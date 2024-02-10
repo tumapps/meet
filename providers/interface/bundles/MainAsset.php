@@ -4,7 +4,8 @@ namespace ui\bundles;
 
 use yii\web\AssetBundle;
 
-class DashboardAsset extends AssetBundle
+
+class MainAsset extends AssetBundle
 {
     public $basePath = '@ui/assets';
     public $baseUrl = '@web/providers/interface/assets';
@@ -14,13 +15,12 @@ class DashboardAsset extends AssetBundle
             'rel' => 'icon',
             'sizes' => '64x64',
         ],
-        'oneui/css/dashboard.css',
+        'peafowl/css/theme.css',
+        'peafowl/css/style.css',
     ];
     public $js = [
-        'oneui/js/dashboard.js',
     ];
     public $depends = [
-        'helpers\widgets\swal\AlertAsset',
         'yii\web\YiiAsset',
     ];
 }

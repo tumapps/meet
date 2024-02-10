@@ -1,14 +1,14 @@
 <?php
-namespace auth;
+namespace admin;
 
 /**
  * @license Apache 2.0
  */
 /**
  * @OA\Info(
- *     description="API documentation for auth module",
+ *     description="API documentation for admin module",
  *     version="1.0.0",
- *     title="Authentication & Authorization Module",
+ *     title="admin Module",
  *     @OA\Contact(
  *         email="admin@crackit.co.ke",
  *         name="Ananda Douglas"
@@ -20,14 +20,22 @@ namespace auth;
  * )
  */ 
 
-class Module extends \helpers\BaseModule
+class Module extends \helpers\ApiModule
 {
     /**
      * {@inheritdoc}
      */
-    public $controllerNamespace = 'auth\controllers';
-    public $name = 'Auth. Module';
+    public $controllerNamespace = 'admin\controllers';
+    public $name = 'Administration';
 
+    /**
+     * {@inheritdoc}
+     */
+    public function init()
+    {
+        parent::init();
+
+    }
 }
 
 /**
@@ -53,15 +61,15 @@ class Module extends \helpers\BaseModule
 
 /**
  * @OA\Tag(
- *     name="AUTH",
- *     description="Endpoints for the AUTH module"
+ *     name="ADMIN",
+ *     description="Endpoints for the ADMIN module"
  * )
  */
 
 /**
  * @OA\Get(path="/about",
  *   summary="Module Info. ",
- *   tags={"AUTH"},
+ *   tags={"ADMIN"},
  *   security={{}},
  *   @OA\Response(
  *     response=200,
@@ -76,7 +84,7 @@ class Module extends \helpers\BaseModule
 /**
  *@OA\Schema(
  *  schema="About",
- *  @OA\Property(property="id", type="string",title="Module ID", example="AUTH"),
- *  @OA\Property(property="name", type="string",title="Module Name", example="AUTH Module"),
+ *  @OA\Property(property="id", type="string",title="Module ID", example="ADMIN"),
+ *  @OA\Property(property="name", type="string",title="Module Name", example="ADMIN Module"),
  * )
  */

@@ -35,9 +35,6 @@ use yii\helpers\Url;
                 </button>
                 <div class="dropdown-menu dropdown-menu-md dropdown-menu-end p-0 border-0" aria-labelledby="page-header-user-dropdown">
                     <div class="p-2">
-                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="op_auth_lock.php">
-                            <span class="fs-sm fw-medium">Lock Account</span>
-                        </a>
                         <a class="dropdown-item d-flex align-items-center justify-content-between" href="<?=Url::to(['/iam/logout'])?>">
                             <span class="fs-sm fw-medium">Log Out</span>
                         </a>
@@ -50,30 +47,4 @@ use yii\helpers\Url;
         <!-- END Right Section -->
     </div>
     <!-- END Header Content -->
-
-    <!-- Header Search -->
-    <div id="page-header-search" class="overlay-header bg-body-extra-light">
-        <div class="content-header">
-            <form class="w-100" action="be_pages_generic_search.php" method="POST">
-                <div class="input-group">
-                    <button type="button" class="btn btn-alt-danger" data-toggle="layout" data-action="header_search_off">
-                        <i class="fa fa-fw fa-times-circle"></i>
-                    </button>
-                    <input type="text" class="form-control" placeholder="Search or hit ESC.." id="page-header-search-input" name="page-header-search-input">
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END Header Search -->
-
-    <!-- Header Loader -->
-    <!-- Please check out the Loaders page under Components category to see examples of showing/hiding it -->
-    <div id="page-header-loader" class="overlay-header bg-body-extra-light">
-        <div class="content-header">
-            <div class="w-100 text-center">
-                <i class="fa fa-fw fa-circle-notch fa-spin"></i>
-            </div>
-        </div>
-    </div>
-    <!-- END Header Loader -->
 </header>

@@ -1,26 +1,22 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
-
+require_once __DIR__ . '/wrapper.php';
+$wrapper = new ConfigWrapper();
 $config = [
     'id' => $_ENV['APP_CODE'],
     'name' => $_ENV['APP_NAME'],
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
-    'controllerNamespace' => 'dashboard\controllers',
+    'controllerNamespace' => 'main\controllers',
     'timeZone' => 'Africa/Nairobi',
-    'aliases' =>  require __DIR__ . '/aliases.php',
-    'modules' => require __DIR__ . '/modules.php',
+    'aliases' =>  $wrapper->load('aliases'),
+    'modules' => $wrapper->load('modules'),
     'runtimePath' => dirname(__DIR__) . '/providers/bin',
     'components' => [
         'assetManager' => [
             'basePath' => '@ui/assets/core',
             'baseUrl' => '@web/providers/interface/assets/core',
             'bundles' => [
-                /* 'yii\web\JqueryAsset' => [
-                    'js' => []
-                ], */
                 'yii\bootstrap\BootstrapPluginAsset' => [
                     'js' => []
                 ],
@@ -35,6 +31,7 @@ $config = [
                 'basePath' => '@ui/views',
                 'pathMap' => [
                     '@app/views' => '@ui/views',
+                    '@dashboard/views' => '@ui/views',
                 ],
             ],
         ],
@@ -71,7 +68,7 @@ $config = [
             'class' => \helpers\auth\AuthUser::class,
             'identityClass' => 'auth\models\User',
             'enableAutoLogin' => false,
-            'loginUrl' => ['iam/login'],
+            'loginUrl' => ['dashboard/iam/login'],
             'identityCookie' => ['name' => '_identity-' . $_ENV['APP_CODE'], 'httpOnly' => true]
         ],
         'authManager' => [
@@ -84,7 +81,6 @@ $config = [
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
-            // send all mails to a file by default.
             'useFileTransport' => true,
         ],
         'log' => [
@@ -96,14 +92,12 @@ $config = [
                 ],
             ],
         ],
-        'db' => $db['core'],
-        'maintenance' => $db['maintenance'],
+        'db' => $wrapper->dbDriver('CORE_DB'),
         'urlManager' => [
             'enablePrettyUrl' => true,
             'enableStrictParsing' => false,
             'showScriptName' => false,
             'rules' => [
-                '' => 'site/index',
                 $_ENV['APP_VERSION'] . '/about' => 'site/about',
                 [
                     'pattern' => $_ENV['APP_VERSION'] . '/docs/openapi-json-resource',
@@ -114,20 +108,19 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'pluralize' => false,
                     'prefix' =>  $_ENV['APP_VERSION'],
-                    'controller' => require __DIR__ . '/controllerExtracts.php',
-                    'extraPatterns' => require __DIR__ . '/extraPatterns.php',
-                    'tokens' => require __DIR__ . '/tokens.php',
+                    'controller' => $wrapper->load('controllers'),
+                    'extraPatterns' => $wrapper->load('routes'),
+                    'tokens' =>  $wrapper->load('tokens'),
                 ],
             ],
         ],
     ],
-    'params' => $params,
+    'params' => $wrapper->load('params'),
 ];
-if ($_SERVER['ENVIRONMENT'] = 'dev') {
+if ($_SERVER['ENVIRONMENT'] == 'dev') {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
-        // uncomment the following to add your IP if you are not connecting from localhost.
         'allowedIPs' => ['*'],
     ];
 
@@ -138,7 +131,7 @@ if ($_SERVER['ENVIRONMENT'] = 'dev') {
         'generators' => [
             'crud' => [
                 'class'     =>  \coder\mono\crud\Generator::class,
-                'baseControllerClass' =>  'helpers\ApiController',
+                'baseControllerClass' =>  'helpers\DashboardController',
             ],
             /* 'module' => [
                 'class'     =>  \coder\api\module\Generator::class,

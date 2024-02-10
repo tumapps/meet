@@ -34,7 +34,7 @@ namespace <?= $generator->moduleID ?>;
  * )
  */ 
 
-class <?= $className ?> extends \helpers\BaseModule
+class <?= $className ?> extends \helpers\ApiModule
 {
     /**
      * {@inheritdoc}

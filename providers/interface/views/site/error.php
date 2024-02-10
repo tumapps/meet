@@ -5,6 +5,7 @@
 /** @var string $message */
 /** @var Exception$exception */
 
+use yii\helpers\Url;
 use yii\helpers\Html;
 
 $this->title = $name;
@@ -26,7 +27,7 @@ $this->title = $name;
                         <p class="mb-1">
                             The above error occurred while the Web server was processing your request.
                         </p>
-                        <a class="link-fx" href="/">Go Back to Dashboard</a>
+                        <a class="link-fx" href="<?=Url::to(['/dashboard'])?>">Go Back to Dashboard</a>
                     </h2>
                     <!-- END Error Header -->
                 </div>

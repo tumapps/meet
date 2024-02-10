@@ -2,7 +2,8 @@
 
 namespace helpers\traits;
 
-use helpers\AutoIncrement;
+use helpers\models\AutoIncrement;
+
 
 trait Keygen
 {

@@ -1,6 +1,0 @@
- php yii voyage
- yii voyage/create default_user_presets  --migrationPath="modules/auth/migrations"
- php yii gii/module --moduleID=auth --moduleClass="app\modules\auth\Module"
- php yii gii/crud --controllerClass='mainstream\controllers\DatabanksController' --modelClass='iam\models\Databanks' --searchModelClass='mainstream\models\searches\DatabanksSea
-rch'
-php yii gii/model --tableName=databanks --modelClass=Databanks --ns='mainstream\models'

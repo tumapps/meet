@@ -1,22 +1,21 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
-
+require_once __DIR__ . '/wrapper.php';
+$wrapper = new ConfigWrapper();
 $config = [
-    'id' => $_ENV['APP_CODE'].'-console',
-    'name' => $_ENV['APP_NAME'].' Terminal',
+    'id' => $_ENV['APP_CODE'] . '-console',
+    'name' => $_ENV['APP_NAME'] . ' Terminal',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'cmd\controllers',
     'timeZone' => 'Africa/Nairobi',
-    'aliases' =>  require __DIR__ . '/aliases.php',
-    'modules' => require __DIR__ . '/modules.php',
+    'aliases' =>  $wrapper->load('aliases'),
+    'modules' => $wrapper->load('modules'),
     'runtimePath' => dirname(__DIR__) . '/providers/bin',
     'controllerMap' => [
         'voyage' => [
             'class' => 'cmd\controllers\VoyageController',
-            'migrationPath' => require __DIR__ . '/migrations.php',
+            'migrationPath' => $wrapper->load('migrationPaths'),
         ],
     ],
     'components' => [
@@ -35,36 +34,12 @@ $config = [
                 ],
             ],
         ],
-        'db' => $db['core'],
-        'maintenance' => $db['maintenance'],
+        'db' => $wrapper->dbDriver('CORE_DB'),
     ],
-    'params' => $params,
-    /*
-    'controllerMap' => [
-        'fixture' => [ // Fixture generation command line.
-            'class' => 'yii\faker\FixtureController',
-        ],
-    ],
-    */
+    'params' => $wrapper->load('params'),
 ];
 
-// if (YII_ENV_DEV) {
-//     // configuration adjustments for 'dev' environment
-//     $config['bootstrap'][] = 'gii';
-//     $config['modules']['gii'] = [
-//         'class' => 'yii\gii\Module',
-//     ];
-//     // configuration adjustments for 'dev' environment
-//     // requires version `2.1.21` of yii2-debug module
-//     $config['bootstrap'][] = 'debug';
-//     $config['modules']['debug'] = [
-//         'class' => 'yii\debug\Module',
-//         // uncomment the following to add your IP if you are not connecting from localhost.
-//         //'allowedIPs' => ['127.0.0.1', '::1'],
-//     ];
-// }
-
-if ($_SERVER['ENVIRONMENT'] = 'dev') {
+if ($_SERVER['ENVIRONMENT'] == 'dev') {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',

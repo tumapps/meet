@@ -34,7 +34,7 @@ class m231209_121135_init extends Migration
         ], $tableOptions);
         
         $this->createTable('{{%password_history}}', [
-            'user_id' => $this->integer()->notNull(),
+            'user_id' => $this->bigInteger()->notNull(),
             'old_password' => $this->string()->notNull(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
@@ -44,7 +44,7 @@ class m231209_121135_init extends Migration
 
         $this->createTable('{{%tokens}}', [
             'token_id' => $this->string(64)->notNull(),
-            'user_id' => $this->integer()->notNull(),
+            'user_id' => $this->bigInteger()->notNull(),
             'token' => $this->string(7)->notNull(),
             'token_type' => $this->string(20)->notNull(),
             'created_at' => $this->integer()->notNull(),
