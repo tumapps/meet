@@ -40,6 +40,11 @@ class ConfigWrapper
             'pageSize' => [10 => 10, 25 => 25, 50 => 50, 100 => 100],
             'pageSizeLimit' => 100,
             'defaultPageSize' => 25,
+            'safeEndpoints' => (isset($_SERVER['APP_SAFE_ENDPOINTS'])) ? explode(',', $_SERVER['APP_SAFE_ENDPOINTS']) : ['error'],
+            'jwt.issuer' => 'http://example.com',
+            'jwt.audience' => 'http://example.org',
+            'jwt.id' => '4f1g23a12aa',
+            'jwt_secret' => getenv('JWT_SECRET'),
         ];
     }
     public function load($item)

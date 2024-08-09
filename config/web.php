@@ -35,32 +35,37 @@ $config = [
                 ],
             ],
         ],
+        'jwt' => [
+             'class' => \sizeg\jwt\Jwt::class,
+            // 'key' => getenv('JWT_SECRET'),
+            'key' => '73bef4d79a975be280c5c1c91d56dba781142710200b8a03fd09c18997706bfa',
+        ],
         'request' => [
             'cookieValidationKey' => hash_hmac('sha256', md5(date('DYM')), sha1(date('myd'))),
-            // 'parsers' => [
-            //     'application/json' => 'yii\web\JsonParser',
-            // ],
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ],
         ],
-        // 'response' => [
-        //     /* Enable JSON Output: */
-        //     'class' => 'yii\web\Response',
-        //     'format' => \yii\web\Response::FORMAT_JSON,
-        //     'charset' => 'UTF-8',
-        //     'on beforeSend' => function ($event) {
-        //         $response = $event->sender;
-        //         if ($response->data !== null && is_array($response->data)) {
-        //             /* delete code param */
-        //             if (array_key_exists('code', $response->data)) {
-        //                 unset($response->data['code']);
-        //             }
-        //             /* change status to statusCode */
-        //             if (array_key_exists('status', $response->data)) {
-        //                 $response->data['statusCode'] = $response->data['status'];
-        //                 unset($response->data['status']);
-        //             }
-        //         }
-        //     },
-        // ],
+        'response' => [
+            /* Enable JSON Output: */
+            'class' => 'yii\web\Response',
+            'format' => \yii\web\Response::FORMAT_JSON,
+            'charset' => 'UTF-8',
+            'on beforeSend' => function ($event) {
+                $response = $event->sender;
+                if ($response->data !== null && is_array($response->data)) {
+                    /* delete code param */
+                    if (array_key_exists('code', $response->data)) {
+                        unset($response->data['code']);
+                    }
+                    /* change status to statusCode */
+                    if (array_key_exists('status', $response->data)) {
+                        $response->data['statusCode'] = $response->data['status'];
+                        unset($response->data['status']);
+                    }
+                }
+            },
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -112,10 +117,17 @@ $config = [
                     'extraPatterns' => $wrapper->load('routes'),
                     'tokens' =>  $wrapper->load('tokens'),
                 ],
+                'POST v1/auth/login' => 'auth/auth/login',
+                'POST v1/auth/user' => 'auth/auth/me',
+                'POST v1/auth/refresh' => 'auth/auth/refresh',
+                'GET v1/auth/default' => 'auth/default/login',
             ],
+
+            
         ],
     ],
     'params' => $wrapper->load('params'),
+    // 'defaultRoute' => '/dashboard',
 ];
 if ($_SERVER['ENVIRONMENT'] == 'dev') {
     $config['bootstrap'][] = 'debug';
