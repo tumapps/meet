@@ -48,7 +48,7 @@ class SettingsController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        Yii::$app->user->can('schedulerSettingsUpdate');
+        // Yii::$app->user->can('schedulerSettingsUpdate');
         $dataRequest['Settings'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {

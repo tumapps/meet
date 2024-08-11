@@ -21,7 +21,7 @@ class AppointmentsController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        Yii::$app->user->can('schedulerAppointmentsList');
+        // Yii::$app->user->can('schedulerAppointmentsList');
                 $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentsSearch');
         $dataProvider = $searchModel->search($search);
