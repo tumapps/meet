@@ -18,7 +18,7 @@ class AppointmentsSearch extends Appointments
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['date', 'start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -60,7 +60,7 @@ class AppointmentsSearch extends Appointments
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'date' => $this->date,
+            'appointment_date' => $this->appointment_date,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'created_at' => $this->created_at,

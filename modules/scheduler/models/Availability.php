@@ -3,10 +3,9 @@
 namespace scheduler\models;
 
 use Yii;
-use auth\models\User;
 /**
  *@OA\Schema(
- *  schema="Booked",
+ *  schema="Availability",
  *  @OA\Property(property="id", type="integer",title="Id", example="integer"),
  *  @OA\Property(property="user_id", type="int",title="User id", example="int"),
  *  @OA\Property(property="start_date", type="string",title="Start date", example="string"),
@@ -20,7 +19,7 @@ use auth\models\User;
  * )
  */
 
-class Booked extends BaseModel
+class Availability extends BaseModel
 {
     /**
      * {@inheritdoc}
@@ -62,7 +61,7 @@ class Booked extends BaseModel
             [['start_date', 'end_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['is_full_day'], 'boolean'],
             [['description'], 'string', 'max' => 255],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
 
@@ -92,6 +91,42 @@ class Booked extends BaseModel
      */
     public function getUser()
     {
-        return $this->hasOne(User::class, ['user_id' => 'user_id']);
+        return $this->hasOne(Users::class, ['user_id' => 'user_id']);
+    }
+
+    public static function getUnavailableSlots($vc_id, $appointment_date, $start_time, $end_time)
+    {
+       return self::find()
+        ->where(['user_id' => $vc_id])
+        ->andWhere([
+            'OR',
+            ['is_full_day' => true, 'start_date' => $appointment_date],
+            [
+                'AND',
+                ['<=', 'start_date', $appointment_date],
+                ['>=', 'end_date', $appointment_date],
+                [
+                    'OR',
+                    ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
+                    ['AND', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+                    ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                    ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+                ]
+            ]
+        ])
+        ->all();
     }
 }
+
+
+// return self::find()
+//             ->where([
+//                 'user_id' => $vc_id,
+//                 'date' => $appointment_date,
+//             ])
+//             ->andWhere([
+//                 'OR',
+//                 ['<=', 'start_time', $start_time],
+//                 ['>=', 'end_time', $end_time],
+//             ])
+//             ->all();

@@ -8,7 +8,7 @@ use Yii;
  *  schema="Appointments",
  *  @OA\Property(property="id", type="integer",title="Id", example="integer"),
  *  @OA\Property(property="user_id", type="int",title="User id", example="int"),
- *  @OA\Property(property="date", type="string",title="Date", example="string"),
+ *  @OA\Property(property="appointment_date", type="string",title="Date", example="string"),
  *  @OA\Property(property="start_time", type="string",title="Start time", example="string"),
  *  @OA\Property(property="end_time", type="string",title="End time", example="string"),
  *  @OA\Property(property="contact_name", type="string",title="Contact name", example="string"),
@@ -41,7 +41,7 @@ class Appointments extends BaseModel
             [
             'id',
             'user_id',
-            'date',
+            'appointment_date',
             'start_time',
             'end_time',
             'contact_name',
@@ -63,8 +63,9 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id'], 'integer'],
-            [['date', 'email_address'], 'required'],
-            [['date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'email_address','start_time','end_time','user_id'], 'required'],
+            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
+            [['start_time', 'end_time'], 'validateTimeRange'],
             [['subject'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
@@ -72,6 +73,13 @@ class Appointments extends BaseModel
             [['appointment_type', 'status'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
+    }
+
+    public function validateTimeRange($attribute, $params)
+    {
+        if (strtotime($this->end_time) < strtotime($this->start_time)) {
+            $this->addError($attribute, 'End time must be later than start time.');
+        }
     }
 
     /**
@@ -82,7 +90,7 @@ class Appointments extends BaseModel
         return [
             'id' => 'ID',
             'user_id' => 'User ID',
-            'date' => 'Date',
+            'appointment_date' => 'Date',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'contact_name' => 'Contact Name',
@@ -105,4 +113,27 @@ class Appointments extends BaseModel
     {
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
+
+     /**
+     * Checks if the requested appointment time overlaps with any existing appointments.
+     *
+     * @param int $vc_id The VC's ID
+     * @param string $appointment_date The date of the appointment
+     * @param string $start_time The start time of the appointment
+     * @param string $end_time The end time of the appointment
+     * @return bool True if an overlapping appointment exists, false otherwise
+     */
+    public static function hasOverlappingAppointment($vc_id, $date, $start_time, $end_time)
+    {
+        return self::find()
+        ->where(['user_id' => $vc_id, 'appointment_date' => $date])
+        ->andWhere([
+            'OR',
+            ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
+            ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+            ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+        ])
+        ->exists();
+    } 
 }

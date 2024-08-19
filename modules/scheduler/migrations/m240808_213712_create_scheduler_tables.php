@@ -23,8 +23,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'end_time' => $this->time()->null(),
             'is_full_day' => $this->boolean()->notNull()->defaultValue(false),
             'description' => $this->string(255)->null(),
-            'created_at' => $this->timestamp()->defaultValue(null),
-            'updated_at' => $this->timestamp()->defaultValue(null),
+            'created_at' => $this->integer()->notNull(),
+            'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
@@ -33,7 +33,7 @@ class m240808_213712_create_scheduler_tables extends Migration
         $this->createTable('{{%appointments}}', [
             'id' => $this->primaryKey(),
             'user_id' => $this->bigInteger(),
-            'date' => $this->date()->notNull(),
+            'appointment_date' => $this->date()->notNull(),
             'start_time' => $this->time()->null(),
             'end_time' => $this->time()->null(),
             'contact_name' => $this->string(50),
@@ -42,8 +42,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'subject' => $this->text()->null(),
             'appointment_type' => $this->string(), //personal or group
             'status' => $this->string()->notNull()->defaultValue('pending'),
-            'created_at' => $this->timestamp()->defaultValue(null),
-            'updated_at' => $this->timestamp()->defaultValue(null),
+            'created_at' => $this->integer()->notNull(),
+            'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);

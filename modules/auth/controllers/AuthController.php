@@ -5,6 +5,7 @@ namespace auth\controllers;
 use Yii;
 use yii\web\Response;
 use auth\models\static\Login;
+use auth\models\static\Register;
 use auth\models\RefreshToken;
 
 class AuthController extends \helpers\ApiController
@@ -19,6 +20,16 @@ class AuthController extends \helpers\ApiController
 			$this->generateRefreshToken($user);
 			$accesToken = $this->getToken();
 			return $this->payloadResponse(['username' => $user->username, 'token' => $accesToken], ['statusCode' => 200, 'message' => 'Access granted']);
+		}
+		return $this->errorResponse($model->getErrors());
+	}
+
+	public function actionRegister()
+	{
+		$model = new Register();
+		$dataRequest['Register'] = Yii::$app->request->getBodyParams();
+		if ($model->load($dataRequest) && $model->save()) {
+			return $this->payloadResponse(['username' => $dataRequest['Register']['username']], ['statusCode' => 200, 'message' => 'Created Successfully']);
 		}
 		return $this->errorResponse($model->getErrors());
 	}

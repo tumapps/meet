@@ -127,7 +127,7 @@ $config = [
         ],
     ],
     'params' => $wrapper->load('params'),
-    // 'defaultRoute' => '/dashboard',
+    'defaultRoute' => '/dashboard',
 ];
 if ($_SERVER['ENVIRONMENT'] == 'dev') {
     $config['bootstrap'][] = 'debug';

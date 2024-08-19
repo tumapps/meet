@@ -4,12 +4,12 @@ namespace scheduler\models\searches;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use scheduler\models\Settings;
+use scheduler\models\Availability;
 
 /**
- * SettingsSearch represents the model behind the search form of `scheduler\models\Settings`.
+ * AvailabilitySearch represents the model behind the search form of `scheduler\models\Availability`.
  */
-class SettingsSearch extends Settings
+class AvailabilitySearch extends Availability
 {
     /**
      * {@inheritdoc}
@@ -17,8 +17,9 @@ class SettingsSearch extends Settings
     public function rules()
     {
         return [
-            [['id', 'user_id', 'slot_duration', 'booking_window', 'created_at', 'updated_at'], 'integer'],
-            [['start_time', 'end_time'], 'safe'],
+            [['id', 'user_id'], 'integer'],
+            [['start_date', 'end_date', 'start_time', 'end_time', 'description', 'created_at', 'updated_at'], 'safe'],
+            [['is_full_day'], 'boolean'],
         ];
     }
 
@@ -40,7 +41,7 @@ class SettingsSearch extends Settings
      */
     public function search($params)
     {
-        $query = Settings::find();
+        $query = Availability::find();
 
         // add conditions that should always apply here
 
@@ -60,13 +61,16 @@ class SettingsSearch extends Settings
         $query->andFilterWhere([
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
-            'slot_duration' => $this->slot_duration,
-            'booking_window' => $this->booking_window,
+            'is_full_day' => $this->is_full_day,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
+
+        $query->andFilterWhere(['ilike', 'description', $this->description]);
 
         return $dataProvider;
     }
