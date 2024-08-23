@@ -1,0 +1,10 @@
+// .badge{
+//     font-weight: var(--bs-body-font-weight);
+// }
+.btn-check:checked + .btn,
+.btn-check:active + .btn,
+.btn:active,
+.btn.active,
+.btn.show {
+  border: none;
+}
