@@ -41,7 +41,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'mobile_number' => $this->string(15),
             'subject' => $this->text()->null(),
             'appointment_type' => $this->string(), //personal or group
-            'status' => $this->string()->notNull()->defaultValue('pending'),
+            // 'status' => $this->string()->notNull()->defaultValue('pending'),
+            'status' => $this->integer()->notNull()->defaultValue(1),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .

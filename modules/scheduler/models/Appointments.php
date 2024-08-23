@@ -24,6 +24,20 @@ use Yii;
 
 class Appointments extends BaseModel
 {
+    const STATUS_PENDING = 1;
+    const STATUS_CONFIRMED = 2;
+    const STATUS_RESCHEDULED = 3;
+    const STATUS_CANCELLED = 4;
+
+
+    protected static $statusLabels = [
+        self::STATUS_PENDING => 'Pending',
+        self::STATUS_CONFIRMED => 'Confirmed',
+        self::STATUS_RESCHEDULED => 'Rescheduled',
+        self::STATUS_CANCELLED => 'Cancelled',
+    ];
+
+
     /**
      * {@inheritdoc}
      */
@@ -112,6 +126,11 @@ class Appointments extends BaseModel
     public function getUser()
     {
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
+    }
+
+    public static function getStatusLabel($status)
+    {
+        return self::$statusLabels[$status] ?? 'Unknown';
     }
 
     public function getRescheduledAppointment($id)
