@@ -76,7 +76,7 @@ class Appointments extends BaseModel
     {
         return [
             [['user_id'], 'default', 'value' => null],
-            [['user_id'], 'integer'],
+            [['user_id', 'status'], 'integer'],
             [['appointment_date', 'email_address','start_time','end_time','user_id'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
@@ -84,7 +84,7 @@ class Appointments extends BaseModel
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
             [['mobile_number'], 'string', 'max' => 15],
-            [['appointment_type', 'status'], 'string', 'max' => 255],
+            [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }

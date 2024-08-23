@@ -47,14 +47,14 @@ class AppointmentsController extends \helpers\ApiController{
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
-        $unavailableSlots = $this->checkAvailability(
+        $isAvailable = $this->checkAvailability(
             $dataRequest['Appointments']['user_id'], 
             $dataRequest['Appointments']['appointment_date'], 
             $dataRequest['Appointments']['start_time'],
             $dataRequest['Appointments']['end_time']
         );
 
-        if ($unavailableSlots) {
+        if (!$isAvailable) {
             return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
         }
         

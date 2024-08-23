@@ -41,7 +41,6 @@ class m240808_213712_create_scheduler_tables extends Migration
             'mobile_number' => $this->string(15),
             'subject' => $this->text()->null(),
             'appointment_type' => $this->string(), //personal or group
-            // 'status' => $this->string()->notNull()->defaultValue('pending'),
             'status' => $this->integer()->notNull()->defaultValue(1),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
@@ -49,12 +48,12 @@ class m240808_213712_create_scheduler_tables extends Migration
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
-        // Add index to created_at column
-        // $this->createIndex(
-        //     'idx-appointments-created_at',
-        //     '{{%appointments}}',
-        //     'created_at'
-        // );
+        //Add index to created_at column
+        $this->createIndex(
+            'idx-appointments-created_at',
+            '{{%appointments}}',
+            'created_at'
+        );
 
     }
 
@@ -63,7 +62,7 @@ class m240808_213712_create_scheduler_tables extends Migration
      */
     public function safeDown()
     {   
-        // $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
+        $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
         $this->dropTable('{{%appointments}}');
         $this->dropTable('{{%unavailable_slots}}');
     }
