@@ -132,7 +132,7 @@ class Availability extends BaseModel
         }
 
         // Check for time-slot-based unavailability within a date range
-        $hasOverlappingSlots = getUnavailableSlotsQuery($vc_id, $appointment_date, $start_time, $end_time)->exists();
+        $hasOverlappingSlots = self::getUnavailableSlotsQuery($vc_id, $appointment_date, $start_time, $end_time)->exists();
 
         // Return true if there are overlapping slots, otherwise false
         return $hasOverlappingSlots;

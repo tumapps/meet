@@ -46,14 +46,25 @@ class AppointmentsController extends \helpers\ApiController{
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+
+        $unavailableSlots = $this->checkAvailability(
+            $dataRequest['Appointments']['user_id'], 
+            $dataRequest['Appointments']['appointment_date'], 
+            $dataRequest['Appointments']['start_time'],
+            $dataRequest['Appointments']['end_time']
+        );
+
+        if ($unavailableSlots) {
+            return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
+        }
         
         // cheking if there is overlapping appoiment ie if the appoitment is already placed
-            $appoitmentExists = $model::hasOverlappingAppointment(
-                $dataRequest['Appointments']['user_id'], 
-                $dataRequest['Appointments']['appointment_date'], 
-                $dataRequest['Appointments']['start_time'],
-                $dataRequest['Appointments']['end_time']
-            );
+        $appoitmentExists = $model::hasOverlappingAppointment(
+            $dataRequest['Appointments']['user_id'], 
+            $dataRequest['Appointments']['appointment_date'], 
+            $dataRequest['Appointments']['start_time'],
+            $dataRequest['Appointments']['end_time']
+        );
 
         if ($appoitmentExists) {
             return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
@@ -149,9 +160,9 @@ class AppointmentsController extends \helpers\ApiController{
          
     }
 
-    private function checkAvailability($vc_id, $appointment_date, $start_time, $end_time)
+    private function checkAvailability($user_id, $appointment_date, $start_time, $end_time)
     {
-        $bookedSlots = Availability::getUnavailableSlots($vc_id, $appointment_date, $start_time, 
+        $bookedSlots = Availability::getUnavailableSlots($user_id, $appointment_date, $start_time, 
             $end_time);
 
         if($bookedSlots){
