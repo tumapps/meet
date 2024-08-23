@@ -114,6 +114,49 @@ class Appointments extends BaseModel
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
 
+    public function getRescheduledAppointment($id)
+    {
+        return self::find()
+        ->where(['id' => $id, 'status' => 'rescheduled'])
+        ->one();
+        
+    }
+
+    private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
+    {
+
+        // Check for time-slot-based unavailability within a date range
+        return self::find()
+        ->where(['user_id' => $user_id])
+        ->andWhere([
+            'AND',
+            ['<=', 'start_date', $appointment_date],
+            ['>=', 'end_date', $appointment_date],
+        ])
+        ->andWhere([
+            'OR',
+            // Check if the start time of the appointment overlaps with any unavailable slot
+            ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
+            // Check if the end time of the appointment overlaps with any unavailable slot
+            ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+            // Check if the appointment fully overlaps an unavailable slot
+            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+            // Check if the appointment is within an unavailable slot
+            ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+        ]);
+    }
+
+    public static function getUnavailableSlotsForRange($user_id, $start_date, $end_date)
+    {
+        return self::find()
+            ->where(['user_id' => $user_id])
+            ->andWhere(['between', 'appointment_date', $start_date, $end_date])
+            ->andWhere(['!=', 'status', 'rescheduled'])
+            ->asArray()
+            ->all();
+    }
+
+
      /**
      * Checks if the requested appointment time overlaps with any existing appointments.
      *
@@ -129,11 +172,61 @@ class Appointments extends BaseModel
         ->where(['user_id' => $vc_id, 'appointment_date' => $date])
         ->andWhere([
             'OR',
+
+            /* checks if the start time of the new appointment ($start_time) falls within an existing appointment.
+            */
+
             ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
+
+            /*
+                hecks if the end time of the new appointment ($end_time) falls within an existing appointment.
+             */
             ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+
+            /*
+                checks if the existing appointment completely spans over the new appointment's time slot.
+             */
             ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+
+             // The requested appointment spans across an existing appointment
             ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
         ])
         ->exists();
     } 
+
+    public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
+    {
+        return self::find()
+        ->where(['user_id' => $user_id])
+        ->andWhere([
+            'AND',
+            // Appointments within the unavailable date range
+            ['>=', 'appointment_date', $start_date],
+            ['<=', 'appointment_date', $end_date],
+        ])
+        ->andWhere([
+            'OR',
+            // user is unavailable for the entire day
+            // Any appointment on the same date is affected
+            ['AND', ['=', 'appointment_date', $start_date], ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+
+            // Appointment starts within the unavailable time range
+            ['AND', ['>=', 'start_time', $start_time], ['<', 'start_time', $end_time]],
+            
+            // Appointment ends within the unavailable time range
+            ['AND', ['>', 'end_time', $start_time], ['<=', 'end_time', $end_time]],
+            
+            // Appointment completely overlaps with unavailable time range
+            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+            
+            // Appointment starts before unavailability ends but ends after
+            ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
+        ])
+        ->andWhere(['!=', 'status', 'self'])
+        ->orderBy(['created_at' => SORT_ASC])
+        ->all();
+    }
+
+
 }
+// echo $query->createCommand()->getRawSql();

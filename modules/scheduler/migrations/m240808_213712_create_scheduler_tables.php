@@ -48,13 +48,21 @@ class m240808_213712_create_scheduler_tables extends Migration
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
+        // Add index to created_at column
+        // $this->createIndex(
+        //     'idx-appointments-created_at',
+        //     '{{%appointments}}',
+        //     'created_at'
+        // );
+
     }
 
     /**
      * {@inheritdoc}
      */
     public function safeDown()
-    {
+    {   
+        // $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
         $this->dropTable('{{%appointments}}');
         $this->dropTable('{{%unavailable_slots}}');
     }

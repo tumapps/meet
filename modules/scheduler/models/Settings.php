@@ -95,4 +95,27 @@ class Settings extends BaseModel
     {
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
+
+    public static function getWorkingHours($user_id)
+    {
+        $hours = self::find()
+        ->select(['start_time', 'end_time'])
+        ->where(['user_id' => $user_id])
+        ->asArray()
+        ->one();
+
+        if ($hours) {
+        return [
+            'start_time' => $hours['start_time'],
+            'end_time' => $hours['end_time']
+            ];
+        } else {
+            // If no hours are found, return default working hours (e.g., 08:00:00 to 17:00:00)
+            return [
+                'start_time' => '08:00:00',
+                'end_time' => '17:00:00'
+            ];
+        }
+
+    }
 }

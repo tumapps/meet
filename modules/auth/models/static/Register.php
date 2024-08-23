@@ -5,9 +5,12 @@ namespace auth\models\static;
 use Yii;
 use yii\base\Model;
 use auth\models\User;
+use helpers\traits\Keygen;
 
 class Register extends Model
 {
+    use Keygen;
+
     public $username;
     public $password;
     public $confirm_password;
@@ -30,12 +33,16 @@ class Register extends Model
     //Abc#123456
     public function save()
     {
+        $uid = $this->uid('USERS', true);
         $user = new User();
+        $user->user_id = $uid;
         $user->username = $this->username;
         $user->setPassword($this->password);
         $user->generateAuthKey();
-        if ($user->save(false)) {
-            return $user;
+        if($this->validate()){
+            if ($user->save(false)) {
+                return $user;
+            }
         }
     }
 }

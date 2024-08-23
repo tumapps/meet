@@ -5,6 +5,7 @@ namespace scheduler\controllers;
 use Yii;
 use scheduler\models\Availability;
 use scheduler\models\searches\AvailabilitySearch;
+use scheduler\hooks\AppointmentRescheduler;
 /**
  * @OA\Tag(
  *     name="Availability",
@@ -36,7 +37,7 @@ class AvailabilityController extends \helpers\ApiController{
 
     public function actionCreate()
     {
-        Yii::$app->user->can('schedulerAvailabilityCreate');
+        // Yii::$app->user->can('schedulerAvailabilityCreate');
         $model = new Availability();
         $model->loadDefaultValues();
         $dataRequest['Availability'] = Yii::$app->request->getBodyParams();
@@ -48,11 +49,31 @@ class AvailabilityController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        Yii::$app->user->can('schedulerAvailabilityUpdate');
+        // Yii::$app->user->can('schedulerAvailabilityUpdate');
         $dataRequest['Availability'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {
-           return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Availability updated successfully']);
+
+            // trigger rescheduling logic 
+            $appointments = AppointmentRescheduler::rescheduleAffectedAppointments(
+                $model->user_id, 
+                $model->start_date, 
+                $model->end_date, 
+                $model->start_time, 
+                $model->end_time
+            );
+
+
+
+           return $this->payloadResponse(
+            [
+                $this->findModel($id),
+                'affectedAppointments' => $appointments
+            ],
+            [
+                'statusCode'=>202,
+                'message'=>'Availability updated successfully'
+            ]);
         }
         return $this->errorResponse($model->getErrors()); 
     }

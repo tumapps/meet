@@ -46,7 +46,12 @@ return [
  *   ),
  * )
  */
-'GET appointments'         => 'appointments/index',
+'GET appointments'     => 'appointments/index',
+
+'POST available'       => 'appointments/get-slots',
+'POST slot-suggestion'	   => 'appointments/suggest-available-slots',
+'POST self-booking'		=> 'appointments/self-book',
+
 
 /**
  * @OA\Post(

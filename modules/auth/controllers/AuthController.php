@@ -68,7 +68,6 @@ class AuthController extends \helpers\ApiController
 	{
 		$refreshToken = Yii::$app->request->cookies->getValue('refresh-token', false);
 		if (!$refreshToken) {
-			// return $this->errorResponse(440);
 			return $this->errorResponse([
 					'statusCode' => [
 						'440'
@@ -88,7 +87,6 @@ class AuthController extends \helpers\ApiController
 			$user = User::findIdentity($userRefreshToken->user_id);
 			if (empty($user)) {
 				$userRefreshToken->delete();
-				// return $this->errorResponse(440);
 				return $this->errorResponse([
 					'statusCode' => [
 						'440'
