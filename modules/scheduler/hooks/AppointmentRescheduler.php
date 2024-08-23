@@ -38,7 +38,7 @@ class AppointmentRescheduler {
 
     protected static function rescheduleAppointment($appointment)
     {
-        $appointment->status = 'rescheduled';
+        $appointment->status = $appointment->STATUS_RESCHEDULED;
         $appointment->save();
     }
 
