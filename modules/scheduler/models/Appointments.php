@@ -91,7 +91,7 @@ class Appointments extends BaseModel
 
     public function validateTimeRange($attribute, $params)
     {
-        if (strtotime($this->end_time) < strtotime($this->start_time)) {
+        if (strtotime($this->end_time) <= strtotime($this->start_time)) {
             $this->addError($attribute, 'End time must be later than start time.');
         }
     }
