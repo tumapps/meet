@@ -136,7 +136,7 @@ class Appointments extends BaseModel
     public function getRescheduledAppointment($id)
     {
         return self::find()
-        ->where(['id' => $id, 'status' => 'rescheduled'])
+        ->where(['id' => $id, 'status' => 3])
         ->one();
         
     }
@@ -241,7 +241,7 @@ class Appointments extends BaseModel
             // Appointment starts before unavailability ends but ends after
             ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
         ])
-        ->andWhere(['!=', 'status', 'self'])
+        // ->andWhere(['!=', 'status', 'self'])
         ->orderBy(['created_at' => SORT_ASC])
         ->all();
     }
