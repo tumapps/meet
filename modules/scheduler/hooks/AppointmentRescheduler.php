@@ -40,189 +40,116 @@ class AppointmentRescheduler {
         $appointment->save();
     }
 
-    public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime)
-    {
-
-    	// get slot duration
-    	$slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
-
-    	$date = $appointment_date;
-    	while(true){
-    		//retrieve unavailable slots for the given date ie that cant be booked 
-    		$unavailableSlots = Appointments::getUnavailableSlotsForRange($user_id, $date, $date);
-
-    		// Calculate available slots based on working hours and unavailable slots
-    		$availableSlots = self::calculateAvailableSlots($user_id, $unavailableSlots, $date, $startTime, $endTime);
-
-    		return $availableSlots;
-
-    		// Check if there's an available slot that fits the duration
-       	    $slot = self::findSlotThatFitsDuration($availableSlots, $slotDuration);
-
-       	    if ($slot !== null) {
-	            return [
-	                'date' => $date,
-	                'start_time' => $slot['start_time'],
-	                'end_time' => $slot['end_time']
-	            ];
-        	}
-
-    		// Move to the next day if no suitable slot is found
-        	$date = date('Y-m-d', strtotime($date . ' +1 day'));
-    	}
-    	
-    	
-    }
-
-    protected static function findSlotThatFitsDuration(array $availableSlots, $duration)
+	public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime)
 	{
-	    foreach ($availableSlots as $slot) {
-	        $slotStartTime = strtotime($slot['start_time']);
-	        $slotEndTime = strtotime($slot['end_time']);
-	        $availableDuration = $slotEndTime - $slotStartTime;
+	    // Get slot duration for a given time range
+	    $slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
 
-	        if ($availableDuration >= $duration) {
-	            return [
-	                'start_time' => date('H:i:s', $slotStartTime),
-	                'end_time' => date('H:i:s', $slotStartTime + $duration)
-	            ];
+	    $date = $appointment_date;
+
+	    while (true) {
+	        // Get all booked slots for the given date (i.e., those that can't be booked in the appointments table)
+	        $bookedSlots = Appointments::getBookedSlotsForRange($user_id, $date, $date);
+
+	        // Get all the unavailable time range for the given date (i.e., those that can't be booked since the user is unavailable)
+	        $unavailableSlots = Availability::getUnavailableSlotDetails($user_id, $date, $startTime, $endTime);
+
+	        // Calculate available slots based on working hours and unavailable slots
+	        $availableSlots = self::calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration);
+
+	        // Check if there are available slots for the current day
+	        if (!empty($availableSlots)) {
+	            // Find slots that fit the duration of the affected appointment
+	            $suitableSlots = self::findSlotsThatFitDuration($availableSlots, $slotDuration);
+
+	            if (!empty($suitableSlots)) {
+	                return [
+	                    'date' => $date,
+	                    'slots' => $suitableSlots
+	                ];
+	            }
+	        }
+
+	        // Move to the next day
+	        $date = date('Y-m-d', strtotime($date . ' +1 day'));
+   	 	}
+	}
+
+
+	protected static function findSlotsThatFitDuration($availableSlots, $slotDuration)
+	{
+	    $suitableSlots = [];
+
+	    foreach ($availableSlots as $slot) {
+	        $slotStart = strtotime($slot['start_time']);
+	        $slotEnd = strtotime($slot['end_time']);
+
+	        if (($slotEnd - $slotStart) >= $slotDuration) {
+	            $suitableSlots[] = $slot;
 	        }
 	    }
 
-	    return null; // No suitable slot found
+	    return $suitableSlots;
 	}
+
+
 
     private  function sendNotifications($appointments)
     {
         // Implement logic to send notifications to users about the rescheduling
     }
-
-	 
-	protected static function calculateAvailableSlots($user_id, $unavailableSlots, $date, $startTime, $endTime)
+ 
+	protected static function calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration)
 	{
+	    // Convert slot duration from minutes to seconds
+	    $slotDurationInSeconds = $slotDuration * 60;
+
+	    // Get working hours for the user
 	    $workingHours = Settings::getWorkingHours($user_id);
 	    $dayStart = strtotime($date . ' ' . $workingHours['start_time']);
 	    $dayEnd = strtotime($date . ' ' . $workingHours['end_time']);
+
 	    $availableSlots = [];
 	    $previousEnd = $dayStart;
 
-	    usort($unavailableSlots, function($a, $b) {
+	    // Merge booked and unavailable slots and sort by start time
+	    $allSlots = array_merge($bookedSlots, $unavailableSlots);
+	    usort($allSlots, function($a, $b) {
 	        return strtotime($a['start_time']) - strtotime($b['start_time']);
 	    });
 
-	    foreach ($unavailableSlots as $slot) {
-	        $unavailableStart = strtotime($date . ' ' . $slot['start_time']);
-	        $unavailableEnd = strtotime($date . ' ' . $slot['end_time']);
+	    // Iterate over the slots to find gaps
+	    foreach ($allSlots as $slot) {
+	        $slotStart = strtotime($slot['start_time']);
+	        $slotEnd = strtotime($slot['end_time']);
 
-	        if ($unavailableStart < $dayEnd && $unavailableEnd > $dayStart) {
-	            $unavailableStart = max($unavailableStart, $dayStart);
-	            $unavailableEnd = min($unavailableEnd, $dayEnd);
-
-	            if ($unavailableStart > $previousEnd) {
-	                $availableSlots[] = [
-	                    'start_time' => date('H:i:s', $previousEnd),
-	                    'end_time' => date('H:i:s', $unavailableStart)
-	                ];
-	            }
-
-	            $previousEnd = max($previousEnd, $unavailableEnd);
+	        // Check if there's a gap between the previous end time and the start of the next booked/unavailable slot
+	        while ($previousEnd + $slotDurationInSeconds <= $slotStart) {
+	            $availableSlots[] = [
+	                'date' => $date,
+	                'start_time' => date('H:i:s', $previousEnd),
+	                'end_time' => date('H:i:s', $previousEnd + $slotDurationInSeconds)
+	            ];
+	            $previousEnd += $slotDurationInSeconds;
 	        }
+
+	        // Update the previous end time to the current slot's end time
+	        $previousEnd = max($previousEnd, $slotEnd);
 	    }
 
-	    if ($previousEnd < $dayEnd) {
+	    // Finally, check the gap between the last slot and the end of the working day
+	    while ($previousEnd + $slotDurationInSeconds <= $dayEnd) {
 	        $availableSlots[] = [
+	            'date' => $date,
 	            'start_time' => date('H:i:s', $previousEnd),
-	            'end_time' => date('H:i:s', $dayEnd)
+	            'end_time' => date('H:i:s', $previousEnd + $slotDurationInSeconds)
 	        ];
-	    }
-
-	    $splitSlots = [];
-	    foreach ($availableSlots as $slot) {
-	        $start = strtotime($date . ' ' . $slot['start_time']);
-	        $end = strtotime($date . ' ' . $slot['end_time']);
-
-	        if ($start < strtotime($date . ' 10:00:00') && $end > strtotime($date . ' 08:00:00')) {
-	            $splitSlots[] = [
-	                'start_time' => date('H:i:s', max($start, strtotime($date . ' 08:00:00'))),
-	                'end_time' => date('H:i:s', min($end, strtotime($date . ' 10:00:00')))
-	            ];
-	        }
-
-	        if ($start < strtotime($date . ' 15:00:00') && $end > strtotime($date . ' 12:30:00')) {
-	            $splitSlots[] = [
-	                'start_time' => date('H:i:s', max($start, strtotime($date . ' 12:30:00'))),
-	                'end_time' => date('H:i:s', min($end, strtotime($date . ' 15:00:00')))
-	            ];
-	        }
-
-	        if ($start < strtotime($date . ' 17:00:00') && $end > strtotime($date . ' 16:30:00')) {
-	            $splitSlots[] = [
-	                'start_time' => date('H:i:s', max($start, strtotime($date . ' 16:30:00'))),
-	                'end_time' => date('H:i:s', min($end, strtotime($date . ' 17:00:00')))
-	            ];
-	        }
-	    }
-
-	    return $splitSlots;
-	}
-
-	protected static function calculateAvailableSlots3($user_id, $unavailableSlots, $date, $startTime, $endTime)
-	{
-	    // Fetch working hours for the given user
-	    $workingHours = Settings::getWorkingHours($user_id);
-	    
-	    // Convert working hours to timestamps
-	    $dayStart = strtotime($date . ' ' . $workingHours['start_time']); 
-	    $dayEnd = strtotime($date . ' ' . $workingHours['end_time']);
-	    
-	    $availableSlots = [];
-	    
-	    // Initialize previous end time to the start of the working day
-	    $previousEnd = $dayStart;
-
-	    // Sort unavailable slots by start time to ensure they are in order
-	    usort($unavailableSlots, function($a, $b) {
-	        return strtotime($a['start_time']) - strtotime($b['start_time']);
-	    });
-
-	    // Iterate through unavailable slots and calculate available slots
-	    foreach ($unavailableSlots as $slot) {
-	        // Convert unavailable slot times to timestamps
-	        $unavailableStart = strtotime($date . ' ' . $slot['start_time']);
-	        $unavailableEnd = strtotime($date . ' ' . $slot['end_time']);
-
-	        // Ensure that the slot is within the working hours
-	        if ($unavailableStart < $dayEnd && $unavailableEnd > $dayStart) {
-	            // Adjust start and end to be within the working hours
-	            $unavailableStart = max($unavailableStart, $dayStart);
-	            $unavailableEnd = min($unavailableEnd, $dayEnd);
-
-	            // Calculate available slot before the unavailable slot
-	            if ($unavailableStart > $previousEnd) {
-	                $availableSlots[] = [
-	                    'start_time' => date('H:i:s', $previousEnd),
-	                    'end_time' => date('H:i:s', $unavailableStart)
-	                ];
-	            }
-
-	            // Update previous end to the end of the current unavailable slot
-	            $previousEnd = max($previousEnd, $unavailableEnd);
-	        }
-	    }
-
-	    // Add the last available slot if there's a gap at the end of the working hours
-	    if ($previousEnd < $dayEnd) {
-	        $availableSlots[] = [
-	            'start_time' => date('H:i:s', $previousEnd),
-	            'end_time' => date('H:i:s', $dayEnd)
-	        ];
+	        $previousEnd += $slotDurationInSeconds;
 	    }
 
 	    return $availableSlots;
 	}
 
 
-
-	
 }
 
