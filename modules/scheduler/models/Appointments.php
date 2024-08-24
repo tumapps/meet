@@ -136,7 +136,7 @@ class Appointments extends BaseModel
     public function getRescheduledAppointment($id)
     {
         return self::find()
-        ->where(['id' => $id, 'status' => 3])
+        ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULED])
         ->one();
         
     }
@@ -165,12 +165,13 @@ class Appointments extends BaseModel
         ]);
     }
 
-    public static function getUnavailableSlotsForRange($user_id, $start_date, $end_date)
+    public static function getBookedSlotsForRange($user_id, $start_date, $end_date)
     {
         return self::find()
             ->where(['user_id' => $user_id])
             ->andWhere(['between', 'appointment_date', $start_date, $end_date])
-            ->andWhere(['!=', 'status', 'rescheduled'])
+            ->andWhere(['!=', 'status', self::STATUS_RESCHEDULED])
+            ->orderBy(['start_time' => SORT_ASC])
             ->asArray()
             ->all();
     }

@@ -227,3 +227,80 @@ overlapping
         if(!$isAvailable){
             return $this->payloadResponse(['message' => 'The VC is unavailable for the requested time slot',]);
         }
+
+
+
+
+
+
+
+
+
+
+        protected static function calculateAvailableSlots($user_id, $unavailableSlots, $date, $startTime, $endTime)
+    {
+        $workingHours = Settings::getWorkingHours($user_id);
+        $dayStart = strtotime($date . ' ' . $workingHours['start_time']);
+        $dayEnd = strtotime($date . ' ' . $workingHours['end_time']);
+        $availableSlots = [];
+        $previousEnd = $dayStart;
+
+        usort($unavailableSlots, function($a, $b) {
+            return strtotime($a['start_time']) - strtotime($b['start_time']);
+        });
+
+        foreach ($unavailableSlots as $slot) {
+            $unavailableStart = strtotime($date . ' ' . $slot['start_time']);
+            $unavailableEnd = strtotime($date . ' ' . $slot['end_time']);
+
+            if ($unavailableStart < $dayEnd && $unavailableEnd > $dayStart) {
+                $unavailableStart = max($unavailableStart, $dayStart);
+                $unavailableEnd = min($unavailableEnd, $dayEnd);
+
+                if ($unavailableStart > $previousEnd) {
+                    $availableSlots[] = [
+                        'start_time' => date('H:i:s', $previousEnd),
+                        'end_time' => date('H:i:s', $unavailableStart)
+                    ];
+                }
+
+                $previousEnd = max($previousEnd, $unavailableEnd);
+            }
+        }
+
+        if ($previousEnd < $dayEnd) {
+            $availableSlots[] = [
+                'start_time' => date('H:i:s', $previousEnd),
+                'end_time' => date('H:i:s', $dayEnd)
+            ];
+        }
+
+        $splitSlots = [];
+        foreach ($availableSlots as $slot) {
+            $start = strtotime($date . ' ' . $slot['start_time']);
+            $end = strtotime($date . ' ' . $slot['end_time']);
+
+            if ($start < strtotime($date . ' 10:00:00') && $end > strtotime($date . ' 08:00:00')) {
+                $splitSlots[] = [
+                    'start_time' => date('H:i:s', max($start, strtotime($date . ' 08:00:00'))),
+                    'end_time' => date('H:i:s', min($end, strtotime($date . ' 10:00:00')))
+                ];
+            }
+
+            if ($start < strtotime($date . ' 15:00:00') && $end > strtotime($date . ' 12:30:00')) {
+                $splitSlots[] = [
+                    'start_time' => date('H:i:s', max($start, strtotime($date . ' 12:30:00'))),
+                    'end_time' => date('H:i:s', min($end, strtotime($date . ' 15:00:00')))
+                ];
+            }
+
+            if ($start < strtotime($date . ' 17:00:00') && $end > strtotime($date . ' 16:30:00')) {
+                $splitSlots[] = [
+                    'start_time' => date('H:i:s', max($start, strtotime($date . ' 16:30:00'))),
+                    'end_time' => date('H:i:s', min($end, strtotime($date . ' 17:00:00')))
+                ];
+            }
+        }
+
+        return $splitSlots;
+    }
