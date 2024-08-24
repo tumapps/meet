@@ -42,7 +42,23 @@ class AvailabilityController extends \helpers\ApiController{
         $model->loadDefaultValues();
         $dataRequest['Availability'] = Yii::$app->request->getBodyParams();
         if($model->load($dataRequest) && $model->save()) {
-            return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Availability added successfully']);
+             // trigger rescheduling logic and return affected appointments
+            $appointments = AppointmentRescheduler::rescheduleAffectedAppointments(
+                $model->user_id, 
+                $model->start_date, 
+                $model->end_date, 
+                $model->start_time, 
+                $model->end_time
+            );
+            return $this->payloadResponse(
+                [
+                    $model,
+                    'affectedAppointments' =>  $appointments
+                ],
+                [
+                    'statusCode'=>201,'message'=>'Availability added successfully'
+                ]
+            );
         }
         return $this->errorResponse($model->getErrors()); 
     }
