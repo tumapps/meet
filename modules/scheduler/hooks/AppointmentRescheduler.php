@@ -15,8 +15,6 @@ class AppointmentRescheduler {
         	$user_id, $start_date, $end_date, $start_time, $end_time
         );
 
-        return $affectedAppointments;
-
         foreach ($affectedAppointments as $appointment) {
             self::rescheduleAppointment($appointment);
         }
@@ -38,7 +36,7 @@ class AppointmentRescheduler {
 
     protected static function rescheduleAppointment($appointment)
     {
-        $appointment->status = $appointment->STATUS_RESCHEDULED;
+        $appointment->status = Appointments::STATUS_RESCHEDULED;
         $appointment->save();
     }
 
