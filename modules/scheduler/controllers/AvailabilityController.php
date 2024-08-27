@@ -98,11 +98,11 @@ class AvailabilityController extends \helpers\ApiController{
     {
         $model = $this->findModel($id);
         if ($model->is_deleted) {
-            Yii::$app->user->can('schedulerAvailabilityRestore');
+            // Yii::$app->user->can('schedulerAvailabilityRestore');
             $model->restore();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Availability restored successfully']);
         } else {
-            Yii::$app->user->can('schedulerAvailabilityDelete');
+            // Yii::$app->user->can('schedulerAvailabilityDelete');
             $model->delete();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Availability deleted successfully']);
         }

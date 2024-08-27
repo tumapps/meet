@@ -48,8 +48,72 @@ return [
  */
 'GET appointments'     => 'appointments/index',
 
-'POST available'       => 'appointments/get-slots',
-'POST slot-suggestion'	   => 'appointments/suggest-available-slots',
+/**
+ * @OA\Get(
+ * path="/scheduler/get-slots",
+ * summary="Get all available slots ",
+ * tags={"Appointments"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Fill in appointments data",
+ *    @OA\JsonContent(
+ *       required={"user_id","date",},
+ *       ref="#/components/schemas/Appointments",
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=201,
+ *    description="Data payload",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="dataPayload", type="object",
+ *          @OA\Property(property="data", type="object",ref="#/components/schemas/Appointments"),
+ *          @OA\Property(property="toastMessage", type="string", example="appointments created succefully"),
+ *          @OA\Property(property="toastTheme", type="string",example="success"),
+ *       )
+ *    )
+ * ),
+ * @OA\Response(
+ *    response=422,
+ *    description="Data Validation Error",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="errorPayload", type="object",
+ *          @OA\Property(property="errors", type="object", ref="#/components/schemas/Appointments"),
+ *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
+ *          @OA\Property(property="toastTheme", type="string",example="danger"),
+ *       )
+ *    )
+ * )
+ *),
+ */
+'GET get-slots'       => 'appointments/get-slots',
+
+
+/**
+ * @OA\Get(path="/scheduler/slot-suggestion/{id}",
+ *   summary="Display the next available slots for a particular affected appointment",
+ *   tags={"Appointments"},
+ *   @OA\Parameter(description="Appointments unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Displays a single Appointments model.",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/Appointments"))
+ *      ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Resource not found",
+ *      @OA\JsonContent(
+ *           @OA\Property(property="errorPayload", type="object",
+ *               @OA\Property(property="statusCode", type="integer", example=404 ),
+ *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+ *           )
+ *      )
+ *   ),
+ * )
+ */
+'GET slot-suggestion'	   => 'appointments/suggest-available-slots',
+
+
 'POST self-booking'		=> 'appointments/self-book',
 
 

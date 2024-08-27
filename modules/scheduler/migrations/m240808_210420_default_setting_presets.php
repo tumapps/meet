@@ -21,6 +21,7 @@ class m240808_210420_default_setting_presets extends Migration
             'end_time' => $this->time()->notNull(),
             'slot_duration' => $this->integer()->notNull()->defaultValue(30),
             'booking_window' => $this->integer()->notNull()->defaultValue(12),
+            'advanced_booking' => $this->integer()->notNull()->defaultValue(1),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .

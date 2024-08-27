@@ -34,6 +34,34 @@ class TimeHelper
     }
 
     /**
+     * Get the number of days between 2 dates.
+     *
+     * @param DateTime $date1
+     * @param DateTime $date2
+     * @return string
+     */
+    public static function getDifferenceBetweenDates($date1, $date2){
+        $days = date_diff($date1, $date2)->format("%R%a days");
+        return $days;
+    }
+
+     /**
+     * Get information about the date.
+     *
+     * @param DateTime $date
+     * @return array
+     */
+    public static function getDateInfo($date)
+    {
+        $info = date_parse($date);
+        foreach ($info as $key => $value) {
+            return [
+                $key => $value
+            ];
+        }
+    }
+
+    /**
      * Calculate the duration between two DateTime objects in minutes.
      *
      * @param DateTime $startTime
@@ -44,6 +72,32 @@ class TimeHelper
     {
         $interval = $startTime->diff($endTime);
         return ($interval->h * 60) + $interval->i;
+    }
+
+     /**
+     * Get available slots for a specific date.
+     *
+     * @param int $user_id - The user ID (e.g., Vice Chancellor)
+     * @param string $date - The date (e.g., '2024-08-27')
+     * @param string $startTime - The start time (e.g., '08:00')
+     * @param string $endTime - The end time (e.g., '17:00')
+     * @param int $interval - The slot duration in minutes (e.g., 30)
+     * @return array - List of available time slots
+     */
+    public static function getAvailableSlots($user_id, $date)
+    {
+        $allSlots = self::generateTimeSlots($user_id);
+        $slotsWithAvailability = [];
+
+        foreach ($allSlots as $slot) {
+            $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
+            $slotsWithAvailability[] = [
+                'slot' => $slot,
+                'isAvailable' => $isAvailable
+            ];
+        }
+
+        return $slotsWithAvailability;
     }
 
     /**
@@ -59,9 +113,18 @@ class TimeHelper
         $slots = [];
         $startTime = Settings::find()->select('start_time')->where(['user_id' => $user_id])->scalar();
         $endTime = Settings::find()->select('end_time')->where(['user_id' => $user_id])->scalar();
+
+        if(empty($startTime) || empty($endTime)){
+            return 'start time or endtime is not set';
+        }
+
         $start = new \DateTime($startTime);
         $end = new \DateTime($endTime);
         $interval = Settings::find()->select('slot_duration')->where(['user_id' => $user_id])->scalar();
+
+        if(empty($interval)){
+            return 'slot duration is not set';
+        }
 
         while ($start < $end) {
             $slotStart = $start->format('H:i');
@@ -83,45 +146,21 @@ class TimeHelper
      * @param string $slot - The time slot (e.g., '08:00-08:30')
      * @return bool - True if available, false otherwise
      */
-    public static function isSlotAvailable($vc_id, $date, $slot)
+    public static function isSlotAvailable($user_id, $date, $slot)
     {
         [$start_time, $end_time] = explode('-', $slot);
 
         // Check in the unavailable slots table
-        $unavailable = Availability::isUnavailableSlot($vc_id, $date, $start_time, $end_time);
+        $unavailable = Availability::isUnavailableSlot($user_id, $date, $start_time, $end_time);
 
         if ($unavailable) {
             return false;
         }
 
         // Check in the appointments table
-        $appointmentOverlap = Appointments::hasOverlappingAppointment($vc_id, $date, $start_time, $end_time);
+        $appointmentOverlap = Appointments::hasOverlappingAppointment($user_id, $date, $start_time, $end_time);
 
         return !$appointmentOverlap;
-    }
-
-    /**
-     * Get available slots for a specific date.
-     *
-     * @param int $vc_id - The user ID (e.g., Vice Chancellor)
-     * @param string $date - The date (e.g., '2024-08-19')
-     * @param string $startTime - The start time (e.g., '08:00')
-     * @param string $endTime - The end time (e.g., '17:00')
-     * @param int $interval - The slot duration in minutes (e.g., 30)
-     * @return array - List of available time slots
-     */
-    public static function getAvailableSlots($vc_id, $date)
-    {
-        $allSlots = self::generateTimeSlots($vc_id);
-        $availableSlots = [];
-
-        foreach ($allSlots as $slot) {
-            if (self::isSlotAvailable($vc_id, $date, $slot)) {
-                $availableSlots[] = $slot;
-            }
-        }
-
-        return $availableSlots;
     }
 
     /**
@@ -132,8 +171,13 @@ class TimeHelper
      * @param int $interval - The slot duration in minutes (e.g., 30)
      * @return bool - True if valid, false otherwise
      */
-    public static function isValidBookingDuration($startTime, $endTime, $interval = 30)
+    public static function isValidBookingDuration($user_id, $startTime, $endTime, $interval = 30)
     {
+        $interval= Settings::find()
+                        ->select('slot_duration')
+                        ->where(['user_id' => $user_id])
+                        ->scalar();
+
         $start = new \DateTime($startTime);
         $end = new \DateTime($endTime);
         $difference = $start->diff($end);
@@ -142,4 +186,55 @@ class TimeHelper
         return ($minutes % $interval) === 0;
     }
 
+    /**
+     * Validate if the appointment is within the open booking window.
+     *
+     * @return bool - True if valid, false otherwise
+     */
+    public static function isWithinBookingWindow($user_id, $appointmentDate)
+    {
+        $bookingWindow = Settings::find()
+                         ->select('booking_window')
+                         ->where(['user_id' => $user_id])
+                         ->scalar();
+
+        $bookingWindowDays = $bookingWindow * 30;
+
+        // maximum allowable appointment date
+        $currentDate = new \DateTime();
+
+        $maxBookingDate = clone $currentDate;
+
+        $maxBookingDate->modify("+$bookingWindowDays days");
+
+        $appointmentDate = new \DateTime($appointmentDate);
+
+        //check if the appointment is within booking window
+        if($appointmentDate <= $maxBookingDate){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Validate if the appointment is in advance of the minimun booking time.
+     *
+     * @return bool - True if booking time is within the advance or minimum booking time, false otherwise
+     */
+    public static function validateAdvanceBooking($user_id, $appointmentTime)
+    {
+        //fetch advance booking time from settings
+        $advancedBookingTime = (int)Settings::getAdvanceBookingDuration($user_id);
+
+        // clalculate minimum time one can book an appoiment
+        $advanceTime = date('Y-m-d H:i:sa', strtotime('+'.$advancedBookingTime.' hours'));
+        // return $advanceTime;
+
+        if(strtotime(date('Y-m-d '.$appointmentTime)) < strtotime($advanceTime))
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

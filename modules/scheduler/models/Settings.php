@@ -79,6 +79,7 @@ class Settings extends BaseModel
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'slot_duration' => 'Slot Duration',
+            'advanced_booking' => 'Advance Booking',
             'booking_window' => 'Booking Window',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
@@ -117,5 +118,15 @@ class Settings extends BaseModel
             ];
         }
 
+    }
+
+    public static function getAdvanceBookingDuration($user_id)
+    {
+        $duration = self::find()
+                    ->select(['advanced_booking'])
+                    ->where(['user_id' => $user_id])
+                    ->scalar();
+
+        return $duration;
     }
 }

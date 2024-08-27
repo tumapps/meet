@@ -59,10 +59,26 @@ class Availability extends BaseModel
             [['user_id'], 'integer'],
             [['start_date', 'end_date', 'start_time', 'end_time'], 'required'],
             [['start_date', 'end_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
+            [['start_time', 'end_time'], 'validateTimeRange'],
+            [['start_date', 'end_date'], 'validateDateRange'],
             [['is_full_day'], 'boolean'],
             [['description'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
+    }
+
+    public function validateTimeRange($attribute, $params)
+    {
+        if (strtotime($this->end_time) <= strtotime($this->start_time)) {
+            $this->addError($attribute, 'End time must be later than start time.');
+        }
+    }
+
+    public function validateDateRange($attribute, $params)
+    {
+        if (new \DateTime($this->end_date) < new \DateTime($this->start_date)) {
+            $this->addError($attribute, 'End date must be later than start date.');
+        }
     }
 
     /**
@@ -157,7 +173,6 @@ class Availability extends BaseModel
 
         // Use the common query logic to get unavailable slots
         $slots = self::getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)->all(); 
-        // return $user_id.','.$appointment_date.','.$start_time.','.$end_time;
         return $slots;
 
         foreach ($slots as $slot) {
@@ -169,10 +184,6 @@ class Availability extends BaseModel
 
         return $unavailableSlots;
     }
-
-
-
-
 
 
     public static function isUnavailableSlot($vc_id, $date, $start_time, $end_time)

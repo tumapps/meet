@@ -16,7 +16,6 @@ use scheduler\hooks\AppointmentRescheduler as Ar;
  */
 class AppointmentsController extends \helpers\ApiController{
 
-    // private $isSelfBooking = false;
 
     public $permissions = [
         'schedulerAppointmentsList'=>'View Appointments List',
@@ -31,21 +30,58 @@ class AppointmentsController extends \helpers\ApiController{
         $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentsSearch');
         $dataProvider = $searchModel->search($search);
+
+        $appointments = $dataProvider->getModels();
+
+        // Add statusLabel to each appointment
+        foreach ($appointments as &$appointment) {
+            $appointmentData = $appointment->toArray();
+            $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
+            $appointment = $appointmentData;
+        }
+
+        $dataProvider->setModels($appointments);
+
         return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
     }
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerAppointmentsView');
-        return $this->payloadResponse($this->findModel($id));
+        // Yii::$app->user->can('schedulerAppointmentsView');
+        $appointment = $this->findModel($id);
+
+        $statusLabel = Appointments::getStatusLabel($appointment->status);
+        $appoitmentData = $appointment->toArray();
+        $appoitmentData['statusLabel'] = $statusLabel; 
+
+        return $this->payloadResponse($appoitmentData);
+
+        // return $this->payloadResponse($this->findModel($id));
     }
 
     public function actionCreate($dataRequest = null)
     {
+       
         // Yii::$app->user->can('schedulerAppointmentsCreate');
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+
+        $advanced = TimeHelper::validateAdvanceBooking(
+             $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time']
+        );
+
+        if($advanced) {
+            return $this->payloadResponse(['message' => 'The selected appoitment start time overlaps with the minimum advanced booking time']); 
+        }
+
+        $validateBookingWindow = TimeHelper::isWithinBookingWindow(
+            $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['appointment_date']
+        );
+
+        if(!$validateBookingWindow){
+            return $this->payloadResponse(['message' => 'Appoitment is not within the open booking period',]); 
+        }
 
         $isAvailable = $this->checkAvailability(
             $dataRequest['Appointments']['user_id'], 
@@ -80,6 +116,46 @@ class AppointmentsController extends \helpers\ApiController{
     {
         // Yii::$app->user->can('schedulerAppointmentsUpdate');
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+        
+        $advanced = TimeHelper::validateAdvanceBooking(
+             $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time']
+        );
+
+        if($advanced) {
+            return $this->payloadResponse(['message' => 'The selected appoitment start time overlaps with the minimum advanced booking time']); 
+        }
+
+        $validateBookingWindow = TimeHelper::isWithinBookingWindow(
+            $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['appointment_date']
+        );
+
+        if(!$validateBookingWindow){
+            return $this->payloadResponse(['message' => 'Appoitment is not within the open booking period',]); 
+        }
+
+        $isAvailable = $this->checkAvailability(
+            $dataRequest['Appointments']['user_id'], 
+            $dataRequest['Appointments']['appointment_date'], 
+            $dataRequest['Appointments']['start_time'],
+            $dataRequest['Appointments']['end_time']
+        );
+
+        if (!$isAvailable) {
+            return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
+        }
+        
+        // cheking if there is overlapping appoiment ie if the appoitment is already placed
+        $appoitmentExists = $model::hasOverlappingAppointment(
+            $dataRequest['Appointments']['user_id'], 
+            $dataRequest['Appointments']['appointment_date'], 
+            $dataRequest['Appointments']['start_time'],
+            $dataRequest['Appointments']['end_time']
+        );
+
+        if ($appoitmentExists) {
+            return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
+        }
+
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {
            return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
@@ -95,7 +171,7 @@ class AppointmentsController extends \helpers\ApiController{
             $model->restore();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
-            Yii::$app->user->can('schedulerAppointmentsDelete');
+            // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
@@ -109,55 +185,6 @@ class AppointmentsController extends \helpers\ApiController{
             return $model;
         }
         throw new \yii\web\NotFoundHttpException('Record not found.');
-    }
-
-    public function actionSelfBook()
-    {
-        // Ensure the user is logged in (i.e., is the VC)
-        // if (Yii::$app->user->isGuest) {
-        //     return $this->errorResponse(['message' => 'You must be logged in to book an appointment.']);
-        // }
-        
-        $model = new Appointments();
-        $model->loadDefaultValues();
-        $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-
-        // $userId = Yii::$app->user->identity->getId();
-
-        //$dataRequest['Appointments']['user_id'] = $userId
-        $user_id = $dataRequest['Appointments']['user_id'];
-        $start_date = $dataRequest['Appointments']['appointment_date'];
-        $end_date = $dataRequest['Appointments']['appointment_date'];
-        $start_time = $dataRequest['Appointments']['start_time'];
-        $end_time = $dataRequest['Appointments']['end_time'];
-
-        $dataRequest['Appointments']['email_address'] = 'adminvc@gmail.com';
-
-
-        // trigger rescheduling logic 
-        $appointments = Ar::rescheduleAffectedAppointments(
-                $user_id, 
-                $start_date, 
-                $end_date, 
-                $start_time, 
-                $end_time
-        );
-
-        // return $appointments;
-
-        $model->status = 'self';
-
-        if($model->load($dataRequest) && $model->save()) {
-                $data = [
-                    $model,
-                    'affectedAppointments' => $appointments
-                ];
-                return $this->payloadResponse(
-                    $data, ['statusCode' => 201, 'message' => 'self-booking completed successfully']
-               );
-        }
-        return $this->errorResponse($model->getErrors());
-         
     }
 
     private function checkAvailability($user_id, $appointment_date, $start_time, $end_time)
@@ -180,7 +207,6 @@ class AppointmentsController extends \helpers\ApiController{
         if(empty($user_id) || empty($date)){
             return $this->errorResponse(['message' => ['user id and date are required']]);
         }
-
         $slots = TimeHelper::getAvailableSlots($user_id, $date);
         return $this->payloadResponse(['slots' => $slots]);
     }

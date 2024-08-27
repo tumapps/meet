@@ -1,13 +1,34 @@
  <?php
-  // return $this->errorResponse([
-            //         'message' => [
-            //              'The VC is unavailable for the requested time slot',
-            //         ],
-            // ]);
-            // 
-            // 
-            
 
+ public static function getAvailableSlots($user_id, $date)
+    {
+        $allSlots = self::generateTimeSlots($user_id);
+         $slotsWithAvailability = [];
+        // $availableSlots = [];
+
+        foreach ($allSlots as $slot) {
+            // if (self::isSlotAvailable($user_id, $date, $slot)) {
+                // $availableSlots[] = $slot;
+                $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
+                $slotsWithAvailability[] = [
+                    'slot' => $slot,
+                    'isAvailable' => $isAvailable
+                ];
+            // }
+        }
+
+        // return $availableSlots;
+        return $slotsWithAvailability;
+    }
+ /check if the appointment is within booking window
+        if(/*$appointmentDate >= $currentDate && */$appointmentDate <= $maxBookingDate){
+            return true; // valid appointment date
+        }
+        return false; //invalid appointment, outside the boking window
+            
+if(empty($bookingWindow)){
+            return 'Booking window is not set';
+        }
 
             
  // $appointmentStart = new \DateTime("$appointment_date $start_time");
@@ -26,71 +47,45 @@
         // 
  
 
-  public static function getUnavailableSlots2($vc_id, $appointment_date, $start_time=null, $end_time=null)
+   
+
+
+
+  public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime)
     {
-       $query = self::find()
-        ->where(['user_id' => $vc_id])
-        ->andWhere([
-            'OR',
-            // Check if the entire day is unavailable
-            ['is_full_day' => true, 'start_date' => $appointment_date],
-            // Check for time-slot-based unavailability within a date range
-            ['AND',
-                ['<=', 'start_date', $appointment_date],
-                ['>=', 'end_date', $appointment_date],
-            ]
-        ]);
+        // Get slot duration for a given time range
+        $slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
+        $date = $appointment_date;
 
-        // Add time-based conditions if start and end times are provided
-        if ($start_time !== null && $end_time !== null) {
-            $query->andWhere([
-                'OR',
-                ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
-                ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-                ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-            ]);
-        }
+        // while (true) {
+        // Get all booked slots for the given date (i.e., those that can't be booked in the appointments table)
+        $bookedSlots = Appointments::getBookedSlotsForRange($user_id, $date, $date);
 
-        return $query->all();
+            // Get all the unavailable time range for the given date (i.e., those that can't be booked since the user is unavailable)
+            $unavailableSlots = Availability::getUnavailableSlotDetails($user_id, $date, $startTime, $endTime);
+
+            // Calculate available slots based on working hours and unavailable slots
+            $availableSlots = self::calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration);
+
+            // Check if there are available slots for the current day
+            if (!empty($availableSlots)) {
+                // Find slots that fit the duration of the affected appointment
+                $suitableSlots = self::findSlotsThatFitDuration($availableSlots, $slotDuration);
+
+                if (!empty($suitableSlots)) {
+                    return [
+                        'date' => $date,
+                        'slots' => $suitableSlots
+                    ];
+                }
+            }
+
+            // Move to the next day
+            $nextDate = date('Y-m-d', strtotime($date . ' +1 day'));
+            // return $date;
+            return self::findNextAvailableSlot($user_id, $nextDate, $startTime, $endTime);
+        // }
     }
-
-
-
-
-    public static function getUnavailableSlots3($vc_id, $appointment_date, $start_time, $end_time)
-    {
-    // Step 1: Check if the entire day is unavailable
-        $isFullDayUnavailable = self::find()
-            ->where(['user_id' => $vc_id, 'is_full_day' => true, 'start_date' => $appointment_date])
-            ->exists();
-
-        if ($isFullDayUnavailable) {
-            // If the entire day is unavailable, return all slots for that day
-            return self::find()
-                ->where(['user_id' => $vc_id, 'start_date' => $appointment_date])
-                ->all();
-        }
-
-        // Step 2: Check for time-slot-based unavailability within a date range
-        return self::find()
-            ->where(['user_id' => $vc_id])
-            ->andWhere([
-                'AND',
-                ['<=', 'start_date', $appointment_date],
-                ['>=', 'end_date', $appointment_date],
-            ])
-            ->andWhere([
-                'OR',
-                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
-                ['AND', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-                ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-            ])
-            ->all();
-    }
-
-
 
    // retuning all booked time slots logic
 
@@ -232,7 +227,76 @@ overlapping
 
 
 
+// protected static function calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration)
+    // {
 
+    //     // Convert slot duration from minutes to seconds
+    //     $slotDurationInSeconds = $slotDuration * 60;
+
+    //     // Get working hours for the user
+    //     $workingHours = Settings::getWorkingHours($user_id);
+    //     $dayStart = strtotime($date . ' ' . $workingHours['start_time']);
+    //     $dayEnd = strtotime($date . ' ' . $workingHours['end_time']);
+
+
+    //     $availableSlots = [];
+    //     $previousEnd = $dayStart;
+
+    //     // return [
+    //     //   'unavailable' => $unavailableSlots,
+    //     //   'booked' => $bookedSlots
+    //     // ];
+    //     // Merge booked and unavailable slots and sort by start time
+    //     $allSlots = array_merge($unavailableSlots, $bookedSlots);
+    //     // return ['all' =>  $allSlots];
+
+    //     usort($allSlots, function($a, $b) {
+    //         return strtotime($a['start_time']) - strtotime($b['start_time']);
+    //     });
+
+    //     // return ['all sorted' =>  $allSlots];
+
+
+    //     // Iterate over the slots to find gaps
+    //     foreach ($allSlots as $slot) {
+    //      // return [
+    //      //  'slotsst' => $slot['start_time'],
+    //      //  'sloteet' => $slot['end_time'],
+
+    //      // ];
+    //         $slotStart = strtotime($slot['start_time']);
+    //         $slotEnd = strtotime($slot['end_time']);
+
+    //         // Check if there's a gap between the previous end time and the start of the next booked unavailable slot
+    //         return $previousEnd + $slotDurationInSeconds;
+    //         while ($previousEnd + $slotDurationInSeconds <= $slotStart) {
+    //             $availableSlots[] = [
+    //                 'date' => $date,
+    //                 'start_time' => date('H:i:s', $previousEnd),
+    //                 'end_time' => date('H:i:s', $previousEnd + $slotDurationInSeconds)
+    //             ];
+    //             $previousEnd += $slotDurationInSeconds;
+    //         }
+
+    //         // Update the previous end time to the current slot's end time
+    //         $previousEnd = max($previousEnd, $slotEnd);
+            
+    //     }
+
+    //     // Finally, check the gap between the last slot and the end of the working day
+    //     while ($previousEnd + $slotDurationInSeconds <= $dayEnd) {
+
+    //         $availableSlots[] = [
+    //             'date' => $date,
+    //             'start_time' => date('H:i:s', $previousEnd),
+    //             'end_time' => date('H:i:s', $previousEnd + $slotDurationInSeconds)
+    //         ];
+    //         $previousEnd += $slotDurationInSeconds;
+    //     }
+
+    //     return $availableSlots;
+    // }
+    // 
 
 
 
@@ -303,4 +367,114 @@ overlapping
         }
 
         return $splitSlots;
+    }
+
+
+
+
+
+
+
+    public function actionSelfBook()
+    {
+        // Ensure the user is logged in (i.e., is the VC)
+        // if (Yii::$app->user->isGuest) {
+        //     return $this->errorResponse(['message' => 'You must be logged in to book an appointment.']);
+        // }
+        
+        $model = new Appointments();
+        $model->loadDefaultValues();
+        $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+
+        // $userId = Yii::$app->user->identity->getId();
+
+        //$dataRequest['Appointments']['user_id'] = $userId
+        $user_id = $dataRequest['Appointments']['user_id'];
+        $start_date = $dataRequest['Appointments']['appointment_date'];
+        $end_date = $dataRequest['Appointments']['appointment_date'];
+        $start_time = $dataRequest['Appointments']['start_time'];
+        $end_time = $dataRequest['Appointments']['end_time'];
+
+        $dataRequest['Appointments']['email_address'] = 'adminvc@gmail.com';
+
+
+        // trigger rescheduling logic 
+        $appointments = Ar::rescheduleAffectedAppointments(
+                $user_id, 
+                $start_date, 
+                $end_date, 
+                $start_time, 
+                $end_time
+        );
+
+        // return $appointments;
+
+        $model->status = 'self';
+
+        if($model->load($dataRequest) && $model->save()) {
+                $data = [
+                    $model,
+                    'affectedAppointments' => $appointments
+                ];
+                return $this->payloadResponse(
+                    $data, ['statusCode' => 201, 'message' => 'self-booking completed successfully']
+               );
+        }
+        return $this->errorResponse($model->getErrors());
+         
+    }
+
+
+
+
+   protected static function calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration)
+    {
+        // Convert slot duration from minutes to seconds
+        $slotDurationInSeconds = $slotDuration * 60;
+
+        // Get working hours for the user
+        $workingHours = Settings::getWorkingHours($user_id);
+        $dayStart = strtotime($date . ' ' . $workingHours['start_time']);
+        $dayEnd = strtotime($date . ' ' . $workingHours['end_time']);
+
+        // Initialize array to store all possible time slots for the day
+        $suggestedSlots = [];
+        // for ($time = $dayStart; $time + $slotDurationInSeconds <= $dayEnd; $time += $slotDurationInSeconds) {
+        //     $suggestedSlots[] = [
+        //         'start_time' => $time,
+        //         'end_time' => $time + $slotDurationInSeconds
+        //     ];
+        // }
+        $slots = TimeHelper::generateTimeSlots($user_id);
+
+
+        // Helper function to filter out slots
+        $filterSlots = function ($slots, &$suggestedSlots) {
+            foreach ($slots as $slot) {
+                $slotStart = strtotime($slot['start_time']);
+                $slotEnd = strtotime($slot['end_time']);
+
+                // Remove overlapping slots from suggestedSlots
+                $suggestedSlots = array_filter($suggestedSlots, function ($suggestedSlot) use ($slotStart, $slotEnd) {
+                    return !($suggestedSlot['start_time'] < $slotEnd && $suggestedSlot['end_time'] > $slotStart);
+                });
+            }
+        };
+
+        // Filter out unavailable time ranges
+        $filterSlots($unavailableSlots, $suggestedSlots);
+
+        // Filter out booked time slots
+        $filterSlots($bookedSlots, $suggestedSlots);
+
+        // Format available slots as needed
+        $availableSlots = array_map(function ($slot) use ($date) {
+            return [
+                'date' => $date,
+                'start_time' => date('H:i:s', $slot['start_time']),
+                'end_time' => date('H:i:s', $slot['end_time']),
+            ];
+        }, $suggestedSlots);
+
+        return $availableSlots;
     }

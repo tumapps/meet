@@ -80,10 +80,14 @@ class Appointments extends BaseModel
             [['appointment_date', 'email_address','start_time','end_time','user_id'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
+            [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
+            ['appointment_date', 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '>=', 'type' => 'date', 'message' => 'The date must not be in the past'],
             [['subject'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
-            [['mobile_number'], 'string', 'max' => 15],
+            ['email_address', 'email'],
+            ['mobile_number', 'string', 'max' => 13, 'tooLong' => 'Phone number must not exceed 13 digits.'],
+            ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 13 digits.'],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
@@ -91,8 +95,11 @@ class Appointments extends BaseModel
 
     public function validateTimeRange($attribute, $params)
     {
-        if (strtotime($this->end_time) <= strtotime($this->start_time)) {
-            $this->addError($attribute, 'End time must be later than start time.');
+        $currentTime = date('Y-m-d h:i:sa');
+        $dateTime = date($this->appointment_date.' '.$this->start_time);
+
+        if (strtotime($this->end_time) <= strtotime($this->start_time) || strtotime($dateTime) < strtotime($currentTime)) {
+            $this->addError($attribute, 'invalid time range');
         }
     }
 
@@ -167,15 +174,17 @@ class Appointments extends BaseModel
 
     public static function getBookedSlotsForRange($user_id, $start_date, $end_date)
     {
+        // $currentDateTime = new \DateTime();
+
         return self::find()
             ->where(['user_id' => $user_id])
             ->andWhere(['between', 'appointment_date', $start_date, $end_date])
             ->andWhere(['!=', 'status', self::STATUS_RESCHEDULED])
+            // ->andWhere(['>=', 'end_time', $currentDateTime->format('H:i:s')])
             ->orderBy(['start_time' => SORT_ASC])
             ->asArray()
             ->all();
     }
-
 
      /**
      * Checks if the requested appointment time overlaps with any existing appointments.
