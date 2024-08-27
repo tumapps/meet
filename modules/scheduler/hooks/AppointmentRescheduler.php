@@ -46,25 +46,17 @@ class AppointmentRescheduler {
 	    $slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
 
 	    while (true) {
-	        // Get all booked slots for the given date (i.e., those that can't be booked in the appointments table)
-	        $bookedSlots = Appointments::getBookedSlotsForRange($user_id, $appointment_date, $appointment_date);
-
-
-
-	        // Get all the unavailable time range for the given date (i.e., those that can't be booked since the user is unavailable)
-	        $unavailableSlots = Availability::getUnavailableSlotDetails($user_id, $appointment_date, $startTime, $endTime);
-	        // return $unavailableSlots;
-
-
+	    	
 	        // Calculate available slots based on working hours and unavailable slots
-	        $availableSlots = self::calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $appointment_date, $startTime, $endTime, $slotDuration);
-	        return $availableSlots;
+	        $availableSlots = self::calculateAvailableSlots($user_id, $appointment_date, $startTime, $endTime, $slotDuration);
+	        // return $availableSlots;
 	        
 	        // Check if there are available slots for the current day
 	        if (!empty($availableSlots)) {
 	            // Find slots that fit the duration of the affected appointment
 	            $suitableSlots = self::findSlotsThatFitDuration($availableSlots, $slotDuration);
 
+	            // return $suitableSlots;
 	            if (!empty($suitableSlots)) {
 	                return [
 	                    'date' => $appointment_date,
@@ -75,26 +67,43 @@ class AppointmentRescheduler {
 
 	        // Move to the next day
 	        $nextDate = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
-	        // $appointment_date = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
 	        // return self::findNextAvailableSlot($user_id, $nextDate, $startTime, $endTime);
    	 	}
 	}
 
-	protected static function findSlotsThatFitDuration($availableSlots, $slotDuration)
+	
+
+	protected static function findSlotsThatFitDuration($availableSlots, $requiredSlotDuration)
 	{
 	    $suitableSlots = [];
+	    $currentSlotGroup = [];
+	    $accumulatedDuration = 0;
 
 	    foreach ($availableSlots as $slot) {
-	        $slotStart = strtotime($slot['start_time']);
-	        $slotEnd = strtotime($slot['end_time']);
+	        // Split the slot into start and end times
+	        [$slotStart, $slotEnd] = explode('-', $slot);
 
-	        if (($slotEnd - $slotStart) >= $slotDuration) {
-	            $suitableSlots[] = $slot;
+	        // Calculate the duration of this slot in minutes
+	        $slotDuration = (strtotime($slotEnd) - strtotime($slotStart)) / 60;
+
+	        // Accumulate the duration and add the slot to the current group
+	        $accumulatedDuration += $slotDuration;
+	        $currentSlotGroup[] = $slot;
+
+	        // Check if the accumulated duration meets or exceeds the required duration
+	        if ($accumulatedDuration >= $requiredSlotDuration) {
+	            // If it meets the required duration, add the current group to the suitable slots
+	            $suitableSlots = array_merge($suitableSlots, $currentSlotGroup);
+
+	            // Reset the current group and accumulated duration for the next batch
+	            $currentSlotGroup = [];
+	            $accumulatedDuration = 0;
 	        }
 	    }
 
 	    return $suitableSlots;
 	}
+
 
 
     private  function sendNotifications($appointments)
@@ -103,7 +112,7 @@ class AppointmentRescheduler {
     }
  
 	
-	protected static function calculateAvailableSlots($user_id, $bookedSlots, $unavailableSlots, $date, $startTime, $endTime, $slotDuration)
+	protected static function calculateAvailableSlots($user_id, $date, $startTime, $endTime, $slotDuration)
 	{
 	    // Convert slot duration from minutes to seconds
 	    $slotDurationInSeconds = $slotDuration * 60;
@@ -116,10 +125,10 @@ class AppointmentRescheduler {
 	    // Initialize array to store all possible time slots for the day
 	    $availableSlots = [];
 	    $slots = TimeHelper::generateTimeSlots($user_id);
+
 	    foreach ($slots as $slot) {
             if (TimeHelper::isSlotAvailable($user_id, $date, $slot)) {
                 $availableSlots[] = $slot;
-                
             }
         }
         return $availableSlots;

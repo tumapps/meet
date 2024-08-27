@@ -234,7 +234,6 @@ class AppointmentsController extends \helpers\ApiController{
             $appoitment->start_time,
             $appoitment->end_time
         );
-
         return $this->payloadResponse(['suggestions' => $suggestions]);
     }
 }
