@@ -45,8 +45,10 @@ class m231209_121135_init extends Migration
         $this->createTable('{{%tokens}}', [
             'token_id' => $this->string(64)->notNull(),
             'user_id' => $this->bigInteger()->notNull(),
-            'token' => $this->string(7)->notNull(),
+            'token' => $this->string(32)->notNull(),
+            'status' => $this->integer()->defaultValue(1)->notNull(),
             'token_type' => $this->string(20)->notNull(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'PRIMARY KEY ([[token_id]])',

@@ -65,4 +65,14 @@ class Profiles extends \helpers\ActiveRecord
 		$this->full_name = $this->first_name.' '.$this->middle_name.' '.$this->last_name;
 		return parent::afterFind();
 	}
+
+    // public static function findUserByEmail($email)
+    // {
+    //     /* @var $user User */
+    //     $user = User::findOne([
+    //         'email_address' => $email,
+    //     ]);
+
+    //     return $user;
+    // }
 }

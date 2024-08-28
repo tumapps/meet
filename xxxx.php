@@ -1,6 +1,42 @@
  <?php
 
+ <?php
 
+use yii\db\Migration;
+
+/**
+ * Handles adding columns to table `{{%availability}}`.
+ */
+class m240825_104310_add_is_deleted_column_to_availability_table extends Migration
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        $this->addColumn('unavailable_slots', 'is_deleted', $this->boolean()->defaultValue(false));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        $this->dropColumn('unavailable_slots', 'is_deleted');
+    }
+}
+
+        // $userId = Tokens::find()->select('token')->where(['user_id' => $userId])->scalar();
+ 
+/* @var $user User */
+        // $user = User::findOne([
+        //     'status' => User::STATUS_ACTIVE,
+        //     'username' => $this->username,
+        // ]);
+// $email = Profiles::find()->select('email_address')->where(['user_id' => $userId]);
+        // if (!$email) {
+        //     return flase;
+        // }
 
 
  // Get all booked slots for the given date (i.e., those that can't be booked in the appointments table)

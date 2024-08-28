@@ -93,7 +93,7 @@ class m240118_110956_default_user_presets extends Migration
             'user_id' => $uid,
             'first_name' => 'Standard',
             'last_name' => 'User',
-            'email_address' => 'user@' . strtolower($_ENV['APP_CODE']) . '.com',
+            'email_address' => 'francisyuppie@gmail.com',
             'created_at' => time(),
             'updated_at' => time(),
         ));

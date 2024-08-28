@@ -153,7 +153,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
      */
     public function generatePasswordResetToken()
     {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+        return Yii::$app->security->generateRandomString() . '_' . time();
     }
     /**
      * Generates new token for email verification

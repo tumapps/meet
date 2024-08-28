@@ -87,6 +87,7 @@ class TimeHelper
     public static function getAvailableSlots($user_id, $date)
     {
         $allSlots = self::generateTimeSlots($user_id);
+        // return $allSlots;
         $slotsWithAvailability = [];
 
         foreach ($allSlots as $slot) {

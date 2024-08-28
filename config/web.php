@@ -83,10 +83,23 @@ $config = [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        // 'mailer' => [
+        //     'class' => \yii\symfonymailer\Mailer::class,
+        //     'viewPath' => '@app/mail',
+        //     'useFileTransport' => false,
+        // ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'scheme' => 'smtps',
+                'host' => 'smtp.gmail.com',
+                'username' => 'francisyuppie@gmail.com',
+                'password' => 'utws lgpt hsjr jdec',
+                'port' => 465,
+                'encryption' => 'tls',
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,

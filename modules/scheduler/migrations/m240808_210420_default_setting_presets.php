@@ -24,6 +24,7 @@ class m240808_210420_default_setting_presets extends Migration
             'advanced_booking' => $this->integer()->notNull()->defaultValue(1),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ],  $tableOptions);

@@ -18,7 +18,7 @@ class ApiController extends \yii\rest\Controller
                 'Access-Control-Allow-Origin'      => [$origins],  
                 'Access-Control-Request-Headers'   => ['*'],         
                 'Access-Control-Request-Method'    => ['POST', 'PUT', 'PATCH', 'GET', 'DELETE', 'HEAD'],
-                'Access-Control-Allow-Credentials' => true,
+                'Access-Control-Allow-Credentials' => false,
                 'Access-Control-Max-Age'           => 3600,                
             ],
         ]; 

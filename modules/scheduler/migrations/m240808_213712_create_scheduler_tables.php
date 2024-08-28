@@ -25,6 +25,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'description' => $this->string(255)->null(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
@@ -42,6 +43,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'subject' => $this->text()->null(),
             'appointment_type' => $this->string(), //personal or group
             'status' => $this->integer()->notNull()->defaultValue(1),
+            'is_deleted' => $this->boolean()->defaultValue(false),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .

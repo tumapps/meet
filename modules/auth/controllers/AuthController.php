@@ -6,6 +6,8 @@ use Yii;
 use yii\web\Response;
 use auth\models\static\Login;
 use auth\models\static\Register;
+use auth\models\static\PasswordReset;
+use auth\models\static\PasswordResetRequest;
 use auth\models\RefreshToken;
 
 class AuthController extends \helpers\ApiController
@@ -31,6 +33,49 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->save()) {
 			return $this->payloadResponse(['username' => $dataRequest['Register']['username']], ['statusCode' => 200, 'message' => 'Created Successfully']);
 		}
+		return $this->errorResponse($model->getErrors());
+	}
+
+	public function actionPasswordResetRequest()
+	{
+		$model = new PasswordResetRequest();
+		$dataRequest['PasswordResetRequest'] = Yii::$app->request->getBodyParams();
+
+		if ($model->load($dataRequest) && $model->validate()) {
+			return $model->sendEmail();
+			if ($model->sendEmail()) {
+            	return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
+	        } else {
+	            return $this->errorResponse(['message' => 'Unable to send password reset email. Please try again later.']);
+	        }
+	    
+		}
+
+		return $this->errorResponse($model->getErrors());
+
+	}
+
+	public function actionResetPassword()
+	{
+		$dataRequest['PasswordReset'] = Yii::$app->request->getBodyParams();
+		$token = $dataRequest['PasswordReset']['token'] ?? null;
+
+		if(empty($token)){
+			return $this->errorResponse(['message' => ['missing password reset token']]);
+		}
+		
+		try {
+        	$model = new PasswordReset($token);
+    	} catch (InvalidArgumentException $e) {
+        	return $this->errorResponse(['message' => $e->getMessage()]);
+    	}
+
+		if ($model->load($dataRequest) && $model->validate()) {
+	        if ($model->resetPassword()) {
+	            return $this->payloadResponse(['message' => 'Password updated successfully']);
+	        }
+    	}
+
 		return $this->errorResponse($model->getErrors());
 	}
 

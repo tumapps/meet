@@ -45,6 +45,9 @@ class ConfigWrapper
             'jwt.audience' => 'http://example.org',
             'jwt.id' => '4f1g23a12aa',
             'jwt_secret' => getenv('JWT_SECRET'),
+            'adminEmail' => 'tum@gmail.com',
+            'user.passwordResetTokenExpire' => 3600,
+
         ];
     }
     public function load($item)

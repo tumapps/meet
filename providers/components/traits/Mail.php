@@ -10,30 +10,15 @@ trait Mail
      * @param string $email the target email address
      * @return bool whether the model passes validation
      */
-    public function send($email)
+    public function send($email, $subject, $body)
     {
-        if ($this->validate()) {
-            $message = Yii::$app->mailer->compose()
-                ->setTo($this->email)
-                ->setFrom([Yii::$app->params['adminEmail'] => Yii::$app->params['senderName']])
-                ->setReplyTo([$this->email => $this->name])
-                ->setSubject($this->subject)
-                // ->setTextBody($this->body)
-                ->setHtmlBody($this->body);
+        $message = \Yii::$app->mailer->compose()
+            ->setTo($email)
+            ->setFrom([\Yii::$app->params['adminEmail']])
+            ->setSubject($subject)
+            ->setHtmlBody($body);
 
+        return $message->send();
 
-        if ($this->attachFile !== null) {
-            $message->attach($this->attachFile->tempName, [
-                    'fileName' => $this->attachFile->baseName . '.' . $this->attachFile->extension,
-                    'contentType' => $this->attachFile->type,
-                ]);
-            }
-            // $result = $message->send();
-            $message->send();
-                // ->send();
-
-            return true;
-        }
-        return false;
     }
 }
