@@ -97,7 +97,8 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
-import AxiosInstance from '@/plugins/axios.js'
+import createAxiosInstance from '@/api/axios';
+
 import useDataTable from '../../../hooks/useDatatable.js'
 
 
@@ -112,29 +113,28 @@ const timeline = ref([
 
 
 
-const tableData = ref([
-    {
-        name: 'Anne Hathaway',
-        contact: 'Gastroenterologists',
-        date: '02:00 PM',
-        time: '06:00 PM',
-        status: {
-            color: 'danger',
-            status: 'approved'
-        },
-    }
-])
+// const tableData = ref([
+//     {
+//         name: 'Anne Hathaway',
+//         contact: 'Gastroenterologists',
+//         date: '02:00 PM',
+//         time: '06:00 PM',
+//         status: {
+//             color: 'danger',
+//             status: 'approved'
+//         },
+//     }
+// ])
 
 //get from api
 onMounted(async () => {
     //fetch appointments and slots and unavailable slots
     getSlot();
-    // console.log(appointments);
-    modalInstance = new Modal(modalRef.value);  // Create a Bootstrap modal instance
+    // console.log(appointments)
 });
 
-const axiosInstance = AxiosInstance();
-const appointments = ref([]);
+const axiosInstance = createAxiosInstance();
+const tableData = ref([]);
 // const modalRef = ref(null);  // Reference to the modal element
 // Will hold the Bootstrap modal instance
 //fetch appointments and slots and unavailable slots
@@ -147,12 +147,12 @@ const getSlot = async () => {
 
         tableData.value = apiData.map(item => ({
             name: item.contact_name,
-            contact: item.appointment_type,
-            date: formatTime(item.start_time), // Assuming date should show start_time
+            contact: item.mobile_number,
+            date: formatTime(item.appointment_date), // Assuming date should show start_time
             time: formatTime(item.end_time),
             status: {
-                color: getStatusColor(item.statusLabel),
-                status: item.statusLabel.toLowerCase()
+                color: danger,
+                status: item.status
             }
         }));
     } catch (error) {
