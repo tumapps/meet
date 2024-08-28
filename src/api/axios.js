@@ -61,7 +61,7 @@ const AxiosInstance = () => {
 
             const refreshAccessToken = async () => {
                 try {
-                    const response = await axiosInstance.post('/v1/iam/auth/refresh')
+                    const response = await axiosInstance.post('/v1/auth/refresh')
                     const newToken = response.data?.dataPayload.data.token
                     // Store the new access token
                     authStore.setToken(newToken, response.data.dataPayload.data.username)
@@ -122,7 +122,7 @@ const AxiosInstance = () => {
 
     const logout = async () => {
         try {
-            await axiosInstance.delete('/v1/iam/auth/refresh')
+            await axiosInstance.delete('/v1/auth/refresh')
             console.log('Sent logout request')
             authStore.removeToken() // Update the store
         } catch (error) {

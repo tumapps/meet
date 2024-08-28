@@ -12,7 +12,7 @@
 
     <b-col lg="7 calendar-s">
       <b-card>
-        <full-calender :events="events" @onDateSelect="dateSelected"></full-calender>
+        <full-calender :events="events" @onDateSelect="handleDateClick"></full-calender>
       </b-card>
     </b-col>
     <b-col lg="5">
@@ -72,89 +72,115 @@
           <div class="fade active show" id="-3">
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
-                <label for="addtitle" class="col-form-label">Name</label>
+                <label for="addcontactname" class="col-form-label">Name</label>
               </b-col>
               <b-col cols="10">
-                <input type="text" id="addtitle" class="form-control" />
-              </b-col>
-            </b-row>
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="addtitle" class="col-form-label">RE:</label>
-              </b-col>
-              <b-col cols="10">
-                <input type="text" id="addtitle" class="form-control" placeholder="what the meeting is about">
+                <input type="text" id="addcontactname" v-model="appointmentData.contact_name" class="form-control" />
+                <div v-if="errors.contact_name" class="error" aria-live="polite">{{ errors.contact_name }}</div>
               </b-col>
             </b-row>
 
-            <!-- TODO: Add time picker -->
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
-                <label class="col-form-label">
-                  <icon-component type="outlined" icon-name="watch" :size="24"></icon-component>
-                </label>
+                <label for="addphonenumber" class="col-form-label">Phone</label>
               </b-col>
               <b-col cols="10">
-                <!-- TODO: get the slot from the API -->
-                <select v-model="Timeslot" name="service" class="form-select" id="service">
-                  <option value="">10-12</option>
-                  <option value="in-person">14-16</option>
-                  <option value="group">8-10</option>
-                  <option value="virtual">11-13</option>
+                <input type="text" id="addphonenumber" v-model="appointmentData.mobile_number" class="form-control" />
+                <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
+              </b-col>
+            </b-row>
+
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2">
+                <label for="addemail" class="col-form-label">Email</label>
+              </b-col>
+              <b-col cols="10">
+                <input type="text" id="addemail" v-model="appointmentData.email_address" class="form-control" />
+                <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
+              </b-col>
+            </b-row>
+
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2">
+                <label for="addsubject" class="col-form-label">RE:</label>
+              </b-col>
+              <b-col cols="10">
+                <input type="text" id="addsubject" v-model="appointmentData.subject" class="form-control"
+                  placeholder="what the meeting is about" />
+                <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
+              </b-col>
+            </b-row>
+
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2">
+                <label for="addtime" class="col-form-label">Time</label>
+              </b-col>
+              <b-col cols="10">
+                <select v-model="selectedTime" @change="updateTimes" name="service" class="form-select" id="addtime">
+                  <option value="10-12">10:00 - 12:00</option>
+                  <option value="14-16">14:00 - 16:00</option>
+                  <option value="8-10">08:00 - 10:00</option>
+                  <option value="11-13">11:00 - 13:00</option>
                 </select>
+                <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
               </b-col>
             </b-row>
 
-
-
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
-                <label class="col-form-label">
+                <label for="addappointmenttype" class="col-form-label">
                   <icon-component type="outlined" icon-name="pencil" :size="24"></icon-component>
                 </label>
               </b-col>
               <b-col cols="10">
-                <select v-model="meetingType" name="service" class="form-select" id="service">
+                <select v-model="appointmentData.appointment_type" name="service" class="form-select"
+                  id="addappointmenttype">
                   <option value="">meeting type</option>
                   <option value="in-person">In-Person</option>
                   <option value="group">Group</option>
                   <option value="virtual">Virtual</option>
                 </select>
+                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
               </b-col>
             </b-row>
+
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
-                <label for="addtitle" class="col-form-label">
+                <label for="addlocation" class="col-form-label">
                   <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
-
                 </label>
               </b-col>
               <b-col cols="10">
-                <input type="text" id="addtitle" class="form-control" />
+                <input type="text" id="addlocation" v-model="appointmentData.location" class="form-control" />
+                <div v-if="errors.location" class="error" aria-live="polite">{{ errors.location }}</div>
               </b-col>
             </b-row>
+
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
-                <label class="col-form-label">
+                <label for="adddescription" class="col-form-label">
                   <icon-component type="outlined" icon-name="pencil-alt" :size="24"></icon-component>
                 </label>
               </b-col>
               <b-col cols="10">
-                <textarea name="description" id="description" class="form-control" rows="3" placeholder="Description"
-                  spellcheck="false"></textarea>
+                <textarea name="description" id="adddescription" v-model="appointmentData.description"
+                  class="form-control" rows="3" placeholder="Description" spellcheck="false"></textarea>
+                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
               </b-col>
             </b-row>
           </div>
         </div>
       </div>
     </form>
+
     <div class="d-flex align-items-center justify-content-center form-check">
       <input type="checkbox" class="form-check-input m-0" id="addconfirm2" name="confirm" value="Bike" />
       <label class="form-check-label ms-2" for="addconfirm2">Confirm Information</label>
     </div>
     <div class="modal-footer border-0">
       <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="close()">Discard Changes</button>
-      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="save()">Save</button>
+      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save"
+        @click="submitAppointment">Save</button>
     </div>
   </b-modal>
 
@@ -162,30 +188,44 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import moment from 'moment'
-
-// Library Components
-import flatpickr from 'vue-flatpickr-component'
-
-// Components
+import createAxiosInstance from '@/api/axios';
 import PageHeader from '@/components/custom/header/PageHeader.vue'
 import FullCalender from '@/components/custom/calender/FullCalender.vue'
+import moment from 'moment'
+
+const axiosInstance = createAxiosInstance();
+const errors = ref({ contact_name: '', email_address: '', start_time: '', mobile_number: '', subject: '', appointment_type: '', description: '' });
+const events = ref([]);
 const show = ref(false)
-const dateSelected = () => {
-  show.value = true
-}
-const save = () => {
-  // document.writeln('Form submitted')
-  show.value = false
-}
+const clickedDate = ref('');
+// Function to handle the dateClick event
+
+const formatDate = (date) => {
+  if (!date) return '';
+
+  const year = date.getFullYear().toString(); // Get last 2 digits of the year
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+  const day = date.getDate().toString().padStart(2, '0'); // Day of the month
+
+  return `${year}-${month}-${day}`;
+};
+
+const handleDateClick = (info) => {
+  // `info.date` gives the clicked date
+  clickedDate.value = info.date;
+  console.log('Clicked date:', clickedDate);
+
+  // Format the date and update appointmentData
+  const formattedDate = formatDate(clickedDate.value);
+  appointmentData.value.appointment_date = formattedDate;
+console.log('Formatted date:', formattedDate);
+  // Perform any other action, e.g., open a modal or add an event
+  show.value = true;
+};
+
 const close = () => {
   show.value = false
 }
-const startdate = ref('')
-const selectService = ref('')
-const enddate = ref('')
-const startTime = ref('')
-const endTime = ref('')
 // const show = ref(false)
 const dateOption = ref({
   mode: 'range'
@@ -195,154 +235,101 @@ const timeOption = ref({
   noCalendar: true,
   dateFormat: 'H:i'
 })
-
-
-
-
-// TODO: GET FROM API 
-const events = ref([
-  {
-    title: 'Click for Google',
-    url: 'http://google.com/',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-20, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    title: 'Long Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-18, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    color: 'purple'
-  },
-  {
-    title: 'Long Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-16, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    end: moment(new Date(), 'YYYY-MM-DD').add(-13, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    color: 'red',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)',
-    // display: 'background'
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-14, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    color: '#047685',
-    backgroundColor: 'rgba(4,118,133,0.2)',
-    textColor: 'rgba(4,118,133,1)',
-    borderColor: 'rgba(4,118,133,1)'
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-12, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(235,153,27,0.2)',
-    textColor: 'rgba(235,153,27,1)',
-    borderColor: 'rgba(235,153,27,1)'
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-10, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(206,32,20,0.2)',
-    textColor: 'rgba(206,32,20,1)',
-    borderColor: 'rgba(206,32,20,1)'
-  },
-  {
-    title: 'Birthday Party',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-8, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    title: 'Meeting',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-6, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    title: 'Birthday Party',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-5, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(235,153,27,0.2)',
-    textColor: 'rgba(235,153,27,1)',
-    borderColor: 'rgba(235,153,27,1)'
-  },
-  {
-    title: 'Birthday Party',
-    start: moment(new Date(), 'YYYY-MM-DD').add(-2, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(235,153,27,0.2)',
-    textColor: 'rgba(235,153,27,1)',
-    borderColor: 'rgba(235,153,27,1)'
-  },
-
-  {
-    title: 'Meeting',
-    start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgb(206, 32, 20)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    title: 'Click for Google',
-    url: 'http://google.com/',
-    start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T06:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T07:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    title: 'Birthday Party',
-    start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T08:30:00.000Z',
-    backgroundColor: 'rgba(235,153,27,0.2)',
-    // textColor: 'rgba(235,153,27,1)',
-    borderColor: 'rgba(235,153,27,1)',
-    color: 'yellow',   // an option!
-    textColor: 'black' // an option!
-  },
-  {
-    title: 'Doctor Meeting',
-    start: moment(new Date(), 'YYYY-MM-DD').add(0, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(235,153,27,0.2)',
-    textColor: 'rgba(235,153,27,1)',
-    borderColor: 'rgba(235,153,27,1)',
-  },
-  {
-    title: 'All Day Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(1, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)',
-    
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(8, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
-  },
-  {
-    groupId: '999',
-    title: 'Repeating Event',
-    start: moment(new Date(), 'YYYY-MM-DD').add(10, 'days').format('YYYY-MM-DD') + 'T05:30:00.000Z',
-    backgroundColor: 'rgba(58,87,232,0.2)',
-    textColor: 'rgba(58,87,232,1)',
-    borderColor: 'rgba(58,87,232,1)'
+// Local variable for the selected time range
+const selectedTime = ref('');
+// Function to update start_time and end_time based on the selected option
+const updateTimes = () => {
+  if (selectedTime.value) {
+    const times = selectedTime.value.split('-');
+    appointmentData.value.start_time = `${times[0]}:00`;  // Set the start time (e.g., "10:00")
+    appointmentData.value.end_time = `${times[1]}:00`;    // Set the end time (e.g., "12:00")
+  } else {
+    appointmentData.value.start_time = null;
+    appointmentData.value.end_time = null;
   }
-],
-)
-</script>
+};
+// Define your form data
+const appointmentData = ref({
+  user_id: "212408001",
+  appointment_date: "",
+  start_time: "",
+  end_time: "",
+  contact_name: "",
+  email_address: "",
+  mobile_number: "",
+  subject: "",
+  appointment_type: ""
+});
 
-<style></style>
+onMounted(() => {
+  getBookedSlots();
+});
+
+// Function to send the POST request
+const submitAppointment = async () => {
+  try {
+    // isLoading.value = true;
+    console.log('Appointment data:', appointmentData.value);
+    const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value, {
+    });
+    console.log('Response:', response.data);
+    alert(response.data.dataPayload.data.message);
+
+    close();
+    // Handle the success response here (e.g., showing a success message)
+  } catch (error) {
+    console.error('Error submitting appointment:');
+    if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
+
+      const errorDetails = error.response.data.errorPayload.errors;
+      // console.log("Validation error details:", errorDetails);
+      console.log('Errors:', errors.value.email_address);
+      console.log('Errors:', errors.value.start_time);
+      errors.value.contact_name = errorDetails.contact_name || '';
+      errors.value.email_address = errorDetails.email_address || '';
+      errors.value.mobile_number = errorDetails.mobile_number || '';
+      errors.value.subject = errorDetails.subject || '';
+      errors.value.appointment_type = errorDetails.appointment_type || '';
+      errors.value.description = errorDetails.description || '';
+      errors.value.start_time = errorDetails.start_time || '';
+    }
+    // console.error('Error submitting appointment:', error);
+    // Handle the error response here (e.g., showing an error message)
+  }
+};
+//function to get booked slots
+//run the function on page load
+const getBookedSlots = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/appointments');
+
+    const apiData = response.data.dataPayload.data;
+
+    events.value = apiData.map(item => ({
+      title: item.contact_name + ' - ' + item.subject, // Combining contact name and subject
+      start: moment(item.appointment_date + 'T' + item.start_time,).format(), // Concatenate date and start time
+      end: item.appointment_date + 'T' + item.end_time,     // Concatenate date and end time
+      backgroundColor: 'rgba(58,87,232,0.2)',  // Set a default background color
+      textColor: 'rgba(58,87,232,1)',          // Set text color
+      borderColor: 'rgba(58,87,232,1)',        // Set border color
+      extendedProps: {                         // Add additional information as extendedProps
+        email: item.email_address,
+        mobile: item.mobile_number,
+        appointmentType: item.appointment_type,
+        status: item.status
+      }
+    }));
+    // Handle the success response here (e.g., showing a success message)
+  } catch (error) {
+    console.error('Error submitting appointment:', error);
+    // Handle the error response here (e.g., showing an error message)
+  }
+};
+// console.log('Events2:', events3);
+</script>
+<style scoped>
+.error {
+  color: red;
+  font-size: 0.9em;
+}
+</style>

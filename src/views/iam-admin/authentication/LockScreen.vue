@@ -18,7 +18,7 @@ const onSubmit = async () => {
   try {
     isLoading.value = true;
 
-    const response = await axiosInstance.post('/v1/iam/auth/login', {
+    const response = await axiosInstance.post('/v1/auth/login', {
       username,
       password: password.value,
     });

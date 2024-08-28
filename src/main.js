@@ -13,6 +13,7 @@ import BootstrapVueNext from 'bootstrap-vue-next'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { fas, faFolder, faFolderOpen, faFile  } from '@fortawesome/free-solid-svg-icons'
+import '@fortawesome/fontawesome-free/css/all.css'
 library.add(fas, faFolder, faFolderOpen, faFile)
 // Custom Components & Directives
 import globalComponent from './plugins/global-components'

@@ -1,4 +1,5 @@
-// src/composables/useAutoLogout.js
+// 
+
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -8,14 +9,18 @@ export function useAutoLogout() {
     let warningTimer = null;
     let logoutTimer = null;
 
+    const WARNING_TIMEOUT = 15 * 1000; // 15 seconds for demonstration
+    const LOGOUT_TIMEOUT = 16 * 1000; // 16 seconds for demonstration
     const events = ['click', 'mousemove', 'mousedown', 'scroll', 'keypress', 'load'];
 
     const setTimers = () => {
+        // Set the warning timer
         warningTimer = setTimeout(() => {
             warningZone.value = true;
-        }, 15 * 60 * 1000); // 8 seconds for demonstration
+        }, WARNING_TIMEOUT);
 
-        logoutTimer = setTimeout(logoutUser, 16 * 60 * 1000); // 15 seconds for demonstration
+        // Set the logout timer
+        logoutTimer = setTimeout(logoutUser, LOGOUT_TIMEOUT);
 
         warningZone.value = false;
     };
@@ -24,14 +29,14 @@ export function useAutoLogout() {
         // Clear user token in local storage
         localStorage.removeItem('user.token');
         // Redirect to the lock screen or login page
-        router.push('/Lockscreen')
-        // window.location.href = '/lockscreen'; // Adjust the URL as needed
+        router.push('/Lockscreen');
     };
 
     const resetTimer = () => {
+        // Clear both timers
         clearTimeout(warningTimer);
         clearTimeout(logoutTimer);
-        setTimers();
+        setTimers(); // Reset the timers after user activity
     };
 
     // Setup event listeners when the component is mounted
@@ -47,7 +52,8 @@ export function useAutoLogout() {
         events.forEach((event) => {
             window.removeEventListener(event, resetTimer);
         });
-        resetTimer(); // Clear active timers
+        clearTimeout(warningTimer); // Clear active timers during unmount
+        clearTimeout(logoutTimer);
     });
 
     return {

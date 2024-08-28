@@ -11,16 +11,7 @@
         <span class="sidebar-profile-username">@musk</span>
       </div>
       <div class="sidebar-profile-action d-flex justify-content-center gap-1">
-        <b-button variant="primary" class="btn-icon btn-action" size="sm" pill>
-          <span class="btn-inner">
-            <icon-component type="dual-tone" icon-name="cart"></icon-component>
-          </span>
-        </b-button>
-        <b-button variant="primary" class="btn-icon btn-action" size="sm" pill>
-          <span class="btn-inner">
-            <icon-component type="dual-tone" icon-name="heart"></icon-component>
-          </span>
-        </b-button>
+
         <b-button variant="primary" class="btn-icon btn-action" size="sm" pill>
           <span class="btn-inner">
             <icon-component type="dual-tone" icon-name="bell"></icon-component>
