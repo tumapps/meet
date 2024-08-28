@@ -135,15 +135,26 @@ onMounted(async () => {
 
 const axiosInstance = AxiosInstance();
 const appointments = ref([]);
-const modalRef = ref(null);  // Reference to the modal element
- // Will hold the Bootstrap modal instance
+// const modalRef = ref(null);  // Reference to the modal element
+// Will hold the Bootstrap modal instance
 //fetch appointments and slots and unavailable slots
 const getSlot = async () => {
     try {
         const response = await axiosInstance.get('v1/scheduler/appointments');
         console.log(response.data);
-        appointments.value = response.data.dataPayload.data;
-        console.log("appointments", appointments);
+
+        const apiData = response.data.dataPayload.data;
+
+        tableData.value = apiData.map(item => ({
+            name: item.contact_name,
+            contact: item.appointment_type,
+            date: formatTime(item.start_time), // Assuming date should show start_time
+            time: formatTime(item.end_time),
+            status: {
+                color: getStatusColor(item.statusLabel),
+                status: item.statusLabel.toLowerCase()
+            }
+        }));
     } catch (error) {
         console.error(error);
     }
