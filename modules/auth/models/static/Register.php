@@ -5,6 +5,7 @@ namespace auth\models\static;
 use Yii;
 use yii\base\Model;
 use auth\models\User;
+use auth\models\Profiles;
 use helpers\traits\Keygen;
 
 class Register extends Model

@@ -304,5 +304,5 @@
      * )
      *),
      */
-     'DELETE logout'     => 'auth/refresh'
+     'DELETE refresh'     => 'auth/refresh'
     ];
