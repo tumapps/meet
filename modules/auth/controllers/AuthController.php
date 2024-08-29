@@ -11,40 +11,40 @@ use auth\models\static\PasswordResetRequest;
 use auth\models\RefreshToken;
 use auth\models\searches\UserSearch;
 use auth\models\Profiles;
+use yii\base\InvalidArgumentException;
 
 class AuthController extends \helpers\ApiController
 {
 
 	public function actionIndex()
-    {
-        // Yii::$app->user->can('schedulerAvailabilityList');
-        $searchModel = new UserSearch();
-        $search = $this->queryParameters(Yii::$app->request->queryParams,'UserSearch');
-        $dataProvider = $searchModel->search($search);
-        return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
-    }
+	{
+		// Yii::$app->user->can('schedulerAvailabilityList');
+		$searchModel = new UserSearch();
+		$search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
+		$dataProvider = $searchModel->search($search);
+		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
+	}
 
-    public function actionGetUsers()
-    {
-	    $profiles = Profiles::find()->all();
+	public function actionGetUsers()
+	{
+		$profiles = Profiles::find()->all();
 
-	    if (empty($profiles)) {
-	        return $this->errorResponse(['message' => 'No profiles found']);
-	    }
-	    $formattedProfiles = [];
-	    foreach ($profiles as $profile) {
-	        $formattedProfiles[] = [
-	            'user_id' => $profile->user_id,
-	            'email' => $profile->email_address,
-	            'first_name' => $profile->first_name,
-	            'middle_name' => $profile->middle_name,
-	            'last_name' => $profile->last_name,
-	            'mobile_number' => $profile->mobile_number
-	        ];
-	    }
-	    return $this->payloadResponse(['profiles' => $formattedProfiles]);
-
-    }
+		if (empty($profiles)) {
+			return $this->errorResponse(['message' => 'No profiles found']);
+		}
+		$formattedProfiles = [];
+		foreach ($profiles as $profile) {
+			$formattedProfiles[] = [
+				'user_id' => $profile->user_id,
+				'email' => $profile->email_address,
+				'first_name' => $profile->first_name,
+				'middle_name' => $profile->middle_name,
+				'last_name' => $profile->last_name,
+				'mobile_number' => $profile->mobile_number
+			];
+		}
+		return $this->payloadResponse(['profiles' => $formattedProfiles]);
+	}
 
 	public function actionLogin()
 	{
@@ -64,7 +64,7 @@ class AuthController extends \helpers\ApiController
 		$model = new Register();
 		$dataRequest['Register'] = Yii::$app->request->getBodyParams();
 		if ($model->load($dataRequest)) {
-			if($model->save()){
+			if ($model->save()) {
 				return $this->payloadResponse(['username' => $dataRequest['Register']['username']], ['statusCode' => 200, 'message' => 'Created Successfully']);
 			}
 			return $this->errorResponse($model->getErrors());
@@ -79,15 +79,13 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->validate()) {
 			return $model->sendEmail();
 			if ($model->sendEmail()) {
-            	return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
-	        } else {
-	            return $this->errorResponse(['message' => 'Unable to send password reset email. Please try again later.']);
-	        }
-	    
+				return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
+			} else {
+				return $this->errorResponse(['message' => 'Unable to send password reset email. Please try again later.']);
+			}
 		}
 
 		return $this->errorResponse($model->getErrors());
-
 	}
 
 	public function actionResetPassword()
@@ -95,21 +93,21 @@ class AuthController extends \helpers\ApiController
 		$dataRequest['PasswordReset'] = Yii::$app->request->getBodyParams();
 		$token = $dataRequest['PasswordReset']['token'] ?? null;
 
-		if(empty($token)){
+		if (empty($token)) {
 			return $this->errorResponse(['message' => ['missing password reset token']]);
 		}
-		
+
 		try {
-        	$model = new PasswordReset($token);
-    	} catch (InvalidArgumentException $e) {
-        	return $this->errorResponse(['message' => $e->getMessage()]);
-    	}
+			$model = new PasswordReset($token);
+		} catch (InvalidArgumentException $e) {
+			return $this->errorResponse(['message' => $e->getMessage()]);
+		}
 
 		if ($model->load($dataRequest) && $model->validate()) {
-	        if ($model->resetPassword()) {
-	            return $this->payloadResponse(['message' => 'Password updated successfully']);
-	        }
-    	}
+			if ($model->resetPassword()) {
+				return $this->payloadResponse(['message' => 'Password updated successfully']);
+			}
+		}
 
 		return $this->errorResponse($model->getErrors());
 	}
@@ -117,66 +115,66 @@ class AuthController extends \helpers\ApiController
 
 	public function actionMe()
 	{
-	    $user = Yii::$app->user->identity;
-	    if (!$user) {
-	        return $this->errorResponse(['errorMassage' => ['You must be logged in to view your profile']]);
-	    }
+		$user = Yii::$app->user->identity;
+		if (!$user) {
+			return $this->errorResponse(['errorMassage' => ['You must be logged in to view your profile']]);
+		}
 
-	    if (Yii::$app->request->isPut) {
-	        $profile = $user->profile;
-	        $dataRequest = Yii::$app->request->getBodyParams();
+		if (Yii::$app->request->isPut) {
+			$profile = $user->profile;
+			$dataRequest = Yii::$app->request->getBodyParams();
 
-	        if ($profile->load($dataRequest, '')) { 
-	            if (!$profile->validate()) {
-	                return $this->errorResponse($profile->getErrors());
-	            }
+			if ($profile->load($dataRequest, '')) {
+				if (!$profile->validate()) {
+					return $this->errorResponse($profile->getErrors());
+				}
 
-	            if ($profile->save(false)) {
-	                return $this->payloadResponse(['message' => 'Profile updated successfully', 'profile' => $profile], ['statusCode' => 200]);
-	            } else {
-	                return $this->errorResponse(['errorMassage' => ['Failed to update profile']]);
-	            }
-	        } else {
-	            return $this->errorResponse(['errorMassage' => ['Failed to load profile data']]);
-	        }
-	    }
+				if ($profile->save(false)) {
+					return $this->payloadResponse(['message' => 'Profile updated successfully', 'profile' => $profile], ['statusCode' => 200]);
+				} else {
+					return $this->errorResponse(['errorMassage' => ['Failed to update profile']]);
+				}
+			} else {
+				return $this->errorResponse(['errorMassage' => ['Failed to load profile data']]);
+			}
+		}
 
-	    return $this->payloadResponse($user->profile, ['statusCode' => 201]);
+		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
 	public function getToken(): string
-    {
-        /** @var Jwt $jwt */
-        $jwt = Yii::$app->jwt;
-        if (!$jwt->key) {
-            throw new \yii\web\ServerErrorHttpException(Yii::t('app', 'The JWT secret must be configured first.'));
-        }
+	{
+		/** @var Jwt $jwt */
+		$jwt = Yii::$app->jwt;
+		if (!$jwt->key) {
+			throw new \yii\web\ServerErrorHttpException(Yii::t('app', 'The JWT secret must be configured first.'));
+		}
 
-        $signer = new \Lcobucci\JWT\Signer\Hmac\Sha256();
-        $time = time();
-        $token = $jwt->getBuilder()
-            ->setIssuer(Yii::$app->params['jwt.issuer']) 
-            ->setAudience(Yii::$app->params['jwt.audience'])
-            ->setId(Yii::$app->params['jwt.id'], true) 
-            ->setIssuedAt(time())
-            ->setExpiration($time + 3600 * 72) 
-            ->set('user_id', Yii::$app->user->identity->id)  
-            ->set('username', Yii::$app->user->identity->username)
-            ->sign($signer, $jwt->key) 
-            ->getToken(); 
+		$signer = new \Lcobucci\JWT\Signer\Hmac\Sha256();
+		$time = time();
+		$token = $jwt->getBuilder()
+			->setIssuer(Yii::$app->params['jwt.issuer'])
+			->setAudience(Yii::$app->params['jwt.audience'])
+			->setId(Yii::$app->params['jwt.id'], true)
+			->setIssuedAt(time())
+			->setExpiration($time + 60)
+			->set('user_id', Yii::$app->user->identity->id)
+			->set('username', Yii::$app->user->identity->username)
+			->sign($signer, $jwt->key)
+			->getToken();
 
-        return (string)$token;
-    }
-	
+		return (string)$token;
+	}
+
 	public function actionRefresh()
 	{
 		$refreshToken = Yii::$app->request->cookies->getValue('refresh-token', false);
 		if (!$refreshToken) {
 			return $this->errorResponse([
-					'statusCode' => [
-						'440'
-					]
-				]);
+				'statusCode' => [
+					'440'
+				]
+			]);
 		}
 		$userRefreshToken = RefreshToken::findOne(['token' => $refreshToken]);
 		if (Yii::$app->request->getMethod() == 'POST') {
@@ -207,10 +205,10 @@ class AuthController extends \helpers\ApiController
 			return $this->toastResponse(['statusCode' => 200, 'message' => 'Logout successful']);
 		}
 		return $this->errorResponse([
-					'statusCode' => [
-						'500'
-					]
-				]);
+			'statusCode' => [
+				'500'
+			]
+		]);
 	}
 
 
@@ -233,10 +231,10 @@ class AuthController extends \helpers\ApiController
 		if (!$userRefreshToken->save(false)) {
 			// return $this->errorResponse(440);
 			return $this->errorResponse([
-					'statusCode' => [
-						'440'
-					]
-				]);
+				'statusCode' => [
+					'440'
+				]
+			]);
 		}
 		// Send the refresh-token to the user in a HttpOnly cookie that Javascript can never read and that's limited by path
 		Yii::$app->response->cookies->add(new \yii\web\Cookie([
@@ -249,6 +247,4 @@ class AuthController extends \helpers\ApiController
 		]));
 		return $userRefreshToken;
 	}
-
-
 }
