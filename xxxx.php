@@ -1,45 +1,31 @@
  <?php
 
-  public function save()
+
+ public function actionMe()
     {
-        $transaction = Yii::$app->db->beginTransaction();
-        
-        try {
-            $uid = $this->uid('USERS', true);
-            $user = new User();
-            $user->user_id = $uid;
-            $user->username = $this->username;
-            $user->setPassword($this->password);
-            $user->generateAuthKey();
-
-            if ($this->validate() && $user->save(false)) {
-                $profile = new Profiles();
-                $profile->user_id = $user->user_id;
-                $profile->first_name = $this->first_name;
-                $profile->middle_name = $this->middle_name;
-                $profile->last_name = $this->last_name;
-                $profile->full_name = $this->full_name;
-                $profile->email_address = $this->email_address;
-                $profile->mobile_number = $this->mobile_number;
-
-                if ($profile->validate() && $profile->save(false)) {
-                    $transaction->commit();
-                    return $user;
-                } else {
-                    $transaction->rollBack();
-                    $this->addErrors($profile->getErrors());
-                    return false;
-                }
-            } else {
-                $transaction->rollBack();
-                return false;
-            }
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            return 'Error occured while creating user' . $e->getMessage();
+        $user = Yii::$app->user->identity;
+        if(!$user){
+            return $this->payloadResponse(['message' => 'You must be logged in to view Your profile']);
         }
+
+        if(Yii::$app->request->getMethod() == 'PUT'){
+
+            $dataRequest['Profile'] = Yii::$app->request->getBodyParams();
+            $id = $dataRequest['Profile']['profile_id'];
+            $profile = new Profiles();
+            $model = $profile->findModel($id);
+
+            if($model->load($dataRequest) && $model->save()) {
+                return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Profile updated successfully']);
+            }
+            
+            return $this->errorResponse($model->getErrors());
+        }
+
+        return $this->payloadResponse($user->profile, ['statusCode' => 201]);
     }
 
+  
  <?php
 
 

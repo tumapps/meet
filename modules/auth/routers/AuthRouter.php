@@ -285,7 +285,7 @@
      * )
      *),
      */
-    'POST profile-update'         => 'auth/me',
+    'PUT profile-update'         => 'auth/me',
 
 
     /**

@@ -118,8 +118,30 @@ class AuthController extends \helpers\ApiController
 	{
 		$user = Yii::$app->user->identity;
 		if(!$user){
-			return $this->payloadResponse(['message' => 'You must be logged in to view Your profile']);
+			return $this->errorResponse(['errorMassage' => ['You must be logged in to view Your profile']]);
 		}
+
+		if(Yii::$app->request->getMethod() == 'PUT'){
+
+			$profile = $user->profile;
+			$dataRequest['Profile'] = Yii::$app->request->getBodyParams();
+
+			if ($profile->load($dataRequest)) {
+
+				if(!$profile->validate()){
+					return $this->errorResponse($profile->getErrors());
+				}
+
+	            if ($profile->save()) {
+	                return $this->payloadResponse(['message' => 'Profile updated successfully', 'profile' => $profile], ['statusCode' => 200]);
+	            } else {
+	                return $this->errorResponse(['errorMassage' => ['Failed To Update Profile']]);
+	            }
+        	}
+
+        	return $this->errorResponse($model->getErrors());
+		}
+
 		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
