@@ -114,35 +114,34 @@ class AuthController extends \helpers\ApiController
 		return $this->errorResponse($model->getErrors());
 	}
 
+
 	public function actionMe()
 	{
-		$user = Yii::$app->user->identity;
-		if(!$user){
-			return $this->errorResponse(['errorMassage' => ['You must be logged in to view Your profile']]);
-		}
+	    $user = Yii::$app->user->identity;
+	    if (!$user) {
+	        return $this->errorResponse(['errorMassage' => ['You must be logged in to view your profile']]);
+	    }
 
-		if(Yii::$app->request->getMethod() == 'PUT'){
+	    if (Yii::$app->request->isPut) {
+	        $profile = $user->profile;
+	        $dataRequest = Yii::$app->request->getBodyParams();
 
-			$profile = $user->profile;
-			$dataRequest['Profile'] = Yii::$app->request->getBodyParams();
+	        if ($profile->load($dataRequest, '')) { 
+	            if (!$profile->validate()) {
+	                return $this->errorResponse($profile->getErrors());
+	            }
 
-			if ($profile->load($dataRequest)) {
-
-				if(!$profile->validate()){
-					return $this->errorResponse($profile->getErrors());
-				}
-
-	            if ($profile->save()) {
+	            if ($profile->save(false)) {
 	                return $this->payloadResponse(['message' => 'Profile updated successfully', 'profile' => $profile], ['statusCode' => 200]);
 	            } else {
-	                return $this->errorResponse(['errorMassage' => ['Failed To Update Profile']]);
+	                return $this->errorResponse(['errorMassage' => ['Failed to update profile']]);
 	            }
-        	}
+	        } else {
+	            return $this->errorResponse(['errorMassage' => ['Failed to load profile data']]);
+	        }
+	    }
 
-        	return $this->errorResponse($model->getErrors());
-		}
-
-		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
+	    return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
 	public function getToken(): string
