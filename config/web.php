@@ -130,10 +130,10 @@ $config = [
                     'extraPatterns' => $wrapper->load('routes'),
                     'tokens' =>  $wrapper->load('tokens'),
                 ],
-                'POST v1/auth/login' => 'auth/auth/login',
-                'POST v1/auth/user' => 'auth/auth/me',
-                'POST v1/auth/refresh' => 'auth/auth/refresh',
-                'GET v1/auth/default' => 'auth/default/login',
+                // 'POST v1/auth/login' => 'auth/auth/login',
+                // 'POST v1/auth/user' => 'auth/auth/me',
+                // 'POST v1/auth/refresh' => 'auth/auth/refresh',
+                // 'GET v1/auth/default' => 'auth/default/login',
             ],
 
             

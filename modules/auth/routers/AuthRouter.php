@@ -3,7 +3,7 @@
 
      /**
      * @OA\Post(
-     * path="/auth/auth/login",
+     * path="/auth/login",
      * summary="Authenticates user based on the credentials provided",
      * security={{}},
      * tags={"Authentication"},
@@ -51,7 +51,7 @@
 
     /**
      * @OA\Post(
-     * path="/auth/auth/register",
+     * path="/auth/register",
      * summary="Authenticates user based on the credentials provided",
      * security={{}},
      * tags={"Authentication"},
@@ -104,16 +104,16 @@
 
      /**
      * @OA\Post(
-     * path="/auth/password-rseset",
-     * summary="resets user password",
+     * path="/auth/password-reset-request",
+     * summary="request for a password reset for user",
      * security={{}},
      * tags={"Authentication"},
      * @OA\RequestBody(
      *    required=true,
-     *    description="Provide Email",
+     *    description="Provide Username",
      *    @OA\JsonContent(
-     *       required={"Email"},
-     *              @OA\Property(property="email", type="string",title="Email", example="admin@gmail.com"),
+     *       required={"Username"},
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
      *    ),
      * ),
      * @OA\Response(
@@ -145,13 +145,58 @@
      *),
      */
     'POST password-reset-request'  => 'auth/password-reset-request',
+
+
+    /**
+     * @OA\Post(
+     * path="/auth/reset-password",
+     * summary="resets password",
+     * security={{}},
+     * tags={"Authentication"},
+     * @OA\RequestBody(
+     *    required=true,
+     *    description="Provide Password, Comfirm Password",
+     *    @OA\JsonContent(
+     *       required={"Password", "Comfirm Password"},
+     *              @OA\Property(property="Password", type="string",title="Password", example="admin"),
+     *              @OA\Property(property="ComfirmPassword", type="string",title="Comfirm Password", example="admin"),
+     *    ),
+     * ),
+     * @OA\Response(
+     *    response=201,
+     *    description="Data payload",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="dataPayload", type="object",
+     *          @OA\Property(property="data", type="object",
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
+     *          ),
+     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
+     *          @OA\Property(property="toastTheme", type="string",example="success"),
+     *       )
+     *    )
+     * ),
+     * @OA\Response(
+     *    response=422,
+     *    description="Data Validation Error",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="errorPayload", type="object",
+     *          @OA\Property(property="errors", type="object",
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
+     *          ),
+     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
+     *          @OA\Property(property="toastTheme", type="string",example="danger"),
+     *       )
+     *    )
+     * )
+     *),
+     */
     'POST reset-password' => 'auth/reset-password',
 
 
 
     /**
      * @OA\Get(
-     * path="/auth/auth/me",
+     * path="/auth/me",
      * summary="Get the currently logged in user",
      * tags={"Authentication"},
      * @OA\Response(
@@ -175,7 +220,7 @@
 
     /**
      * @OA\Get(
-     * path="/auth/auth/refresh",
+     * path="/auth/refresh",
      * summary="Get the currently logged in user",
      * tags={"Authentication"},
      * @OA\Response(
@@ -191,12 +236,12 @@
      * )
      *),
      */
-    'GET refresh'         => 'auth/refresh',
+    'POST refresh'         => 'auth/refresh',
 
 
     /**
      * @OA\DELETE(
-     * path="/auth/auth/refresh",
+     * path="/auth/refresh",
      * summary="log out currently logged in user",
      * tags={"Authentication"},
      * @OA\Response(
