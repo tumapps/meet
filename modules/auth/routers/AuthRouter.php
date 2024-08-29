@@ -244,7 +244,7 @@
     /**
      * @OA\Get(
      * path="/auth/me",
-     * summary="Get the currently logged in user",
+     * summary="Get the currently logged in user profile details",
      * tags={"Authentication"},
      * @OA\Response(
      *    response=201,
@@ -262,7 +262,30 @@
      * )
      *),
      */
-    'GET auth/me'         => 'auth/me',
+    'GET profile-view'         => 'auth/me',
+
+    /**
+     * @OA\Get(
+     * path="/auth/me",
+     * summary="Updates user profile details",
+     * tags={"Authentication"},
+     * @OA\Response(
+     *    response=201,
+     *    description="Data payload",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="dataPayload", type="object",
+     *          @OA\Property(property="data", type="object",
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
+     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
+     *          ),
+     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
+     *          @OA\Property(property="toastTheme", type="string",example="success"),
+     *       )
+     *    )
+     * )
+     *),
+     */
+    'POST profile-update'         => 'auth/me',
 
 
     /**

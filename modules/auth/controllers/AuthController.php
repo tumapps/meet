@@ -117,6 +117,9 @@ class AuthController extends \helpers\ApiController
 	public function actionMe()
 	{
 		$user = Yii::$app->user->identity;
+		if(!$user){
+			return $this->payloadResponse(['message' => 'You must be logged in to view Your profile']);
+		}
 		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
