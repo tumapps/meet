@@ -24,14 +24,14 @@ use Yii;
 
 class Appointments extends BaseModel
 {
-    const STATUS_PENDING = 1;
+    const STATUS_ACTIVE = 1;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULED = 3;
     const STATUS_CANCELLED = 4;
 
 
     protected static $statusLabels = [
-        self::STATUS_PENDING => 'Pending',
+        self::STATUS_ACTIVE => 'Active',
         self::STATUS_CONFIRMED => 'Confirmed',
         self::STATUS_RESCHEDULED => 'Rescheduled',
         self::STATUS_CANCELLED => 'Cancelled',

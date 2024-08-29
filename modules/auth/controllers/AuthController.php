@@ -9,9 +9,42 @@ use auth\models\static\Register;
 use auth\models\static\PasswordReset;
 use auth\models\static\PasswordResetRequest;
 use auth\models\RefreshToken;
+use auth\models\searches\UserSearch;
+use auth\models\Profiles;
 
 class AuthController extends \helpers\ApiController
 {
+
+	public function actionIndex()
+    {
+        // Yii::$app->user->can('schedulerAvailabilityList');
+        $searchModel = new UserSearch();
+        $search = $this->queryParameters(Yii::$app->request->queryParams,'UserSearch');
+        $dataProvider = $searchModel->search($search);
+        return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
+    }
+
+    public function actionGetUsers()
+    {
+	    $profiles = Profiles::find()->all();
+
+	    if (empty($profiles)) {
+	        return $this->errorResponse(['message' => 'No profiles found']);
+	    }
+	    $formattedProfiles = [];
+	    foreach ($profiles as $profile) {
+	        $formattedProfiles[] = [
+	            'user_id' => $profile->user_id,
+	            'email' => $profile->email_address,
+	            'first_name' => $profile->first_name,
+	            'middle_name' => $profile->middle_name,
+	            'last_name' => $profile->last_name,
+	            'mobile_number' => $profile->mobile_number
+	        ];
+	    }
+	    return $this->payloadResponse(['profiles' => $formattedProfiles]);
+
+    }
 
 	public function actionLogin()
 	{
@@ -30,10 +63,12 @@ class AuthController extends \helpers\ApiController
 	{
 		$model = new Register();
 		$dataRequest['Register'] = Yii::$app->request->getBodyParams();
-		if ($model->load($dataRequest) && $model->save()) {
-			return $this->payloadResponse(['username' => $dataRequest['Register']['username']], ['statusCode' => 200, 'message' => 'Created Successfully']);
+		if ($model->load($dataRequest)) {
+			if($model->save()){
+				return $this->payloadResponse(['username' => $dataRequest['Register']['username']], ['statusCode' => 200, 'message' => 'Created Successfully']);
+			}
+			return $this->errorResponse($model->getErrors());
 		}
-		return $this->errorResponse($model->getErrors());
 	}
 
 	public function actionPasswordResetRequest()
@@ -129,7 +164,7 @@ class AuthController extends \helpers\ApiController
 					]
 				]);
 			}
-			$user = User::findIdentity($userRefreshToken->user_id);
+			$user = \auth\models\User::findIdentity($userRefreshToken->user_id);
 			if (empty($user)) {
 				$userRefreshToken->delete();
 				return $this->errorResponse([
@@ -147,7 +182,6 @@ class AuthController extends \helpers\ApiController
 			}
 			return $this->toastResponse(['statusCode' => 200, 'message' => 'Logout successful']);
 		}
-		// return $this->errorResponse(500);
 		return $this->errorResponse([
 					'statusCode' => [
 						'500'

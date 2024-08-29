@@ -1,6 +1,102 @@
  <?php
 
+  public function save()
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        
+        try {
+            $uid = $this->uid('USERS', true);
+            $user = new User();
+            $user->user_id = $uid;
+            $user->username = $this->username;
+            $user->setPassword($this->password);
+            $user->generateAuthKey();
+
+            if ($this->validate() && $user->save(false)) {
+                $profile = new Profiles();
+                $profile->user_id = $user->user_id;
+                $profile->first_name = $this->first_name;
+                $profile->middle_name = $this->middle_name;
+                $profile->last_name = $this->last_name;
+                $profile->full_name = $this->full_name;
+                $profile->email_address = $this->email_address;
+                $profile->mobile_number = $this->mobile_number;
+
+                if ($profile->validate() && $profile->save(false)) {
+                    $transaction->commit();
+                    return $user;
+                } else {
+                    $transaction->rollBack();
+                    $this->addErrors($profile->getErrors());
+                    return false;
+                }
+            } else {
+                $transaction->rollBack();
+                return false;
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return 'Error occured while creating user' . $e->getMessage();
+        }
+    }
+
  <?php
+
+
+
+public function save()
+    {
+         $transaction = Yii::$app->db->beginTransaction();
+    
+        try {
+            $uid = $this->uid('USERS', true);
+            $user = new User();
+            $user->user_id = $uid;
+            $user->username = $this->username;
+            $user->setPassword($this->password);
+            $user->generateAuthKey();
+
+            if (!$this->validate()) {
+                $transaction->rollBack();
+                return false;
+            }
+
+            if ($user->save(false)) {
+                $profile = new Profiles();
+                $profile->user_id = $user->user_id;
+                $profile->first_name = $this->first_name;
+                $profile->middle_name = $this->middle_name;
+                $profile->last_name = $this->last_name;
+                $profile->full_name = $this->full_name;
+                $profile->email_address = $this->email_address;
+                $profile->mobile_number = $this->mobile_number;
+
+                if (!$profile->validate()) {
+                    $transaction->rollBack();
+                    $this->addErrors($profile->getErrors());
+                    return false;
+                }
+
+                if ($profile->save(false)) {
+                    $transaction->commit();
+                    return $user;
+                } else {
+                    $transaction->rollBack();
+                    return false;
+                }
+            } else {
+                $transaction->rollBack();
+                return false;
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return 'Error occurred while creating user: ' . $e->getMessage();
+        }
+    }
+
+
+
+
 
 use yii\db\Migration;
 

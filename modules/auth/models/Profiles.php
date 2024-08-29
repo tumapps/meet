@@ -42,6 +42,7 @@ class Profiles extends \helpers\ActiveRecord
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
             [['mobile_number'], 'string', 'max' => 15],
+            ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 15 digits.'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
@@ -66,13 +67,4 @@ class Profiles extends \helpers\ActiveRecord
 		return parent::afterFind();
 	}
 
-    // public static function findUserByEmail($email)
-    // {
-    //     /* @var $user User */
-    //     $user = User::findOne([
-    //         'email_address' => $email,
-    //     ]);
-
-    //     return $user;
-    // }
 }
