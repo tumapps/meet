@@ -88,9 +88,14 @@ class Register extends Model
             $profile->full_name = $this->full_name;
             $profile->email_address = $this->email_address;
             $profile->mobile_number = $this->mobile_number;
-            $profile->save(false);
-
-            return $user;
+            // $profile->save(false);
+            if($profile->save(false)){
+                return $user;
+            }
+            else {
+                $user->delete();
+                return false;
+            }
 
         } else {
             return false;
