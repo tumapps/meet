@@ -26,13 +26,14 @@
 // null by default, thus nothing is generated.
 
 :root {
+  scroll-behavior: smooth;
   @if $font-size-root != null {
     @include font-size(var(--#{$prefix}root-font-size));
   }
 
   @if $enable-smooth-scroll {
     @media (prefers-reduced-motion: no-preference) {
-      scroll-behavior: smooth;
+      
     }
   }
 }
@@ -230,9 +231,10 @@ mark {
 sub,
 sup {
   position: relative;
-  @include font-size($sub-sup-font-size);
   line-height: 0;
   vertical-align: baseline;
+  @include font-size($sub-sup-font-size);
+
 }
 
 sub { bottom: -.25em; }
@@ -284,21 +286,24 @@ pre {
   margin-top: 0; // 1
   margin-bottom: 1rem; // 2
   overflow: auto; // 3
-  @include font-size($code-font-size);
   color: $pre-color;
+  @include font-size($code-font-size);
+ 
 
   // Account for some code outputs that place code tags in pre tags
   code {
-    @include font-size(inherit);
     color: inherit;
     word-break: normal;
+    @include font-size(inherit);
+
   }
 }
 
 code {
-  @include font-size($code-font-size);
   color: var(--#{$prefix}code-color);
   word-wrap: break-word;
+
+  @include font-size($code-font-size);
 
   // Streamline the style when inside anchors to avoid broken underline and more
   a > & {
@@ -308,15 +313,16 @@ code {
 
 kbd {
   padding: $kbd-padding-y $kbd-padding-x;
-  @include font-size($kbd-font-size);
   color: $kbd-color;
   background-color: $kbd-bg;
+  @include font-size($kbd-font-size);
   @include border-radius($border-radius-sm);
 
   kbd {
     padding: 0;
-    @include font-size(1em);
     font-weight: $nested-kbd-font-weight;
+    @include font-size(1em);
+
   }
 }
 
@@ -499,9 +505,10 @@ legend {
   width: 100%;
   padding: 0;
   margin-bottom: $legend-margin-bottom;
-  @include font-size($legend-font-size);
   font-weight: $legend-font-weight;
   line-height: inherit;
+  @include font-size($legend-font-size);
+
 
   + * {
     clear: left; // 2

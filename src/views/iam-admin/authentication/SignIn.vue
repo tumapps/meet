@@ -91,7 +91,7 @@ const onSubmit = async () => {
                 <input type="checkbox" class="form-check-input" id="customCheck11" />
                 <label class="form-check-label" for="customCheck11">Remember Me</label>
               </div>
-              <router-link :to="{ name: 'dashboard' }">Forgot password</router-link>
+              <router-link :to="{ name: 'reset-password' }">Forgot password</router-link>
             </div>
             <div class="text-center pb-3">
               <button v-if="!isLoading" type="submit" class="btn btn-primary" :disabled="isLoading"

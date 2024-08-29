@@ -25,9 +25,6 @@
     <footer-component></footer-component>
     <!-- Footer Component End Here -->
   </main>
-  <!-- Live Customizer Component Start Here -->
-  <setting-offcanvas></setting-offcanvas>
-  <!-- Live Customizer Component End Here-->
 </template>
 
 <script>
@@ -40,10 +37,9 @@ import HeaderComponent from '@/components/partials/HeaderComponent.vue'
 import SidebarComponent from '@/components/modules/appointment/partials/SidebarComponent.vue'
 import MainContentComponent from '@/components/partials/MainContentComponent.vue'
 import FooterComponent from '@/components/partials/FooterComponent.vue'
-import SettingOffcanvas from '@/components/setting/SettingOffcanvas.vue'
 import LoaderComponent from '@/components/custom/loader/LoaderComponent.vue'
 export default {
-  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent, SettingOffcanvas, LoaderComponent },
+  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent, LoaderComponent },
   setup() {
     const route = useRoute()
     const isBanner = computed(() => route.meta.isBanner)

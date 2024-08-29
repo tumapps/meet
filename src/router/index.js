@@ -11,21 +11,15 @@ export const defaultChildRoutes = (prefix) => [
   {
     path: '',
     name: prefix + '.dashboard', // Now it will become appointment.dashboard
-    meta: { auth: true, name: 'Home', isBanner: false },
+    meta: { requiresAuth: true, name: 'Home', isBanner: false },
     component: () => import('@/views/modules/appointment/DashboardPage.vue')
   },
   {
     path: 'book-appointment',
     name: prefix + '.book-appointment',
-    meta: { auth: true, name: 'Book Appointment' },
+    meta: { requiresAuth: true, name: 'Book Appointment' },
     component: () => import('@/views/modules/appointment/BookAppointment.vue')
   },
-  {
-    path: 'doctor-visit',
-    name: prefix + '.doctor-visit',
-    meta: { auth: true, name: 'Doctor Visit' },
-    component: () => import('@/views/modules/appointment/DoctorVisit.vue')
-  }
 ]
 
 const routes = [
@@ -38,6 +32,11 @@ const routes = [
     meta: {
       requiresAuth: true // Add meta field to indicate protected route
     }
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('@/views/iam-admin/authentication/ResetPassword.vue')
   },
   {
     path: "/:catchAll(.*)", // Update the wildcard route
@@ -70,6 +69,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem('user.token')
     if (token) {
@@ -79,9 +79,19 @@ router.beforeEach(async (to, from, next) => {
       // User is not authenticated, redirect to login
       next('/auth/login')
     }
+  } else if (to.path === '/auth/login') {
+    // Redirect authenticated users away from the login page
+    const token = localStorage.getItem('user.token');
+    if (token) {
+      // User is already authenticated, redirect to dashboard or home
+      next(''); // Adjust the redirect path as needed
+    } else {
+      // User is not authenticated, proceed to login page
+      next();
+    }
   } else {
     // Non-protected route, allow access
-    next()
+    next();
   }
 })
 

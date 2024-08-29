@@ -120,16 +120,22 @@ const AxiosInstance = () => {
         }
     )
 
+
     const logout = async () => {
         try {
-            await axiosInstance.delete('/v1/auth/refresh')
-            console.log('Sent logout request')
-            authStore.removeToken() // Update the store
+            await axiosInstance.delete('/v1/auth/refresh');
+            console.log('Sent logout request');
+            authStore.removeToken(); // Update the store
+            // Optionally, redirect after logout
+            router.push({ path: '/auth/login' });
         } catch (error) {
-            console.error('Error during logout:', error)
+            console.error('Error during logout:', error);
         }
-    }
-    axiosInstance.logout = logout
+    };
+
+
+    axiosInstance.logout = logout;
+    
     return axiosInstance
 }
 
