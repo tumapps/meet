@@ -33,6 +33,9 @@ const AxiosInstance = () => {
         async (config) => {
             console.log('Request Interceptor:', config)
             // Fetch the token from localStorage
+            if (config.headers['X-Exclude-Interceptor']) {
+                return config
+            }
             const token = localStorage.getItem('user.token')
             if (token) {
                 config.headers['Authorization'] = `Bearer ${token}`
@@ -60,6 +63,7 @@ const AxiosInstance = () => {
             const originalRequest = error.config
 
             const refreshAccessToken = async () => {
+                localStorage.removeItem('user.token');
                 try {
                     const response = await axiosInstance.post('/v1/auth/refresh')
                     const newToken = response.data?.dataPayload.data.token
@@ -109,7 +113,9 @@ const AxiosInstance = () => {
                 }
                 if (statusCode === 440) {
                     console.error('Session expired or token issue. Handle accordingly.')
+                    localStorage.removeItem('user.token');
                     router.push({ path: `/auth/login` })
+                    
                     return Promise.reject(error)
                 } else if (statusCode === !422) {
                     router.push({ path: `/error/${statusCode}` })

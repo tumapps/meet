@@ -6,7 +6,7 @@
           <h3 class="mb-4 text-left">Finish:</h3>
         </div>
         <div class="col-5">
-          <h2 class="steps">Step 4 - 4</h2>
+          <h2 class="steps">Step 3 - 3</h2>
         </div>
       </b-row>
       <br /><br />
@@ -25,8 +25,11 @@
       </b-row>
     </div>
   </fieldset>
+  <button @click="routerKey.push('/')" class="btn btn-dark previous action-button-previous float-end me-1" value="Previous">Home</button>
+
 </template>
 <script>
+
 export default {
   name: 'FinishComponent'
 }

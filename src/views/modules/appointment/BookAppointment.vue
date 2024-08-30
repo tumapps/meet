@@ -1,3 +1,137 @@
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import createAxiosInstance from '@/api/axios';
+import PageHeader from '@/components/custom/header/PageHeader.vue'
+import FullCalender from '@/components/custom/calender/FullCalender.vue'
+import moment from 'moment'
+
+const axiosInstance = createAxiosInstance();
+const errors = ref({ contact_name: '', email_address: '', start_time: '', mobile_number: '', subject: '', appointment_type: '', description: '' });
+const events = ref([]);
+const show = ref(false)
+const clickedDate = ref('');
+// Function to handle the dateClick event
+
+const formatDate = (date) => {
+  if (!date) return '';
+
+  const year = date.getFullYear().toString(); // Get last 2 digits of the year
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
+  const day = date.getDate().toString().padStart(2, '0'); // Day of the month
+
+  return `${year}-${month}-${day}`;
+};
+
+const handleDateClick = (info) => {
+  // `info.date` gives the clicked date
+  clickedDate.value = info.date;
+  console.log('Clicked date:', clickedDate);
+
+  // Format the date and update appointmentData
+  const formattedDate = formatDate(clickedDate.value);
+  appointmentData.value.appointment_date = formattedDate;
+console.log('Formatted date:', formattedDate);
+  // Perform any other action, e.g., open a modal or add an event
+  show.value = true;
+};
+
+const close = () => {
+  show.value = false
+}
+// const show = ref(false)
+const dateOption = ref({
+  mode: 'range'
+})
+const timeOption = ref({
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: 'H:i'
+})
+// Local variable for the selected time range
+const selectedTime = ref('');
+// Function to update start_time and end_time based on the selected option
+const updateTimes = () => {
+  if (selectedTime.value) {
+    const times = selectedTime.value.split('-');
+    appointmentData.value.start_time = `${times[0]}:00`;  // Set the start time (e.g., "10:00")
+    appointmentData.value.end_time = `${times[1]}:00`;    // Set the end time (e.g., "12:00")
+  } else {
+    appointmentData.value.start_time = null;
+    appointmentData.value.end_time = null;
+  }
+};
+// Define your form data
+const appointmentData = ref({
+  user_id: "212408001",
+  appointment_date: "",
+  start_time: "",
+  end_time: "",
+  contact_name: "",
+  email_address: "",
+  mobile_number: "",
+  subject: "",
+  appointment_type: ""
+});
+
+//time range as slots for the appointment from the api
+const slots = ref([]);
+
+onMounted(() => {
+  getBookedSlots();
+});
+
+// Function to send the POST request
+const submitAppointment = async () => {
+  try {
+    // isLoading.value = true;
+    console.log('Appointment data:', appointmentData.value);
+    const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
+    console.log('Response:', response.data);
+    alert(response.data.dataPayload.data.message);
+
+    close();
+    // Handle the success response here (e.g., showing a success message)
+  } catch (error) {
+    console.error('Error submitting appointment:');
+    if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
+
+      const errorDetails = error.response.data.errorPayload.errors;
+      // console.log("Validation error details:", errorDetails);
+      console.log('Errors:', errors.value.email_address);
+      console.log('Errors:', errors.value.start_time);
+      errors.value.contact_name = errorDetails.contact_name || '';
+      errors.value.email_address = errorDetails.email_address || '';
+      errors.value.mobile_number = errorDetails.mobile_number || '';
+      errors.value.subject = errorDetails.subject || '';
+      errors.value.appointment_type = errorDetails.appointment_type || '';
+      errors.value.description = errorDetails.description || '';
+      errors.value.start_time = errorDetails.start_time || '';
+    }
+    // console.error('Error submitting appointment:', error);
+    // Handle the error response here (e.g., showing an error message)
+  }
+};
+//function to get booked slots
+//run the function on page load
+const getBookedSlots = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/appointments');
+    slots.value = response.data.dataPayload.data;
+    console.log('Slots:', slots.value);
+
+
+    console.log("rime", response)
+    // Handle the success response here (e.g., showing a success message)
+  } catch (error) {
+    console.error('Error submitting appointment:', error);
+    // Handle the error response here (e.g., showing an error message)
+  }
+};
+// console.log('Events2:', events3);
+</script>
+
+
 <template>
   <b-row>
     <b-col md="12">
@@ -117,10 +251,9 @@
               </b-col>
               <b-col cols="10">
                 <select v-model="selectedTime" @change="updateTimes" name="service" class="form-select" id="addtime">
-                  <option value="10-12">10:00 - 12:00</option>
-                  <option value="14-16">14:00 - 16:00</option>
-                  <option value="8-10">08:00 - 10:00</option>
-                  <option value="11-13">11:00 - 13:00</option>
+                  //loop through the slots to get the time range
+                  <option value="">Select Time</option>
+                  <option v-for="slot in slots" :value="slot.time_range">{{ slot.time_range }}</option>
                 </select>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
               </b-col>
@@ -185,148 +318,6 @@
   </b-modal>
 
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue'
-import createAxiosInstance from '@/api/axios';
-import PageHeader from '@/components/custom/header/PageHeader.vue'
-import FullCalender from '@/components/custom/calender/FullCalender.vue'
-import moment from 'moment'
-
-const axiosInstance = createAxiosInstance();
-const errors = ref({ contact_name: '', email_address: '', start_time: '', mobile_number: '', subject: '', appointment_type: '', description: '' });
-const events = ref([]);
-const show = ref(false)
-const clickedDate = ref('');
-// Function to handle the dateClick event
-
-const formatDate = (date) => {
-  if (!date) return '';
-
-  const year = date.getFullYear().toString(); // Get last 2 digits of the year
-  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-  const day = date.getDate().toString().padStart(2, '0'); // Day of the month
-
-  return `${year}-${month}-${day}`;
-};
-
-const handleDateClick = (info) => {
-  // `info.date` gives the clicked date
-  clickedDate.value = info.date;
-  console.log('Clicked date:', clickedDate);
-
-  // Format the date and update appointmentData
-  const formattedDate = formatDate(clickedDate.value);
-  appointmentData.value.appointment_date = formattedDate;
-console.log('Formatted date:', formattedDate);
-  // Perform any other action, e.g., open a modal or add an event
-  show.value = true;
-};
-
-const close = () => {
-  show.value = false
-}
-// const show = ref(false)
-const dateOption = ref({
-  mode: 'range'
-})
-const timeOption = ref({
-  enableTime: true,
-  noCalendar: true,
-  dateFormat: 'H:i'
-})
-// Local variable for the selected time range
-const selectedTime = ref('');
-// Function to update start_time and end_time based on the selected option
-const updateTimes = () => {
-  if (selectedTime.value) {
-    const times = selectedTime.value.split('-');
-    appointmentData.value.start_time = `${times[0]}:00`;  // Set the start time (e.g., "10:00")
-    appointmentData.value.end_time = `${times[1]}:00`;    // Set the end time (e.g., "12:00")
-  } else {
-    appointmentData.value.start_time = null;
-    appointmentData.value.end_time = null;
-  }
-};
-// Define your form data
-const appointmentData = ref({
-  user_id: "212408001",
-  appointment_date: "",
-  start_time: "",
-  end_time: "",
-  contact_name: "",
-  email_address: "",
-  mobile_number: "",
-  subject: "",
-  appointment_type: ""
-});
-
-onMounted(() => {
-  getBookedSlots();
-});
-
-// Function to send the POST request
-const submitAppointment = async () => {
-  try {
-    // isLoading.value = true;
-    console.log('Appointment data:', appointmentData.value);
-    const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value, {
-    });
-    console.log('Response:', response.data);
-    alert(response.data.dataPayload.data.message);
-
-    close();
-    // Handle the success response here (e.g., showing a success message)
-  } catch (error) {
-    console.error('Error submitting appointment:');
-    if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-
-      const errorDetails = error.response.data.errorPayload.errors;
-      // console.log("Validation error details:", errorDetails);
-      console.log('Errors:', errors.value.email_address);
-      console.log('Errors:', errors.value.start_time);
-      errors.value.contact_name = errorDetails.contact_name || '';
-      errors.value.email_address = errorDetails.email_address || '';
-      errors.value.mobile_number = errorDetails.mobile_number || '';
-      errors.value.subject = errorDetails.subject || '';
-      errors.value.appointment_type = errorDetails.appointment_type || '';
-      errors.value.description = errorDetails.description || '';
-      errors.value.start_time = errorDetails.start_time || '';
-    }
-    // console.error('Error submitting appointment:', error);
-    // Handle the error response here (e.g., showing an error message)
-  }
-};
-//function to get booked slots
-//run the function on page load
-const getBookedSlots = async () => {
-  try {
-    const response = await axiosInstance.get('/v1/scheduler/appointments');
-
-    const apiData = response.data.dataPayload.data;
-
-    events.value = apiData.map(item => ({
-      title: item.contact_name + ' - ' + item.subject, // Combining contact name and subject
-      start: moment(item.appointment_date + 'T' + item.start_time,).format(), // Concatenate date and start time
-      end: item.appointment_date + 'T' + item.end_time,     // Concatenate date and end time
-      backgroundColor: 'rgba(58,87,232,0.2)',  // Set a default background color
-      textColor: 'rgba(58,87,232,1)',          // Set text color
-      borderColor: 'rgba(58,87,232,1)',        // Set border color
-      extendedProps: {                         // Add additional information as extendedProps
-        email: item.email_address,
-        mobile: item.mobile_number,
-        appointmentType: item.appointment_type,
-        status: item.status
-      }
-    }));
-    // Handle the success response here (e.g., showing a success message)
-  } catch (error) {
-    console.error('Error submitting appointment:', error);
-    // Handle the error response here (e.g., showing an error message)
-  }
-};
-// console.log('Events2:', events3);
-</script>
 <style scoped>
 .error {
   color: red;

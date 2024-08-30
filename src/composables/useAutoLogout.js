@@ -1,5 +1,3 @@
-// 
-
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -9,54 +7,47 @@ export function useAutoLogout() {
     let warningTimer = null;
     let logoutTimer = null;
 
-    const WARNING_TIMEOUT = 15 * 1000; // 15 seconds for demonstration
-    const LOGOUT_TIMEOUT = 16 * 1000; // 16 seconds for demonstration
-    const events = ['click', 'mousemove', 'mousedown', 'scroll', 'keypress', 'load'];
+    const WARNING_TIMEOUT = 15 * 60 ; // 15 minutes
+    const LOGOUT_TIMEOUT = 20 * 60 ; // 16 minutes
+    const events = ['click', 'mousemove', 'mousedown', 'scroll', 'keypress'];
 
     const setTimers = () => {
-        // Set the warning timer
         warningTimer = setTimeout(() => {
             warningZone.value = true;
-        }, WARNING_TIMEOUT);
+        }, WARNING_TIMEOUT - 1 * 60 * 1000); // Show warning 1 minute before logout
 
-        // Set the logout timer
         logoutTimer = setTimeout(logoutUser, LOGOUT_TIMEOUT);
-
         warningZone.value = false;
     };
 
     const logoutUser = () => {
-        // Clear user token in local storage
         localStorage.removeItem('user.token');
-        // Redirect to the lock screen or login page
         router.push('/Lockscreen');
     };
 
     const resetTimer = () => {
-        // Clear both timers
         clearTimeout(warningTimer);
         clearTimeout(logoutTimer);
-        setTimers(); // Reset the timers after user activity
+        setTimers();
     };
 
-    // Setup event listeners when the component is mounted
     onMounted(() => {
-        events.forEach((event) => {
+        events.forEach(event => {
             window.addEventListener(event, resetTimer);
         });
         setTimers();
     });
 
-    // Cleanup event listeners when the component is unmounted
     onUnmounted(() => {
-        events.forEach((event) => {
+        events.forEach(event => {
             window.removeEventListener(event, resetTimer);
         });
-        clearTimeout(warningTimer); // Clear active timers during unmount
+        clearTimeout(warningTimer);
         clearTimeout(logoutTimer);
     });
 
     return {
-        warningZone
+        warningZone,
+        resetTimer // Include this to allow manual resetting
     };
 }

@@ -1,122 +1,62 @@
-<!-- <script>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import createAxiosInstance from '@/api/axios';
-
-const router = useRouter();
-const email = ref("");
-const axiosInstance = createAxiosInstance();
-const errors = ref({ email: '' });
-
-const onSubmit = async () => {
-    errors.value = { email: '' };
-    try {
-        const response = await axiosInstance.post('v1/auth/password-reset', {
-            email: email.value
-        });
-
-        if (response.data.dataPayload && !response.data.dataPayload.error) {
-            console.log('Password reset email sent successfully.');
-            router.push({ name: 'email-confirmed' });
-        }
-    } catch (error) {
-        console.error("An unexpected error occurred:", error);
-
-        if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-
-            const errorDetails = error.response.data.errorPayload.errors;
-            console.log("Validation error details:", errorDetails);
-
-            errors.value.email = errorDetails.email || '';
-        }
-    }
-};
-
-</script> -->
-
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import createAxiosInstance from '@/api/axios';
-
-const router = useRouter();  // Make sure this is inside setup()
-const email = ref("");
-const axiosInstance = createAxiosInstance();
-const errors = ref({ email: '' });
-
-const onSubmit = async () => {
-    errors.value = { email: '' };  // Reset errors
-    try {
-        const response = await axiosInstance.post('v1/auth/password-reset', {
-            email: email.value
-        });
-
-        if (response.data.dataPayload && !response.data.dataPayload.error) {
-            console.log('Password reset email sent successfully.');
-            router.push({ name: 'email-confirmed' });
-        }
-    } catch (error) {
-        console.error("An unexpected error occurred:", error);
-
-        if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-            const errorDetails = error.response.data.errorPayload.errors;
-            console.log("Validation error details:", errorDetails);
-
-            errors.value.email = errorDetails.email || '';
-        }
-    }
-};
 </script>
 
 <template>
-    <section class="login-content">
-        <div class="row m-0 align-items-center bg-white vh-100">
-            <div class="col-md-6 d-md-block d-none bg-primary p-0 vh-100 overflow-hidden">
-                <img src="@/assets/images/tum.jpg" class="img-fluid gradient-main" alt="images" loading="lazy" />
-            </div>
-            <div class="col-md-6 p-0">
-                <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
-                    <div class="card-body">
-                        <router-link :to="{ name: 'default.dashboard' }"
-                            class="navbar-brand d-flex align-items-center mb-3">
-                            <brand-logo class="text-primary"></brand-logo>
-                            <h4 class="logo-title ms-3 mb-0"><brand-name></brand-name></h4>
-                        </router-link>
-                        <h2 class="mb-2">Reset Password</h2>
-                        <p>Enter your email address and we'll send you an email with instructions to reset your
-                            password.</p>
-                        <form>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="floating-label form-group">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input v-model="email" type="email" class="form-control" id="email"
-                                            aria-describedby="email" placeholder=" " />
-                                        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email
-                                            }}</div>
-
+    <!-- Password Reset 1 - Bootstrap Brain Component -->
+    <div class="bg-light py-3 py-md-5">
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-12 col-md-11 col-lg-8 col-xl-7 col-xxl-6">
+                    <div class="bg-white p-4 p-md-5 rounded shadow-sm">
+                        <div class="row gy-3 mb-5">
+                            <div class="col-12">
+                                <div class="text-center">
+                                    <a href="#!">
+                                        <img src="./assets/img/bsb-logo.svg" alt="BootstrapBrain Logo" width="175"
+                                            height="57">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <h2 class="fs-6 fw-normal text-center text-secondary m-0 px-md-5">Provide the email
+                                    address associated with your account to recover your password.</h2>
+                            </div>
+                        </div>
+                        <form action="#!">
+                            <div class="row gy-3 gy-md-4 overflow-hidden">
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Email <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z" />
+                                            </svg>
+                                        </span>
+                                        <input type="email" class="form-control" name="email" id="email" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary btn-lg" type="submit">Reset Password</button>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Reset</button>
                         </form>
+                        <div class="row">
+                            <div class="col-12">
+                                <hr class="mt-5 mb-4 border-secondary-subtle">
+                                <div class="d-flex gap-4 justify-content-center">
+                                    <a href="#!" class="link-secondary text-decoration-none">Log In</a>
+                                    <a href="#!" class="link-secondary text-decoration-none">Register</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="sign-bg sign-bg-right">
-                    <svg width="280" height="230" viewBox="0 0 431 398" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g opacity="0.05">
-                            <rect x="-157.085" y="193.773" width="543" height="77.5714" rx="38.7857"
-                                transform="rotate(-45 -157.085 193.773)" fill="#3B8AFF" />
-                            <rect x="7.46875" y="358.327" width="543" height="77.5714" rx="38.7857"
-                                transform="rotate(-45 7.46875 358.327)" fill="#3B8AFF" />
-                            <rect x="61.9355" y="138.545" width="310.286" height="77.5714" rx="38.7857"
-                                transform="rotate(45 61.9355 138.545)" fill="#3B8AFF" />
-                            <rect x="62.3154" y="-190.173" width="543" height="77.5714" rx="38.7857"
-                                transform="rotate(45 62.3154 -190.173)" fill="#3B8AFF" />
-                        </g>
-                    </svg>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 </template>

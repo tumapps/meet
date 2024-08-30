@@ -9,7 +9,7 @@ const axiosInstance = AxiosInstance();
 const tableData = ref([]);
 const sortKey = ref('');  // Active column being sorted
 const sortOrder = ref('asc');  // Sorting order: 'asc' or 'desc'
-
+const isArray = ref(false);
 const addAppointment = () => {
     router.push('/book-appointment');
 }
@@ -79,8 +79,11 @@ const getSlot = async () => {
         const response = await axiosInstance.get('v1/scheduler/appointments');
         console.log(response.data);
 
-        tableData.value = response.data.dataPayload.data;
+        //check if data is array
+        isArray.value = Array.isArray(response.data);
+        console.log("isArray", isArray.value)
 
+        tableData.value = response.data.dataPayload.data;
         console.log("chechtable", tableData.value.length)
 
         console.log("hwllo", tableData)
@@ -168,8 +171,8 @@ const username = localStorage.getItem('user.username');
                         <div class="text-center">AVG Engagements Rate</div>
                         <div class="d-flex align-items-center justify-content-between mt-3">
                             <div>
-                                <h2><count-up ref="counter" :startVal=0 :endval=2.648 :duration="3"
-                                        decimalSeparator="." :decimals="3"></count-up></h2>
+                                <h2><count-up ref="counter" :startVal=0 :endval=2.648 :duration="3" decimalSeparator="."
+                                        :decimals="3"></count-up></h2>
                                 26.84%
                             </div>
                             <div class="border bg-info-subtle rounded p-3">
@@ -243,25 +246,26 @@ const username = localStorage.getItem('user.username');
             </div>
         </b-col>
     </b-row>
-<b-row class="m-3 w-100">
-    <b-col lg="12">
-        <div class="mb-5 mt-3 bg-white h-75 rounded">
-            <div class="d-flex justify-content-between align-items-center py-5">
-                <!-- Search Box with Icon -->
-                <div class="flex mx-auto position-relative w-25">
-                    <input type="text" v-model="searchQuery" class="form-control rounded-pill ps-5"
-                        placeholder="Search..." />
-                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y text-muted ps-3"></i>
-                </div>
+    <b-row class="m-3 w-100">
+        <b-col lg="12">
+            <div class="mb-5 mt-3 bg-white h-75 rounded">
+                <div class="d-flex justify-content-between align-items-center py-5">
+                    <!-- Search Box with Icon -->
+                    <div class="flex mx-auto position-relative w-25">
+                        <input type="text" v-model="searchQuery" class="form-control rounded-pill ps-5"
+                            placeholder="Search..." />
+                        <i
+                            class="fas fa-search position-absolute top-50 start-0 translate-middle-y text-muted ps-3"></i>
+                    </div>
 
-                <!-- Add Appointment Button -->
-                <button class="btn btn-outline-primary rounded-pill mx-5" @click="addAppointment">
-                    + Appointment
-                </button>
+                    <!-- Add Appointment Button -->
+                    <button class="btn btn-outline-primary rounded-pill mx-5" @click="addAppointment">
+                        + Appointment
+                    </button>
+                </div>
             </div>
-        </div>
-    </b-col>
-</b-row>
+        </b-col>
+    </b-row>
     <b-col lg="12">
         <b-card body-class="px-0">
             <div class="table-responsive">
@@ -293,23 +297,30 @@ const username = localStorage.getItem('user.username');
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item, index) in sortedData" :key="index">
-                            <td>{{ item.contact_name }}</td>
-                            <td>{{ item.mobile_number }}</td>
-                            <td>{{ item.appointment_date }}</td>
-                            <td>{{ item.start_time }} - {{ item.end_time }}</td>
-                            <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
-                                    }}</span></td>
-                            <td>
-                                <button class="btn btn-outline-primary btn-sm" @click="viewAppointment(item)">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" @click="deleteAppointment(item)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        <template v-if="Array.isArray(tableData) && tableData.length > 0">
+                            <tr v-for="(item, index) in sortedData" :key="index">
+                                <td>{{ item.contact_name }}</td>
+                                <td>{{ item.mobile_number }}</td>
+                                <td>{{ item.appointment_date }}</td>
+                                <td>{{ item.start_time }} - {{ item.end_time }}</td>
+                                <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
+                                        }}</span></td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm" @click="viewAppointment(item)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" @click="deleteAppointment(item)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr v-else>
+                            <td colspan="5" class="text-center">
+                                No data to display
                             </td>
                         </tr>
                     </tbody>
@@ -358,77 +369,3 @@ h1 {
     /* Adds gap between buttons */
 }
 </style>
-
-<!-- <template>
-    <table id="datatable" ref="columnTableRef" class="table dataTable" data-toggle="data-table"></table>
-    
-</template>
-
-<script setup>
-import { ref, onMounted } from 'vue'
-import useDataTable from '../../../hooks/useDatatable'
-import createAxiosInstance from '@/api/axios'
-
-const axiosInstance = createAxiosInstance();
-
-// const tableData = ref([
-//     { Name: 'Airi Satou', position: 'Accountant	', office: 'Tokyo', age: '33', start_Date: '2008/11/28', salary: '$162,700' },
-//     { Name: 'Angelica Ramos', position: 'Chief Executive Officer (CEO)	', office: 'London', age: '47', start_Date: '2009/10/09', salary: '$1,200,000' },
-//     { Name: 'Ashton Cox', position: 'Junior Technical Author	', office: 'San Francisco', age: '66', start_Date: '2009/01/12', salary: '$86,000' },
-// ])
-
-
-const tableData = ref([])
-
-//get from api
-const getSlot = async () => {
-    try {
-        const response = await axiosInstance.get('v1/scheduler/appointments');
-
-        // Map the API response to fit the tableData structure
-        tableData.value = response.data.map(item => ({
-            contact_name: item.contact_name || 'N/A',
-            mobile_number: item.mobile_number || 'N/A',
-            appointment_date: item.appointment_date,
-            start_time: item.start_time,
-            end_time: item.end_time,
-            statusLabel: item.statusLabel
-        }))
-    } catch (error) {
-        console.error(error);
-    }
-
-};
-
-const columns = ref([
-    { data: 'contact_name', title: 'Name' },
-    { data: 'mobile_number', title: 'Contact' },
-    { data: 'appointment_date', title: 'Date' },
-    { data: 'start_time', title: 'Start Time' },
-    { data: 'end_time', title: 'End Time' },
-    { data: 'statusLabel', title: 'Status' }
-])
-
-onMounted(async () => {
-    await getSlot()
-useDataTable({
-    tableRef: columnTableRef,
-    columns: columns.value,
-    data: tableData.value,
-    isColumnHidden: true,
-    isColumnHiddenClass: '.toggle-vis'
-})
-})
-
-
-
-const columnTableRef = ref(null)
-// useDataTable({
-//     tableRef: columnTableRef,
-//     columns: columns.value,
-//     data: tableData.value,
-//     isColumnHidden: true,
-//     isColumnHiddenClass: '.toggle-vis'
-// })
-
-</script> -->

@@ -20,6 +20,24 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true, name: 'Book Appointment' },
     component: () => import('@/views/modules/appointment/BookAppointment.vue')
   },
+  {
+    path: '/settings',
+    name: prefix + '.settings', // Now it will become appointment.dashboard
+    meta: { requiresAuth: true, name: 'settings'},
+    component: () => import('@/views/modules/appointment/Settings.vue')
+  },
+  {
+    path: '/new-user',
+    name: prefix + '.adduser',
+    meta: { requiresAuth: true, name: 'Add User', isBanner: true },
+    component: () => import('@/views/iam-admin/AddUser.vue'),
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    meta: { requiresAuth: true, name: 'profile' },
+    component: () => import('@/views/iam-admin/Profile.vue'),
+  },
 ]
 
 const routes = [
@@ -34,9 +52,21 @@ const routes = [
     }
   },
   {
+    path: '/request-password-reset',
+    name: 'request-password-reset',
+    component: () => import('@/views/iam-admin/authentication/RequestPasswordReset.vue')
+  },
+
+  {
     path: '/reset-password',
     name: 'reset-password',
     component: () => import('@/views/iam-admin/authentication/ResetPassword.vue')
+  },
+  {
+    path: '/email-confirmed',
+    name: 'email-confirmed',
+    component: () => import('@/views/iam-admin/authentication/EmailConfirmed.vue')
+
   },
   {
     path: "/:catchAll(.*)", // Update the wildcard route

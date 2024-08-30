@@ -3,7 +3,7 @@
   <sidebar-component></sidebar-component>
   <!-- Sidebar Component End Here-->
   <main class="main-content">
-    <AutoLogout />
+
     <div :class="`position-relative  ${isBanner ? 'iq-banner ' + bannerStyle : ''}`">
       <!-- Header Component Start Here -->
       <header-component></header-component>
@@ -16,6 +16,7 @@
     </div>
     <!-- Main Content Start Here -->
     <main-content-component>
+      <AutoLogout></AutoLogout>
       <!-- Router View For Pages -->
       <router-view></router-view>
     </main-content-component>

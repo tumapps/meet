@@ -24,6 +24,7 @@ export default defineConfig({
       '/v1': {
         // target: 'https://api.crackit.co.ke/',
         target: 'http://127.0.0.1/projects/vc/vc_scheduler/',
+        // target: 'http://127.0.0.1/demos/yii2/afya365-endpoints/',
         // target: 'http://127.0.0.1/demos/yii2/afy365/',
 
         changeOrigin: true,
