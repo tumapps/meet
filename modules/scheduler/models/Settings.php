@@ -41,6 +41,7 @@ class Settings extends BaseModel
             'end_time',
             'slot_duration',
             'booking_window',
+            'advanced_booking',
             'created_at',
             'updated_at',
             ]
@@ -53,7 +54,7 @@ class Settings extends BaseModel
     {
         return [
             [['user_id', 'slot_duration', 'booking_window', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['user_id', 'slot_duration', 'booking_window', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'slot_duration', 'booking_window', 'advanced_booking', 'created_at', 'updated_at'], 'integer'],
             [['start_time', 'end_time', 'user_id'], 'required'],
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],

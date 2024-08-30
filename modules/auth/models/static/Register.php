@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use auth\models\User;
 use auth\models\Profiles;
+use scheduler\models\Settings;
 use helpers\traits\Keygen;
 
 class Register extends Model
@@ -90,7 +91,17 @@ class Register extends Model
             $profile->mobile_number = $this->mobile_number;
             // $profile->save(false);
             if($profile->save(false)){
-                return $user;
+                $settings = new Settings();
+                $settings->user_id = $user->user_id;
+                $settings->start_time = '08:00:00';
+                $settings->end_time = '17:00:00';
+                $settings->slot_duration = 30; // 30 mins by default
+                $settings->booking_window = 12; // 12 months by default
+                $settings->advanced_booking = 30; //dfault 30 min
+
+                if($settings->save()){
+                    return $user;
+                }
             }
             else {
                 $user->delete();

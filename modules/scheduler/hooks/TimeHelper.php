@@ -88,6 +88,10 @@ class TimeHelper
     {
         $allSlots = self::generateTimeSlots($user_id);
         // return $allSlots;
+        if(!is_array($allSlots)){
+            return 'No available slots'
+        }
+        
         $slotsWithAvailability = [];
 
         foreach ($allSlots as $slot) {
