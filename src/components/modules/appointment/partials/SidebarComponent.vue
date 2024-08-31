@@ -1,9 +1,7 @@
 <template>
   <!-- Sidebar Component Start Here-->
   <default-sidebar>
-    <template #profile-card>
-      <profile-card></profile-card>
-    </template>
+
     <ul class="navbar-nav iq-main-menu" id="e-commerce">
       <hr class="hr-horizontal" />
       <side-menu title="APPOINTMENT" :static-item="true"></side-menu>
@@ -13,7 +11,6 @@
       <hr class="hr-horizontal" />
       <side-menu title="OTHER" :static-item="true"></side-menu>
       <side-menu isTag="router-link" title="Add-User" icon="user-plus" miniTitle="BF" :route="{ to: 'default.adduser' }"></side-menu>
-
       <side-menu isTag="router-link" title="Profile" icon="user" miniTitle="BF" :route="{ to: 'profile' }"></side-menu>
       <side-menu isTag="router-link" title="Settings" icon="gears" miniTitle="BF" :route="{ to: 'default.settings' }"></side-menu>
       <side-menu title="Sign Out" icon="exit" miniTitle="BF"></side-menu>

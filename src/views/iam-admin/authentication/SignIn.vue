@@ -64,7 +64,7 @@ const onSubmit = async () => {
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100 ">
       <div class="col-md-4 col-lg-3 ">
         <b-card class="h-100 py-5 d-flex flex-column justify-content-between " style="background: white !important;">
-          <img src="https://www.tum.ac.ke/resources/public/logo.png" class="img-thumbnail h-12 w-25 d-block mx-auto"
+          <img src="@/assets/images/logo.png" class="img-thumbnail h-12 w-25 d-block mx-auto"
             alt="logo">
           <h5 class="text-center mt-3 mb-4 fw-bold text-primary">Sign In | TUMMEET</h5>
 

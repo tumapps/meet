@@ -1,6 +1,6 @@
 <template>
   <!--Logo start-->
-  <div class="logo-main">
+  <!-- <div class="logo-main">
     <div class="logo-normal">
       <svg :class="`${color ? 'text-primary' : ''} icon-30`" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="-0.757324" y="19.2427" width="28" height="4" rx="2" transform="rotate(-45 -0.757324 19.2427)" fill="currentColor" />
@@ -18,7 +18,9 @@
       </svg>
     </div>
   </div>
-  <!--Logo End-->
+  Logo End -->
+
+  <img src="@/assets/images/logo.png " class="h-25 w-25">
 </template>
 
 <script>

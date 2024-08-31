@@ -119,7 +119,49 @@ router.beforeEach(async (to, from, next) => {
       // User is not authenticated, proceed to login page
       next();
     }
-  } else {
+  } else if (to.path === '/request-password-reset') {
+    // Redirect authenticated users away from the login page
+    const token = localStorage.getItem('user.token');
+    if (token) {
+      // User is already authenticated, redirect back
+      next(''); // Adjust the redirect path as needed
+    } else {
+      // User is not authenticated, proceed to login page
+      next();
+    }
+  }else if (to.path === '/reset-password') {
+    // Redirect authenticated users away from the login page
+    const token = localStorage.getItem('user.token');
+    if (token) {
+      // User is already authenticated, redirect back
+      next(''); // Adjust the redirect path as 
+    } else {
+      // User is not authenticated, proceed to login page
+      next();
+    }
+  } else if (to.path === '/email-confirmed') {
+    // Redirect authenticated users away from the login page
+    const token = localStorage.getItem('user.token');
+    if (token) {
+      // User is already authenticated, redirect back
+      next(''); // Adjust the redirect path as 
+    } else {
+      // User is not authenticated, proceed to login page
+      next();
+    }
+  }
+  else if (to.path === '/LockScreen') {
+    // Redirect authenticated users away from the login page
+    const token = localStorage.getItem('user.token');
+    if (token) {
+      // User is already authenticated, redirect back
+      next(''); // Adjust the redirect path as 
+    } else {
+      // User is not authenticated, proceed to login page
+      next();
+    }
+  }
+  else {
     // Non-protected route, allow access
     next();
   }
