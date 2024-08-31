@@ -46,7 +46,7 @@ class ConfigWrapper
             'jwt.id' => '4f1g23a12aa',
             'jwt_secret' => getenv('JWT_SECRET'),
             'adminEmail' => 'tum@gmail.com',
-            'user.passwordResetTokenExpire' => 3600,
+            'user.passwordResetTokenExpire' => 900,
 
         ];
     }

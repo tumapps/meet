@@ -29,7 +29,7 @@ class PasswordReset extends Model
             throw new InvalidArgumentException('Password reset token cannot be blank.');
         }
 
-        $this->_token = Tokens::findOne(['token' => $token, 'token_type' => 'password_reset_token']);
+        $this->_token = Tokens::findOne(['token' => $token, 'token_type' => 'password_reset_token', 'status' => 1]);
         if (!$this->_token || !$this->isPasswordResetTokenValid($this->_token->token)) {
             throw new InvalidArgumentException('Invalid or expired password reset token.');
         }

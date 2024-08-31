@@ -89,16 +89,22 @@ class TimeHelper
         $allSlots = self::generateTimeSlots($user_id);
         // return $allSlots;
         if(!is_array($allSlots)){
-            return 'No available slots'
+            return 'No available slots';
         }
-        
+
         $slotsWithAvailability = [];
 
         foreach ($allSlots as $slot) {
             $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
+            list($slotStart, $slotEnd) = explode('-', $slot);
             $slotsWithAvailability[] = [
-                'slot' => $slot,
-                'isAvailable' => $isAvailable
+                // 'slot' => $slot,
+                // 'isAvailable' => $isAvailable,
+                'slot' => [
+                    'slotStart' => $slotStart,
+                    'slotEnd' => $slotEnd,
+                    'isAvailable' => $isAvailable,
+                ]
             ];
         }
 

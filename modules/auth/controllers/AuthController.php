@@ -7,6 +7,7 @@ use yii\web\Response;
 use auth\models\static\Login;
 use auth\models\static\Register;
 use auth\models\static\PasswordReset;
+use auth\models\static\ChangePassword;
 use auth\models\static\PasswordResetRequest;
 use auth\models\RefreshToken;
 use auth\models\searches\UserSearch;
@@ -77,7 +78,6 @@ class AuthController extends \helpers\ApiController
 		$dataRequest['PasswordResetRequest'] = Yii::$app->request->getBodyParams();
 
 		if ($model->load($dataRequest) && $model->validate()) {
-			return $model->sendEmail();
 			if ($model->sendEmail()) {
 				return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
 			} else {
@@ -100,7 +100,7 @@ class AuthController extends \helpers\ApiController
 		try {
 			$model = new PasswordReset($token);
 		} catch (InvalidArgumentException $e) {
-			return $this->errorResponse(['message' => $e->getMessage()]);
+			return $this->errorResponse(['message' => [$e->getMessage()]]);
 		}
 
 		if ($model->load($dataRequest) && $model->validate()) {
@@ -112,6 +112,17 @@ class AuthController extends \helpers\ApiController
 		return $this->errorResponse($model->getErrors());
 	}
 
+	public function actionChangePassword()
+	{
+		// $user = Yii::$app->user->identity;
+		$model = new ChangePassword();
+		$dataRequest['ChangePassword'] = Yii::$app->request->getBodyParams();
+
+		if($model->load($dataRequest) && $model->updatePassword()) {
+			return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
+		}
+		return $this->errorResponse($model->getErrors());
+	}
 
 	public function actionMe()
 	{

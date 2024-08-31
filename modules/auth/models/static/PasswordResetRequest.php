@@ -67,7 +67,7 @@ class PasswordResetRequest extends Model
         // Email subject and body
         $subject = 'Password Reset Request';
         $body = "
-            <p>Hello,'{$password_reset_token}'</p>
+            <p>Hello, '{ $this->username }'</p>
             <p>You have requested a password reset. Please click the link below to reset your password:</p>
             <p><a href='{$resetLink}'>Reset Password</a></p>
             <p>If you did not request this, please ignore this email.</p>

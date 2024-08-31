@@ -85,7 +85,7 @@ return [
  * )
  *),
  */
-'GET get-slots'       => 'appointments/get-slots',
+'POST get-slots'       => 'appointments/get-slots',
 
 
 /**

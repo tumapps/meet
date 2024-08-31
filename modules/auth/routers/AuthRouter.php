@@ -240,6 +240,50 @@
     'POST reset-password' => 'auth/reset-password',
 
 
+    /**
+     * @OA\Post(
+     * path="/auth/update-password",
+     * summary="change user current password to a new password",
+     * security={{}},
+     * tags={"Authentication"},
+     * @OA\RequestBody(
+     *    required=true,
+     *    description="Old Password, New Password",
+     *    @OA\JsonContent(
+     *       required={"Old Password", "Old Password"},
+     *              @OA\Property(property="Old Password", type="string",title="Old Password", example="admin"),
+     *              @OA\Property(property="New Password", type="string",title="New Password", example="admin"),
+     *    ),
+     * ),
+     * @OA\Response(
+     *    response=201,
+     *    description="Data payload",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="dataPayload", type="object",
+     *          @OA\Property(property="data", type="object",
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
+     *          ),
+     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
+     *          @OA\Property(property="toastTheme", type="string",example="success"),
+     *       )
+     *    )
+     * ),
+     * @OA\Response(
+     *    response=422,
+     *    description="Data Validation Error",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="errorPayload", type="object",
+     *          @OA\Property(property="errors", type="object",
+     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
+     *          ),
+     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
+     *          @OA\Property(property="toastTheme", type="string",example="danger"),
+     *       )
+     *    )
+     * )
+     *),
+     */
+    'POST update-password' => 'auth/change-password',
 
     /**
      * @OA\Get(
