@@ -5,6 +5,7 @@ namespace scheduler\hooks;
 use scheduler\models\Settings;
 use scheduler\models\Appointments;
 use scheduler\models\Availability;
+use yii\helpers\ArrayHelper;
 
 
 
@@ -209,14 +210,14 @@ class TimeHelper
                          ->where(['user_id' => $user_id])
                          ->scalar();
 
-        $bookingWindowDays = $bookingWindow * 30;
+        $bookingWindowMonths = $bookingWindow; //* 30; // 30 is number of days in a months
 
         // maximum allowable appointment date
         $currentDate = new \DateTime();
 
         $maxBookingDate = clone $currentDate;
 
-        $maxBookingDate->modify("+$bookingWindowDays days");
+        $maxBookingDate->modify("+$bookingWindowMonths months");
 
         $appointmentDate = new \DateTime($appointmentDate);
 
