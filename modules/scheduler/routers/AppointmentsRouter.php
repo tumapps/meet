@@ -49,7 +49,7 @@ return [
 'GET appointments'     => 'appointments/index',
 
 /**
- * @OA\Get(
+ * @OA\Post(
  * path="/scheduler/get-slots",
  * summary="Get all available slots ",
  * tags={"Appointments"},

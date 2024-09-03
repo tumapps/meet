@@ -67,49 +67,59 @@ class AppointmentsController extends \helpers\ApiController{
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
-        $advanced = TimeHelper::validateAdvanceBooking(
-             $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time']
-        );
-
-        if($advanced) {
-            return $this->payloadResponse(['message' => 'The selected appoitment start time overlaps with the minimum advanced booking time']); 
-        }
-
-        $validateBookingWindow = TimeHelper::isWithinBookingWindow(
-            $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['appointment_date']
-        );
-
-        if(!$validateBookingWindow){
-            return $this->payloadResponse(['message' => 'Appoitment is not within the open booking period',]); 
-        }
-
-        $isAvailable = $this->checkAvailability(
-            $dataRequest['Appointments']['user_id'], 
-            $dataRequest['Appointments']['appointment_date'], 
-            $dataRequest['Appointments']['start_time'],
-            $dataRequest['Appointments']['end_time']
-        );
-
-        if (!$isAvailable) {
-            return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
-        }
+        if($model->load($dataRequest)) {
+            if(!$model->validate()) {
+                return $this->errorResponse($model->getErrors()); 
+            }
         
-        // cheking if there is overlapping appoiment ie if the appoitment is already placed
-        $appoitmentExists = $model::hasOverlappingAppointment(
-            $dataRequest['Appointments']['user_id'], 
-            $dataRequest['Appointments']['appointment_date'], 
-            $dataRequest['Appointments']['start_time'],
-            $dataRequest['Appointments']['end_time']
-        );
 
-        if ($appoitmentExists) {
-            return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
-        }
+            $advanced = TimeHelper::validateAdvanceBooking(
+                 $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time']
+            );
 
-        if($model->load($dataRequest) && $model->save()) {
-                return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
+            if($advanced) {
+                return $this->payloadResponse(['message' => 'The selected appoitment start time overlaps with the minimum advanced booking time']); 
+            }
+
+            $validateBookingWindow = TimeHelper::isWithinBookingWindow(
+                $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['appointment_date']
+            );
+
+            if(!$validateBookingWindow){
+                return $this->payloadResponse(['message' => 'Appoitment is not within the open booking period',]); 
+            }
+
+            $isAvailable = $this->checkAvailability(
+                $dataRequest['Appointments']['user_id'], 
+                $dataRequest['Appointments']['appointment_date'], 
+                $dataRequest['Appointments']['start_time'],
+                $dataRequest['Appointments']['end_time']
+            );
+
+            if (!$isAvailable) {
+                return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
+            }
+            
+            // cheking if there is overlapping appoiment ie if the appoitment is already placed
+            $appoitmentExists = $model::hasOverlappingAppointment(
+                $dataRequest['Appointments']['user_id'], 
+                $dataRequest['Appointments']['appointment_date'], 
+                $dataRequest['Appointments']['start_time'],
+                $dataRequest['Appointments']['end_time']
+            );
+
+            if ($appoitmentExists) {
+                return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
+            }
+
+            if($model->save()) {
+               return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
+            }
         }
-        return $this->errorResponse($model->getErrors()); 
+        // if($model->load($dataRequest) && $model->save()) {
+        //         return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
+        // }
+        // return $this->errorResponse($model->getErrors()); 
     }
 
     public function actionUpdate($id)

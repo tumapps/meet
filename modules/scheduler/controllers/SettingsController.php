@@ -30,7 +30,7 @@ class SettingsController extends \helpers\ApiController{
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerSettingsView');
+        // Yii::$app->user->can('schedulerSettingsView');
         return $this->payloadResponse($this->findModel($id));
     }
 

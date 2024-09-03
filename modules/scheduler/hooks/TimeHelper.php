@@ -42,6 +42,7 @@ class TimeHelper
      * @return string
      */
     public static function getDifferenceBetweenDates($date1, $date2){
+        
         $days = date_diff($date1, $date2)->format("%R%a days");
         return $days;
     }
