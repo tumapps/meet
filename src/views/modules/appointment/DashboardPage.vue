@@ -26,22 +26,14 @@ const sortTable = (key) => {
 };
 
 // Dummy methods for the action buttons
-const viewItem = (id) => {
-    console.log('View item with ID:', id);
-};
-const editItem = (id) => {
-    console.log('Edit item with ID:', id);
-};
-const deleteItem = (id) => {
-    console.log('Delete item with ID:', id);
-};
+
 
 // Get class for status badges
 const getStatusClass = (status) => {
     switch (status) {
         case 'Pending':
             return 'badge bg-warning';
-        case 'Confirmed':
+        case 'Active':
             return 'badge bg-success';
         case 'Cancelled':
             return 'badge bg-danger';
@@ -65,28 +57,17 @@ onMounted(async () => {
     getSlot();
 });
 
-const timeline = ref([
-    { name: 'Cameron Williamson', position: 'Dentist', time: '11 Jul 8:10 PM' },
-    { name: 'Brooklyn Simmons', position: 'Orthopedic', time: '11 Jul 11 PM' },
-    { name: 'Leslie Alexander', position: 'Neurology', time: '11 Jul 1:21 AM' },
-    { name: 'Robbin Doe', position: 'ENT', time: '11 Jul 4:30 AM' },
-    { name: 'Jane Cooper', position: 'Cardiologist', time: '11 Jul 4:50 AM' }
-])
+const timeline = ref([])
 
 //get from api
 const getSlot = async () => {
     try {
         const response = await axiosInstance.get('v1/scheduler/appointments');
-        console.log(response.data);
-
         //check if data is array
         isArray.value = Array.isArray(response.data);
-        console.log("isArray", isArray.value)
-
         tableData.value = response.data.dataPayload.data;
         console.log("chechtable", tableData.value.length)
-
-        console.log("hwllo", tableData)
+        timeline.value = response.data.dataPayload.data;
     } catch (error) {
         console.error(error);
     }
@@ -227,7 +208,6 @@ const username = localStorage.getItem('user.username');
                                 <path fill="#17904b"
                                     d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"></path>
                             </svg>
-                            16% this month
                         </p>
                     </div>
                 </div>
@@ -237,9 +217,9 @@ const username = localStorage.getItem('user.username');
                         <div class="profile-dots-pills border-primary"></div>
                         <div class="ms-4">
                             <h6 class="mb-1">
-                                {{ item.name }} - <span class="text-primary">{{ item.position }}</span>
+                                {{ item.contact_name }} - <span class="text-primary">{{ item.appointment_type }}</span>
                             </h6>
-                            <span class="text-muted">{{ item.time }}</span>
+                            <span class="text-muted">{{ item.start_time }}</span>
                         </div>
                     </div>
                 </div>
@@ -306,13 +286,13 @@ const username = localStorage.getItem('user.username');
                                 <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
                                         }}</span></td>
                                 <td>
-                                    <button class="btn btn-outline-primary btn-sm" @click="viewAppointment(item)">
+                                    <button type="button" class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
+                                    <!-- <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" @click="deleteAppointment(item)">
+                                    </button> -->
+                                    <button class="btn btn-outline-danger btn-sm" @click="toggleDelete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -327,6 +307,7 @@ const username = localStorage.getItem('user.username');
                 </table>
             </div>
         </b-card>
+
     </b-col>
 </template>
 

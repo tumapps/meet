@@ -1,14 +1,3 @@
-<!-- TimeSlotComponent.vue -->
-<template>
-    <div class="timeslots-container">
-        <!-- Loop through time slots and display them -->
-        <div v-for="(slot, index) in timeSlots" :key="slot.startTime"
-            :class="['timeslot', { 'booked': slot.booked, 'selected': slot.selected }]" @click="selectSlot(index)">
-            {{ slot.startTime }} - {{ slot.endTime }}
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
 
@@ -21,7 +10,7 @@ const props = defineProps({
 });
 
 // Define emits
-const emit = defineEmits(['update:timeSlots']);
+const emit = defineEmits(['update:timeSlots', 'selectedSlotsTimes']);
 
 // Local state for selected slots
 const selectedSlots = ref([]);
@@ -68,8 +57,39 @@ const selectSlot = (index) => {
 
     // Emit the updated time slots to parent
     emit('update:timeSlots', props.timeSlots);
+
+    // Emit selected slots times
+    const selectedTimes = selectedSlots.value.map(i => ({
+        startTime: props.timeSlots[i].startTime,
+        endTime: props.timeSlots[i].endTime
+    }));
+
+    // Calculate start and end time
+    let startTime = '';
+    let endTime = '';
+
+    if (selectedTimes.length > 0) {
+        startTime = selectedTimes[0].startTime;
+        endTime = selectedTimes[selectedTimes.length - 1].endTime;
+    }
+
+    emit('selectedSlotsTimes', { startTime, endTime });
+
+    // console.log(selectedSlots.value);
 };
 </script>
+
+<template>
+    <div class="timeslots-container w-100">
+        <!-- Loop through time slots and display them -->
+        <div v-for="(slot, index) in timeSlots" :key="slot.startTime"
+            :class="['timeslot', { 'booked': slot.booked, 'selected': slot.selected }]" @click="selectSlot(index)">
+            {{ slot.startTime }}-
+            {{ slot.endTime }}
+        </div>
+    </div>
+</template>
+
 
 <style scoped>
 .timeslots-container {
@@ -80,13 +100,18 @@ const selectSlot = (index) => {
 .timeslot {
     width: 60px;
     height: 60px;
-    margin: 5px;
+    margin: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
+    background-color: #fff;
+    color: black;
     cursor: pointer;
     border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
 }
 
 .timeslot.selected {
@@ -95,8 +120,8 @@ const selectSlot = (index) => {
 }
 
 .timeslot.booked {
-    background-color: #ccc;
-    color: white;
+    background-color: #CACACA;
+    color: black;
     pointer-events: none;
 }
 </style>

@@ -1,10 +1,9 @@
-
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import createAxiosInstance from '@/api/axios';
 import PageHeader from '@/components/custom/header/PageHeader.vue'
 import FullCalender from '@/components/custom/calender/FullCalender.vue'
-import moment from 'moment'
+import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 
 const axiosInstance = createAxiosInstance();
 const errors = ref({ contact_name: '', email_address: '', start_time: '', mobile_number: '', subject: '', appointment_type: '', description: '' });
@@ -23,15 +22,25 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const formattedDate = ref('');
+
+const slotsData = ref({
+  user_id: "212409004",
+  date: ""
+})
+
 const handleDateClick = (info) => {
   // `info.date` gives the clicked date
   clickedDate.value = info.date;
   console.log('Clicked date:', clickedDate);
+  // getSlots();
 
   // Format the date and update appointmentData
-  const formattedDate = formatDate(clickedDate.value);
-  appointmentData.value.appointment_date = formattedDate;
-console.log('Formatted date:', formattedDate);
+  formattedDate.value = formatDate(clickedDate.value);
+  appointmentData.value.appointment_date = formattedDate.value;
+  slotsData.value.date = formattedDate.value;
+  console.log('Formatted date:', formattedDate);
+  getSlots();
   // Perform any other action, e.g., open a modal or add an event
   show.value = true;
 };
@@ -39,31 +48,10 @@ console.log('Formatted date:', formattedDate);
 const close = () => {
   show.value = false
 }
-// const show = ref(false)
-const dateOption = ref({
-  mode: 'range'
-})
-const timeOption = ref({
-  enableTime: true,
-  noCalendar: true,
-  dateFormat: 'H:i'
-})
-// Local variable for the selected time range
-const selectedTime = ref('');
-// Function to update start_time and end_time based on the selected option
-const updateTimes = () => {
-  if (selectedTime.value) {
-    const times = selectedTime.value.split('-');
-    appointmentData.value.start_time = `${times[0]}:00`;  // Set the start time (e.g., "10:00")
-    appointmentData.value.end_time = `${times[1]}:00`;    // Set the end time (e.g., "12:00")
-  } else {
-    appointmentData.value.start_time = null;
-    appointmentData.value.end_time = null;
-  }
-};
+
 // Define your form data
 const appointmentData = ref({
-  user_id: "212408001",
+  user_id: "212409004",
   appointment_date: "",
   start_time: "",
   end_time: "",
@@ -75,11 +63,59 @@ const appointmentData = ref({
 });
 
 //time range as slots for the appointment from the api
-const slots = ref([]);
 
+const timeSlots = ref([]);
+const apiResponse = ref([]);
+
+;
+
+
+// Function to fetch slots from the API
+const getSlots = async () => {
+  try {
+    const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
+
+    // Update the `apiResponse` ref with the response data
+    apiResponse.value = response.data.dataPayload.data.slots;
+
+    // Log the API response to verify
+    console.log('Slots (from API):', apiResponse.value);
+
+    // Set all slots to `selected: false`
+    const slotsWithSelected = apiResponse.value.map(slot => ({
+      ...slot,
+      selected: false
+    }));
+
+    // Update `timeSlots`
+    timeSlots.value = slotsWithSelected;
+
+  } catch (error) {
+    console.error('Error getting slots:', error);
+  }
+};
+
+// Call `getSlots` when the component is mounted
 onMounted(() => {
-  getBookedSlots();
 });
+
+// Method to update time slots
+const updateTimeSlots = (updatedSlots) => {
+  timeSlots.value = updatedSlots;
+};
+
+// Handle selected slots
+
+const handleSelectedSlotsTimes = (selectedTimes) => {
+  console.log('Selected Slots Times:', selectedTimes.startTime);
+
+  appointmentData.value.start_time = selectedTimes.startTime;
+  appointmentData.value.end_time = selectedTimes.endTime;
+
+  console.log('Updated appointmentData:', appointmentData.value);
+
+};
+
 
 // Function to send the POST request
 const submitAppointment = async () => {
@@ -88,7 +124,7 @@ const submitAppointment = async () => {
     console.log('Appointment data:', appointmentData.value);
     const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
     console.log('Response:', response.data);
-    alert(response.data.dataPayload.data.message);
+    alert(response.data.toastPayload.data.toastMessage);
 
     close();
     // Handle the success response here (e.g., showing a success message)
@@ -97,9 +133,6 @@ const submitAppointment = async () => {
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
 
       const errorDetails = error.response.data.errorPayload.errors;
-      // console.log("Validation error details:", errorDetails);
-      console.log('Errors:', errors.value.email_address);
-      console.log('Errors:', errors.value.start_time);
       errors.value.contact_name = errorDetails.contact_name || '';
       errors.value.email_address = errorDetails.email_address || '';
       errors.value.mobile_number = errorDetails.mobile_number || '';
@@ -108,27 +141,9 @@ const submitAppointment = async () => {
       errors.value.description = errorDetails.description || '';
       errors.value.start_time = errorDetails.start_time || '';
     }
-    // console.error('Error submitting appointment:', error);
-    // Handle the error response here (e.g., showing an error message)
   }
 };
-//function to get booked slots
-//run the function on page load
-const getBookedSlots = async () => {
-  try {
-    const response = await axiosInstance.get('/v1/scheduler/appointments');
-    slots.value = response.data.dataPayload.data;
-    console.log('Slots:', slots.value);
 
-
-    console.log("rime", response)
-    // Handle the success response here (e.g., showing a success message)
-  } catch (error) {
-    console.error('Error submitting appointment:', error);
-    // Handle the error response here (e.g., showing an error message)
-  }
-};
-// console.log('Events2:', events3);
 </script>
 
 
@@ -197,14 +212,15 @@ const getBookedSlots = async () => {
       </b-card>
     </b-col>
   </b-row>
-  <b-modal v-model="show" title="Add Appointment" hide-footer>
+  <b-modal v-model="show" title="Add Appointment" class="modal-fullscreen my-modal" no-close-on-backdrop 
+  no-close-on-esc size="xl" hide-footer>
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
         <input type="hidden" name="appointment_type" />
         <div class="w-100" id="v-pills-tabContent">
-          <div class="fade active show" id="-3">
-            <b-row class="g-3 align-items-center form-group">
+          <div class="fade active show m-5" id="-3">
+            <b-row class=" align-items-center form-group">
               <b-col cols="2">
                 <label for="addcontactname" class="col-form-label">Name</label>
               </b-col>
@@ -244,21 +260,6 @@ const getBookedSlots = async () => {
                 <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
               </b-col>
             </b-row>
-
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="addtime" class="col-form-label">Time</label>
-              </b-col>
-              <b-col cols="10">
-                <select v-model="selectedTime" @change="updateTimes" name="service" class="form-select" id="addtime">
-                  //loop through the slots to get the time range
-                  <option value="">Select Time</option>
-                  <option v-for="slot in slots" :value="slot.time_range">{{ slot.time_range }}</option>
-                </select>
-                <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
-              </b-col>
-            </b-row>
-
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
                 <label for="addappointmenttype" class="col-form-label">
@@ -276,30 +277,20 @@ const getBookedSlots = async () => {
                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
               </b-col>
             </b-row>
-
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="addlocation" class="col-form-label">
-                  <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
-                </label>
+            <b-row class="g-3 align-items-center form-group mt-5 mb-5 p-2">
+              <b-col cols="7">
+                <h3> select time</h3>
+                <!-- make a key for the colors of the time slots -->
+                
               </b-col>
-              <b-col cols="10">
-                <input type="text" id="addlocation" v-model="appointmentData.location" class="form-control" />
-                <div v-if="errors.location" class="error" aria-live="polite">{{ errors.location }}</div>
-              </b-col>
-            </b-row>
-
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="adddescription" class="col-form-label">
-                  <icon-component type="outlined" icon-name="pencil-alt" :size="24"></icon-component>
-                </label>
-              </b-col>
-              <b-col cols="10">
-                <textarea name="description" id="adddescription" v-model="appointmentData.description"
-                  class="form-control" rows="3" placeholder="Description" spellcheck="false"></textarea>
-                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
-              </b-col>
+              <b-col> <span class="dot bg-primary"></span></b-col>
+              <b-row class="justify-content-center align-items-center">
+                <b-col md="12" lg="8">
+                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots"
+                    @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                </b-col>
+              </b-row>
+              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
             </b-row>
           </div>
         </div>
@@ -322,5 +313,12 @@ const getBookedSlots = async () => {
 .error {
   color: red;
   font-size: 0.9em;
+}
+
+.dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
 }
 </style>
