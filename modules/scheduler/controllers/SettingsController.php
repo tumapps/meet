@@ -31,7 +31,13 @@ class SettingsController extends \helpers\ApiController{
     public function actionView($id)
     {
         // Yii::$app->user->can('schedulerSettingsView');
-        return $this->payloadResponse($this->findModel($id));
+        $setting_id = Settings::getSettingId($id);
+
+        if(!$setting_id) {
+            return $this->payloadResponse(['message' => 'Settings Not Found for the current User']);
+        }
+
+        return $this->payloadResponse($this->findModel($setting_id->id));
     }
 
     public function actionCreate()

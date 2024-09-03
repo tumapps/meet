@@ -100,6 +100,16 @@ class Settings extends BaseModel
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
 
+    /**
+     * Gets setting id for the user [[User]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public static function getSettingId($user_id)
+    {
+        return self::findOne(['user_id' => $user_id]);
+    }
+
     public static function getWorkingHours($user_id)
     {
         $hours = self::find()
