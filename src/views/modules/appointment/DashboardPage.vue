@@ -54,27 +54,40 @@ const sortedData = computed(() => {
 
 onMounted(async () => {
     //fetch appointments and slots and unavailable slots
-    getSlot();
+    getAppointment();
 });
 
 const timeline = ref([])
-
 //get from api
-const getSlot = async () => {
+const getAppointment = async () => {
     try {
         const response = await axiosInstance.get('v1/scheduler/appointments');
         //check if data is array
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
-        console.log("chechtable", tableData.value.length)
         timeline.value = response.data.dataPayload.data;
+        console.log("data", tableData.value);
     } catch (error) {
         console.error(error);
     }
 
 };
+//cancel appointment
+const cancelAppointment = async (id) => {
+    try {
+        const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
+        console.log(response);
+            getAppointment();
+            alert('Appointment cancelled successfully');
+    } catch (error) {
+        console.error(error);
+    }
+};
 
 const username = localStorage.getItem('user.username');
+const goToPage = (id) => {
+  router.push({ name: 'appointment', params: { id } }); // Navigate with dynamic id
+};
 // data table end
 </script>
 <template>
@@ -286,13 +299,13 @@ const username = localStorage.getItem('user.username');
                                 <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
                                         }}</span></td>
                                 <td>
-                                    <button type="button" class="btn btn-outline-primary btn-sm">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @click="goToPage(item.id)">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <!-- <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
                                         <i class="fas fa-edit"></i>
                                     </button> -->
-                                    <button class="btn btn-outline-danger btn-sm" @click="toggleDelete">
+                                    <button class="btn btn-outline-danger btn-sm" @click="cancelAppointment(item.id)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

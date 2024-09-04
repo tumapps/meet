@@ -1,9 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import AxiosInstance from '@/api/axios';
-import { param } from 'jquery';
+import { useRoute } from 'vue-router';
 
 const axiosInstance = AxiosInstance();
+
+const route = useRoute();
 
 onMounted(() => {
   fetchSettings();
@@ -17,25 +19,27 @@ const timeOptions = ref([
   '15:00', '16:00', '17:00', '18:00'
 ]);
 
-const user_id = 1;
+const user_id = ref('212409004');
+const appointment_id = ref('');
 
 // Initial settings data
 const settings = ref({
-  user_id: user_id,
+  user_id: user_id.value,
   start_time: '',
   end_time: '',
   booking_window: '',
   slot_duration: '',
   advanced_booking: '',
+
 });
+
 
 
 
 //fetch user settings
 const fetchSettings = async () => {
   try {
-    const response = await axiosInstance.get(`v1/scheduler/settings/${user_id}`
-    );
+    const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`);
     console.log(response.data.dataPayload.data);
 
     settings.value = {
@@ -45,8 +49,8 @@ const fetchSettings = async () => {
       slot_duration: response.data.dataPayload.data.slot_duration,
       advanced_booking: response.data.dataPayload.data.advanced_booking,
     };
+    appointment_id.value = response.data.dataPayload.data.id;
 
-    appointment_id.value = response.data.dataPayload.data.appointment_id;
 
 
     if (response.data.dataPayload && !response.data.dataPayload.error) {
@@ -62,7 +66,7 @@ const fetchSettings = async () => {
 // Function to save settings (add API or local storage logic here)
 const saveSettings = async () => {
   try {
-    const response = await axiosInstance.put('v1/scheduler/settings', settings.value);
+    const response = await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value);
     console.log(response.data.datapaylaod.data);
 
     if (response.data.datapaylaod && !response.data.datapaylaod.error) {

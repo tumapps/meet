@@ -20,7 +20,14 @@ const emit = defineEmits(['onDateSelect'])
 
 // Event handlers
 const handleDateSelect = (e) => {
-  emit('onDateSelect', e)
+  // Check if date is valid (not in the past)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Set time to 00:00:00 to avoid time comparison issues
+  if (e.date >= today) {
+    emit('onDateSelect', e) // Emit date if it's today or in the future
+  } else {
+    alert('You cannot select past dates.')
+  }
 }
 
 const handleEventSelect = (e) => {
@@ -48,6 +55,9 @@ const options = {
   dayMaxEvents: true,
   select: handleEventSelect,
   dateClick: handleDateSelect,
+  validRange: {
+    start: new Date() // Disables past dates
+  },
   events: props.events
 }
 </script>

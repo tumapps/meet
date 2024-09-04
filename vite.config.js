@@ -23,10 +23,8 @@ export default defineConfig({
       // Proxy configuration for the first API
       '/v1': {
         // target: 'https://api.crackit.co.ke/',
-        target: 'http://127.0.0.1/projects/vc/vc_scheduler/',
-        // target: 'http://127.0.0.1/demos/yii2/afya365-endpoints/',
-        // target: 'http://127.0.0.1/demos/yii2/afy365/',
-
+        target: 'http://127.0.0.1/projects/vc/vc_scheduler/',      // target: 'http://127.0.0.1/demos/yii2/afya365-endpoints/',
+        // target: 'http://127.0.0.1/demos/yii2/
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api from the path
       },

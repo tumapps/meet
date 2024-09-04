@@ -1,19 +1,25 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import createAxiosInstance from '@/api/axios';
-import PageHeader from '@/components/custom/header/PageHeader.vue'
 import FullCalender from '@/components/custom/calender/FullCalender.vue'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 
 const axiosInstance = createAxiosInstance();
-const errors = ref({ contact_name: '', email_address: '', start_time: '', mobile_number: '', subject: '', appointment_type: '', description: '' });
+const errors = ref({
+  contact_name: '',
+  email_address: '',
+  start_time: '',
+  mobile_number: '',
+  subject: '',
+  appointment_type: '',
+  description: ''
+});
 const events = ref([]);
 const show = ref(false)
 const clickedDate = ref('');
 // Function to handle the dateClick event
-
 const formatDate = (date) => {
-  if (!date) return '';
+  if (!(date instanceof Date)) return '';
 
   const year = date.getFullYear().toString(); // Get last 2 digits of the year
   const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
@@ -32,14 +38,10 @@ const slotsData = ref({
 const handleDateClick = (info) => {
   // `info.date` gives the clicked date
   clickedDate.value = info.date;
-  console.log('Clicked date:', clickedDate);
-  // getSlots();
-
   // Format the date and update appointmentData
   formattedDate.value = formatDate(clickedDate.value);
   appointmentData.value.appointment_date = formattedDate.value;
   slotsData.value.date = formattedDate.value;
-  console.log('Formatted date:', formattedDate);
   getSlots();
   // Perform any other action, e.g., open a modal or add an event
   show.value = true;
@@ -48,7 +50,6 @@ const handleDateClick = (info) => {
 const close = () => {
   show.value = false
 }
-
 // Define your form data
 const appointmentData = ref({
   user_id: "212409004",
@@ -61,77 +62,81 @@ const appointmentData = ref({
   subject: "",
   appointment_type: ""
 });
-
 //time range as slots for the appointment from the api
-
 const timeSlots = ref([]);
 const apiResponse = ref([]);
-
-;
-
-
 // Function to fetch slots from the API
 const getSlots = async () => {
   try {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
-
     // Update the `apiResponse` ref with the response data
     apiResponse.value = response.data.dataPayload.data.slots;
-
-    // Log the API response to verify
-    console.log('Slots (from API):', apiResponse.value);
-
     // Set all slots to `selected: false`
     const slotsWithSelected = apiResponse.value.map(slot => ({
       ...slot,
       selected: false
     }));
-
     // Update `timeSlots`
     timeSlots.value = slotsWithSelected;
-
   } catch (error) {
     console.error('Error getting slots:', error);
   }
 };
 
+//get appointments to fill calendar
+const getAppointment = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/appointments');
+
+    events.value = response.data.dataPayload.data.map(event => ({
+      id: event.id,
+      title: event.subject || event.appointment_type,
+      start: `${event.appointment_date}T${event.start_time}`,
+      end: `${event.appointment_date}T${event.end_time}`,
+      description: event.appointment_type,
+      backgroundColor: '#007bff'
+    }));
+
+    console.log('Events:', events.value);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 // Call `getSlots` when the component is mounted
 onMounted(() => {
+  getAppointment();
 });
-
 // Method to update time slots
 const updateTimeSlots = (updatedSlots) => {
   timeSlots.value = updatedSlots;
 };
-
 // Handle selected slots
 
 const handleSelectedSlotsTimes = (selectedTimes) => {
-  console.log('Selected Slots Times:', selectedTimes.startTime);
-
-  appointmentData.value.start_time = selectedTimes.startTime;
-  appointmentData.value.end_time = selectedTimes.endTime;
-
-  console.log('Updated appointmentData:', appointmentData.value);
-
+  appointmentData.value.start_time = selectedTimes?.startTime || '';
+  appointmentData.value.end_time = selectedTimes?.endTime || '';
 };
-
 
 // Function to send the POST request
 const submitAppointment = async () => {
   try {
     // isLoading.value = true;
-    console.log('Appointment data:', appointmentData.value);
     const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
-    console.log('Response:', response.data);
-    alert(response.data.toastPayload.data.toastMessage);
 
+    // the sweetalert plugin
+this.$showAlert({
+  title: 'Success',
+  message: 'Appointment booked successfully',
+  variant: 'success'
+});
+    
     close();
     // Handle the success response here (e.g., showing a success message)
   } catch (error) {
     console.error('Error submitting appointment:');
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-
       const errorDetails = error.response.data.errorPayload.errors;
       errors.value.contact_name = errorDetails.contact_name || '';
       errors.value.email_address = errorDetails.email_address || '';
@@ -146,13 +151,12 @@ const submitAppointment = async () => {
 
 </script>
 
-
 <template>
   <b-row>
     <b-col md="12">
       <page-header title="Book Appointment">
         <b-button variant="primary me-1">Back</b-button>
-        <b-button variant="warning ms-2" @click="show = true">
+        <b-button variant="warning ms-2" @click="show.value = true">
           <icon-component type="solid" icon-name="plus" :size="20"></icon-component>
           <span class="ms-1">Book Appointment</span>
         </b-button>
@@ -212,8 +216,8 @@ const submitAppointment = async () => {
       </b-card>
     </b-col>
   </b-row>
-  <b-modal v-model="show" title="Add Appointment" class="modal-fullscreen my-modal" no-close-on-backdrop 
-  no-close-on-esc size="xl" hide-footer>
+  <b-modal v-model="show" title="Add Appointment" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc
+    size="xl" hide-footer>
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
@@ -281,7 +285,7 @@ const submitAppointment = async () => {
               <b-col cols="7">
                 <h3> select time</h3>
                 <!-- make a key for the colors of the time slots -->
-                
+
               </b-col>
               <b-col> <span class="dot bg-primary"></span></b-col>
               <b-row class="justify-content-center align-items-center">

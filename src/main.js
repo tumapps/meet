@@ -20,6 +20,8 @@ import globalComponent from './plugins/global-components'
 import globalDirective from './plugins/global-directive'
 import globalMixin from './plugins/global-mixin'
 import axiosPlugin from './plugins/axiosPlugin'
+import globalUtils from '@/utilities/globalUtils'
+import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
 import { createPinia } from 'pinia'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
@@ -39,5 +41,7 @@ app.use(globalComponent)
 app.use(globalDirective)
 app.mixin(globalMixin)
 app.use(axiosPlugin)
+app.use(sweetAlertPlugin)
+app.config.globalProperties.$utils = globalUtils
 app.mount('#app')
 export default app

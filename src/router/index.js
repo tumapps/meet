@@ -87,6 +87,12 @@ const routes = [
       requiresAuth: true // Add meta field to indicate protected route
     }
   },
+  {
+    path: '/appointment/:id',
+    name: 'appointment',
+    meta: { requiresAuth: true, },
+    component: () => import('@/views/modules/appointment/Appointment.vue'),
+  },
   ...authRoutes,
 ]
 
