@@ -111,7 +111,7 @@ const AxiosInstance = () => {
                         refreshAndRetryQueue.push({ config: originalRequest, resolve, reject })
                     })
                 }
-                if (statusCode === 440) {
+                if (response.data.errorPayload.errors.statusCode === 440) {
                     console.error('Session expired or token issue. Handle accordingly.')
                     localStorage.removeItem('user.token');
                     router.push({ path: `/auth/login` })

@@ -1,10 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, getCurrentInstance } from 'vue';
 import AxiosInstance from '@/api/axios';
 import { useRoute } from 'vue-router';
 
 const axiosInstance = AxiosInstance();
-
+const proxy = getCurrentInstance();
 const route = useRoute();
 
 onMounted(() => {
@@ -12,7 +12,6 @@ onMounted(() => {
 });
 //errors 
 const errors = ref({ start_time: '', end_time: '', booking_window: '', slot_duration: '', advanced_booking: '' });
-
 // Time options for select dropdown
 const timeOptions = ref([
   '08:00 ', '09:00 ', '10:00 ', '11:00', '12:00', '13:00', '14:00',
@@ -21,7 +20,6 @@ const timeOptions = ref([
 
 const user_id = ref('212409004');
 const appointment_id = ref('');
-
 // Initial settings data
 const settings = ref({
   user_id: user_id.value,
@@ -30,11 +28,7 @@ const settings = ref({
   booking_window: '',
   slot_duration: '',
   advanced_booking: '',
-
 });
-
-
-
 
 //fetch user settings
 const fetchSettings = async () => {
@@ -51,15 +45,19 @@ const fetchSettings = async () => {
     };
     appointment_id.value = response.data.dataPayload.data.id;
 
-
-
     if (response.data.dataPayload && !response.data.dataPayload.error) {
-      alert('Settings fetched successfully!');
-    } else {
-      alert('An unexpected error occurred.');
+      proxy.$showAlert({
+    title: 'Settings fetched successfully',
+    text: 'Your appointment has been booked successfully!',
+    icon: 'success',
+  });
     }
   } catch (error) {
-    console.error("An unexpected error occurred:", error);
+    proxy.$showToast({
+    title: 'An error occurred ',
+    text: 'an error has occured while getting your settings!',
+    icon: 'success',
+  });
   }
 }
 

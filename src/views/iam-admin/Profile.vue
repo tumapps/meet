@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import CreateAxiosInstance from '@/api/axios.js'
 
 const axiosInstance = CreateAxiosInstance();
-const errors = ref({ username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '' });
+const errors = ref({ username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '', oldPassword: '' });
 
 const username = ref("");
 const password = ref("");
@@ -13,16 +13,17 @@ const middle_name = ref("");
 const last_name = ref("");
 const mobile_number = ref("");
 const email_address = ref("");
+const oldPassword = ref("");
 
 onMounted(() => {
     getProfile();
 });
 
+const user_id = ref(212409004);
 
 const getProfile = async () => {
     try {
-        const response = await axiosInstance.get('v1/auth/profile-view');
-        console.log(response.data);
+        const response = await axiosInstance.get('/v1/auth/profile-view');
         username.value = response.data.dataPayload.data.username;
         first_name.value = response.data.dataPayload.data.first_name;
         middle_name.value = response.data.dataPayload.data.middle_name;
@@ -38,7 +39,7 @@ const getProfile = async () => {
 }
 
 const updateProfile = async () => {
-    errors.value = { username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '' };
+    errors.value = { username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: ''};
     try {
         const response = await axiosInstance.put('v1/auth/profile-update', {
             username: username.value,
@@ -77,11 +78,12 @@ const updateProfile = async () => {
 }
 
 const updatePassword = async () => {
-    errors.value = { password: '', confirm_password: '' };
+    errors.value = { password: '', confirm_password: '', oldPassword: ''  };
     try {
         const response = await axiosInstance.post('v1/auth/update-password', {
             password: password.value,
             confirm_password: confirm_password.value,
+            oldPassword: oldPassword.value
         });
 
         if (response.data.dataPayload && !response.data.dataPayload.error) {
@@ -215,6 +217,13 @@ const updatePassword = async () => {
                         <div class="">
                             <form @submit.prevent="updatePassword" class="mt-5">
                                 <div class="row">
+                                    <b-col md="6" lg="7" class="form-group">
+                                        <label class="form-label" for="pass"> Current Password:</label>
+                                        <input v-model="oldPassword" type="password" class="form-control" id="pass"
+                                            placeholder="Password" />
+                                        <div v-if="errors.oldPassword" class="error" aria-live="polite">{{ errors.password
+                                            }}</div>
+                                    </b-col>
                                     <b-col md="6" class="form-group">
                                         <label class="form-label" for="pass">Password:</label>
                                         <input v-model="password" type="password" class="form-control" id="pass"

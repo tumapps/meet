@@ -1,10 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import createAxiosInstance from '@/api/axios';
 import FullCalender from '@/components/custom/calender/FullCalender.vue'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 
 const axiosInstance = createAxiosInstance();
+const { proxy } = getCurrentInstance();
+
+function triggerAlert() {
+  proxy.$showAlert({
+    title: 'Custom Alert',
+    text: 'This is a global alert!',
+    icon: 'info',
+  });
+}
 const errors = ref({
   contact_name: '',
   email_address: '',
@@ -126,16 +135,21 @@ const submitAppointment = async () => {
     const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
 
     // the sweetalert plugin
-this.$showAlert({
-  title: 'Success',
-  message: 'Appointment booked successfully',
-  variant: 'success'
-});
+    proxy.$showAlert({
+    title: 'Booked Successfully',
+    text: 'Your appointment has been booked successfully!',
+    icon: 'success',
+
+  });
     
     close();
     // Handle the success response here (e.g., showing a success message)
   } catch (error) {
-    console.error('Error submitting appointment:');
+    proxy.$showAlert({
+    title: 'Failed',
+    text: 'An error occurred while booking the appointment. Please try again!',
+    icon: 'danger',
+  });
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors;
       errors.value.contact_name = errorDetails.contact_name || '';
@@ -155,6 +169,7 @@ this.$showAlert({
   <b-row>
     <b-col md="12">
       <page-header title="Book Appointment">
+        <button @click="triggerAlert">Show Alert</button>
         <b-button variant="primary me-1">Back</b-button>
         <b-button variant="warning ms-2" @click="show.value = true">
           <icon-component type="solid" icon-name="plus" :size="20"></icon-component>

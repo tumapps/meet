@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue';
-import { useRoute } from 'vue-router';
+import {  useRoute, useRouter } from 'vue-router';
 import AxiosInstance from '@/api/axios';
-// import globalUtils from '../../../utilities/globalUtils';
 
 const axiosInstance = AxiosInstance();
+const { proxy } = getCurrentInstance();
 // Get route parameter using useRoute
 const route = useRoute();
+const router = useRouter();
 // Access the global utility function using getCurrentInstance
 const { appContext } = getCurrentInstance();
 const globalUtils = appContext.config.globalProperties.$utils;
@@ -85,22 +86,31 @@ const updateAppointment = async () => {
 
         const response = await axiosInstance.put(`/v1/scheduler/appointments/${route.params.id}`, updatedAppointmentDetails.value);
 
-        if (response.data.dataPayload && !response.data.errorPayload) {
-            globalUtils.showSuccessToast('Appointment updated successfully');
-        }
+        proxy.$showAlert({
+    title: 'success',
+    text: 'Your appointment details have been updated successfully!',
+    icon: 'success',
+  });
 
     } catch (error) {
-        console.log(error);
+        proxy.$showAlert({
+    title: 'Failed',
+    text: 'It seems there was an error updating your appointment details. Please try again!',
+    icon: 'danger',
+  });
         errorDetails.value = error.response.data.errorPayload.errors;
     }
 }
 
 onMounted(() => {
     getAppointment();
-    
 
 });
 
+//go back to prvoius page
+const goBack = () => {
+    router.go(-1);
+}
 
 </script>
 <template>
@@ -208,7 +218,7 @@ onMounted(() => {
                         </b-form-group>
                         <div class="d-flex justify-content-center">
                             <b-button variant="primary" class="me-1" @click="updateAppointment">Update</b-button>
-                            <b-button variant="danger">Cancel</b-button>
+                            <b-button variant="danger" @click="goBack">Back</b-button>
                         </div>
                     </b-form>
                 </b-card-body>
@@ -318,7 +328,7 @@ onMounted(() => {
                         </b-form-group>
                         <div class="d-flex justify-content-center">
                             <b-button variant="primary" class="me-1">Submit</b-button>
-                            <b-button variant="danger">Cancel</b-button>
+                            <b-button variant="danger">go back</b-button>
                         </div>
                     </b-form>
                 </b-card-body>

@@ -77,8 +77,8 @@ const cancelAppointment = async (id) => {
     try {
         const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
         console.log(response);
-            getAppointment();
-            alert('Appointment cancelled successfully');
+        getAppointment();
+        alert('Appointment cancelled successfully');
     } catch (error) {
         console.error(error);
     }
@@ -86,7 +86,7 @@ const cancelAppointment = async (id) => {
 
 const username = localStorage.getItem('user.username');
 const goToPage = (id) => {
-  router.push({ name: 'appointment', params: { id } }); // Navigate with dynamic id
+    router.push({ name: 'appointment', params: { id } }); // Navigate with dynamic id
 };
 // data table end
 </script>
@@ -135,79 +135,70 @@ const goToPage = (id) => {
                     </div>
                 </div>
             </b-card>
-            <b-row>
-                <b-col lg="4" md="4">
-                    <b-card>
-                        <div class="text-center">AVG Engagements Rate</div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <div>
-                                <h2><count-up ref="counter" :startVal='0' :endval='2.648' :duration="3"
-                                        decimalSeparator="." :decimals="3"></count-up></h2>
-                                26.84%
-                            </div>
-                            <div class="border bg-info-subtle rounded p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                </svg>
-                            </div>
+            <b-row class="d-flex flex-nowrap  overflow-auto">
+                <b-card class="me-2 statistics-card">
+                    <div class="text-center">AVG Engagements Rate</div>
+                    <div class="d-flex align-items-center justify-content-between mt-3">
+                        <div>
+                            <h2><vue3-autocounter ref="counter" :startAmount='0' :endAmount='2.648' :duration="3" decimalSeparator='.' :decimals='2' :autoinit='true'/></h2>
+
                         </div>
-                        <div class="mt-4">
-                            <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
-                                <b-progress-bar :value="70" variant="info"></b-progress-bar>
-                            </b-progress>
+                        <div class="border bg-info-subtle rounded p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
                         </div>
-                    </b-card>
-                </b-col>
-                <b-col lg="4" md="4">
-                    <b-card>
-                        <div class="text-center">AVG Engagements Rate</div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <div>
-                                <h2><count-up ref="counter" :startVal=0 :endval=2.648 :duration="3" decimalSeparator="."
-                                        :decimals="3"></count-up></h2>
-                                26.84%
-                            </div>
-                            <div class="border bg-info-subtle rounded p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                </svg>
-                            </div>
+                    </div>
+                    <div class="mt-4">
+                        <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
+                            <b-progress-bar :value="70" variant="info"></b-progress-bar>
+                        </b-progress>
+                    </div>
+                </b-card>
+
+                <b-card class="me-2 statistics-card">
+                    <div class="text-center">AVG Engagements Rate</div>
+                    <div class="d-flex align-items-center justify-content-between mt-3">
+                        <div>
+                            <h2><vue3-autocounter ref="counter" :startAmount='0' :endAmount='2.648' :duration="3" decimalSeparator='.' :decimals='2' :autoinit='true'/></h2>
                         </div>
-                        <div class="mt-4">
-                            <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
-                                <b-progress-bar :value="70" variant="info"></b-progress-bar>
-                            </b-progress>
+                        <div class="border bg-info-subtle rounded p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
                         </div>
-                    </b-card>
-                </b-col>
-                <b-col lg="4" md="4">
-                    <b-card>
-                        <div class="text-center">AVG Engagements Rate</div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <div>
-                                <h2><count-up ref="counter" :startVal='0' :endval='2.648' :duration="3"
-                                        decimalSeparator="." :decimals="3"></count-up></h2>
-                                26.84%
-                            </div>
-                            <div class="border bg-info-subtle rounded p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                </svg>
-                            </div>
+                    </div>
+                    <div class="mt-4">
+                        <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
+                            <b-progress-bar :value="70" variant="info"></b-progress-bar>
+                        </b-progress>
+                    </div>
+                </b-card>
+                <b-card class="me-2 statistics-card">
+                    <div class="text-center">Cancelled </div>
+                    <div class="d-flex align-items-center justify-content-between mt-3">
+                        <div>
+                            <h2><vue3-autocounter ref="counter" :startAmount='0' :endAmount='2.648' :duration="3" decimalSeparator='.' :decimals='2' :autoinit='true'/></h2>
                         </div>
-                        <div class="mt-4">
-                            <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
-                                <b-progress-bar :value="70" variant="info"></b-progress-bar>
-                            </b-progress>
+                        <div class="border bg-info-subtle rounded p-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
                         </div>
-                    </b-card>
-                </b-col>
+                    </div>
+                    <div class="mt-4">
+                        <b-progress :max="0" class="progress bg-info-subtle shadow-none w-100" height="6px">
+                            <b-progress-bar :value="70" variant="info"></b-progress-bar>
+                        </b-progress>
+                    </div>
+                </b-card>
+
             </b-row>
         </b-col>
 
@@ -224,7 +215,7 @@ const goToPage = (id) => {
                         </p>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body card-body-scrollable">
                     <div class="d-flex profile-media align-items-top mb-3" v-for="(item, index) in timeline"
                         :key="index">
                         <div class="profile-dots-pills border-primary"></div>
@@ -239,11 +230,11 @@ const goToPage = (id) => {
             </div>
         </b-col>
     </b-row>
-    <b-row class="m-3 w-100">
+    <!-- <b-row class="m-3 w-100">
         <b-col lg="12">
             <div class="mb-5 mt-3 bg-white h-75 rounded">
                 <div class="d-flex justify-content-between align-items-center py-5">
-                    <!-- Search Box with Icon -->
+                    <!-- Search Box with Icon -
                     <div class="flex mx-auto position-relative w-25">
                         <input type="text" v-model="searchQuery" class="form-control rounded-pill ps-5"
                             placeholder="Search..." />
@@ -251,7 +242,7 @@ const goToPage = (id) => {
                             class="fas fa-search position-absolute top-50 start-0 translate-middle-y text-muted ps-3"></i>
                     </div>
 
-                    <!-- Add Appointment Button -->
+                    <!-- Add Appointment Button --
                     <button class="btn btn-outline-primary rounded-pill mx-5" @click="addAppointment">
                         + Appointment
                     </button>
@@ -304,24 +295,24 @@ const goToPage = (id) => {
                                     </button>
                                     <!-- <button class="btn btn-outline-warning btn-sm" @click="editAppointment(item)">
                                         <i class="fas fa-edit"></i>
-                                    </button> -->
+                                    </button> --
                                     <button class="btn btn-outline-danger btn-sm" @click="cancelAppointment(item.id)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
                         </template>
-                        <tr v-else>
-                            <td colspan="5" class="text-center">
-                                No data to display
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </b-card>
+<tr v-else>
+    <td colspan="5" class="text-center">
+        No data to display
+    </td>
+</tr>
+</tbody>
+</table>
+</div>
+</b-card>
 
-    </b-col>
+</b-col> -->
 </template>
 
 <style scoped>
@@ -332,9 +323,7 @@ const goToPage = (id) => {
 
 .borderless-btn {
     border: none !important;
-    /* Remove the border */
     box-shadow: none;
-    /* Remove any button shadow */
 }
 
 h1 {
@@ -361,5 +350,33 @@ h1 {
 .btn {
     margin-right: 0.5rem;
     /* Adds gap between buttons */
+}
+
+.card-body-scrollable {
+    overflow-y: auto;
+}
+
+/* For extra large screens (xl) */
+@media (min-width: 1200px) {
+    .card-body-scrollable {
+        max-height: 49vh !important;
+    }
+}
+
+/* For large screens (lg) */
+@media (min-width: 992px) {
+    .card-body-scrollable {
+        max-height: 49vh!important;
+    }
+}
+
+/* For medium screens (md) */
+@media (min-width: 768px) {
+    .card-body-scrollable {
+        max-height: 52vh!important;
+    }
+}
+.statistics-card {
+    max-width: 33%;
 }
 </style>

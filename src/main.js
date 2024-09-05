@@ -21,7 +21,9 @@ import globalDirective from './plugins/global-directive'
 import globalMixin from './plugins/global-mixin'
 import axiosPlugin from './plugins/axiosPlugin'
 import globalUtils from '@/utilities/globalUtils'
+import { showAlert, showToast } from '@/utilities/sweetAlert';
 import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
+import Vue3Autocounter from 'vue3-autocounter';
 import { createPinia } from 'pinia'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
@@ -30,7 +32,7 @@ const app = createApp(App)
 const pinia = createPinia()
 //fontawesome
 app.component('font-awesome-icon', FontAwesomeIcon)
-// app.component('vue3-autocounter', Vue3Autocounter)
+app.component('vue3-autocounter', Vue3Autocounter)
 //router
 app.use(router).use(pinia)
 // Library Components
@@ -42,6 +44,9 @@ app.use(globalDirective)
 app.mixin(globalMixin)
 app.use(axiosPlugin)
 app.use(sweetAlertPlugin)
-app.config.globalProperties.$utils = globalUtils
+// Make functions globally accessible
+app.provide('showAlert', showAlert)
+app.provide('showToast', showToast)
+app.config.globalProperties.$utils = globalUtils;
 app.mount('#app')
 export default app
