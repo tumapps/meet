@@ -11,7 +11,8 @@ use scheduler\models\searches\SettingsSearch;
  *     description="Available endpoints for Settings model"
  * )
  */
-class SettingsController extends \helpers\ApiController{
+class SettingsController extends \helpers\ApiController
+{
     public $permissions = [
         'schedulerSettingsList'=>'View Settings List',
         'schedulerSettingsCreate'=>'Add Settings',

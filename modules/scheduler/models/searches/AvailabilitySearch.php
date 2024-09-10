@@ -18,7 +18,7 @@ class AvailabilitySearch extends Availability
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['start_date', 'end_date', 'start_time', 'end_time', 'description', 'created_at', 'updated_at'], 'safe'],
+            [['start_date', 'end_date', 'is_deleted','start_time', 'end_time', 'description', 'created_at', 'updated_at'], 'safe'],
             [['is_full_day'], 'boolean'],
         ];
     }
@@ -64,6 +64,7 @@ class AvailabilitySearch extends Availability
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'start_time' => $this->start_time,
+            'is_deleted' => false,
             'end_time' => $this->end_time,
             'is_full_day' => $this->is_full_day,
             'created_at' => $this->created_at,

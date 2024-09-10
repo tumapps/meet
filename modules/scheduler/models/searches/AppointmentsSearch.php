@@ -18,7 +18,7 @@ class AppointmentsSearch extends Appointments
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['appointment_date', 'start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'is_deleted','start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -61,6 +61,7 @@ class AppointmentsSearch extends Appointments
             'id' => $this->id,
             'user_id' => $this->user_id,
             'appointment_date' => $this->appointment_date,
+            // 'is_deleted' => false,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'created_at' => $this->created_at,

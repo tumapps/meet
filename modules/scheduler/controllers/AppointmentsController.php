@@ -24,6 +24,7 @@ class AppointmentsController extends \helpers\ApiController{
         'schedulerAppointmentsDelete'=>'Delete Appointments',
         'schedulerAppointmentsRestore'=>'Restore Appointments',
         ];
+        
     public function actionIndex()
     {
         // Yii::$app->user->can('schedulerAppointmentsList');
@@ -183,6 +184,8 @@ class AppointmentsController extends \helpers\ApiController{
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
+            $model->status = Appointments::STATUS_CANCELLED;
+            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors()); 

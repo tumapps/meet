@@ -18,7 +18,7 @@ class SettingsSearch extends Settings
     {
         return [
             [['id', 'user_id', 'slot_duration', 'booking_window', 'created_at', 'updated_at'], 'integer'],
-            [['start_time', 'end_time'], 'safe'],
+            [['start_time', 'end_time', 'is_deleted'], 'safe'],
         ];
     }
 
@@ -64,6 +64,7 @@ class SettingsSearch extends Settings
             'end_time' => $this->end_time,
             'slot_duration' => $this->slot_duration,
             'booking_window' => $this->booking_window,
+            'is_deleted' => false,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
