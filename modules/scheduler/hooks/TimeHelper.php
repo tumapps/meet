@@ -239,11 +239,15 @@ class TimeHelper
         //fetch advance booking time from settings
         $advancedBookingTime = (int)Settings::getAdvanceBookingDuration($user_id);
 
+        if(!$advancedBookingTime){
+            return 'Advance Booking Time not set';
+        }
+
         // clalculate minimum time one can book an appoiment
-        $advanceTime = date('Y-m-d H:i:sa', strtotime('+'.$advancedBookingTime.' hours'));
+        $advanceTime = date('Y-m-d H:i:sa', strtotime('+'.$advancedBookingTime.'minutes'));
         // return $advanceTime;
 
-        if(strtotime(date('Y-m-d '.$appointmentTime)) < strtotime($advanceTime))
+        if(date('Y-m-d '.$appointmentTime) <= $advanceTime)
         {
             return true;
         }
