@@ -1,8 +1,5 @@
 <template>
   <router-view> </router-view>
-  <!-- Live Customizer Component Start Here -->
-  <setting-offcanvas :landing-page="landingPage" :buy-now="buyNow"></setting-offcanvas>
-  <!-- Live Customizer Component End Here-->
 </template>
 
 <script>

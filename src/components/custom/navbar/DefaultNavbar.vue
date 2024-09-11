@@ -49,6 +49,12 @@ export default {
         console.error('Error during logout:', error);
       }
     }
+    const toProfile = () => {
+      router.push('/profile');
+    }
+    const toSettings = () => {
+      router.push('/settings' );
+    }
 
     const navbarHide = computed(() => [store.navbar_show_value])
 
@@ -70,7 +76,9 @@ export default {
       carts,
       navbarHide,
       emit,
-      logOut
+      logOut,
+      toProfile,
+      toSettings,
     }
   },
 }
@@ -94,36 +102,7 @@ export default {
       <b-collapse class="navbar-collapse" id="navbarSupportedContent" @show="emit('menuOpen')"
         @hide="emit('menuClose')">
         <ul class="mb-2 navbar-nav ms-auto align-items-center navbar-list mb-xl-0">
-          <slot name="navbar-buttons-start"></slot>
-          <li class="nav-item dropdown border-end pe-3 d-none d-xl-block">
-            <div class="form-group input-group mb-0 search-input">
-              <input type="text" class="form-control" placeholder="Search..." />
-              <span class="input-group-text">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="11.7669" cy="11.7666" r="8.98856" stroke="currentColor" stroke-width="1.5"
-                    stroke-linecap="round" stroke-linejoin="round"></circle>
-                  <path d="M18.0186 18.4851L21.5426 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                    stroke-linejoin="round"></path>
-                </svg>
-              </span>
-            </div>
-          </li>
-          <li class="nav-item dropdown iq-responsive-menu border-end d-block d-xl-none">
-            <div class="btn btn-sm bg-body" id="navbarDropdown-search-11" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              <icon-component type="outlined" icon-name="search" :size="20"></icon-component>
-            </div>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown-search-11" style="width: 25rem">
-              <li class="px-3 py-0">
-                <div class="form-group input-group mb-0">
-                  <input type="text" class="form-control" placeholder="Search..." />
-                  <span class="input-group-text">
-                    <icon-component type="outlined" icon-name="search" :size="20"></icon-component>
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </li>
+          <!-- <slot name="navbar-buttons-start"></slot> -->
           <b-dropdown :aria-labelledby="`dropdownMenu-${id}`"
             class="nav-item dropdown py-0 me-2 d-flex align-items-center" variant="none px-0" no-caret dropleft>
             <template #button-content>
@@ -133,8 +112,8 @@ export default {
                 </span>
               </b-button>
             </template>
-            <b-dropdown-item variant="none" href="#">Profile</b-dropdown-item>
-            <b-dropdown-item variant="none" href="#">Privacy Setting</b-dropdown-item>
+            <b-dropdown-item variant="none" @click="toProfile">Profile</b-dropdown-item>
+            <b-dropdown-item variant="none" @click="toSettings">Settings</b-dropdown-item>
             <li>
               <hr class="dropdown-divider" />
             </li>

@@ -8,18 +8,23 @@ export function showAlert({ title = 'Alert', text = '', icon = 'warning', confir
         text,
         icon,
         confirmButtonText,
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#076232',
     });
 }
 
 // Show toast function
-export function showToast({ title = '', icon = 'success', timer = 3000, position = 'top-end' }) {
+export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top-end' }, background = '', grow = '' ) {
     return Swal.fire({
         toast: true,
         title,
         icon,
         position,
-        showConfirmButton: false,
         timer,
+        background,
+        grow,
         timerProgressBar: true,
+
     });
 }

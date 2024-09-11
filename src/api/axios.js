@@ -18,7 +18,6 @@ const AxiosInstance = () => {
         try {
             const response = await axios.get('https://api.ipify.org?format=json')
             userIP = response.data.ip // Assign the fetched IP to userIP
-            console.log('ipAddr:', userIP)
         } catch (error) {
             console.error('Error fetching IP address:', error)
         }
@@ -111,7 +110,7 @@ const AxiosInstance = () => {
                         refreshAndRetryQueue.push({ config: originalRequest, resolve, reject })
                     })
                 }
-                if (response.data.errorPayload.errors.statusCode === 440) {
+                if (statusCode === 440) {
                     console.error('Session expired or token issue. Handle accordingly.')
                     localStorage.removeItem('user.token');
                     router.push({ path: `/auth/login` })
@@ -128,20 +127,16 @@ const AxiosInstance = () => {
 
 
     const logout = async () => {
+        authStore.removeToken(); // Update the store
         try {
             await axiosInstance.delete('/v1/auth/refresh');
-            console.log('Sent logout request');
-            authStore.removeToken(); // Update the store
             // Optionally, redirect after logout
             router.push({ path: '/auth/login' });
         } catch (error) {
             console.error('Error during logout:', error);
         }
     };
-
-
     axiosInstance.logout = logout;
-    
     return axiosInstance
 }
 

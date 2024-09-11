@@ -4,7 +4,7 @@ import AxiosInstance from '@/api/axios';
 import { useRoute } from 'vue-router';
 
 const axiosInstance = AxiosInstance();
-const proxy = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 const route = useRoute();
 
 onMounted(() => {
@@ -45,19 +45,12 @@ const fetchSettings = async () => {
     };
     appointment_id.value = response.data.dataPayload.data.id;
 
-    if (response.data.dataPayload && !response.data.dataPayload.error) {
-      proxy.$showAlert({
-    title: 'Settings fetched successfully',
-    text: 'Your appointment has been booked successfully!',
-    icon: 'success',
-  });
-    }
   } catch (error) {
     proxy.$showToast({
-    title: 'An error occurred ',
-    text: 'an error has occured while getting your settings!',
-    icon: 'success',
-  });
+      title: 'An error occurred ',
+      text: 'an error has occured while getting your settings!',
+      icon: 'success',
+    });
   }
 }
 
@@ -65,31 +58,30 @@ const fetchSettings = async () => {
 const saveSettings = async () => {
   try {
     const response = await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value);
-    console.log(response.data.datapaylaod.data);
-
-    if (response.data.datapaylaod && !response.data.datapaylaod.error) {
-      alert('Settings saved successfully!');
-    } else {
-      alert('An unexpected error occurred.');
-    }
+      proxy.$showToast({
+        title: 'Updated',
+        text: 'settings updated successfully!',
+        icon: 'success',
+    });
   } catch (error) {
-    console.error("An unexpected error occurred:", error);
+    proxy.$showToast({
+        title: 'Failed',
+        text: 'failed to update your settings',
+        icon: 'error',
+      });
   }
 }
 </script>
 <template>
-  <div class="container">
-    <b-card class="p-4 shadow">
-      <h2 class="text-center mb-4">Scheduler Settings</h2>
-
+  <div>
+    <b-card class="">
+      <h2 class="text-center mb-2">Scheduler Settings</h2>
       <b-form @submit.prevent="saveSettings">
         <!-- Section: Working Hours -->
-        <b-card class="mb-3 p-3">
+        <b-card>
           <h4 class="text-green">Working Hours</h4>
-          <p class="text-muted">Set the start and end time for your working hours.</p>
-
-          <b-row class="mb-3">
-            <b-col md="6">
+          <b-row class="">
+            <b-col md="12">
               <b-form-group label="Start Time" label-for="working-hours-start">
                 <input id="working-hours-start" v-model="settings.start_time" type="time" required>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
@@ -97,51 +89,42 @@ const saveSettings = async () => {
             </b-col>
             <b-col md="6">
               <b-form-group label="End Time" label-for="working-hours-end">
-                <input id="working-hours-end" v-model="settings.end_time" :options="timeOptions"
-                  required>
+                <input id="working-hours-end" v-model="settings.end_time" :options="timeOptions" required>
                 <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
               </b-form-group>
             </b-col>
           </b-row>
         </b-card>
         <!-- Section: Booking Settings -->
-        <b-card class="mb-3 p-3">
+        <b-card>
           <h4 class="text-green">Booking Settings</h4>
-          <p class="text-muted">Configure booking windows and time slots.</p>
-
-          <b-row class="mb-3">
-            <b-col md="6">
+          <b-row>
+            <b-col md="12">
               <b-form-group label="Booking Window (in months)" label-for="booking-window">
                 <b-form-input id="booking-window" type="number" v-model="settings.booking_window" min="1" max="12"
                   required></b-form-input>
                 <div v-if="errors.booking_window" class="error" aria-live="polite">{{ errors.booking_window }}</div>
-                <b-form-text>Set how far in advance clients can book appointments.</b-form-text>
               </b-form-group>
             </b-col>
 
-            <b-col md="6">
+            <b-col md="12">
               <b-form-group label="Slot Duration (in minutes)" label-for="slot-duration">
                 <b-form-input id="slot-duration" type="number" v-model="settings.slot_duration" min="15" max="60"
                   required></b-form-input>
                 <div v-if="errors.slot_duration" class="error" aria-live="polite">{{ errors.slot_duration }}</div>
-                <b-form-text>Duration for each appointment slot.</b-form-text>
               </b-form-group>
             </b-col>
           </b-row>
         </b-card>
-
         <!-- Section: Buffer Time -->
         <b-card class="mb-3 p-3 shadow">
           <h4 class="text-green">Buffer Time</h4>
-          <p class="text-muted">Set buffer time between appointments to prevent overlap.</p>
-
           <b-row>
-            <b-col md="6">
+            <b-col md="12">
               <b-form-group label="Buffer Time (in minutes)" label-for="buffer-time">
                 <b-form-input id="buffer-time" type="number" v-model="settings.advanced_booking" min="10"
                   required></b-form-input>
                 <div v-if="errors.advanced_booking" class="error" aria-live="polite">{{ errors.advanced_booking }}</div>
-                <b-form-text>Buffer time helps avoid back-to-back appointments.</b-form-text>
               </b-form-group>
             </b-col>
           </b-row>
@@ -159,9 +142,7 @@ const saveSettings = async () => {
 
 
 <style scoped>
-.container {
-  max-width: 1000px;
-}
+
 
 /* Green theme for section titles */
 .text-green {

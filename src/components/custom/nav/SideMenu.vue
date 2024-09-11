@@ -133,6 +133,8 @@ export default {
         }
       } else {
         context.emit('onClick', props.route.to)
+        // close sidebar after navigation
+
       }
     }
 

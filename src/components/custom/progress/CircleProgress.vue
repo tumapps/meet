@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from 'vue'
+import { ref, onMounted} from 'vue'
 import CircleProgress from 'js-circle-progress'
 const props = defineProps({
   size: { type: Number, default: 0 },

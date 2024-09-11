@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth.store.js';
 import createAxiosInstance from '@/api/axios';
@@ -10,6 +10,7 @@ const errors = ref({ password: '', general: '' });
 const authStore = useAuthStore();
 const router = useRouter();
 const axiosInstance = createAxiosInstance(router, authStore);
+const {proxy} = getCurrentInstance();
 const username = localStorage.getItem('user.username');
 
 const onSubmit = async () => {
@@ -28,6 +29,14 @@ const onSubmit = async () => {
       //set cookie
       const setCookieHeader = response.headers['set-cookie'];
       console.log('Cookie received:', setCookieHeader);
+      // set the httponly cookie
+      document.cookie = setCookieHeader;
+
+      proxy.$showToast({
+        title: 'success',
+        text: 'You have successfully logged in!',
+        icon: 'success',
+      });
 
       authStore.setToken(
         response.data.dataPayload.data.token,
@@ -38,10 +47,18 @@ const onSubmit = async () => {
 
     } else {
 
-      errors.value.general = 'An unexpected error occurred.';
+      proxy.$showToast({
+    title: 'An error occurred ',
+    text: 'Ooops! an error has occured while logging in!',
+    icon: 'error',
+  });
     }
   } catch (error) {
-    console.error("An unexpected error occurred:", error);
+    proxy.$showToast({
+    title: 'An error occurred ',
+    text: 'Ooops! an error has occured while logging in!',
+    icon: 'error',
+  });
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
 
@@ -62,7 +79,8 @@ const onSubmit = async () => {
   <section class="backimg">
     <b-row class="align-items-center justify-content-center vh-100 w-100">
       <b-col cols="10" lg="6">
-        <b-card class="text-center p-5 rounded-3 bg-aliceblue" style="min-height: 400px;" > <!-- Added padding and min-height -->
+        <b-card class="text-center p-5 rounded-3 bg-aliceblue" style="min-height: 400px;">
+          <!-- Added padding and min-height -->
           <img src="@/assets/images/avatars/01.png" alt="User-Profile"
             class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded" loading="lazy" />
           <h4 class="mt-4">Hi ! {{ username }}</h4>
@@ -71,7 +89,8 @@ const onSubmit = async () => {
             <label class="form-label" for="lock-pass">Password</label>
             <input type="password" class="form-control mb-0" id="password" v-model="password"
               placeholder="Enter password" aria-label="Password" autocomplete="off" />
-              <div v-if="errors.password" class="error" aria-live="polite">{{ errors.password }}</div> <!-- Access errors.value -->
+            <div v-if="errors.password" class="error" aria-live="polite">{{ errors.password }}</div>
+            <!-- Access errors.value -->
           </div>
           <b-button class="bg-green" @click="onSubmit" variant="primary">Login</b-button>
         </b-card>
@@ -82,7 +101,6 @@ const onSubmit = async () => {
 
 
 <style lang="scss" scoped>
-
 .backimg {
   background-image: url('@/assets/images/tum.jpg');
   background-size: cover;

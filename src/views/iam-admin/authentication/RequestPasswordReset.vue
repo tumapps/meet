@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import createAxiosInstance from '@/api/axios';
 
 const router = useRouter();  // Make sure this is inside setup()
-
+const {proxy} = getCurrentInstance();
 const email = ref("");
 const username = ref("");
 const axiosInstance = createAxiosInstance();
@@ -14,26 +14,33 @@ const onSubmit = async () => {
     errors.value = { email: '', username: '' };  // Reset errors
     try {
         const response = await axiosInstance.post('/v1/auth/password-reset-request',
-        {
+            {
                 email: email.value,
                 username: username.value,
             },
             {
                 headers: {
-                'X-Exclude-Interceptor': true,
-            },
+                    'X-Exclude-Interceptor': true,
+                },
             }
         );
 
         if (response.data.dataPayload && !response.data.dataPayload.error) {
-            router.push({ name: 'email-confirmed' });
 
-            console.log('Password reset email sent successfully.');
+            proxy.$showAlert({
+                title: 'success',
+                text: 'An email has been sent to you with instructions to reset your password!',
+                icon: 'success',
+            });
             router.push({ name: 'email-confirmed' });
         }
     } catch (error) {
 
-        console.error("An unexpected error occurred:", error);
+        proxy.$showAlert({
+            title: 'Oops!',
+            text: 'An error occurred while sending the password reset email!',
+            icon: 'error',
+        });
 
         if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
             const errorDetails = error.response.data.errorPayload.errors;

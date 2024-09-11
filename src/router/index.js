@@ -15,10 +15,10 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/modules/appointment/DashboardPage.vue')
   },
   {
-    path: 'book-appointment',
-    name: prefix + '.book-appointment',
-    meta: { requiresAuth: true, name: 'Book Appointment' },
-    component: () => import('@/views/modules/appointment/BookAppointment.vue')
+    path: 'users',
+    name: prefix + '.users',
+    meta: { requiresAuth: true, name: 'users' },
+    component: () => import('@/views/modules/appointment/Users.vue')
   },
   {
     path: '/settings',
@@ -37,6 +37,18 @@ export const defaultChildRoutes = (prefix) => [
     name: 'profile',
     meta: { requiresAuth: true, name: 'profile' },
     component: () => import('@/views/iam-admin/Profile.vue'),
+  },
+  {
+    path: '/appointment/:id',
+    name: 'appointment',
+    meta: { requiresAuth: true, },
+    component: () => import('@/views/modules/appointment/Appointment.vue'),
+  },
+  {
+    path: '/appointments',
+    name: 'appointments',
+    meta: { requiresAuth: true, },
+    component: () => import('@/views/modules/appointment/Appointments.vue'),
   },
 ]
 
@@ -87,12 +99,7 @@ const routes = [
       requiresAuth: true // Add meta field to indicate protected route
     }
   },
-  {
-    path: '/appointment/:id',
-    name: 'appointment',
-    meta: { requiresAuth: true, },
-    component: () => import('@/views/modules/appointment/Appointment.vue'),
-  },
+
   ...authRoutes,
 ]
 

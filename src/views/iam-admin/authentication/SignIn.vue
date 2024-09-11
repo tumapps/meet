@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth.store.js';
 import { login } from '../../../api/auth/login.js';
@@ -10,6 +10,7 @@ const password = ref("");
 const errors = ref({ username: '', password: '', general: '' });
 const authStore = useAuthStore();
 const router = useRouter();
+const {proxy} = getCurrentInstance();
 
 const onSubmit = async () => {
   errors.value = { username: '', password: '', general: '' };
@@ -27,30 +28,36 @@ const onSubmit = async () => {
     if (response.data.dataPayload && !response.data.dataPayload.error) {
       //set cookie
       const setCookieHeader = response.headers['set-cookie'];
-      console.log('Cookie received:', setCookieHeader);
 
       authStore.setToken(
         response.data.dataPayload.data.token,
         response.data.dataPayload.data.username
       );
 
+      proxy.$showToast({
+        title: 'success',
+        text: 'You have successfully logged in!',
+        icon: 'success',
+      });
+
       router.push('/');
 
     } else {
 
-      errors.value.general = 'An unexpected error occurred.';
+      // errors.value.general = 'An unexpected error occurred.';
     }
   } catch (error) {
-    console.error("An unexpected error occurred:", error);
-
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
 
       const errorDetails = error.response.data.errorPayload.errors;
-      console.log("Validation error details:", errorDetails);
-
       errors.value.username = errorDetails.username || '';
       errors.value.password = errorDetails.password || '';
-
+    }else{
+      proxy.$showToast({
+        title: 'error',
+        text: 'An unexpected error occurred!',
+        icon: 'error',
+      });
     }
   } finally {
     isLoading.value = false;
@@ -64,7 +71,7 @@ const onSubmit = async () => {
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100 ">
       <div class="col-md-4 col-lg-3 ">
         <b-card class="h-100 py-5 d-flex flex-column justify-content-between " style="background: white !important;">
-          <img src="@/assets/images/logo.png" class="img-thumbnail h-12 w-25 d-block mx-auto"
+          <img src="@/assets/images/logo.png" class="h-12 w-25 d-block mx-auto"
             alt="logo">
           <h5 class="text-center mt-3 mb-4 fw-bold text-primary">Sign In | TUMMEET</h5>
 
@@ -100,7 +107,7 @@ const onSubmit = async () => {
             </div>
           </form>
         </b-card>
-      </div>
+        </div>
     </div>
   </section>
 </template>

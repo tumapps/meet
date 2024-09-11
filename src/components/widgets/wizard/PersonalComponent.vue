@@ -59,51 +59,51 @@ const changeTab = (value) => {
         </div>
       </b-row>
       <b-row>
-        <b-col md="6">
+        <b-col md="12" lg="12">
           <b-form-group label="First Name: *">
             <b-form-input
               type="text"
-              class="form-control"
+              class="form-control mb-3"
               name="fname"
               placeholder="First Name"
               v-model="localPersonalData.first_name"
-              @input="updateData('first_name', localPersonalData.first_name)"
+              @input="updateData('first_name', localPersonalData.first_name)" required
             />
           </b-form-group>
         </b-col>
-        <b-col md="6">
+        <b-col md="12" lg="12">
           <b-form-group label="Last Name: *">
             <b-form-input
               type="text"
-              class="form-control"
+              class="form-control mb-3"
               name="lname"
               placeholder="Last Name"
               v-model="localPersonalData.last_name"
-              @input="updateData('last_name', localPersonalData.last_name)"
+              @input="updateData('last_name', localPersonalData.last_name)" required
             />
           </b-form-group>
         </b-col>
-        <b-col md="6" class="mt-3">
+        <b-col md="12" lg="12" class="mt-3">
           <b-form-group label="Contact No.: *">
             <b-form-input
               type="text"
-              class="form-control"
+              class="form-control mb-3"
               name="phno"
               placeholder="Contact No."
               v-model="localPersonalData.contact_no"
-              @input="updateData('contact_no', localPersonalData.contact_no)"
+              @input="updateData('contact_no', localPersonalData.contact_no)" required
             />
           </b-form-group>
         </b-col>
-        <b-col md="6" class="mt-3">
+        <b-col md="12" lg="12" class="mt-3">
           <b-form-group label="Middle name: *">
             <b-form-input
               type="text"
-              class="form-control"
+              class="form-control "
               name="phno_2"
               placeholder="middle name."
               v-model="localPersonalData.middle_name"
-              @input="updateData('middle_name', localPersonalData.middle_name)"
+              @input="updateData('middle_name', localPersonalData.middle_name)" required
             />
           </b-form-group>
         </b-col>
@@ -119,7 +119,7 @@ const changeTab = (value) => {
     <a
       href="#account"
       @click="changeTab(1)"
-      class="btn btn-dark previous action-button-previous float-end me-1 mt-3"
+      class="btn btn-warning previous action-button-previous float-end me-1 mt-3"
       value="Previous"
     >
       Previous

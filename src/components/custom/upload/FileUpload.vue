@@ -13,7 +13,7 @@ export default{
     },
 };
 
-import { ref, defineEmits } from 'vue';
+import { ref} from 'vue';
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const uploadStatus = ref<string>('');

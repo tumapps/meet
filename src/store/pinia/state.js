@@ -23,7 +23,7 @@ export const initialState = {
       value: 'theme-with-animation'
     },
     theme_font_size: {
-      value: 'theme-fs-sm'
+      value: 'theme-fs-md'
     },
     page_layout: {
       value: 'container-fuild'
@@ -53,7 +53,7 @@ export const initialState = {
       value: 'card-default'
     },
     footer_style: {
-      value: 'sticky'
+      value: 'default'
     },
     body_font_family: {
       value: null
@@ -170,7 +170,7 @@ export const defaultState = {
       target: '.footer',
       choices: ['sticky', 'default', 'glass'],
       type: 'layout_design',
-      value: 'sticky'
+      value: 'default'
     },
     body_font_family: {
       target: 'body',

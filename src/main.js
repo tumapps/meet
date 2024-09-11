@@ -24,6 +24,9 @@ import globalUtils from '@/utilities/globalUtils'
 import { showAlert, showToast } from '@/utilities/sweetAlert';
 import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
 import Vue3Autocounter from 'vue3-autocounter';
+import 'flatpickr/dist/flatpickr.css';
+import 'flatpickr/dist/themes/material_blue.css'; // Optional theme, pick one that fits
+
 import { createPinia } from 'pinia'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
