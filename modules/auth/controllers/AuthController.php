@@ -28,7 +28,11 @@ class AuthController extends \helpers\ApiController
 
 	public function actionGetUsers()
 	{
-		$profiles = Profiles::find()->all();
+		// $profiles = Profiles::find()->all();
+		$profiles = Profiles::find()
+	        ->joinWith('user')
+	        ->where(['users.can_be_booked' => true])
+	        ->all();
 
 		if (empty($profiles)) {
 			return $this->errorResponse(['message' => 'No profiles found']);

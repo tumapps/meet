@@ -26,13 +26,15 @@ class Appointments extends BaseModel
 {
     const STATUS_ACTIVE = 1;
     const STATUS_CONFIRMED = 2;
-    const STATUS_RESCHEDULED = 3;
+    const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
+    const STATUS_RESCHEDULED = 5;
 
 
     protected static $statusLabels = [
         self::STATUS_ACTIVE => 'Active',
         self::STATUS_CONFIRMED => 'Confirmed',
+        self::STATUS_RESCHEDULE => 'Reschedule',
         self::STATUS_RESCHEDULED => 'Rescheduled',
         self::STATUS_CANCELLED => 'Cancelled',
     ];
@@ -77,12 +79,12 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address','start_time','end_time','user_id'], 'required'],
+            [['appointment_date', 'email_address','start_time','end_time','user_id','subject', 'contact_name','mobile_number', 'appointment_type','description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '>=', 'type' => 'date', 'message' => 'The date must not be in the past'],
-            [['subject'], 'string'],
+            [['subject','description'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
@@ -118,6 +120,7 @@ class Appointments extends BaseModel
             'email_address' => 'Email Address',
             'mobile_number' => 'Mobile Number',
             'subject' => 'Subject',
+            'description' => 'Notes',
             'appointment_type' => 'Appointment Type',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -147,6 +150,47 @@ class Appointments extends BaseModel
         ->one();
         
     }
+
+    public function getActiveAppointments()
+    {
+        return self::find()->where(['status' => self::STATUS_ACTIVE])->count();
+    }
+
+    public function getCancelledAppointments()
+    {
+        return self::find()->where(['status' => self::STATUS_CANCELLED])->count();
+    }
+
+    public function getRescheduleAppointments()
+    {
+        return self::find()->where(['status' => self::STATUS_RESCHEDULE])->count();
+    }
+
+    public function getRescheduledAppointments()
+    {
+        return self::find()->where(['status' => self::STATUS_RESCHEDULED])->count();
+    }
+
+    public function getAllAppointments()
+    {
+       return self::find()->count();
+    }
+
+    public function upComingAppointments($appointment_date = null, $limit = 5)
+    {
+        if ($appointment_date === null) {
+            $appointment_date = date('Y-m-d');
+        }
+
+        // Fetch upcoming appointments on the given date, ordered by start time
+        return self::find()
+            ->where(['appointment_date' => $appointment_date])
+            ->andWhere(['>', 'start_time', date('H:i:s')])
+            ->orderBy(['start_time' => SORT_ASC])
+            ->limit($limit)
+            ->all(); 
+    }
+
 
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
     {

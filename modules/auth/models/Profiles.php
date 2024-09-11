@@ -3,6 +3,7 @@
 namespace auth\models;
 
 use Yii;
+use auth\models\User;
 
 /**
  * This is the model class for table "profiles".
@@ -67,4 +68,13 @@ class Profiles extends \helpers\ActiveRecord
 		return parent::afterFind();
 	}
 
+    /**
+     * Gets query for [[User]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['user_id' => 'user_id']);
+    }
 }

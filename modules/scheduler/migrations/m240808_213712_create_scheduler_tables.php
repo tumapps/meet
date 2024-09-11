@@ -42,6 +42,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'mobile_number' => $this->string(15),
             'subject' => $this->text()->null(),
             'appointment_type' => $this->string(), //personal or group
+            'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(1),
             'is_deleted' => $this->boolean()->defaultValue(false),
             'created_at' => $this->integer()->notNull(),

@@ -68,6 +68,7 @@ class m240118_110956_default_user_presets extends Migration
             'username' => 'admin',
             'auth_key' => Yii::$app->security->generateRandomString(),
             'password_hash' => Yii::$app->security->generatePasswordHash('admin'),
+            'can_be_booked' => false,
             'created_at' => time(),
             'updated_at' => time(),
         ));
@@ -86,6 +87,7 @@ class m240118_110956_default_user_presets extends Migration
             'username' => 'user',
             'auth_key' => Yii::$app->security->generateRandomString(),
             'password_hash' => Yii::$app->security->generatePasswordHash('user'),
+            'can_be_booked' => true,
             'created_at' => time(),
             'updated_at' => time(),
         ));
