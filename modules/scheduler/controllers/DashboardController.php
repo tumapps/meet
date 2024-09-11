@@ -9,13 +9,29 @@ use scheduler\models\searches\AppointmentsSearch;
 
 class DashboardController extends \helpers\ApiController 
 {
+	public $menus = [];
+
 	public function actionIndex(){
-		return 'ok';
+
+		$model = new Appointments();
+		$dashboardData = [
+			'appointments' => [
+				'upcoming' => $model->upComingAppointments(),
+				'active' => $model->getActiveAppointments(),
+				'all' => $model->getAllAppointments(),
+				'canceled' => $model->getCancelledAppointments(),
+				'reschedule' => $model->getRescheduleAppointments(),
+				'rescheduled' => $model->getRescheduledAppointments(),
+			],
+			// 'menus' => $this->menus
+		];
+
+		return $this->payloadResponse($dashboardData);
 	}
 
 	public function actionMenus(){
 
-		$menus = [
+		$this->menus = [
 			['route' => 'appointments', 'label' => 'Appointments'],
 	        ['route' => 'dashboard', 'label' => 'Dashboard'],
 	        ['route' => 'users', 'label' => 'Users'],
