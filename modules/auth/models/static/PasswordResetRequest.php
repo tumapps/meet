@@ -62,7 +62,7 @@ class PasswordResetRequest extends Model
 
 
         // $resetLink = Yii::$app->urlManager->createAbsoluteUrl(['site/reset-password', 'token' => $password_reset_token]);
-        $resetLink = 'http://10.17.0.26:3000/?token='.$password_reset_token;
+        $resetLink = Yii::$app->params['passwordResetLink'].$password_reset_token;
          
         // Email subject and body
         $subject = 'Password Reset Request';
