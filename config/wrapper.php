@@ -47,6 +47,11 @@ class ConfigWrapper
             'jwt_secret' => getenv('JWT_SECRET'),
             'adminEmail' => 'tum@gmail.com',
             'user.passwordResetTokenExpire' => 900,
+            'menus' => [
+                    ['route' => 'appointments', 'label' => 'Appointments'],
+                    ['route' => 'dashboard', 'label' => 'Dashboard'],
+                    ['route' => 'users', 'label' => 'Users'],
+            ],
 
         ];
     }
