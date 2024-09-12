@@ -1,6 +1,40 @@
  <?php
 
 
+
+    // protected static function findSlotsThatFitDuration($availableSlots, $requiredSlotDuration)
+    // {
+    //     $suitableSlots = [];
+    //     $currentSlotGroup = [];
+    //     $accumulatedDuration = 0;
+
+    //     foreach ($availableSlots as $slot) {
+    //         // Split the slot into start and end times
+    //         [$slotStart, $slotEnd] = explode('-', $slot);
+
+    //         // Calculate the duration of this slot in minutes
+    //         $slotDuration = (strtotime($slotEnd) - strtotime($slotStart)) / 60;
+
+    //         // Accumulate the duration and add the slot to the current group
+    //         $accumulatedDuration += $slotDuration;
+    //         $currentSlotGroup[] = $slot;
+
+    //         // Check if the accumulated duration meets or exceeds the required duration
+    //         if ($accumulatedDuration >= $requiredSlotDuration) {
+    //             // If it meets the required duration, add the current group to the suitable slots
+    //             $suitableSlots = array_merge($suitableSlots, $currentSlotGroup);
+
+    //             // Reset the current group and accumulated duration for the next batch
+    //             $currentSlotGroup = [];
+    //             $accumulatedDuration = 0;
+    //         }
+    //     }
+
+    //     return $suitableSlots;
+    // }
+
+
+
  public function actionMe()
     {
         $user = Yii::$app->user->identity;

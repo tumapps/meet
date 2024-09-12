@@ -146,7 +146,7 @@ class Appointments extends BaseModel
     public function getRescheduledAppointment($id)
     {
         return self::find()
-        ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULED])
+        ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULE])
         ->one();
         
     }

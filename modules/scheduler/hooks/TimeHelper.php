@@ -99,14 +99,16 @@ class TimeHelper
         foreach ($allSlots as $slot) {
             $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
             list($slotStart, $slotEnd) = explode('-', $slot);
+            $expireTime = self::checkExpireTime($date, $slotStart);
             $slotsWithAvailability[] = [
                 // 'slot' => $slot,
                 // 'isAvailable' => $isAvailable,
-                'slot' => [
-                    'slotStart' => $slotStart,
-                    'slotEnd' => $slotEnd,
-                    'isAvailable' => $isAvailable,
-                ]
+                // 'slot' => [
+                    'startTime' => $slotStart,
+                    'endTime' => $slotEnd,
+                    'booked' => !$isAvailable,
+                    'is_expired' => $expireTime
+                // ]
             ];
         }
 
@@ -251,6 +253,22 @@ class TimeHelper
             return true;
         }
 
+        return false;
+    }
+
+    public static function checkExpireTime($appointment_date, $slot_start_time)
+    {
+        // Get current date and time
+        $currentDate = date('Y-m-d');
+        $currentTime = date('H:i:s');
+
+        // Check if the appointment date is today
+        if ($appointment_date == $currentDate) {
+            // If the slot's start time is earlier than the current time, it's expired
+            return $slot_start_time < $currentTime;
+        }
+
+        // For future dates, the slot is not expired
         return false;
     }
 }

@@ -36,7 +36,7 @@ class AppointmentRescheduler {
 
     protected static function rescheduleAppointment($appointment)
     {
-        $appointment->status = Appointments::STATUS_RESCHEDULED;
+        $appointment->status = Appointments::STATUS_RESCHEDULE;
         $appointment->save(false);
     }
 
@@ -72,54 +72,6 @@ class AppointmentRescheduler {
 	}
 
 
-	public static function checkExpireTime($appointment_date, $slot_start_time)
-	{
-	    // Get current date and time
-	    $currentDate = date('Y-m-d');
-	    $currentTime = date('H:i:s');
-
-	    // Check if the appointment date is today
-	    if ($appointment_date == $currentDate) {
-	        // If the slot's start time is earlier than the current time, it's expired
-	        return $slot_start_time < $currentTime;
-	    }
-
-	    // For future dates, the slot is not expired
-	    return false;
-	}
-
-
-	// protected static function findSlotsThatFitDuration($availableSlots, $requiredSlotDuration)
-	// {
-	//     $suitableSlots = [];
-	//     $currentSlotGroup = [];
-	//     $accumulatedDuration = 0;
-
-	//     foreach ($availableSlots as $slot) {
-	//         // Split the slot into start and end times
-	//         [$slotStart, $slotEnd] = explode('-', $slot);
-
-	//         // Calculate the duration of this slot in minutes
-	//         $slotDuration = (strtotime($slotEnd) - strtotime($slotStart)) / 60;
-
-	//         // Accumulate the duration and add the slot to the current group
-	//         $accumulatedDuration += $slotDuration;
-	//         $currentSlotGroup[] = $slot;
-
-	//         // Check if the accumulated duration meets or exceeds the required duration
-	//         if ($accumulatedDuration >= $requiredSlotDuration) {
-	//             // If it meets the required duration, add the current group to the suitable slots
-	//             $suitableSlots = array_merge($suitableSlots, $currentSlotGroup);
-
-	//             // Reset the current group and accumulated duration for the next batch
-	//             $currentSlotGroup = [];
-	//             $accumulatedDuration = 0;
-	//         }
-	//     }
-
-	//     return $suitableSlots;
-	// }
-
 	protected static function findSlotsThatFitDuration($availableSlots, $requiredSlotDuration, $appointment_date)
 	{
 	    $suitableSlots = [];
@@ -138,7 +90,7 @@ class AppointmentRescheduler {
 	        $currentSlotGroup[] = [
 	            'start_time' => $slotStart,
 	            'end_time' => $slotEnd,
-	            'is_expired' => self::checkExpireTime($appointment_date, $slotStart) // Check if the slot is expired
+	            'is_expired' => TimeHelper::checkExpireTime($appointment_date, $slotStart)
 	        ];
 
 	        // Check if the accumulated duration meets or exceeds the required duration
