@@ -23,7 +23,6 @@ class DashboardController extends \helpers\ApiController
 				'reschedule' => $model->getRescheduleAppointments(),
 				'rescheduled' => $model->getRescheduledAppointments(),
 			],
-			// 'menus' => $this->menus
 		];
 
 		return $this->payloadResponse($dashboardData);
@@ -37,7 +36,7 @@ class DashboardController extends \helpers\ApiController
 	        ['route' => 'users', 'label' => 'Users'],
 		];
 
-		return $this->payloadResponse($menus);
+		return $this->payloadResponse($this->menus);
 	}
 
 	public function actionUpcomingAppoitments()

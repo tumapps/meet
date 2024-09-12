@@ -4,6 +4,7 @@ namespace scheduler\controllers;
 
 use Yii;
 use scheduler\models\Appointments;
+use scheduler\models\AppointmentType;
 use scheduler\models\searches\AppointmentsSearch;
 use scheduler\models\Availability;
 use scheduler\hooks\TimeHelper;
@@ -60,6 +61,16 @@ class AppointmentsController extends \helpers\ApiController{
         // return $this->payloadResponse($this->findModel($id));
     }
 
+    public function actionAppointmentsTypes(){
+        $model = new AppointmentType();
+        $appointmentTypes = $model->getAppointmentTypes();
+        $types = [];
+        foreach($appointmentTypes as $appointmentType){
+            $types[] = $appointmentType->type;
+        }
+        return $this->payloadResponse(['types' => $types]);
+    }
+
     public function actionCreate($dataRequest = null)
     {
        
@@ -75,7 +86,8 @@ class AppointmentsController extends \helpers\ApiController{
         
 
             $advanced = TimeHelper::validateAdvanceBooking(
-                 $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time']
+                 $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time'],
+                 $dataRequest['Appointments']['appointment_date']
             );
 
             if($advanced) {
@@ -180,6 +192,8 @@ class AppointmentsController extends \helpers\ApiController{
         if ($model->is_deleted) {
             // Yii::$app->user->can('schedulerAppointmentsRestore');
             $model->restore();
+            // $model->status = Appointments::STATUS_CANCELLED;
+            // $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');

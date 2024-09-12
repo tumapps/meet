@@ -234,7 +234,7 @@ class TimeHelper
      *
      * @return bool - True if booking time is within the advance or minimum booking time, false otherwise
      */
-    public static function validateAdvanceBooking($user_id, $appointmentTime)
+    public static function validateAdvanceBooking($user_id, $appointmentTime, $date)
     {
         //fetch advance booking time from settings
         $advancedBookingTime = (int)Settings::getAdvanceBookingDuration($user_id);
@@ -246,8 +246,7 @@ class TimeHelper
         // clalculate minimum time one can book an appoiment
         $advanceTime = date('Y-m-d H:i:sa', strtotime('+'.$advancedBookingTime.'minutes'));
         // return $advanceTime;
-
-        if(date('Y-m-d '.$appointmentTime) <= $advanceTime)
+        if(date($date.' '.$appointmentTime) <= $advanceTime)
         {
             return true;
         }

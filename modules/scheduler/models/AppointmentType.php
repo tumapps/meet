@@ -61,9 +61,14 @@ class AppointmentType extends BaseModel
         return [
             'id' => 'ID',
             'type' => 'Type',
-            'is_deleted' => 'Is Deleted',
+            // 'is_deleted' => 'Is Deleted',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public function getAppointmentTypes(){
+        // return self::find()->select('type')->where(['is_deleted' => false])->asArray()->all();
+        return self::findAll(['is_deleted' => false]);
     }
 }

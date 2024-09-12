@@ -21,6 +21,24 @@ class m240911_074621_appointemnts_type_table extends Migration
             'created_at' => $this->integer(),
             'updated_at' => $this->integer()
         ]);
+
+        $this->insert('{{%appointment_type}}', [
+            'type' => 'in person',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        $this->insert('{{%appointment_type}}', [
+            'type' => 'group',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        $this->insert('{{%appointment_type}}', [
+            'type' => 'meeting',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
     }
 
     /**

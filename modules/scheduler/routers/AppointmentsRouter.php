@@ -115,7 +115,7 @@ return [
 
 
 'POST self-booking'		=> 'appointments/self-book',
-
+'GET types'  => 'appointments/appointments-types',
 
 /**
  * @OA\Post(
