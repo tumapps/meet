@@ -36,4 +36,5 @@ tests/_support/_generated
 /.vagrant
 
 calculatelogic.txt
-.phpintel
+xxxx.php
+/.phpintel

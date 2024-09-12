@@ -51,6 +51,7 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
+
 	public function actionLogin()
 	{
 		$model = new Login();
@@ -59,10 +60,11 @@ class AuthController extends \helpers\ApiController
 			$user = Yii::$app->user->identity;
 			$this->generateRefreshToken($user);
 			$accesToken = $this->getToken();
-			return $this->payloadResponse(['username' => $user->username, 'token' => $accesToken], ['statusCode' => 200, 'message' => 'Access granted']);
+			return $this->payloadResponse(['username' => $user->username, 'token' => $accesToken, 'menus' => Yii::$app->params['menus']], ['statusCode' => 200, 'message' => 'Access granted']);
 		}
 		return $this->errorResponse($model->getErrors());
 	}
+
 
 	public function actionRegister()
 	{
@@ -175,6 +177,7 @@ class AuthController extends \helpers\ApiController
 			->setExpiration($time + 60)
 			->set('user_id', Yii::$app->user->identity->id)
 			->set('username', Yii::$app->user->identity->username)
+			->set('menus', Yii::$app->params['menus'])
 			->sign($signer, $jwt->key)
 			->getToken();
 

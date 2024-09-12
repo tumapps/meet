@@ -30,12 +30,8 @@ class DashboardController extends \helpers\ApiController
 
 	public function actionMenus(){
 
-		$this->menus = [
-			['route' => 'appointments', 'label' => 'Appointments'],
-	        ['route' => 'dashboard', 'label' => 'Dashboard'],
-	        ['route' => 'users', 'label' => 'Users'],
-		];
-
+		$this->menus = Yii::$app->params['menus'];
+			 
 		return $this->payloadResponse($this->menus);
 	}
 
