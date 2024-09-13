@@ -26,7 +26,7 @@ import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
 import Vue3Autocounter from 'vue3-autocounter';
 import 'flatpickr/dist/flatpickr.css';
 import 'flatpickr/dist/themes/material_blue.css'; // Optional theme, pick one that fits
-
+import { useMenuStore } from '@/store/menuStore'
 import { createPinia } from 'pinia'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
@@ -52,4 +52,8 @@ app.provide('showAlert', showAlert)
 app.provide('showToast', showToast)
 app.config.globalProperties.$utils = globalUtils;
 app.mount('#app')
+
+// Load menus from session storage when the app starts
+const menuStore = useMenuStore();
+menuStore.loadMenusFromStorage();
 export default app

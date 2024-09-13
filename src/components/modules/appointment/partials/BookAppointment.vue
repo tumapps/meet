@@ -3,7 +3,6 @@ import { ref, getCurrentInstance, watch, onMounted } from 'vue'
 import createAxiosInstance from '@/api/axios';
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 import FlatPickr from 'vue-flatpickr-component';
-import { min } from 'lodash';
 
 const axiosInstance = createAxiosInstance();
 const { proxy } = getCurrentInstance();
@@ -96,27 +95,15 @@ const getSlots = async () => {
 
 // Function to send the POST request
 const submitAppointment = async () => {
+//reset errors
+    errors.value = {};
     try {
-        console.log('appointmentData:', appointmentData.value);
-        // isLoading.value = true;        // proxy.$showAlert({
-        //     title: 'Failed',
-        //     text: 'It seems there was an error updating your appointment details. Please try again!',
-        //     icon: 'error',
-        // });
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
-        if (response.data.datapayload.data && response.data.datapayload.data.message) {
-            const message = response.data.datapayload.data.message; // Extract the message
 
-            proxy.$showToast({
-                title: 'Alert',
-                text: message, // Pass the message into the text field
-                icon: 'info',
-            });            // Close the modal or any other desired action
-        }
 
         proxy.$showAlert({
                 title: 'Success',
-                text: message,
+                text: 'Appointment booked successfully',
                 icon: 'success',
             });
             // Reset the form

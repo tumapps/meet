@@ -3,6 +3,8 @@ import { onMounted, ref, getCurrentInstance, computed } from 'vue';
 import AxiosInstance from '@/api/axios';
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue';
 import globalUtils from '@/utilities/globalUtils';
+import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue';
+
 // const globalUtils = require('@/utils/globalUtils');
 const appointmentModal = ref(null);
 const showModal = () => {
@@ -20,6 +22,7 @@ const totalPages = ref(1);   // Total number of pages from the API
 const perPage = ref(20);     // Number of items per page (from API response)
 const selectedPerPage = ref(20);  // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100]);
+const searchQuery = ref('');
 
 const errorDetails = ref({
     contact_name: '',
@@ -96,6 +99,8 @@ const getStatusClass = (status) => {
             return 'badge bg-success';
         case 'Cancelled':
             return 'badge bg-danger';
+        case 'Resheduled':
+            return 'primary';
         default:
             return 'badge bg-secondary';
     }
@@ -123,6 +128,7 @@ const sortedData = computed(() => {
         return 0;
     });
 });
+
 
 onMounted(async () => {
     //fetch appointments and slots and unavailable slots
@@ -195,6 +201,7 @@ const getAppointment = async (id) => {
             appointmentDetails.value = response.data.dataPayload.data;
             //convert start created at to yyyy-mm-dd
             appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at);
+            selectedAppointmentId.value = id;
         }
     } catch (error) {
         console.log(error);
@@ -250,6 +257,7 @@ const updateAppointment = async () => {
 };
 
 const restoreAppointment = async (id) => {
+
     try {
         errorDetails.value = {};
 
@@ -270,44 +278,51 @@ const restoreAppointment = async (id) => {
         } else {
             proxy.$showAlert({
                 title: 'Failed',
-                text: 'It seems there was an error restoring your appointment. Please try again!',
+                text: 'Network error or no response',
                 icon: 'error',
             });
         }
     }
 };
-const dateSlots = ref([]);
-const suggestedTimeSlots = ref([]);
 
-const suggestSlots = async () => {
+
+const suggestions = ref([]);
+const suggestedDate = ref('');
+const timeSlots = ref([]);
+
+// Function to fetch suggested slots
+const suggestSlots = async (id) => {
     try {
+        id = selectedAppointmentId.value;
         errorDetails.value = {};
+        const response = await axiosInstance.get(`/v1/scheduler/slot-suggestion/${id}`);
 
-        const response = await axiosInstance.get('/v1/scheduler/slot-suggestion');
+        suggestions.value = response.data.dataPayload.data.suggestions;
 
+        // Assign date and slots from the API response
+        suggestedDate.value = suggestions.value.date;
+        timeSlots.value = suggestions.value.slots;
 
-        if (response.data.dataPayload && !response.data.errorPayload) {
-            proxy.$showToast({
-                title: 'Success',
-                text: 'Slots suggested successfully!',
-                icon: 'success',
-            });
-            getAppointments(1);
-        }
+        // Show a success toast message
+        proxy.$showToast({
+            title: 'Success',
+            text: 'Slots suggested successfully!',
+            icon: 'success',
+        });
+        //update date to suggessted date 
+        appointmentDetails.value.appointment_date = suggestedDate;
 
     } catch (error) {
+        // Handle errors
+        errorDetails.value = error.response.data.errorPayload.errors;
+        proxy.$showAlert({
+            title: 'Failed',
+            text: 'An error occurred',
+            icon: 'error',
+        });
 
-        if (error.response && error.response.data && error.response.data.errorPayload) {
-            errorDetails.value = error.response.data.errorPayload.errors;
-        } else {
-            proxy.$showAlert({
-                title: 'Failed',
-                text: 'an error occurred',
-                icon: 'error',
-            });
-        }
     }
-}
+};
 
 </script>
 <template>
@@ -316,42 +331,41 @@ const suggestSlots = async () => {
     </div>
     <b-col lg="12">
         <b-card>
+            <b-row class="mb-3">
+                <b-col lg="12" md="12" sm="12" class="mb-3">
+                    <div class="d-flex justify-content-end">
+                        <b-button variant="primary" @click="showModal">
+                            New Appointment
+                        </b-button>
+                    </div>
+                </b-col>
+                <b-col lg="12" md="12" sm="12">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <label for="itemsPerPage" class="me-2">Items per page:</label>
+                            <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
+                                class="form-select form-select-sm" style="width: auto;">
+                                <option v-for="option in perPageOptions" :key="option" :value="option">
+                                    {{ option }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <b-input-group>
+                                <!-- Search Input -->
+                                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
+                                <!-- Search Button -->
+                                <b-input-group-append>
+                                    <b-button variant="primary" @click="performSearch">
+                                        Search
+                                    </b-button>
+                                </b-input-group-append>
+                            </b-input-group>
+                        </div>
+                    </div>
+                </b-col>
+            </b-row>
             <div class="table-responsive">
-                <b-row class="mb-3">
-                    <b-col lg="12" md="12" sm="12" class="mb-3">
-                        <div class="d-flex justify-content-end">
-                            <b-button variant="primary" @click="showModal">
-                                New Appointment
-                            </b-button>
-                        </div>
-                    </b-col>
-                    <b-col lg="12" md="12" sm="12">
-                        <div class="d-flex justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <label for="itemsPerPage" class="me-2">Items per page:</label>
-                                <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
-                                    class="form-select form-select-sm" style="width: auto;">
-                                    <option v-for="option in perPageOptions" :key="option" :value="option">
-                                        {{ option }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <b-input-group>
-                                    <!-- Search Input -->
-                                    <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
-                                    <!-- Search Button -->
-                                    <b-input-group-append>
-                                        <b-button variant="primary" @click="performSearch">
-                                            Search
-                                        </b-button>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
-                        </div>
-                    </b-col>
-                </b-row>
-
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -393,7 +407,11 @@ const suggestSlots = async () => {
                                         @click="openModal(item.id)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button v-if="item.status === 1 " class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
+                                    <button v-if="item.status === 5 || item.status === 1"
+                                        class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
+                                        <i class="fas fa-cancel"></i>
+                                    </button>
+                                    <button v-if=" item.status === 4" class="btn btn-danger btn-sm">
                                         <i class="fas fa-cancel"></i>
                                     </button>
                                 </td>
@@ -407,24 +425,26 @@ const suggestSlots = async () => {
                     </tbody>
                 </table>
                 <!-- Pagination -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-end">
-                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                            <button class="page-link" @click="goToPage(currentPage - 1)"
-                                :disabled="currentPage === 1">Previous</button>
-                        </li>
-                        <li v-for="page in totalPages" :key="page" class="page-item"
-                            :class="{ active: currentPage === page }">
-                            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
-                        </li>
-                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                            <button class="page-link" @click="goToPage(currentPage + 1)"
-                                :disabled="currentPage === totalPages">Next</button>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </b-card>
+        <b-col sm="12" lg="12" md="12" class="d-flex justify-content-end">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                        <button class="page-link" @click="goToPage(currentPage - 1)"
+                            :disabled="currentPage === 1">Previous</button>
+                    </li>
+                    <li v-for="page in totalPages" :key="page" class="page-item"
+                        :class="{ active: currentPage === page }">
+                        <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                    </li>
+                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                        <button class="page-link" @click="goToPage(currentPage + 1)"
+                            :disabled="currentPage === totalPages">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </b-col>
     </b-col>
     <BookAppointment ref="appointmentModal" />
 
@@ -490,27 +510,32 @@ const suggestSlots = async () => {
                                             @click="confirmCancel">
                                             Cancel
                                         </b-button>
-                                        <b-button v-else-if="appointmentDetails.status === 2" variant="success"
+                                        <!-- <b-button v-else-if="appointmentDetails.status === 4" variant="success"
                                             @click="restoreAppointment">
                                             Restore Appointment
-                                        </b-button>
-                                        <b-button v-else variant="success" @click="suggestSlots">Suggest Open
+                                        </b-button> -->
+                                        <b-button v-else-if="appointmentDetails.status === 3" variant="success" @click="suggestSlots">Suggest Open
                                             slots</b-button>
                                     </div>
                                 </b-col>
 
                                 <b-col lg="5" class="mb-3">
                                     <div v-if="appointmentDetails.status === 3">
-                                        <div v-for="(dateEntry, index) in dateSlots" :key="index">
-                                            <h3>{{ dateEntry.date }}</h3>
+                                        <div v-if="timeSlots.length > 1">
+                                            <h3>{{ suggestedDate }}</h3> <!-- Display the date from the API response -->
                                             <div>
-                                                <TimeSlotComponent :timeSlots="suggestedTimeSlots"
+                                                <TimeSlotComponent :timeSlots="timeSlots"
                                                     @update:timeSlots="updateTimeSlots"
                                                     @selectedSlotsTimes="handleSelectedSlotsTimes" />
                                             </div>
                                         </div>
+                                        <div v-else>
+                                            <p>No available slots.</p>
+                                            <!-- Handle case where there are no suggestions -->
+                                        </div>
                                     </div>
                                 </b-col>
+
 
                                 <b-row class="m-5">
                                     <b-col>

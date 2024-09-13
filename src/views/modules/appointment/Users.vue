@@ -74,8 +74,8 @@ const showModal = () => {
         <h2>Appointments</h2>
     </div>
     <b-col lg="12">
-        <b-card>
-            <div class="table-responsive">
+        <b-card class="h-100">
+            
                 <b-row class="mb-3">
                     <b-col lg="12" md="12" sm="12" class="mb-3">
                         <div class="d-flex justify-content-end">
@@ -110,6 +110,7 @@ const showModal = () => {
                         </div>
                     </b-col>
                 </b-row>
+                <div class="table-responsive">
                 <!-- Table Section -->
                 <table class="table table-hover">
                     <thead>
@@ -135,7 +136,11 @@ const showModal = () => {
                     </tbody>
                 </table>
                 <!-- Pagination -->
-                <nav aria-label="Page navigation">
+
+            </div>
+
+        </b-card>
+        <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end">
                         <li class="page-item" :class="{ disabled: currentPage === 1 }">
                             <button class="page-link" @click="goToPage(currentPage - 1)"
@@ -151,8 +156,6 @@ const showModal = () => {
                         </li>
                     </ul>
                 </nav>
-            </div>
-        </b-card>
     </b-col>
     <Adduser ref="addUserModal"/>
 </template>

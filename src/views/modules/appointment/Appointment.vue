@@ -51,8 +51,8 @@ const updateTimeSlots = (updatedSlots) => {
 // Handle selected slots
 
 const handleSelectedSlotsTimes = (selectedTimes) => {
-    appointmentData.value.start_time = selectedTimes?.startTime || '';
-    appointmentData.value.end_time = selectedTimes?.endTime || '';
+    appointmentDetails.value.start_time = selectedTimes?.startTime || '';
+    appointmentDetails.value.end_time = selectedTimes?.endTime || '';
 };
 
 const getAppointment = async () => {
@@ -104,52 +104,6 @@ const updateAppointment = async () => {
 }
 
 const timeSlots = ref([]);
-const responseData = {
-    "date": "2024-09-09",
-    "slots": [
-        { "startTime": "08:00", "endTime": "09:00" },
-        { "startTime": "09:00", "endTime": "10:00" },
-        { "startTime": "10:00", "endTime": "11:00" },
-        { "startTime": "11:00", "endTime": "12:00" },
-        { "startTime": "12:00", "endTime": "13:00" },
-        { "startTime": "13:00", "endTime": "14:00" },
-        { "startTime": "14:00", "endTime": "15:00" },
-        { "startTime": "15:00", "endTime": "16:00" },
-        { "startTime": "16:00", "endTime": "17:00" },
-        { "startTime": "17:00", "endTime": "18:00" },
-        { "startTime": "18:00", "endTime": "19:00" },
-        { "startTime": "19:00", "endTime": "20:00" },
-        { "startTime": "20:00", "endTime": "21:00" },
-        { "startTime": "21:00", "endTime": "22:00" },
-        { "startTime": "22:00", "endTime": "23:00" },
-        { "startTime": "23:00", "endTime": "00:00" }
-    ],
-    "date": "2024-09-10",
-    "slots": [
-        { "startTime": "08:00", "endTime": "09:00" },
-        { "startTime": "09:00", "endTime": "10:00" },
-        { "startTime": "10:00", "endTime": "11:00" },
-        { "startTime": "11:00", "endTime": "12:00" },
-        { "startTime": "12:00", "endTime": "13:00" },
-        { "startTime": "13:00", "endTime": "14:00" },
-        { "startTime": "14:00", "endTime": "15:00" },
-        { "startTime": "15:00", "endTime": "16:00" },
-        { "startTime": "16:00", "endTime": "17:00" },
-        { "startTime": "17:00", "endTime": "18:00" },
-        { "startTime": "18:00", "endTime": "19:00" },
-        { "startTime": "19:00", "endTime": "20:00" },
-        { "startTime": "20:00", "endTime": "21:00" },
-        { "startTime": "21:00", "endTime": "22:00" },
-        { "startTime": "22:00", "endTime": "23:00" },
-        { "startTime": "23:00", "endTime": "00:00" }
-    ]
-};
-
-timeSlots.value = responseData.slots;
-
-const dateSlots = ref([responseData]);
-
-
 const suggestSlots = async () => {
     try {
         errorDetails.value = {};
@@ -332,13 +286,13 @@ const goBack = () => {
                                 </b-col>
                                 <b-col lg="5">
                                     <div v-if="appointmentDetails.status === 3">
-                                        <div v-for="(dateEntry, index) in dateSlots" :key="index">
+                                        <div v-for="(dateEntry, index) in dateSlots" :key="index" class="w-100 d-flex">
                                             <h3>{{ dateEntry.date }}</h3>
-                                            <div>
+                                            <b-col lg="12">
                                                 <TimeSlotComponent :timeSlots="timeSlots"
                                                     @update:timeSlots="updateTimeSlots"
                                                     @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                                            </div>
+                                            </b-col>
                                         </div>
                                     </div>
                                 </b-col>
