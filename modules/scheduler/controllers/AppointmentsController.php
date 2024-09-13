@@ -255,10 +255,12 @@ class AppointmentsController extends \helpers\ApiController{
         return $this->payloadResponse(['slots' => $slots]);
     }
 
-    public function actionSuggestAvailableSlots()
+    public function actionSuggestAvailableSlots($id)
     {
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        $rescheduledAppointmentId = $dataRequest['Appointments']['id'];
+        // $rescheduledAppointmentId = $dataRequest['Appointments']['id'];
+        $rescheduledAppointmentId = $id;
+
 
         if(empty($rescheduledAppointmentId)){
             return $this->errorResponse(['message' => ['Appointment ID is required']]);

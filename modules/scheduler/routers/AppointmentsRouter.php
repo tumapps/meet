@@ -111,7 +111,7 @@ return [
  *   ),
  * )
  */
-'GET slot-suggestion'	   => 'appointments/suggest-available-slots',
+'GET slot-suggestion/{id}'	   => 'appointments/suggest-available-slots',
 
 
 'POST self-booking'		=> 'appointments/self-book',

@@ -67,7 +67,7 @@ class AppointmentRescheduler {
 
 	        // Move to the next day
 	        $nextDate = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
-	        // return self::findNextAvailableSlot($user_id, $nextDate, $startTime, $endTime);
+	        return self::findNextAvailableSlot($user_id, $nextDate, $startTime, $endTime);
    	 	}
 	}
 
