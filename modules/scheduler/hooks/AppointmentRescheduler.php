@@ -88,8 +88,9 @@ class AppointmentRescheduler {
 	        // Accumulate the duration and add the slot to the current group
 	        $accumulatedDuration += $slotDuration;
 	        $currentSlotGroup[] = [
-	            'start_time' => $slotStart,
-	            'end_time' => $slotEnd,
+	            'startTime' => $slotStart,
+	            'endTime' => $slotEnd,
+	            'booked' => false,
 	            'is_expired' => TimeHelper::checkExpireTime($appointment_date, $slotStart)
 	        ];
 
