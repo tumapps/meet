@@ -1,26 +1,38 @@
 <script setup>
 import { useAutoLogout } from '@/composables/useAutoLogout';
+import { getCurrentInstance, watch } from 'vue';
 
-const { warningZone, resetTimer } = useAutoLogout(); // Include resetTimer
+// Get the current instance to access proxy
+const { proxy } = getCurrentInstance();
+const { warningZone, resetTimer } = useAutoLogout(); // Destructure the returned values from useAutoLogout
 
+// Function to show alert when warningZone becomes true
+const showAlert = () => {
+    proxy.$showAlert({
+        title: 'Still there?',
+        text: 'You are about to be logged out!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+    });
+};
+
+// Watch the reactive `warningZone` and trigger showAlert when it changes to `true`
+watch(warningZone, (newVal) => {
+    if (newVal === true) {
+        showAlert(); // Call showAlert when user is in the warning zone
+    }
+});
+
+console.log("warning zone", warningZone.value); // Debugging: logs the initial state of warningZone
 </script>
 
 <template>
-    <div v-if="warningZone" class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-body">
-                You will be logged out soon due to inactivity.
-                <div class="mt-2 pt-2 border-top">
-                    <button type="button" class="btn btn-primary btn-sm" @click="resetTimer">
-                        Stay logged in
-                    </button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Add any necessary HTML here -->
+
 </template>
 
 <style scoped>

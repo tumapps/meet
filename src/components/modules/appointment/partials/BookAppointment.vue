@@ -3,6 +3,7 @@ import { ref, getCurrentInstance, watch, onMounted } from 'vue'
 import createAxiosInstance from '@/api/axios';
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 import FlatPickr from 'vue-flatpickr-component';
+import { min } from 'lodash';
 
 const axiosInstance = createAxiosInstance();
 const { proxy } = getCurrentInstance();
@@ -24,6 +25,7 @@ const config = {
     dateFormat: 'Y-m-d',
     altInput: true,
     altFormat: 'F j, Y',
+    minDate: 'today',
 };
 
 
@@ -31,14 +33,14 @@ const today = ref(new Date().toLocaleDateString());
 console.log(today.value)
 
 const slotsData = ref({
-    user_id: "212409004",
+    user_id: "212409003",
     date: '',
 });
 
 
 // Define your form data
 const appointmentData = ref({
-    user_id: "212409004",
+    user_id: "212409003",
     appointment_date: selectedDate.value,
     start_time: "",
     end_time: "",
@@ -46,19 +48,21 @@ const appointmentData = ref({
     email_address: "",
     mobile_number: "",
     subject: "",
+    description: "",
     appointment_type: ""
 });
 //handle date change 
 const handleDateChange = (newValue, oldValue) => {
+    appointmentData.value.appointment_date = newValue;
+    slotsData.value.date = newValue;
+    console.log('date changed:', newValue);
     getSlots();
 };
 
 //watcher for date change
 watch(selectedDate, (newValue, oldValue) => {
+
     handleDateChange(newValue, oldValue);
-    console.log('selectedDate:', selectedDate.value);
-    slotsData.value.date = selectedDate.value;
-    getSlots();
 });
 
 // Method to update time slots
@@ -93,41 +97,63 @@ const getSlots = async () => {
 // Function to send the POST request
 const submitAppointment = async () => {
     try {
-        // isLoading.value = true;
+        console.log('appointmentData:', appointmentData.value);
+        // isLoading.value = true;        // proxy.$showAlert({
+        //     title: 'Failed',
+        //     text: 'It seems there was an error updating your appointment details. Please try again!',
+        //     icon: 'error',
+        // });
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
+        if (response.data.datapayload.data && response.data.datapayload.data.message) {
+            const message = response.data.datapayload.data.message; // Extract the message
 
-        // the sweetalert plugin
+            proxy.$showToast({
+                title: 'Alert',
+                text: message, // Pass the message into the text field
+                icon: 'info',
+            });            // Close the modal or any other desired action
+        }
+
         proxy.$showAlert({
-            title: 'Booked Successfully',
-            text: 'Your appointment has been booked successfully!',
-            icon: 'success',
-        });
-        closeModal();
-        // Handle the success response here (e.g., showing a success message)
+                title: 'Success',
+                text: message,
+                icon: 'success',
+            });
+            // Reset the form
+            appointmentData.value = { };
     } catch (error) {
-        proxy.$showToast({
-            title: 'Failed',
-            text: 'An error occurred while booking the appointment. Please try again!',
-            icon: 'error',
-        });
+
         if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
             errors.value = error.response.data.errorPayload.errors;
+
         }
     }
 };
 
+const appointmentTypeOptions = ref([]);
+const getAppointmentType = async () => {
+    try {
+        const response = await axiosInstance.get('/v1/scheduler/types');
+        appointmentTypeOptions.value = response.data.dataPayload.data.types;
+    } catch (error) {
+        console.error('Error fetching appointment types:', error);
+    }
+};
+
 const close = () => {
-  // Logic to close modal
+    // Logic to close modal
 };
 
 onMounted(() => {
     slotsData.value.date = today.value;
     getSlots();
+    getAppointmentType();
+    getAppointmentType();
 });
 
 </script>
 <template>
-    
+
     <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal" no-close-on-backdrop
         no-close-on-esc size="xl" hide-footer>
         <form id="add-form" action="javascript:void(0)" method="post">
@@ -189,13 +215,27 @@ onMounted(() => {
                             <b-col cols="10">
                                 <select v-model="appointmentData.appointment_type" name="service" class="form-select"
                                     id="addappointmenttype">
-                                    <option value="">meeting type</option>
-                                    <option value="in-person">In-Person</option>
-                                    <option value="group">Group</option>
-                                    <option value="virtual">Virtual</option>
+                                    <!-- Default placeholder option -->
+                                    <option value="">Meeting Type</option>
+                                    <!-- Dynamically populated options from API -->
+                                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                                        {{ type }}
+                                    </option>
                                 </select>
                                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{
                                     errors.appointment_type }}</div>
+                            </b-col>
+
+                        </b-row>
+                        <b-row class="g-3 align-items-center form-group">
+                            <b-col cols="2">
+                                <label for="addphonenumber" class="col-form-label">Notes</label>
+                            </b-col>
+                            <b-col cols="10">
+                                <input type="text" id="addphonenumber" v-model="appointmentData.description"
+                                    class="form-control" />
+                                <div v-if="errors.description" class="error" aria-live="polite">{{
+                                    errors.description }}</div>
                             </b-col>
                         </b-row>
                         <b-row>

@@ -2,9 +2,11 @@
 import { onMounted, ref, getCurrentInstance } from 'vue';
 import AxiosInstance from '@/api/axios';
 import { useRoute } from 'vue-router';
+import FlatPickr from 'vue-flatpickr-component';
+
 
 const axiosInstance = AxiosInstance();
-const {proxy} = getCurrentInstance();
+const { proxy } = getCurrentInstance();
 const route = useRoute();
 
 onMounted(() => {
@@ -18,7 +20,7 @@ const timeOptions = ref([
   '15:00', '16:00', '17:00', '18:00'
 ]);
 
-const user_id = ref('212409004');
+const user_id = ref('212409003');
 const appointment_id = ref('');
 // Initial settings data
 const settings = ref({
@@ -52,23 +54,74 @@ const fetchSettings = async () => {
       icon: 'success',
     });
   }
+};
+
+// Flatpickr config
+const config = {
+  enableTime: false,
+  // noCalendar: true,
+  dateFormat: 'Y-m-d',
+
+};
+
+const config2 = {
+  enableTime: true,
+  noCalendar: true,
+  dateFormat: 'H:i',
+  time_24hr: true,
+  minuteIncrement: 10,
+};
+
+// Selected date
+const start_date = ref('');
+const end_date = ref('');
+
+//selected time
+const start_Time = ref('');
+const end_Time = ref('');
+const description = ref('');
+
+// Function to save settings (add API or local storage logic here)
+const saveAvailability = async () => {
+  try {
+    const response = await axiosInstance.post('v1/scheduler/availability', {
+      user_id: user_id.value,
+      start_date: start_date.value,
+      end_date: end_date.value,
+      start_time: start_Time.value,
+      end_time: end_Time.value,
+      description:description.value
+    });
+
+    proxy.$showToast({
+      title: 'Updated',
+      text: 'settings updated successfully!',
+      icon: 'success',
+    });
+  } catch (error) {
+    proxy.$showToast({
+      title: 'Failed',
+      text: 'failed to update your settings',
+      icon: 'error',
+    });
+  }
 }
 
 // Function to save settings (add API or local storage logic here)
 const saveSettings = async () => {
   try {
     const response = await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value);
-      proxy.$showToast({
-        title: 'Updated',
-        text: 'settings updated successfully!',
-        icon: 'success',
+    proxy.$showToast({
+      title: 'Updated',
+      text: 'settings updated successfully!',
+      icon: 'success',
     });
   } catch (error) {
     proxy.$showToast({
-        title: 'Failed',
-        text: 'failed to update your settings',
-        icon: 'error',
-      });
+      title: 'Failed',
+      text: 'failed to update your settings',
+      icon: 'error',
+    });
   }
 }
 </script>
@@ -83,23 +136,67 @@ const saveSettings = async () => {
           <b-row class="">
             <b-col md="12">
               <b-form-group label="Start Time" label-for="working-hours-start">
-                <input id="working-hours-start" v-model="settings.start_time" type="time" required>
+                <b-form-input id="working-hours-start" v-model="settings.start_time" type="time"
+                  required></b-form-input>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
               </b-form-group>
             </b-col>
             <b-col md="6">
               <b-form-group label="End Time" label-for="working-hours-end">
-                <input id="working-hours-end" v-model="settings.end_time" :options="timeOptions" required>
+                <b-form-input id="working-hours-end" v-model="settings.end_time" :options="timeOptions"
+                  required></b-form-input>
                 <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
               </b-form-group>
             </b-col>
           </b-row>
         </b-card>
+
+        <!-- availability -->
+        <b-card>
+          <h4>Availability Settings</h4>
+          <b-row>
+            <b-col md="6">
+              <div class="mb-3">
+                <label for="datePicker" class="form-label">Start Date</label>
+                <flat-pickr v-model="start_date" class="form-control" :config="config" id="datePicker" />
+              </div>
+            </b-col>
+            <b-col md="5">
+              <div class="mb-3">
+                <label for="datePicker" class="form-label">Last Date</label>
+                <flat-pickr v-model="end_date" class="form-control" :config="config" id="datePicker" />
+              </div>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col md="6">
+              <div class="mb-3">
+                <label for="datePicker" class="form-label">Start Time</label>
+                <flat-pickr v-model="start_Time" class="form-control" :config="config2" id="datePicker" />
+              </div>
+            </b-col>
+            <b-col md="5">
+              <div class="mb-3">
+                <label for="datePicker" class="form-label">End Time</label>
+                <flat-pickr v-model="end_Time" class="form-control" :config="config2" id="datePicker" />
+              </div>
+            </b-col>
+            <b-col md="12" class="mb-3">
+              <b-form-group label="Description" label-for="description">
+                <b-form-input id="description" type="text" v-model="description"></b-form-input>
+                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <div class="d-flex justify-content-end">
+            <b-button @click="saveAvailability" variant="primary">Save</b-button>
+          </div>
+        </b-card>
         <!-- Section: Booking Settings -->
         <b-card>
-          <h4 class="text-green">Booking Settings</h4>
+          <h4>Booking Settings</h4>
           <b-row>
-            <b-col md="12">
+            <b-col md="12" class="mb-4">
               <b-form-group label="Booking Window (in months)" label-for="booking-window">
                 <b-form-input id="booking-window" type="number" v-model="settings.booking_window" min="1" max="12"
                   required></b-form-input>
@@ -118,7 +215,7 @@ const saveSettings = async () => {
         </b-card>
         <!-- Section: Buffer Time -->
         <b-card class="mb-3 p-3 shadow">
-          <h4 class="text-green">Buffer Time</h4>
+          <h4>Buffer Time</h4>
           <b-row>
             <b-col md="12">
               <b-form-group label="Buffer Time (in minutes)" label-for="buffer-time">
@@ -143,9 +240,4 @@ const saveSettings = async () => {
 
 <style scoped>
 
-
-/* Green theme for section titles */
-.text-green {
-  color: black;
-}
 </style>

@@ -8,6 +8,8 @@
       <!-- Header Component Start Here -->
       <header-component></header-component>
       <template v-if="isBanner">
+        <AutoLogout />
+
         <!-- Sub Header Component Start Here-->
         <!-- Sub Header Component End Here-->
       </template>
@@ -33,6 +35,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 // Components
+import AutoLogout from '@/components/AutoLogout.vue'
 import HeaderComponent from '@/components/partials/HeaderComponent.vue'
 import SidebarComponent from '@/components/modules/appointment/partials/SidebarComponent.vue'
 import MainContentComponent from '@/components/partials/MainContentComponent.vue'

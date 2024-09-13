@@ -28,11 +28,14 @@ const onSubmit = async () => {
         if (response.data.dataPayload && !response.data.dataPayload.error) {
 
             proxy.$showAlert({
-                title: 'success',
-                text: 'An email has been sent to you with instructions to reset your password!',
-                icon: 'success',
-            });
-            router.push({ name: 'email-confirmed' });
+    title: 'Success',
+    text: 'An email has been sent to you with instructions to reset your password!',
+    icon: 'success',
+}).then(() => {
+    // After the alert is dismissed, redirect to the login page
+    proxy.$router.push('/');
+});
+
         }
     } catch (error) {
 

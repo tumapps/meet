@@ -15,7 +15,7 @@ export function showAlert({ title = 'Alert', text = '', icon = 'warning', confir
 }
 
 // Show toast function
-export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top-end' }, background = '', grow = '' ) {
+export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top-end' }, background = '#79fcb4', grow = '' ) {
     return Swal.fire({
         toast: true,
         title,
@@ -24,7 +24,7 @@ export function showToast({ title = '', icon = '#fff', timer = 3000, position = 
         timer,
         background,
         grow,
-        timerProgressBar: true,
+        // timerProgressBar: true,
 
     });
 }

@@ -2,8 +2,8 @@
 import { onMounted, ref, getCurrentInstance, computed } from 'vue';
 import AxiosInstance from '@/api/axios';
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue';
-
-
+import globalUtils from '@/utilities/globalUtils';
+// const globalUtils = require('@/utils/globalUtils');
 const appointmentModal = ref(null);
 const showModal = () => {
     appointmentModal.value.$refs.appointmentModal.show();
@@ -65,6 +65,7 @@ const updatePerPage = async () => {
     await getAppointments(1);  // Fetch appointments with the new perPage value
 };
 
+
 // Method to update time slots
 const updateTimeSlots = (updatedSlots) => {
     timeSlots.value = updatedSlots;
@@ -76,32 +77,6 @@ const handleSelectedSlotsTimes = (selectedTimes) => {
     appointmentData.value.end_time = selectedTimes?.endTime || '';
 };
 
-const timeSlots = ref([]);
-const responseData = {
-    "date": "2024-09-09",
-    "slots": [
-        { "startTime": "08:00", "endTime": "09:00" },
-        { "startTime": "09:00", "endTime": "10:00" },
-        { "startTime": "10:00", "endTime": "11:00" },
-        { "startTime": "11:00", "endTime": "12:00" },
-        { "startTime": "12:00", "endTime": "13:00" },
-        { "startTime": "13:00", "endTime": "14:00" },
-        { "startTime": "14:00", "endTime": "15:00" },
-        { "startTime": "15:00", "endTime": "16:00" },
-        { "startTime": "16:00", "endTime": "17:00" },
-        { "startTime": "17:00", "endTime": "18:00" },
-        { "startTime": "18:00", "endTime": "19:00" },
-        { "startTime": "19:00", "endTime": "20:00" },
-        { "startTime": "20:00", "endTime": "21:00" },
-        { "startTime": "21:00", "endTime": "22:00" },
-        { "startTime": "22:00", "endTime": "23:00" },
-        { "startTime": "23:00", "endTime": "00:00" }
-    ],
-};
-
-timeSlots.value = responseData.slots;
-
-const dateSlots = ref([responseData]);
 
 const sortTable = (key) => {
     if (sortKey.value === key) {
@@ -128,7 +103,7 @@ const getStatusClass = (status) => {
 
 const getBadgeVariant = (statusLabel) => {
     switch (statusLabel) {
-        case 'Rescheduled':
+        case 'Reschedule':
             return 'warning';
         case 'Active':
             return 'success';
@@ -156,7 +131,7 @@ onMounted(async () => {
 
 const confirmCancel = (id) => {
     console.log("id", id);
-    id = selectedAppointmentId.value;
+    selectedAppointmentId.value = id;
 
     console.log("selectedAppointmentId", selectedAppointmentId.value);
     console.log("id2", id)
@@ -173,6 +148,7 @@ const confirmCancel = (id) => {
     }).then((result) => {
         if (result.isConfirmed) {
             cancelAppointment(id);
+            getAppointments(1);
         }
     });
 };
@@ -182,11 +158,12 @@ const cancelAppointment = async (id) => {
     try {
         const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
         getAppointment(id);
-
+        getAppointments(1);
         proxy.$showToast({
             title: 'Appointment cancelled',
             icon: 'success',
         })
+
     } catch (error) {
         console.error(error);
     }
@@ -221,7 +198,15 @@ const getAppointment = async (id) => {
         }
     } catch (error) {
         console.log(error);
-        errorDetails.value = error.response.data.errorPayload.errors;
+
+
+        // Check if error.response is defined before accessing it
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            // Handle the case where error.response is not defined
+            errorDetails.value = { general: 'An unexpected error occurred.' };
+        }
     }
 }
 
@@ -252,52 +237,75 @@ const updateAppointment = async () => {
         }
 
     } catch (error) {
-        proxy.$showAlert({
-            title: 'Failed',
-            text: 'It seems there was an error updating your appointment. Please try again!',
-            icon: 'danger',
-        });
-        errorDetails.value = error.response.data.errorPayload.errors;
+        if (error.response && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            proxy.$showAlert({
+                title: 'Failed',
+                text: 'It seems there was an error updating your appointment. Please try again!',
+                icon: 'error',
+            });
+        }
     }
 };
 
-const restoreAppointment = async () => {
+const restoreAppointment = async (id) => {
     try {
         errorDetails.value = {};
 
-        const response = await axiosInstance.put(`/v1/scheduler/appointments/`);
-
+        const response = await axiosInstance.put(`/v1/scheduler/appointments/${id}`);
+        selectedAppointmentId.value = id;
         if (response.data.dataPayload && !response.data.errorPayload) {
             proxy.$showAlert({
                 title: 'Success',
                 text: 'Appointment restored successfully!',
                 icon: 'success',
             });
-            getAppointment();
+            getAppointments(1);
         }
 
     } catch (error) {
-        proxy.$showAlert({
-            title: 'Failed',
-            text: 'It seems there was an error restoring your appointment. Please try again!',
-            icon: 'danger',
-        });
-        errorDetails.value = error.response.data.errorPayload.errors;
+        if (error.response && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            proxy.$showAlert({
+                title: 'Failed',
+                text: 'It seems there was an error restoring your appointment. Please try again!',
+                icon: 'error',
+            });
+        }
     }
 };
+const dateSlots = ref([]);
+const suggestedTimeSlots = ref([]);
 
 const suggestSlots = async () => {
     try {
         errorDetails.value = {};
 
-        const response = await axiosInstance.get(`/v1/scheduler/appointments/suggest-available-slots`);
+        const response = await axiosInstance.get('/v1/scheduler/slot-suggestion');
+
 
         if (response.data.dataPayload && !response.data.errorPayload) {
+            proxy.$showToast({
+                title: 'Success',
+                text: 'Slots suggested successfully!',
+                icon: 'success',
+            });
+            getAppointments(1);
         }
 
     } catch (error) {
-        console.log(error);
-        // errorDetails.value = error.response.data.errorPayload.errors;
+
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            proxy.$showAlert({
+                title: 'Failed',
+                text: 'an error occurred',
+                icon: 'error',
+            });
+        }
     }
 }
 
@@ -383,31 +391,13 @@ const suggestSlots = async () => {
                                 <td>
                                     <button type="button" class="btn btn-outline-primary btn-sm me-3"
                                         @click="openModal(item.id)">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
+                                    <button v-if="item.status === 1 " class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
                                         <i class="fas fa-cancel"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <!-- Pagination -->
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-end">
-                                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                                        <button class="page-link" @click="goToPage(currentPage - 1)"
-                                            :disabled="currentPage === 1">Previous</button>
-                                    </li>
-                                    <li v-for="page in totalPages" :key="page" class="page-item"
-                                        :class="{ active: currentPage === page }">
-                                        <button class="page-link" @click="goToPage(page)">{{ page }}</button>
-                                    </li>
-                                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                                        <button class="page-link" @click="goToPage(currentPage + 1)"
-                                            :disabled="currentPage === totalPages">Next</button>
-                                    </li>
-                                </ul>
-                            </nav>
-
                         </template>
                         <tr v-else>
                             <td colspan="5" class="text-center">
@@ -416,102 +406,126 @@ const suggestSlots = async () => {
                         </tr>
                     </tbody>
                 </table>
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" @click="goToPage(currentPage - 1)"
+                                :disabled="currentPage === 1">Previous</button>
+                        </li>
+                        <li v-for="page in totalPages" :key="page" class="page-item"
+                            :class="{ active: currentPage === page }">
+                            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                        </li>
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" @click="goToPage(currentPage + 1)"
+                                :disabled="currentPage === totalPages">Next</button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </b-card>
     </b-col>
     <BookAppointment ref="appointmentModal" />
 
     <b-modal ref="myModal" hide-footer title="Appointment Details" size="xl">
-    <b-row class="justify-content-center">
-        <b-col lg="12" sm="12">
-            <b-card-body>
-                <b-form>
-                    <b-form-group>
-                        <b-row>
-                            <b-col lg="12" md="12" class="mb-3">
-                                <label for="input-107" class="form-label">Date</label>
-                                <b-form-input v-model="appointmentDetails.appointment_date" id="input-107"
-                                    type="date"></b-form-input>
-                                <div v-if="errorDetails.appointment_date" class="error">
-                                    {{ errorDetails.appointment_date }}</div>
-                            </b-col>
+        <b-row class="justify-content-center">
+            <b-col lg="12" sm="12">
+                <b-card-body>
+                    <b-form>
+                        <b-form-group>
+                            <b-row>
+                                <b-col lg="12" md="12" class="mb-3">
+                                    <label for="input-107" class="form-label">Date</label>
+                                    <b-form-input v-model="appointmentDetails.appointment_date" id="input-107"
+                                        type="date"></b-form-input>
+                                    <div v-if="errorDetails.appointment_date" class="error">
+                                        {{ errorDetails.appointment_date }}</div>
+                                </b-col>
 
-                            <b-col lg="6" md="6" class="mb-3">
-                                <label for="input-107" class="form-label">Start Time</label>
-                                <b-form-input v-model="appointmentDetails.start_time" id="input-107"></b-form-input>
-                                <div v-if="errorDetails.start_time" class="error">
-                                    {{ errorDetails.start_time }}</div>
-                            </b-col>
-                            
-                            <b-col lg="6" md="6" class="mb-3">
-                                <label for="input-107" class="form-label">End Time</label>
-                                <b-form-input v-model="appointmentDetails.end_time" id="input-107"></b-form-input>
-                                <div v-if="errorDetails.end_time" class="error">
-                                    {{ errorDetails.end_time }}</div>
-                            </b-col>
+                                <b-col lg="6" md="6" class="mb-3">
+                                    <label for="input-107" class="form-label">Start Time</label>
+                                    <b-form-input v-model="appointmentDetails.start_time" id="input-107"></b-form-input>
+                                    <div v-if="errorDetails.start_time" class="error">
+                                        {{ errorDetails.start_time }}</div>
+                                </b-col>
 
-                            <b-col lg="12" md="12" class="mb-3">
-                                <label for="input-107" class="form-label">Subject</label>
-                                <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
-                                <div v-if="errorDetails.subject" class="error">
-                                    {{ errorDetails.subject }}</div>
-                            </b-col>
-                            
-                            <b-col lg="12" md="12" class="mb-3">
-                                <label for="input-107" class="form-label">Appointment Type</label>
-                                <b-form-input v-model="appointmentDetails.appointment_type" id="input-107"></b-form-input>
-                                <div v-if="errorDetails.appointment_type" class="error">
-                                    {{ errorDetails.appointment_type }}</div>
-                            </b-col>
+                                <b-col lg="6" md="6" class="mb-3">
+                                    <label for="input-107" class="form-label">End Time</label>
+                                    <b-form-input v-model="appointmentDetails.end_time" id="input-107"></b-form-input>
+                                    <div v-if="errorDetails.end_time" class="error">
+                                        {{ errorDetails.end_time }}</div>
+                                </b-col>
 
-                            <b-col lg="12" md="12" class="mb-3">
-                                <label for="input-107" class="form-label">Booked on</label>
-                                <b-form-input v-model="appointmentDetails.created_at" id="input-107"></b-form-input>
-                                <div v-if="errorDetails.created_at" class="error">
-                                    {{ errorDetails.created_at }}</div>
-                            </b-col>
+                                <b-col lg="12" md="12" class="mb-3">
+                                    <label for="input-107" class="form-label">Subject</label>
+                                    <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
+                                    <div v-if="errorDetails.subject" class="error">
+                                        {{ errorDetails.subject }}</div>
+                                </b-col>
 
-                            <b-col lg="8" md="8" class="mb-3">
-                                <label for="status-badge" class="form-label">Status</label>
-                                <div id="status-badge" class="d-flex align-items-center">
-                                    <b-badge :variant="getBadgeVariant(appointmentDetails.statusLabel)" class="me-3">
-                                        {{ appointmentDetails.statusLabel }}
-                                    </b-badge>
-                                    <b-button v-if="appointmentDetails.status === 1" variant="danger" @click="confirmCancel">
-                                        Cancel
-                                    </b-button>
-                                    <b-button v-else-if="appointmentDetails.status === 2" variant="success" @click="restoreAppointment">
-                                        Restore Appointment
-                                    </b-button>
-                                    <b-button v-else variant="success" @click="suggestSlots">Suggest Open slots</b-button>
-                                </div>
-                            </b-col>
-                            
-                            <b-col lg="5" class="mb-3">
-                                <div v-if="appointmentDetails.status === 3">
-                                    <div v-for="(dateEntry, index) in dateSlots" :key="index">
-                                        <h3>{{ dateEntry.date }}</h3>
-                                        <div>
-                                            <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots"
-                                                @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </b-col>
-                            
-                            <b-row class="m-5">
-                                <b-col>
-                                    <div class="d-flex justify-content-center">
-                                        <b-button variant="primary" class="me-1" @click="updateAppointment">Update</b-button>
+                                <b-col lg="12" md="12" class="mb-3">
+                                    <label for="input-107" class="form-label">Appointment Type</label>
+                                    <b-form-input v-model="appointmentDetails.appointment_type"
+                                        id="input-107"></b-form-input>
+                                    <div v-if="errorDetails.appointment_type" class="error">
+                                        {{ errorDetails.appointment_type }}</div>
+                                </b-col>
+
+                                <b-col lg="12" md="12" class="mb-3">
+                                    <label for="input-107" class="form-label">Booked on</label>
+                                    <b-form-input v-model="appointmentDetails.created_at" id="input-107"></b-form-input>
+                                    <div v-if="errorDetails.created_at" class="error">
+                                        {{ errorDetails.created_at }}</div>
+                                </b-col>
+
+                                <b-col lg="8" md="8" class="mb-3">
+                                    <label for="status-badge" class="form-label">Status</label>
+                                    <div id="status-badge" class="d-flex align-items-center">
+                                        <b-badge :variant="getBadgeVariant(appointmentDetails.statusLabel)"
+                                            class="me-3">
+                                            {{ appointmentDetails.statusLabel }}
+                                        </b-badge>
+                                        <b-button v-if="appointmentDetails.status === 1" variant="danger"
+                                            @click="confirmCancel">
+                                            Cancel
+                                        </b-button>
+                                        <b-button v-else-if="appointmentDetails.status === 2" variant="success"
+                                            @click="restoreAppointment">
+                                            Restore Appointment
+                                        </b-button>
+                                        <b-button v-else variant="success" @click="suggestSlots">Suggest Open
+                                            slots</b-button>
                                     </div>
                                 </b-col>
+
+                                <b-col lg="5" class="mb-3">
+                                    <div v-if="appointmentDetails.status === 3">
+                                        <div v-for="(dateEntry, index) in dateSlots" :key="index">
+                                            <h3>{{ dateEntry.date }}</h3>
+                                            <div>
+                                                <TimeSlotComponent :timeSlots="suggestedTimeSlots"
+                                                    @update:timeSlots="updateTimeSlots"
+                                                    @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </b-col>
+
+                                <b-row class="m-5">
+                                    <b-col>
+                                        <div class="d-flex justify-content-center">
+                                            <b-button variant="primary" class="me-1"
+                                                @click="updateAppointment">Update</b-button>
+                                        </div>
+                                    </b-col>
+                                </b-row>
                             </b-row>
-                        </b-row>
-                    </b-form-group>
-                </b-form>
-            </b-card-body>
-        </b-col>
-    </b-row>
-</b-modal>
+                        </b-form-group>
+                    </b-form>
+                </b-card-body>
+            </b-col>
+        </b-row>
+    </b-modal>
 
 </template>

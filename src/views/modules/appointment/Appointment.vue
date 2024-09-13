@@ -94,11 +94,11 @@ const updateAppointment = async () => {
         }
 
     } catch (error) {
-        proxy.$showAlert({
-            title: 'Failed',
-            text: 'It seems there was an error updating your appointment details. Please try again!',
-            icon: 'danger',
-        });
+        // proxy.$showAlert({
+        //     title: 'Failed',
+        //     text: 'It seems there was an error updating your appointment details. Please try again!',
+        //     icon: 'error',
+        // });
         errorDetails.value = error.response.data.errorPayload.errors;
     }
 }
@@ -184,7 +184,7 @@ const cancelAppointment = async () => {
         proxy.$showAlert({
             title: 'Failed',
             text: 'It seems there was an error cancelling your appointment. Please try again!',
-            icon: 'danger',
+            icon: 'error',
         });
         errorDetails.value = error.response.data.errorPayload.errors;
     }
@@ -209,7 +209,7 @@ const restoreAppointment = async () => {
         proxy.$showAlert({
             title: 'Failed',
             text: 'It seems there was an error restoring your appointment. Please try again!',
-            icon: 'danger',
+            icon: 'error',
         });
         errorDetails.value = error.response.data.errorPayload.errors;
     }
@@ -227,6 +227,17 @@ const getBadgeVariant = (statusLabel) => {
             return 'secondary';
     }
 };
+
+const appointmentType = ref([]);
+const getAppointmentType =() =>{
+    try{
+        const response=axiosInstance.get('/v1/scheduler/appointmentTypes')
+        appointmentType.value = response.data.dataPayload.data;
+
+    }catch(error){
+
+    }
+}
 
 
 onMounted(() => {
@@ -257,27 +268,6 @@ const goBack = () => {
                         <b-form-group>
 
                             <b-row>
-                                <!-- <b-col lg="12" md="12" sm="12"> <label class="form-label">Name </label>
-                                    <b-form-input v-model="appointmentDetails.contact_name" id="input-101" type="text"
-                                        placeholder="first name"></b-form-input>
-                                </b-col>
-                                <div v-if="errorDetails.contact_name" class="error">
-                                    {{ errorDetails.contact_name }} </div> -->
-
-                                <!-- <b-col lg="6" md="6">
-                                    <label for="input-104" class="form-label">Mobile number</label>
-                                    <b-form-input v-model="appointmentDetails.mobile_number" id="input-104" type="tel"
-                                        placeholder="+254 555-555-555"></b-form-input>
-                                    <div v-if="errorDetails.mobile_number" class="error">
-                                        {{ errorDetails.mobile_number }} </div>
-                                </b-col>
-                                <b-col lg="6" md="6">
-                                    <label for="input-102" class="form-label">Email</label>
-                                    <b-form-input v-model="appointmentDetails.email_address" id="input-102" type="email"
-                                        placeholder="markjhon@gmail.com"></b-form-input>
-                                    <div v-if="errorDetails.email_address" class="error">
-                                        {{ errorDetails.email_address }} </div>
-                                </b-col> -->
 
                                 <b-col lg="12" md="12">
                                     <label for="input-107" class="form-label">Date </label>

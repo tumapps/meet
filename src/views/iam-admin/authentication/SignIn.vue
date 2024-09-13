@@ -3,14 +3,16 @@ import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth.store.js';
 import { login } from '../../../api/auth/login.js';
+import { useMenuStore } from '@/store/menuStore';
 
+const menuStore = useMenuStore();
 const isLoading = ref(false);
 const username = ref("");
 const password = ref("");
 const errors = ref({ username: '', password: '', general: '' });
 const authStore = useAuthStore();
 const router = useRouter();
-const {proxy} = getCurrentInstance();
+const { proxy } = getCurrentInstance();
 
 const onSubmit = async () => {
   errors.value = { username: '', password: '', general: '' };
@@ -25,14 +27,18 @@ const onSubmit = async () => {
     const response = await login(credentials);
 
 
-    if (response.data.dataPayload && !response.data.dataPayload.error) {
+    if (response.data.dataPayload && !response.data.dataPayload.error && response.data.dataPayload.data.menus) {
       //set cookie
-      const setCookieHeader = response.headers['set-cookie'];
+      // const setCookieHeader = response.headers['set-cookie'];
+
+      //set menus
 
       authStore.setToken(
         response.data.dataPayload.data.token,
         response.data.dataPayload.data.username
       );
+      menuStore.setMenus(response.data.dataPayload.data.menus);
+
 
       proxy.$showToast({
         title: 'success',
@@ -52,7 +58,7 @@ const onSubmit = async () => {
       const errorDetails = error.response.data.errorPayload.errors;
       errors.value.username = errorDetails.username || '';
       errors.value.password = errorDetails.password || '';
-    }else{
+    } else {
       proxy.$showToast({
         title: 'error',
         text: 'An unexpected error occurred!',
@@ -71,8 +77,7 @@ const onSubmit = async () => {
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100 ">
       <div class="col-md-4 col-lg-3 ">
         <b-card class="h-100 py-5 d-flex flex-column justify-content-between " style="background: white !important;">
-          <img src="@/assets/images/logo.png" class="h-12 w-25 d-block mx-auto"
-            alt="logo">
+          <img src="@/assets/images/logo.png" class="h-12 w-25 d-block mx-auto" alt="logo">
           <h5 class="text-center mt-3 mb-4 fw-bold text-primary">Sign In | TUMMEET</h5>
 
 
@@ -107,7 +112,7 @@ const onSubmit = async () => {
             </div>
           </form>
         </b-card>
-        </div>
+      </div>
     </div>
   </section>
 </template>

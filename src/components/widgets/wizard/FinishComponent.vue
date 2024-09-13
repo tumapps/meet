@@ -3,10 +3,10 @@
     <div class="form-card">
       <b-row>
         <div class="col-7">
-          <h3 class="mb-4 text-left">Finish:</h3>
+          <!-- <h3 class="mb-4 text-left">Finish:</h3> -->
         </div>
         <div class="col-5">
-          <h2 class="steps">Step 3 - 3</h2>
+          <!-- <h2 class="steps">Step 3 - 3</h2> -->
         </div>
       </b-row>
       <br /><br />
@@ -14,23 +14,31 @@
       <br />
       <b-row class="justify-content-center">
         <div class="col-3">
-          <img src="@/assets/images/pages/img-success.png" class="img-fluid" alt="fit-image" />
+          <img src="@/assets/images/img-success.png" class="img-fluid" alt="fit-image" />
         </div>
       </b-row>
       <br /><br />
       <b-row class="justify-content-center">
         <div class="col-7 text-center">
-          <h5 class="purple-text text-center">You Have Successfully Signed Up</h5>
+          <!-- <h5 class="purple-text text-center">User Created</h5> -->
         </div>
       </b-row>
     </div>
   </fieldset>
-  <button @click="routerKey.push('/')" class="btn btn-dark previous action-button-previous float-end me-1" value="Previous">Home</button>
+  <button @click="back" class="btn btn-warning float-end me-1">Close</button>
 
 </template>
-<script>
+<script setup> 
+import { useRouter } from 'vue-router';
 
-export default {
-  name: 'FinishComponent'
-}
+const router = useRouter();
+
+const back = () => {
+router.push('/');};
+
+
+
+// export default {
+//   name: 'FinishComponent'
+// }
 </script>
