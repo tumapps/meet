@@ -176,7 +176,7 @@ class Appointments extends BaseModel
        return self::find()->count();
     }
 
-    public function upComingAppointments($appointment_date = null, $limit = 5)
+    public function upComingAppointments($appointment_date = null, $limit = 10)
     {
         if ($appointment_date === null) {
             $appointment_date = date('Y-m-d');
@@ -185,6 +185,7 @@ class Appointments extends BaseModel
         // Fetch upcoming appointments on the given date, ordered by start time
         return self::find()
             ->where(['appointment_date' => $appointment_date])
+            ->andWhere(['status' => self::STATUS_ACTIVE])
             ->andWhere(['>', 'start_time', date('H:i:s')])
             ->orderBy(['start_time' => SORT_ASC])
             ->limit($limit)
