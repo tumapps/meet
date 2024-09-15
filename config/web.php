@@ -35,11 +35,6 @@ $config = [
                 ],
             ],
         ],
-        'jwt' => [
-             'class' => \sizeg\jwt\Jwt::class,
-            // 'key' => getenv('JWT_SECRET'),
-            'key' => '73bef4d79a975be280c5c1c91d56dba781142710200b8a03fd09c18997706bfa',
-        ],
         'request' => [
             'cookieValidationKey' => hash_hmac('sha256', md5(date('DYM')), sha1(date('myd'))),
             'parsers' => [
