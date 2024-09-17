@@ -81,6 +81,20 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', onscroll())
 })
+
+// Select the first ASIDE element
+const asideElement = document.getElementsByTagName('ASIDE')[0];
+
+// Function to add the 'sidebar-mini' class when hovering
+asideElement.addEventListener('mouseleave', () => {
+  asideElement.classList.add('sidebar-mini');
+});
+
+// Function to remove the 'sidebar-mini' class when mouse leaves
+asideElement.addEventListener('mouseenter', () => {
+  asideElement.classList.remove('sidebar-mini');
+});
+
 </script>
 <style>
 .iq-product-menu-responsive .offcanvas-header {

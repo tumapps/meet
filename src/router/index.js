@@ -50,6 +50,12 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true, },
     component: () => import('@/views/modules/appointment/Appointments.vue'),
   },
+  {
+    path: '/availability',
+    name: 'availability',
+    meta: { requiresAuth: true, },
+    component: () => import('@/views/modules/appointment/Availability.vue'),
+  },
 ]
 
 const routes = [

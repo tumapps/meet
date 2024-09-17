@@ -48,16 +48,16 @@
     }
 }
 @include media-breakpoint-down(xl) {
-    // .sidebar{
-    //     &.sidebar-chat{
-    //         // .sidebar-toggle{
-    //         //     right: -12px;
-    //         // }
-    //         &.sidebar-mini{
-    //             .sidebar-toggle{
-    //                 right: 18px;
-    //             }
-    //         }
-    //     }
-    // }
+    .sidebar{
+        &.sidebar-chat{
+            .sidebar-toggle{
+                right: 12px;
+            }
+            &.sidebar-mini{
+                .sidebar-toggle{
+                    right: 18px;
+                }
+            }
+        }
+    }
 }

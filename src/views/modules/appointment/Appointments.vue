@@ -407,7 +407,7 @@ const suggestSlots = async (id) => {
                                         @click="openModal(item.id)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button v-if="item.status === 5 || item.status === 1"
+                                    <button v-if="item.status === 5 || item.status === 1 || item.status === 3"
                                         class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
                                         <i class="fas fa-cancel"></i>
                                     </button>
