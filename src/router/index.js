@@ -38,12 +38,7 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true, name: 'profile' },
     component: () => import('@/views/iam-admin/Profile.vue'),
   },
-  {
-    path: '/appointment/:id',
-    name: 'appointment',
-    meta: { requiresAuth: true, },
-    component: () => import('@/views/modules/appointment/Appointment.vue'),
-  },
+
   {
     path: '/appointments',
     name: 'appointments',

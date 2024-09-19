@@ -36,7 +36,7 @@ const settings = ref({
 const fetchSettings = async () => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`);
-    console.log(response.data.dataPayload.data);
+    // console.log(response.data.dataPayload.data);
 
     settings.value = {
       start_time: response.data.dataPayload.data.start_time,

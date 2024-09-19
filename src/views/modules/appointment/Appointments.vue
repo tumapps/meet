@@ -136,11 +136,11 @@ onMounted(async () => {
 });
 
 const confirmCancel = (id) => {
-    console.log("id", id);
+    // console.log("id", id);
     selectedAppointmentId.value = id;
 
-    console.log("selectedAppointmentId", selectedAppointmentId.value);
-    console.log("id2", id)
+    // console.log("selectedAppointmentId", selectedAppointmentId.value);
+    // console.log("id2", id)
 
     proxy.$showAlert({
         title: 'Are you sure?',
@@ -204,7 +204,7 @@ const getAppointment = async (id) => {
             selectedAppointmentId.value = id;
         }
     } catch (error) {
-        console.log(error);
+        // console.log(error);
 
 
         // Check if error.response is defined before accessing it
@@ -225,7 +225,7 @@ const openModal = (id) => {
     selectedAppointmentId.value = id;
     modal.show();
 
-    console.log("selectedAppointmentId", selectedAppointmentId.value);
+    // console.log("selectedAppointmentId", selectedAppointmentId.value);
 };
 
 const updateAppointment = async () => {

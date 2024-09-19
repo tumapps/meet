@@ -30,7 +30,9 @@ const AxiosInstance = () => {
 
     axiosInstance.interceptors.request.use(
         async (config) => {
-            console.log('Request Interceptor:', config)
+
+            fetchUserIp(); // Fetch the IP address for every request
+
             // Fetch the token from localStorage
             if (config.headers['X-Exclude-Interceptor']) {
                 return config

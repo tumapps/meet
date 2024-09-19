@@ -19,12 +19,12 @@ export const useAuthStore = defineStore('userAuth', {
 
             if (storedToken && storedUsername) {
                 this.setToken(storedToken, storedUsername);
-                console.log('Initialized user', this.user);
+                // console.log('Initialized user', this.user);
             }
         },
 
         setToken(token, username) {
-            console.log('Setting token:', token, username);
+            // console.log('Setting token:', token, username);
 
             this.user.token = token;
             this.user.username = username;
@@ -42,13 +42,13 @@ export const useAuthStore = defineStore('userAuth', {
             localStorage.removeItem('user.token');
             localStorage.removeItem('user.username');
 
-            console.log('Removed token');
+            // console.log('Removed token');
         },
 
         setIp(ipAddr) {
             this.user.ipAddr = ipAddr;
             sessionStorage.setItem("ipA", ipAddr);
-            console.log("Set IP address in store:", sessionStorage.getItem("ipA"));
+            // console.log("Set IP address in store:", sessionStorage.getItem("ipA"));
         }
     },
 

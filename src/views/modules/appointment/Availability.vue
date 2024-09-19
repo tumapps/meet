@@ -191,7 +191,7 @@ const saveAvailability = async () => {
 const updateAvailabilityDetails = async () =>{
     try{
         const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value)
-        console.log(response);
+        // console.log(response);
 
 
         proxy.$showToast({

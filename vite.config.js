@@ -5,7 +5,7 @@ import vue from "@vitejs/plugin-vue";
 import commonjs from 'vite-plugin-commonjs';
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [
     vue(),
     commonjs(),
@@ -22,13 +22,18 @@ export default defineConfig({
     proxy: {
       // Proxy configuration for the first API
       '/v1': {
-        // target: 'https://api.crackit.co.ke/',
         target: 'http://127.0.0.1/projects/vc/vc_scheduler/',      // target: 'http://127.0.0.1/demos/yii2/afya365-endpoints/',
-        // target: 'http://127.0.0.1/demos/yii2/
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api from the path
       },
     },
     cors: false, // Ensure CORS is disabled if necessary
   },
+
+  build: {
+    outDir: 'dist',
+    sourcemap: false, // Disable sourcemaps in production to reduce file size
+    // Other build options
+  },
+  
 });

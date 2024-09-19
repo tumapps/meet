@@ -27,7 +27,6 @@ watch(warningZone, (newVal) => {
     }
 });
 
-console.log("warning zone", warningZone.value); // Debugging: logs the initial state of warningZone
 </script>
 
 <template>

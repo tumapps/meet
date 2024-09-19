@@ -47,7 +47,7 @@ const onSubmit = async () => {
 
         if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
             const errorDetails = error.response.data.errorPayload.errors;
-            console.log("Validation error details:", errorDetails);
+            // console.log("Validation error details:", errorDetails);
 
             errors.value.email = errorDetails.email || '';
             errors.value.username = errorDetails.username || '';  // Add this line to handle username errors

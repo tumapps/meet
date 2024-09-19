@@ -2,7 +2,7 @@
 import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth.store.js';
-import { login } from '../../../api/auth/login.js';
+import { login } from '@/api/auth/login.js';
 import { useMenuStore } from '@/store/menuStore';
 
 const menuStore = useMenuStore();
@@ -28,10 +28,6 @@ const onSubmit = async () => {
 
 
     if (response.data.dataPayload && !response.data.dataPayload.error && response.data.dataPayload.data.menus) {
-      //set cookie
-      // const setCookieHeader = response.headers['set-cookie'];
-
-      //set menus
 
       authStore.setToken(
         response.data.dataPayload.data.token,
@@ -77,12 +73,8 @@ const onSubmit = async () => {
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100 ">
       <div class="col-md-4 col-lg-3 ">
         <b-card class="h-100 py-5 d-flex flex-column justify-content-between " style="background: white !important;">
-          <img src="@/assets/images/logo.png" class="h-12 w-25 d-block mx-auto" alt="logo">
+          <img :src="require(`@/assets/images/logo.png`)" class="h-12 w-25 d-block mx-auto" alt="logo">
           <h5 class="text-center mt-3 mb-4 fw-bold text-primary">Sign In | TUMMEET</h5>
-
-
-          <!-- <h4 class="text-center">Sign </h4> -->
-          <!-- <p class="text-center">Sign in to stay connected</p> -->
           <form @submit.prevent="onSubmit">
             <div class="form-group">
               <label class="form-label" for="username-id">Username</label>

@@ -41,7 +41,6 @@ const uploadFile = async () => {
         }
 
         const responseData = await response.json();
-        console.log('File uploaded:', responseData);
         uploadStatus.value = 'File uploaded successfully!';
 
         // Emit the 'fileUploaded' event with a success message

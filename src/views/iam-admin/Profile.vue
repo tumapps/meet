@@ -105,13 +105,13 @@ const updatePassword = async () => {
                 icon: 'success',
             });
         }
-        console.log(response.data);
+        // console.log(response.data);
     } catch (error) {
 
         if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
 
             const errorDetails = error.response.data.errorPayload.errors;
-            console.log("Validation error details:", errorDetails);
+            // console.log("Validation error details:", errorDetails);
 
             errors.value.password = errorDetails.password || '';
             errors.value.confirm_password = errorDetails.confirm_password || '';

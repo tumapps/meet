@@ -1,17 +1,14 @@
+<script setup>
+import logo from '@/assets/images/logo.png';
+
+// const logo = new URL("@/assets/images/logo.png", import.meta.url).href;
+
+</script>
 <template>
   <div class="circle-container">
-    <img src="@/assets/images/logo.png" alt="Logo">
+    <img :src="logo" alt="Logo">
   </div>
 </template>
-
-<script>
-export default {
-  props: {
-    color: { type: Boolean, default: false }
-  }
-}
-</script>
-
 
 <style scoped>
 .circle-container {

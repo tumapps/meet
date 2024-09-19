@@ -29,7 +29,7 @@ const config = {
 
 
 const today = ref(new Date().toLocaleDateString());
-console.log(today.value)
+// console.log(today.value)
 
 const slotsData = ref({
     user_id: "212409003",
@@ -54,7 +54,7 @@ const appointmentData = ref({
 const handleDateChange = (newValue, oldValue) => {
     appointmentData.value.appointment_date = newValue;
     slotsData.value.date = newValue;
-    console.log('date changed:', newValue);
+    // console.log('date changed:', newValue);
     getSlots();
 };
 
