@@ -163,6 +163,7 @@
 	left: 100%;
 }
 .ovrlay-3-a {
+	top: 100%;
 	position: absolute;
 	background: rgba(0, 0, 0, 0.25);
 	height: 100%;
@@ -203,7 +204,6 @@
 	left: 0;
 	width: 100%;
 		}
-	top: 100%;
 }
 .ovrlay-5 {
 	position: absolute;
@@ -225,9 +225,6 @@
 	}
 }
 .ovrlay-6 {
-	h4 {
-		color: var(--bs-white);
-	}
 	background: var(--#{$variable-prefix}primary);
 	width: 100%;
 	position: absolute;
@@ -241,25 +238,34 @@
 	@if $enable-transitions == true {
 		@include transition-mixin(all 0.3s ease-in-out);
 	}
+	h4 {
+		color: var(--bs-white);
+	}
+
+
 	p {
 		color: var(--bs-white);
 	}
 }
 .ovrlay-8 {
-	h4 {
-		color: var(--bs-white);
-	}
 	background: var(--#{$variable-prefix}primary);
 	width: 40%;
 	height: 100%;
 	top: 0;
-	@if $enable-transitions == true {
-		@include transition-mixin(all 0.3s ease-in-out);
-	}
 	position: absolute;
 	right: -40%;
 	overflow: auto;
 	padding: 0 10px;
+
+	@if $enable-transitions == true {
+		@include transition-mixin(all 0.3s ease-in-out);
+	}
+
+
+	h4 {
+		color: var(--bs-white);
+	}
+
 	.i-btn {
 		position: absolute;
 		bottom: 10px;

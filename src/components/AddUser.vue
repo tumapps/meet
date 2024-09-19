@@ -159,7 +159,7 @@ no-close-on-esc size="xl" hide-footer>
                 </div>
 
                 <div id="confirm" :class="currentindex == 3 ? 'show' : 'd-none'">
-                    <finish-component @onClick="changeTab"></finish-component>
+                    <finish-component></finish-component>
                 </div>
             </b-form>
         </b-card-body>

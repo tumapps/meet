@@ -38,6 +38,7 @@
             }
         }
         .iq-media-1 {
+            border-radius: $border-radius-sm;
             display: inline-flex;
             background-repeat: no-repeat;
             background-position: center center;
@@ -45,7 +46,6 @@
             &:hover {
                 text-decoration: none;
             }
-            border-radius: $border-radius-sm;
         }
     }
 }

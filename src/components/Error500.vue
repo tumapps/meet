@@ -250,7 +250,7 @@
         
         @keyframes flame-ember-opacity{
             45% {opacity: 1;}
-            100% {opacity: 0;}
+            100% {opacity: 1;}
         }
         
         @keyframes scale-pulse {

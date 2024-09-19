@@ -94,7 +94,7 @@
 }
 .iq-product-tracker-card{ 
     display: none;
-    opacity: 0;
+    opacity: 1;
     transform: translateY(330px);
     transition: 300ms ease-in-out;
     &.show{

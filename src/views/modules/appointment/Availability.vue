@@ -293,7 +293,22 @@ const updateAvailabilityDetails = async () =>{
         </b-card>
         <!-- Pagination -->
         <b-col sm="12" lg="12" class="mt-2 d-flex justify-content-end">
-            <pagination :current-page="currentPage" :total-pages="totalPages" @go-to-page="goToPage" />
+            <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" @click="goToPage(currentPage - 1)"
+                                :disabled="currentPage === 1">Previous</button>
+                        </li>
+                        <li v-for="page in totalPages" :key="page" class="page-item"
+                            :class="{ active: currentPage === page }">
+                            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                        </li>
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" @click="goToPage(currentPage + 1)"
+                                :disabled="currentPage === totalPages">Next</button>
+                        </li>
+                    </ul>
+                </nav>
         </b-col>
     </b-col>
 

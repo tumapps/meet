@@ -100,7 +100,7 @@
 .tab-content{
     &.iq-tab-fade-up{
         .tab-pane.fade {
-            opacity: 0;
+            opacity: 1;
             transform: translateY(10px);
             transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
             &.active.show {

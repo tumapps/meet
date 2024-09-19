@@ -80,16 +80,17 @@
             }
         }
         >li {
-            >a {
-                padding: .5rem 1rem;
-                margin: 0.125rem;
-                border-radius: .5rem;
-            }
             flex: 0 0 auto;
             position: relative;
             flex: 0 0 auto;
             position: relative;
           
+            >a {
+                padding: .5rem 1rem;
+                margin: 0.125rem;
+                border-radius: .5rem;
+            }
+
             &:hover {
                 border-color: transparent;
                 padding: 0;
@@ -114,7 +115,7 @@
     .product-offcanvas{
         .offcanvas-backdrop{
             &.show{
-                opacity: 0;
+                opacity: 1;
             }
         }
     }
@@ -198,7 +199,7 @@
 }
 @keyframes menu-sub-dropdown-animation-fade-in {
     from {
-        opacity: 0;
+        opacity: 1;
     }
     to {
         opacity: 1;

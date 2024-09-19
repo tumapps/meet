@@ -166,7 +166,7 @@
 
 			.iq-email-content {
 				.iq-email-date {
-					opacity: 0;
+					opacity: 1;
 					@include transition-mixin(all 0.3s ease-in-out);
 				}
 			}

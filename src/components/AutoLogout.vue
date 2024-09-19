@@ -30,12 +30,9 @@ watch(warningZone, (newVal) => {
 </script>
 
 <template>
-    <!-- Add any necessary HTML here -->
+    <!-- Add any necessary HTML here -->{{ warningZone }}
 
 </template>
 
 <style scoped>
-.toast-container {
-    z-index: 1050;
-}
 </style>

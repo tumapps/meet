@@ -39,7 +39,7 @@
             position: absolute;
             right: 1rem;
             text-align: center;
-            opacity: 0;
+            opacity: 1;
             transform: translateY(30px);
             transition: 300ms ease-in-out;
         }
@@ -275,7 +275,7 @@
         opacity: 1;
     }
     .swiper-slide{
-        opacity: 0;
+        opacity: 1;
     }
     .swiper-slide-active{
         opacity: 1;

@@ -256,32 +256,12 @@ const updateAppointment = async () => {
     }
 };
 
-const restoreAppointment = async (id) => {
-
+const performSearch = async () => {
     try {
-        errorDetails.value = {};
-
-        const response = await axiosInstance.put(`/v1/scheduler/appointments/${id}`);
-        selectedAppointmentId.value = id;
-        if (response.data.dataPayload && !response.data.errorPayload) {
-            proxy.$showAlert({
-                title: 'Success',
-                text: 'Appointment restored successfully!',
-                icon: 'success',
-            });
-            getAppointments(1);
-        }
-
+        const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`);
+        tableData.value = response.data.dataPayload.data;
     } catch (error) {
-        if (error.response && error.response.data.errorPayload) {
-            errorDetails.value = error.response.data.errorPayload.errors;
-        } else {
-            proxy.$showAlert({
-                title: 'Failed',
-                text: 'Network error or no response',
-                icon: 'error',
-            });
-        }
+        console.error(error);
     }
 };
 

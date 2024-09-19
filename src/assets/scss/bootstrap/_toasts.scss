@@ -29,7 +29,7 @@
   @include border-radius(var(--#{$prefix}toast-border-radius));
 
   &.showing {
-    opacity: 0;
+    opacity: 1;
   }
 
   &:not(.show) {

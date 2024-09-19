@@ -106,7 +106,7 @@
         }
 
         .navbar-toggler-bar.bar2 {
-            opacity: 0;
+            opacity: 1;
         }
 
         .navbar-toggler-bar.bar3 {
@@ -215,7 +215,7 @@
 @keyframes fade-in-bottom {
     0% {
         transform: translateY(25px);
-        opacity: 0;
+        opacity: 1;
     }
 
     100% {
@@ -306,11 +306,12 @@
     .sidebar.sidebar-boxed {
         +.main-content {
             .navs-sticky {
+
+                width: calc(100% - 2.2rem);
                 &.menu-sticky {
                     width: calc(calc(100% - var(--sidebar-width)) - 4rem);
                 }
 
-                width: calc(100% - 2.2rem);
             }
         }
     }

@@ -59,7 +59,7 @@
 
 .carousel-fade {
   .carousel-item {
-    opacity: 0;
+    opacity: 1;
     transition-property: opacity;
     transform: none;
   }
@@ -74,7 +74,7 @@
   .active.carousel-item-start,
   .active.carousel-item-end {
     z-index: 0;
-    opacity: 0;
+    opacity: 1;
     @include transition(opacity 0s $carousel-transition-duration);
   }
 }

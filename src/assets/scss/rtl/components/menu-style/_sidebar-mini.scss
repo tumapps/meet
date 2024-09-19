@@ -59,7 +59,7 @@
                 .nav-link:not(.static-item){
                     span{
                         transform: translateX(100%) scale(0);
-                        opacity: 0;
+                        opacity: 1;
                     }
                 }
             }
@@ -67,7 +67,7 @@
         .navbar-brand {
             .logo-title {
                 transform: translateX(100%) scale(0);
-                opacity: 0;
+                opacity: 1;
             }
         }
     }

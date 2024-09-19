@@ -7,7 +7,7 @@
         .sidebar-profile-detail {
             height: 0;
             width: 0;
-            opacity: 0;
+            opacity: 1;
             margin-bottom: 0;
             transition: all 0.3s ease;
         }
@@ -38,7 +38,7 @@
             .sidebar-border-user-data{
                 height: 0;
                 width: 0;
-                opacity: 0;
+                opacity: 1;
                 transition: all 0.3s ease;
             }
         }
@@ -75,10 +75,11 @@
                     }
                     .sidebar-profile-action {
                         .btn-action {
+                            margin-bottom: unset;
+
                             &:not(:last-child) {
                                 margin-right: $spacer;
                             }
-                            margin-bottom: unset;
                         }
                     }
                 }

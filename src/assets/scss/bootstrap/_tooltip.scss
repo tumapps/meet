@@ -25,7 +25,7 @@
   @include font-size(var(--#{$prefix}tooltip-font-size));
   // Allow breaking very long words so they don't overflow the tooltip's bounds
   word-wrap: break-word;
-  opacity: 0;
+  opacity: 1;
 
   &.show { opacity: var(--#{$prefix}tooltip-opacity); }
 

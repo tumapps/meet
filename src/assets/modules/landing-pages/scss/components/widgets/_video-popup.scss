@@ -73,7 +73,7 @@
         border-radius: 50%;
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
-        opacity: 0;
+        opacity: 1;
         animation: wave-animate 3s 1.5s infinite ease-out;
     }
 }
@@ -87,7 +87,7 @@
 
     100% {
         transform: scale(3);
-        opacity: 0;
+        opacity: 1;
         transform-origin: center
     }
 }

@@ -19,15 +19,16 @@
         }
 
         &.swiper-button-prev {
+
+            right:auto;
+            left:12px;
+            top:65px;
             &:after {
                 content: 'prev';
                 font-size: 0.75rem;
                 color: var(--bs-body-color);
             }
 
-            right:auto;
-            left:12px;
-            top:65px;
         }
     }
 }

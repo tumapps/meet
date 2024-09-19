@@ -1,3 +1,31 @@
+<script>
+// Library
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+
+// Components
+import AutoLogout from '@/components/AutoLogout.vue'
+import HeaderComponent from '@/components/partials/HeaderComponent.vue'
+import SidebarComponent from '@/components/modules/appointment/partials/SidebarComponent.vue'
+import MainContentComponent from '@/components/partials/MainContentComponent.vue'
+import FooterComponent from '@/components/partials/FooterComponent.vue'
+import LoaderComponent from '@/components/custom/loader/LoaderComponent.vue'
+export default {
+  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent, LoaderComponent, AutoLogout },
+  setup() {
+    const route = useRoute()
+    const isBanner = computed(() => route.meta.isBanner)
+    const isLoader = ref(true)
+    onMounted(() => {
+      setTimeout(() => {
+        isLoader.value = false
+      }, 300)
+    })
+    return { isBanner, isLoader }
+  }
+}
+</script>
+
 <template>
   <!-- <loader-component :show="isLoader"></loader-component> -->
   <!-- Sidebar Component Start Here-->
@@ -8,7 +36,7 @@
       <!-- Header Component Start Here -->
       <header-component></header-component>
       <template v-if="isBanner">
-        <AutoLogout />
+        <AutoLogout></AutoLogout>
 
         <!-- Sub Header Component Start Here-->
         <!-- Sub Header Component End Here-->
@@ -28,34 +56,6 @@
     <!-- Footer Component End Here -->
   </main>
 </template>
-
-<script>
-// Library
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-
-// Components
-import AutoLogout from '@/components/AutoLogout.vue'
-import HeaderComponent from '@/components/partials/HeaderComponent.vue'
-import SidebarComponent from '@/components/modules/appointment/partials/SidebarComponent.vue'
-import MainContentComponent from '@/components/partials/MainContentComponent.vue'
-import FooterComponent from '@/components/partials/FooterComponent.vue'
-import LoaderComponent from '@/components/custom/loader/LoaderComponent.vue'
-export default {
-  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent, LoaderComponent },
-  setup() {
-    const route = useRoute()
-    const isBanner = computed(() => route.meta.isBanner)
-    const isLoader = ref(true)
-    onMounted(() => {
-      setTimeout(() => {
-        isLoader.value = false
-      }, 300)
-    })
-    return { isBanner, isLoader }
-  }
-}
-</script>
 
 <style lang="scss">
 @import '@/assets/modules/appointment/scss/appointment.scss';

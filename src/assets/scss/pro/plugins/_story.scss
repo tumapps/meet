@@ -13,6 +13,12 @@
 		}
 	}
 	.story {
+		max-height: 100% !important;
+		min-height: 100% !important;
+		width: auto !important;
+		max-width: 60px !important;
+		white-space: normal !important;
+		
 		.info {
 			strong.name {
 				color: var(--bs-gray-800);
@@ -21,11 +27,7 @@
 				font-weight: 500 !important;
 			}
 		}
-		max-height: 100% !important;
-		min-height: 100% !important;
-		width: auto !important;
-		max-width: 60px !important;
-		white-space: normal !important;
+
 	}
 }
 .stories.carousel {

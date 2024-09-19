@@ -1,4 +1,6 @@
 .table {
+    overflow: hidden;
+
     thead {
         white-space: nowrap;
         tr {
@@ -31,7 +33,6 @@
             }
         }
     }
-    overflow: hidden;
 }
 .table > :not(:last-child) > :last-child > * {
     border-bottom-color: transparent;

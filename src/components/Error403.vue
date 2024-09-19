@@ -129,7 +129,7 @@ html {
                         // $rotation: (5 - random(10)) + deg;
                         // transform: translateY(0px) rotate($rotation);      
                         $spacing: (
-                            random(9) / 2) + 1em;
+                            random(9), 2) + 1em;
                         margin-left: $spacing;
                     }
                 }

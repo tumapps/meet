@@ -2,13 +2,15 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth.store.js'
 
+let userIP ; // Initialize 
+
+
 const AxiosInstance = () => {
     const axiosInstance = axios.create({
         // Set your API base URL
         withCredentials: true
     })
 
-    let userIP = '' // Initialize userIP
     const authStore = useAuthStore()
     const refreshAndRetryQueue = []
     let isRefreshing = false
@@ -19,7 +21,8 @@ const AxiosInstance = () => {
             const response = await axios.get('https://api.ipify.org?format=json')
             userIP = response.data.ip // Assign the fetched IP to userIP
         } catch (error) {
-            console.error('Error fetching IP address:', error)
+
+            console.log('Error fetching IP address:', error)
         }
     }
 
@@ -40,17 +43,11 @@ const AxiosInstance = () => {
             const token = localStorage.getItem('user.token')
             if (token) {
                 config.headers['Authorization'] = `Bearer ${token}`
-            } else {
-                // TODO:handle these minor errors better
-                console.warn('No token found in localStorage')
             }
             // Add the stored IP address to the headers
             if (userIP) {
                 config.headers['X-User-IP'] = userIP
-            } else {
-                // TODO:handle these minor errors better
-                console.warn('No IP address available')
-            }
+            } 
             return config
         },
         (error) => {

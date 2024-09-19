@@ -42,7 +42,7 @@ import RadioInput from '@/components/custom/elements/RadioInput'
 import { useRoute } from 'vue-router'
 const store = useSetting()
 
-const fontSize = computed(() => store.theme_font_size_value)
+const fontSize = computed(() => store.theme_font_sizeDefaultNa_value)
 
 const themeSchemeDirection = computed(() => store.theme_scheme_direction_value)
 

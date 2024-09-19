@@ -126,6 +126,12 @@
             line-height: 1.5;
             color: inherit;
             transition: all 0.3s ease 0s;
+            text-transform: capitalize;
+            padding: 0.5rem 0.8rem;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            text-transform: capitalize;
 
             &.active {
                 transition-property: background-color, color, border-radius, transform, opacity;
@@ -154,13 +160,14 @@
             }
 
             .sidenav-mini-icon {
-                opacity: 0;
+                opacity: 1;
                 display: none;
             }
 
-            text-transform: capitalize;
 
             &:not(.disabled) {
+                color: var(--bs-gray-600);
+
                 .right-icon {
                     transition: var(--sidebar-transition);
                     transition-duration: var(--sidebar-transition-duration);
@@ -172,7 +179,6 @@
                     display: flex;
                 }
 
-                color: var(--bs-gray-600);
 
                 &.active,
                 &[aria-expanded='true'] {
@@ -196,11 +202,7 @@
                 }
             }
 
-            padding: 0.5rem 0.8rem;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            text-transform: capitalize;
+
         }
     }
 

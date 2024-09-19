@@ -40,7 +40,7 @@ function getIcon(label) {
     Appointments: 'calendar',
     Users: 'users',
   };
-  return iconMapping[label] || 'default-icon'; // Fallback to 'default-icon' if label not found
+  return iconMapping[label] || 'gears'; // Fallback to 'default-icon' if label not found
 }
 
 

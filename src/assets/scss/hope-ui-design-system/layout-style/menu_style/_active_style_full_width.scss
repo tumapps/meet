@@ -4,11 +4,12 @@
     &.navs-full-width{
         .sidebar-body{
             padding-right: 0;
+            padding: 0;
+
             .nav-item {
                 &.static-item {
                     padding: 0;
                 }
-                padding: 0;
             }
         }
         &.sidebar-mini{

@@ -5,14 +5,15 @@
     .avatar-#{$value}{@include avatar($value, $border-radius-sm)}
 }
 .avatar-status {
-    i {
-        font-size: 12px;
-    }
     position: absolute;
     bottom: -4px;
     top: auto;
     left: auto;
     right: 4px;
+    i {
+        font-size: 12px;
+    }
+
 }
 .avatar-borderd{
     border: $border-width solid;
