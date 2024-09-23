@@ -22,7 +22,7 @@ const AxiosInstance = () => {
             userIP = response.data.ip // Assign the fetched IP to userIP
         } catch (error) {
 
-            console.log('Error fetching IP address:', error)
+            // console.log('Error fetching IP address:', error)
         }
     }
 
@@ -73,12 +73,12 @@ const AxiosInstance = () => {
                     const statusCode = error.response.status
 
                     if (statusCode === 500) {
-                        console.error('Session expired or token issue. Handle accordingly.')
+                        // console.error('Session expired or token issue. Handle accordingly.')
                         router.push({ path: `/auth/login` })
                         // return Promise.reject(error)
                     }
                     // TODO:handle these minor errors better
-                    console.error('Failed to refresh access token', statusCode, error)
+                    // console.error('Failed to refresh access token', statusCode, error)
                     throw error
                 }
             }
@@ -110,7 +110,7 @@ const AxiosInstance = () => {
                     })
                 }
                 if (statusCode === 440) {
-                    console.error('Session expired or token issue. Handle accordingly.')
+                    // console.error('Session expired or token issue. Handle accordingly.')
                     localStorage.removeItem('user.token');
                     router.push({ path: `/auth/login` })
                     

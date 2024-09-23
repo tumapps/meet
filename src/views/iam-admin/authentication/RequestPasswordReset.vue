@@ -2,6 +2,8 @@
 import { ref, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import createAxiosInstance from '@/api/axios';
+import BrandLogo from '@/components/custom/logo/BrandLogo.vue';
+
 
 const router = useRouter();  // Make sure this is inside setup()
 const {proxy} = getCurrentInstance();
@@ -67,7 +69,7 @@ const onSubmit = async () => {
                     <div class="card-body">
                         <router-link :to="{ name: 'default.dashboard' }"
                             class="navbar-brand d-flex align-items-center mb-3">
-                            <brand-logo class="text-primary"></brand-logo>
+                            <BrandLogo/>
                             <h4 class="logo-title ms-3 mb-0"><brand-name></brand-name></h4>
                         </router-link>
                         <h2 class="mb-2">Reset Password</h2>

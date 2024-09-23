@@ -20,9 +20,8 @@ export default defineConfig({
   server: {
     host: true, // Enable the server to be accessed from the network
     proxy: {
-      // Proxy configuration for the first API
       '/v1': {
-        target: 'http://127.0.0.1/projects/vc/vc_scheduler/',      // target: 'http://127.0.0.1/demos/yii2/afya365-endpoints/',
+        target: 'http://scheduler-back_end:80', // Use the service name of the backend container in Docker
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api from the path
       },

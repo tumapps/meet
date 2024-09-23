@@ -202,7 +202,7 @@ const updatePassword = async () => {
                             <div class="row">
                                 <b-col md="12" lg="12" class="form-group">
                                     <label class="form-label" for="pass"> Current Password:</label>
-                                    <input v-model="oldPassword" type="password" class="form-control" id="pass"
+                                    <input v-model="oldPassword" type="password" class="form-control" id="oldpass"
                                         placeholder="Password" />
                                     <div v-if="errors.oldPassword" class="error" aria-live="polite">{{ errors.oldPassword
                                         }}</div>

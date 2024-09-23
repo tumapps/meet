@@ -3,7 +3,7 @@
     <div class="sidebar-profile-body">
       <div class="mb-3 d-flex justify-content-center">
         <div class="rounded rounded-3 border border-primary p-2">
-          <img src="@/assets/images/avatars/01.png" alt="User-Profile" class="img-fluid rounded" loading="lazy" />
+          <!-- <img src="@/assets/images/avatars/01.png" alt="User-Profile" class="img-fluid rounded" loading="lazy" /> -->
         </div>
       </div>
       <div class="sidebar-profile-detail">

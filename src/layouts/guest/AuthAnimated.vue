@@ -3,7 +3,7 @@
     <nav class="navbar iq-auth-logo mt-1 ms-1">
       <div class="container-fluid">
         <router-link :to="{ name: 'appointment.dashboard' }" class="iq-link d-flex align-items-center">
-          <brand-logo></brand-logo>
+          <BrandLogo></BrandLogo>
           <h4 class="mb-0 ms-1"><brand-name></brand-name></h4>
         </router-link>
       </div>
@@ -27,6 +27,7 @@
 
 <script>
 import SettingOffcanvas from '@/components/setting/SettingOffcanvas.vue'
+import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
 export default {
   components: { SettingOffcanvas }
 }

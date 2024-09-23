@@ -171,7 +171,12 @@ const cancelAppointment = async (id) => {
         })
 
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured ',
+            icon: 'error',
+        });
     }
 };
 
@@ -188,7 +193,12 @@ const getAppointments = async (page = 1) => {
         perPage.value = response.data.dataPayload.perPage;
 
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured!',
+            icon: 'error',
+        });
     }
 };
 
@@ -261,7 +271,12 @@ const performSearch = async () => {
         const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`);
         tableData.value = response.data.dataPayload.data;
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
     }
 };
 

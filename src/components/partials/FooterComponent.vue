@@ -9,19 +9,16 @@
   </footer>
   <!-- Footer Section End -->
    <b-offcanvas placement="bottom" title="Share">
-    <share-offcanvas></share-offcanvas>
   </b-offcanvas>
 </template>
 
 <script>
 import { computed } from 'vue'
-import ShareOffcanvas from '@/components/widgets/ShareOffcanvasNew.vue'
 
 // Pinia Store
 import { useSetting } from '@/store/pinia'
 
 export default {
-  components: { ShareOffcanvas },
   setup() {
     const store = useSetting()
     const footerStyle = computed(() => store.footer_style_value)

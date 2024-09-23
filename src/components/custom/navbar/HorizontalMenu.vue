@@ -4,7 +4,7 @@
     <div class="container-fluid">
       <div class="offcanvas-header px-0">
         <div class="navbar-brand ms-0">
-          <brand-logo :color="true"></brand-logo>
+          <BrandLogo :color="true"></BrandLogo>
           <h4 class="logo-title"><brand-name></brand-name></h4>
         </div>
         <button class="btn-close float-end"></button>
@@ -14,5 +14,7 @@
   </nav>
   <!-- Sidebar Menu End -->
 </template>
-<script setup></script>
+<script setup>
+import BrandLogo from '@/components/custom/logo/BrandLogo.vue';
+</script>
 <style lang="scss" scoped></style>

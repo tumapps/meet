@@ -10,11 +10,11 @@ export default {
     app.component('tab-pane', require('@/components/bootstrap/tab/TabPane').default)
 
     // Brand Components
-    app.component('brand-logo', require('@/components/custom/logo/BrandLogo').default)
+    app.component('BrandLogo', require('@/components/custom/logo/BrandLogo').default)
     app.component('brand-name', require('@/components/custom/logo/BrandName').default)
 
     // Icon Components
-    app.component('icon-component', require('@/components/icons/IconComponent').default)
+    app.component('icon-component', require('@/components/icons/IconComponent.vue').default)
 
     // Form Components
     app.component('select-component', require('@/components/custom/select/SelectComponent').default)

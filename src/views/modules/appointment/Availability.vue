@@ -93,7 +93,12 @@ const performSearch = async () => {
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
     }
 };
 
@@ -130,7 +135,12 @@ const cancelAvailability = async (id) => {
         });
         getAvailabilities(1);
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
     }
 };
 
@@ -143,7 +153,12 @@ const getAvailabilities = async (page = 1) => {
         totalPages.value = response.data.dataPayload.totalPages;
         perPage.value = response.data.dataPayload.perPage;
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
     }
 };
 
@@ -153,7 +168,12 @@ const getAvailability = async (id) => {
         availabilityDetails.value = response.data.dataPayload.data;
 
     } catch (error) {
-        console.error(error);
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
     }
 };
 

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth'
 
 // Lazy load components
-const NotFound = () => import('@/components/NotFound.vue')
+const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
 
@@ -84,7 +84,7 @@ const routes = [
   {
     path: "/:catchAll(.*)", // Update the wildcard route
     name: "Error404",
-    component: NotFound,
+    component: Error404,
   },
   {
     path: '/error/:code',

@@ -48,7 +48,7 @@ const submitForm = async () => {
         currentindex.value = 3;
     } catch (error) {
         // Handle error
-        console.error('Error submitting form:', error);
+        // console.error('Error submitting form:', error);
         proxy.$showToast({
             title: 'An error occurred ',
             text: 'Ooops! an error has occured while creating the account!',

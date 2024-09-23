@@ -3,6 +3,7 @@ import { ref, getCurrentInstance, watch, onMounted } from 'vue'
 import createAxiosInstance from '@/api/axios';
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 import FlatPickr from 'vue-flatpickr-component';
+import IconComponent from '@/components/icons/IconComponent.vue'
 
 const axiosInstance = createAxiosInstance();
 const { proxy } = getCurrentInstance();
@@ -89,7 +90,13 @@ const getSlots = async () => {
         // Update `timeSlots`
         timeSlots.value = slotsWithSelected;
     } catch (error) {
-        console.error('Error getting slots:', error);
+        // console.error('Error getting slots:', error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error has occured ',
+            icon: 'error',
+        });
+
     }
 };
 
@@ -123,7 +130,12 @@ const getAppointmentType = async () => {
         const response = await axiosInstance.get('/v1/scheduler/types');
         appointmentTypeOptions.value = response.data.dataPayload.data.types;
     } catch (error) {
-        console.error('Error fetching appointment types:', error);
+        // console.error('Error fetching appointment types:', error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error has occured',
+            icon: 'error',
+        });
     }
 };
 
