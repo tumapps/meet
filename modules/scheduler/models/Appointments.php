@@ -191,6 +191,48 @@ class Appointments extends BaseModel
             ->limit($limit)
             ->all(); 
     }
+    // public function getAppointmentsFromDate($startDate)
+    // {
+    //     return $this->find()
+    //         ->where(['>=', 'appointment_date', $startDate])
+    //         ->andWhere(['<', 'appointment_date', (new \DateTime($startDate))->modify('+1 day')->format('Y-m-d')])
+    //         ->all();
+    // }
+
+    // public function getAppointmentsFromDate($startDate, $limit = 10)
+    // {
+    //     $currentDateTime = (new \DateTime())->format('Y-m-d H:i:s');
+        
+    //     $query = $this->find()
+    //         ->where(['>=', 'appointment_date', $startDate])
+    //         ->andWhere(['<', 'appointment_date', (new \DateTime($startDate))->modify('+1 day')->format('Y-m-d')]);
+
+    //     // If the start date is today, filter by time as well
+    //     if ($startDate === (new \DateTime())->format('Y-m-d')) {
+    //         $query->andWhere(['>=', 'start_time', $currentDateTime]);
+    //     }
+        
+        // return $query->orderBy(['start_time' => SORT_ASC])
+        //                 ->limit($limit)
+        //                 ->all();
+    // }
+
+    // public function getUpcomingAppointments()
+    // {
+    //     $currentDate = (new \DateTime())->format('Y-m-d');
+    //     $appointments = [];
+        
+    //     while (empty($appointments)) {
+    //         $appointments = $this->getAppointmentsFromDate($currentDate);
+    //         if (empty($appointments)) {
+    //             // Move to the next date
+    //             $currentDate = (new \DateTime($currentDate))->modify('+1 day')->format('Y-m-d');
+    //         }
+    //     }
+        
+    //     return $appointments;
+    // }
+
 
 
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)

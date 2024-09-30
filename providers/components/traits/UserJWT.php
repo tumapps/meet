@@ -137,6 +137,7 @@ trait UserJwt
             'aud' => $hostInfo,
             'iat' => $currentTime,
             'nbf' => $currentTime,
+            // 'user_id' => $this->getJTI(),
             'exp' => static::getExpireIn()
         ];
         // Set up id

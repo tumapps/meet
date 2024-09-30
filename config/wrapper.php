@@ -49,9 +49,9 @@ class ConfigWrapper
             'user.passwordResetTokenExpire' => 900,
             'passwordResetLink' => 'http://10.17.0.26:3000/?token=',
             'menus' => [
-                    ['route' => 'appointments', 'label' => 'Appointments'],
-                    ['route' => 'dashboard', 'label' => 'Dashboard'],
-                    ['route' => 'users', 'label' => 'Users'],
+                    ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'home'],
+                    ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
+                    ['route' => 'users', 'label' => 'Users', 'icon' => 'home'],
             ],
 
         ];

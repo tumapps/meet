@@ -17,6 +17,9 @@ $config = [
             'class' => 'cmd\controllers\VoyageController',
             'migrationPath' => $wrapper->load('migrationPaths'),
         ],
+        'ws' => [
+            'class' => 'cmd\controllers\WebSocketServerController',
+        ],
     ],
     'components' => [
         'cache' => [

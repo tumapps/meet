@@ -23,7 +23,10 @@
         "vlucas/phpdotenv": "^5.5",
         "lcobucci/jwt": "*",
         "google/apiclient": "^2.15.1",
-        "firebase/php-jwt": "^6.10"
+        "firebase/php-jwt": "^6.10",
+        "cboden/ratchet": "^0.4.4",
+        "ratchet/pawl": "^0.4.1",
+        "textalk/websocket": "^1.5"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -4,7 +4,7 @@ php yii gii/module --moduleID=auth --moduleClass="app\modules\auth\Module"
 php yii gii/crud --controllerClass='mainstream\controllers\DatabanksController' --modelClass='iam\models\Databanks' --searchModelClass='mainstream\models\searches\DatabanksSearch'
 php yii gii/model --tableName=databanks --modelClass=Databanks --ns='mainstream\models'
 
-
+start serevre: php -S localhost:8088 -t . index.php 
 
 
 

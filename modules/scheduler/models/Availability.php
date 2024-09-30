@@ -186,10 +186,10 @@ class Availability extends BaseModel
     }
 
 
-    public static function isUnavailableSlot($vc_id, $date, $start_time, $end_time)
+    public static function isUnavailableSlot($user_id, $date, $start_time, $end_time)
     {
         $isFullDayUnavailable = self::find()
-        ->where(['user_id' => $vc_id, 'is_full_day' => true, 'start_date' => $date])
+        ->where(['user_id' => $user_id, 'is_full_day' => true, 'start_date' => $date])
         ->exists();
 
         if ($isFullDayUnavailable) {
@@ -197,7 +197,7 @@ class Availability extends BaseModel
         }
 
         return self::find()
-            ->where(['user_id' => $vc_id])
+            ->where(['user_id' => $user_id])
             ->andWhere(['<=', 'start_date', $date])
             ->andWhere(['>=', 'end_date', $date])
             ->andWhere([

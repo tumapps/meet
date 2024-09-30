@@ -98,6 +98,7 @@ class TimeHelper
 
         foreach ($allSlots as $slot) {
             $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
+            // return $isAvailable;
             list($slotStart, $slotEnd) = explode('-', $slot);
             $expireTime = self::checkExpireTime($date, $slotStart);
             $slotsWithAvailability[] = [

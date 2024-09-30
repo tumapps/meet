@@ -79,8 +79,6 @@ class AvailabilityController extends \helpers\ApiController{
                 $model->end_time
             );
 
-
-
            return $this->payloadResponse(
             [
                 $this->findModel($id),

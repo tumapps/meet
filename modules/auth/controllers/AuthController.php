@@ -60,7 +60,7 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
 			$this->generateRefreshToken($user);
-			return $this->payloadResponse(['username' => $user->username, 'token' => $user->token, 'menus' => Yii::$app->params['menus']], ['statusCode' => 200, 'message' => 'Access granted']);
+			return $this->payloadResponse(['username' => $user->username, 'user_id' => $user->user_id, 'token' => $user->token, 'menus' => Yii::$app->params['menus']], ['statusCode' => 200, 'message' => 'Access granted']);
 		}
 		return $this->errorResponse($model->getErrors());
 	}

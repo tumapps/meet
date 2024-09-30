@@ -113,7 +113,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
     public function getProfile(){
-        return $this;
-         // return $this->hasOne(Profiles::class, ['user_id' => 'user_id']);
+        // return $this;
+         return $this->hasOne(Profiles::class, ['user_id' => 'user_id']);
     }
 }
