@@ -21,7 +21,7 @@ export default defineConfig({
     host: true, // Enable the server to be accessed from the network
     proxy: {
       '/v1': {
-        target: 'http://scheduler-back_end:80', // Use the service name of the backend container in Docker
+        target: 'http://localhost:9000', // Use the service name of the backend container in Docker
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api from the path
       },
