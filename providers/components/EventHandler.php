@@ -24,9 +24,13 @@ class EventHandler
 
 	}
 
-	public static function onAppointmentCancelled($event)
+	public static function onAppointmentCancelled(Event $event)
     {
         $contactEmail = $event->data['contactEmail'];
         $bookedUserEmail = $event->data['bookedUserEmail'];
+
+        self::send();
+        self::send();
+
     }
 }
