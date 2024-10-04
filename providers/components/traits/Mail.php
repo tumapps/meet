@@ -10,7 +10,7 @@ trait Mail
      * @param string $email the target email address
      * @return bool whether the model passes validation
      */
-    public function send($email, $subject, $body)
+    public static function send($email, $subject, $body)
     {
         $message = \Yii::$app->mailer->compose()
             ->setTo($email)
