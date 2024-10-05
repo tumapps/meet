@@ -138,6 +138,7 @@ trait UserJwt
             'iat' => $currentTime,
             'nbf' => $currentTime,
             'user_id' => $this->getPrimaryKey(),
+            'can_be_booked' => $this->can_be_booked,
             'exp' => static::getExpireIn()
         ];
         // Set up id
