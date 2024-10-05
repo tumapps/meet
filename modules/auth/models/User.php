@@ -14,12 +14,6 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     const STATUS_ACTIVE = 10;
    
 
-    // public function init()
-    // {
-    //     parent::init();
-    //     $this->on(self::EVENT_PASSWORD_RESET_REQUEST, [EventHandler::class, 'handlePasswordResetRequest']);
-    // }
-
     public static function tableName()
     {
         return '{{%users}}';
@@ -29,7 +23,7 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     {
         return [
             ['username', 'required'],
-            ['status', 'default', 'value' => self::STATUS_INACTIVE],
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
         ];
     }
@@ -120,7 +114,6 @@ class User extends BaseModel implements \yii\web\IdentityInterface
         $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
     }
     public function getProfile(){
-        // return $this;
          return $this->hasOne(Profiles::class, ['user_id' => 'user_id']);
     }
 }
