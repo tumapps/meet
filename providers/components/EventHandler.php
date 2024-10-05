@@ -21,16 +21,74 @@ class EventHandler
 		} else {
 			$event->handled = false;
 		}
-
 	}
 
 	public static function onAppointmentCancelled(Event $event)
     {
+    	 
         $contactEmail = $event->data['contactEmail'];
         $bookedUserEmail = $event->data['bookedUserEmail'];
 
-        self::send();
-        self::send();
+         $commonData = [
+	        'date' => $event->data['date'],
+	        'startTime' => $event->data['startTime'],
+	        'endTime' => $event->data['endTime'],
+	        'contactLink' => 'https://localhost',
+    	];
 
+    	$userBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
+	        'name' => $event->data['contact_name'],
+	        'recipientType' => 'user',
+    	]));
+
+        // notify contact user
+        self::send($contactEmail, $event->data['subject'], $userBody);
+
+        $vcBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
+	        'recipientType' => 'vc', // Specify the recipient type
+    	]));
+
+        self::send($bookedUserEmail, $event->data['subject'], $vcBody)
+    }
+
+    public static function onAppointmentReschedule(Event $event)
+    {
+    	$email = $event->data['email'];
+    	$subject = $event->data['subject'];
+
+    	$body = Yii::$app->view->render('@ui/views/emails/appointmentAffected', [
+    		'name' => $event->data['name'],
+    		'bookedUserName' => $event->data['bookedUserName'],
+    		'supportEmail' => 'example@gmail.com'
+    	]);
+
+    	self::send($email, $subject, $body);
+    }
+
+    public static function onAppointmentRescheduled(Event $event)
+    {
+    	$email = $event->data['email'];
+    	$subject = $event->data['subject'];
+
+        $body = Yii::$app->view->render('@ui/views/emails/appointmentRescheduled',[
+        	'name' => $event->data['name'],
+        	'date' => $event->data['date'],
+        	'startTime' => $event->data['startTime'],
+        	'endTime' => $event->data['endTime'],
+        ]);
+
+        self::send($email, $subject, $body);
+    }
+
+    public static function onAffectedAppointments(Event $event)
+    {
+    	$email = $event->data['email'];
+    	$subject = $event->data['subject'];
+
+    	$body = Yii::$app->view->render('@ui/views/emails/appointmentsNeedReschedule',[
+    		'affectedAppointments' => $event->data['appointments'],
+    	]);
+
+    	self::send($email, $subject, $body);
     }
 }
