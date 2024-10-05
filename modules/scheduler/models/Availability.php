@@ -57,7 +57,7 @@ class Availability extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id'], 'integer'],
-            [['start_date', 'end_date', 'start_time', 'end_time'], 'required'],
+            [['start_date', 'end_date', 'start_time', 'end_time', 'description'], 'required'],
             [['start_date', 'end_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['start_date', 'end_date'], 'validateDateRange'],

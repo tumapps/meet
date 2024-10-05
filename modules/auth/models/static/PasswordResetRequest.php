@@ -7,14 +7,17 @@ use yii\base\Model;
 use auth\models\User;
 use auth\models\Profiles;
 use auth\models\Tokens;
-use helpers\traits\Mail;
+// use helpers\traits\Mail;
+use yii\base\Event;
+use helpers\EventHandler;
 
 
 class PasswordResetRequest extends Model
 {
-	use Mail;
+	// use Mail;
 
 	public $username;
+    const EVENT_PASSWORD_RESET_REQUEST = 'passwordResetRequest';
 
 	/**
      * {@inheritdoc}
@@ -27,14 +30,17 @@ class PasswordResetRequest extends Model
             ['username', 'string'],
             ['username', 'exist',
                 'targetClass' => '\auth\models\User',
-                'message' => 'There is no user with this username.'
+                'message' => 'The provided username does not exists.'
             ],
         ];
     }
 
     public function sendEmail()
     {
-        $userId = User::find()->select('user_id')->where(['username' => $this->username, 'status'=> User::STATUS_ACTIVE])->scalar();
+
+        $userId = User::find()->select('user_id')->where([
+            'username' => $this->username, 'status'=> User::STATUS_ACTIVE
+        ])->scalar();
 
         if (!$userId) {
             return false;
@@ -48,9 +54,8 @@ class PasswordResetRequest extends Model
         if (!$email) {
             return false;
         }
-        // return $email->email_address;
+
         // get user token ie password reset token;
-        $user = new User();
         $password_reset_token = Yii::$app->security->generateRandomString(7) . '_' . time();
 
         $tokens = new Tokens();
@@ -66,16 +71,30 @@ class PasswordResetRequest extends Model
          
         // Email subject and body
         $subject = 'Password Reset Request';
-        $body = "
-            <p>Hello, '{ $this->username }'</p>
-            <p>You have requested a password reset. Please click the link below to reset your password:</p>
-            <p><a href='{$resetLink}'>Reset Password</a></p>
-            <p>If you did not request this, please ignore this email.</p>
-        ";
+      
+        $body = Yii::$app->view->render('@ui/views/emails/passwordReset', [
+            'username' => $this->username,
+            'resetLink' => $resetLink,
+        ]);
 
-        if ($this->send($email->email_address, $subject, $body)) {
+        $eventData = [
+            'email' => $email->email_address,
+            'subject' => $subject,
+            'body' => $body
+        ];
+
+        $this->on(self::EVENT_PASSWORD_RESET_REQUEST, [EventHandler::class, 'handlePasswordResetRequest'], $eventData);
+
+        $event = new Event();
+        $this->trigger(self::EVENT_PASSWORD_RESET_REQUEST, $event);
+
+        if ($event->handled) {
             return true;
         }
+
+        // if (self::send($email->email_address, $subject, $body)) {
+        //     return true;
+        // }
 
         return false;
     }

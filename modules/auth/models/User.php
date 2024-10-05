@@ -12,6 +12,13 @@ class User extends BaseModel implements \yii\web\IdentityInterface
 
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
+   
+
+    // public function init()
+    // {
+    //     parent::init();
+    //     $this->on(self::EVENT_PASSWORD_RESET_REQUEST, [EventHandler::class, 'handlePasswordResetRequest']);
+    // }
 
     public static function tableName()
     {

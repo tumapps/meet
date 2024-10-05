@@ -3,6 +3,10 @@
 namespace scheduler\models;
 
 use Yii;
+use auth\models\User;
+use yii\base\Event;
+use helpers\EventHandler;
+
 /**
  *@OA\Schema(
  *  schema="Appointments",
@@ -29,6 +33,11 @@ class Appointments extends BaseModel
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_RESCHEDULED = 5;
+
+    const EVENT_APPOINTMENT_CANCELLED = 'appointmentCancelled';
+    const EVENT_APPOINTMENT_RESCHEDULE = 'appointmentReschedule';
+    const EVENT_APPOINTMENT_RESCHEDULED = 'appointmentRescheduled';
+    const EVENT_AFFECTED_APPOINTMENTS = 'affectedAppointments';
 
 
     protected static $statusLabels = [
@@ -141,6 +150,85 @@ class Appointments extends BaseModel
     public static function getStatusLabel($status)
     {
         return self::$statusLabels[$status] ?? 'Unknown';
+    }
+
+    public static function getUserName($user_id)
+    {
+        return User::find()->select('username')->where(['user_id' => $user_id])->scalar();
+
+    }
+
+    public function sendAppointmentCancelledEvent($email, $name, $date, $startTime, $endTime, $bookedUserEmail)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Cancelled';
+
+        $event->data = [
+            'contactEmail' => $email,
+            'contact_name' => $name,
+            'date' => $date,
+            'startTime' => $startTime,
+            'endTime' => $endTime,
+            'bookedUserEmail' => $bookedUserEmail,
+            'subject' => $subject,
+        ];
+        $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $event);
+        $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
+    }
+
+    public function sendAppointmentRescheduleEvent($email, $name, $bookedUserId)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Reschedule';
+        $event->data = [
+            'email' => $email,
+            'subject' => $subject,
+            'name' => $name,
+            'bookedUserName' => User::find()->select('username')->where(['user_id' => $bookedUserId])
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $event);
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE); 
+    }
+
+    public function sendAppointmentRescheduledEvent($email, $date, $startTime, $endTime, $name)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Rescheduled';
+        $event->data = [
+            'email' => $email,
+            'subject' => $subject,
+            'date' => $date,
+            'sartTime' => $startTime,
+            'endTime' => $endTime,
+            'name' => $name,
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $event);
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED); 
+    }
+
+    public function sendAffectedAppointmentsEvent($appointments)
+    {
+        $user_id = $appointments[0]->user_id;
+        $user = $user = User::findOne($model->user_id);
+        $userEmail = $user->profile->email_address;
+
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Affected Appointments';
+
+        $event->data = [
+            'email' => $userEmail,
+            'subject' => $subject,
+            'appointments' => $appointments,
+        ];
+
+        $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $event);
+        $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS); 
     }
 
     public function getRescheduledAppointment($id)
@@ -282,32 +370,38 @@ class Appointments extends BaseModel
      * @param string $end_time The end time of the appointment
      * @return bool True if an overlapping appointment exists, false otherwise
      */
-    public static function hasOverlappingAppointment($vc_id, $date, $start_time, $end_time)
+    public static function hasOverlappingAppointment($user_id, $date, $start_time, $end_time,  $appointment_id = null)
     {
-        return self::find()
-        ->where(['user_id' => $vc_id, 'appointment_date' => $date])
-        ->andWhere([
-            'OR',
+        $query = self::find()
+            ->where(['user_id' => $user_id, 'appointment_date' => $date])
+            ->andWhere([
+                'OR',
 
-            /* checks if the start time of the new appointment ($start_time) falls within an existing appointment.
-            */
+                /* checks if the start time of the new appointment ($start_time) falls within an existing appointment.
+                */
 
-            ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
+                ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
 
-            /*
-                hecks if the end time of the new appointment ($end_time) falls within an existing appointment.
-             */
-            ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+                /*
+                    hecks if the end time of the new appointment ($end_time) falls within an existing appointment.
+                 */
+                ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
 
-            /*
-                checks if the existing appointment completely spans over the new appointment's time slot.
-             */
-            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                /*
+                    checks if the existing appointment completely spans over the new appointment's time slot.
+                 */
+                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
 
-             // The requested appointment spans across an existing appointment
-            ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-        ])
-        ->exists();
+                 // The requested appointment spans across an existing appointment
+                ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+            ]);
+
+            // Exclude the current appointment from the overlapping check during update
+            if ($appointment_id !== null) {
+                $query->andWhere(['!=', 'id', $appointment_id]);
+            }
+
+            return $query->exists();
     } 
 
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
@@ -342,7 +436,4 @@ class Appointments extends BaseModel
         ->orderBy(['created_at' => SORT_ASC])
         ->all();
     }
-
-
 }
-// echo $query->createCommand()->getRawSql();

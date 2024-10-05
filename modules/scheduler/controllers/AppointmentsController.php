@@ -9,6 +9,9 @@ use scheduler\models\searches\AppointmentsSearch;
 use scheduler\models\Availability;
 use scheduler\hooks\TimeHelper;
 use scheduler\hooks\AppointmentRescheduler as Ar;
+use auth\models\User;
+use auth\models\Profiles;
+
 /**
  * @OA\Tag(
  *     name="Appointments",
@@ -29,9 +32,18 @@ class AppointmentsController extends \helpers\ApiController{
     public function actionIndex()
     {
         // Yii::$app->user->can('schedulerAppointmentsList');
+        $currentUserId = Yii::$app->user->id;
+        $canBeBooked = Yii::$app->user->identity->can_be_booked;
+
         $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentsSearch');
+        
+
         $dataProvider = $searchModel->search($search);
+        
+        if($canBeBooked){
+            $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        }
 
         $appointments = $dataProvider->getModels();
 
@@ -39,6 +51,7 @@ class AppointmentsController extends \helpers\ApiController{
         foreach ($appointments as &$appointment) {
             $appointmentData = $appointment->toArray();
             $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
+            $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
             $appointment = $appointmentData;
         }
 
@@ -61,7 +74,8 @@ class AppointmentsController extends \helpers\ApiController{
         // return $this->payloadResponse($this->findModel($id));
     }
 
-    public function actionAppointmentsTypes(){
+    public function actionAppointmentsTypes()
+    {
 
         $model = new AppointmentType();
         $appointmentTypes = $model->getAppointmentTypes();
@@ -131,10 +145,6 @@ class AppointmentsController extends \helpers\ApiController{
                return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
             }
         }
-        // if($model->load($dataRequest) && $model->save()) {
-        //         return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
-        // }
-        // return $this->errorResponse($model->getErrors()); 
     }
 
     public function actionUpdate($id)
@@ -181,7 +191,8 @@ class AppointmentsController extends \helpers\ApiController{
                 $dataRequest['Appointments']['user_id'], 
                 $dataRequest['Appointments']['appointment_date'], 
                 $dataRequest['Appointments']['start_time'],
-                $dataRequest['Appointments']['end_time']
+                $dataRequest['Appointments']['end_time'],
+                $id
             );
 
             if ($appoitmentExists) {
@@ -193,6 +204,13 @@ class AppointmentsController extends \helpers\ApiController{
             }
             
             if($model->save()) {
+                if($model->status === Appointments::STATUS_RESCHEDULED){
+                    $model->sendAppointmentRescheduledEvent(
+                        $model->email_address, $model->appointment_date, $model->start_time, $model->end_time, 
+                        $model->contact_name
+                    );
+                }
+
                 return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
             }
         }
@@ -209,17 +227,39 @@ class AppointmentsController extends \helpers\ApiController{
         if ($model->is_deleted) {
             // Yii::$app->user->can('schedulerAppointmentsRestore');
             $model->restore();
-            // $model->status = Appointments::STATUS_CANCELLED;
-            // $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
-            $model->status = Appointments::STATUS_CANCELLED;
-            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors()); 
+    }
+
+    public function actionCancell($id)
+    {
+            $model = $this->findModel($id);
+            $contact_email = $model->email_address;
+            $contact_name = $model->contact_name;
+            $date = $model->appointment_date;
+            $starTime = $model->start_time;
+            $endTime = $model->end_time;
+
+            $user = User::findOne($model->user_id);
+
+            if ($user && $user->profile) {
+                $bookedUserEmail = $user->profile->email_address;
+            } else {
+                return $this->errorResponse(['message' => 'User profile or email not found']);
+            }
+
+            $model->status = Appointments::STATUS_CANCELLED;
+            if($model->save(false)){
+
+                $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $bookedUserEmail);
+                return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments CANCELLED successfully']);
+            }
+            return $this->errorResponse($model->getErrors()); 
     }
 
 

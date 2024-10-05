@@ -59,11 +59,34 @@ class AuthController extends \helpers\ApiController
 		$dataRequest['Login'] = Yii::$app->request->getBodyParams();
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
+			$canBeBooked = Yii::$app->user->identity->can_be_booked;
 			$this->generateRefreshToken($user);
-			return $this->payloadResponse(['username' => $user->username, 'user_id' => $user->user_id, 'token' => $user->token, 'menus' => Yii::$app->params['menus']], ['statusCode' => 200, 'message' => 'Access granted']);
+			
+			return $this->payloadResponse([
+				'username' => $user->username, 
+				'user_id' => $user->user_id, 
+				'can_be_booked' => $canBeBooked, 
+				'token' => $user->token, 
+				'menus' => $this->filterMenus($canBeBooked),
+				], 
+				['statusCode' => 200, 'message' => 'Access granted']);
 		}
 		return $this->errorResponse($model->getErrors());
 	}
+
+	public function filterMenus($can_be_booked)
+	{
+	    $menus = Yii::$app->params['menus'];
+
+	   if (!$can_be_booked === false) {
+	        $menus = array_values(array_filter($menus, function ($menu) {
+	            return $menu['route'] !== 'users';
+	        }));
+    	}
+
+	    return $menus;
+	}
+
 
 
 	public function actionRegister()

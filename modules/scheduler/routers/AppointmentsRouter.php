@@ -210,6 +210,34 @@ return [
 'PUT appointments/{id}'     => 'appointments/update',
 
 /**
+* @OA\Put(
+*     path="/scheduler/cancell/{id}",
+*     tags={"Appointments"},
+*     summary="Cancell an existing Appointments model",
+*     @OA\Parameter(description="Appointments unique ID to load and update",in="path",name="id",required=true,@OA\Schema(type="string",)),
+*     @OA\RequestBody(
+*        required=true,
+*        description="Finds the Appointments model to be cancelled based on its primary key value",
+*        @OA\JsonContent(
+*           ref="#/components/schemas/Appointments",
+*        ),
+*     ),
+*    @OA\Response(
+*       response=202,
+*       description="Data payload",
+*       @OA\JsonContent(
+*          @OA\Property(property="dataPayload", type="object",
+*             @OA\Property(property="data", type="object",ref="#/components/schemas/Appointments"),
+*             @OA\Property(property="toastMessage", type="string", example="appointments cancelled succefully"),
+*             @OA\Property(property="toastTheme", type="string",example="success"),
+*          )
+*       )
+*    ),
+* )
+*/
+'PUT cancell/{id}'     => 'appointments/cancell',
+
+/**
 * @OA\Delete(path="/scheduler/appointments/{id}",
 *    tags={"Appointments"},
 *    summary="Deletes an existing Appointments model.",

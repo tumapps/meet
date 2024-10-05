@@ -31,7 +31,7 @@ class AvailabilityController extends \helpers\ApiController{
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerAvailabilityView');
+        // Yii::$app->user->can('schedulerAvailabilityView');
         return $this->payloadResponse($this->findModel($id));
     }
 

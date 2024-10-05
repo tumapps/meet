@@ -19,12 +19,16 @@
             margin: 0 auto;
             padding: 20px;
             background-color: #f4f4f4;
+            border-radius: 10px;
         }
         .email-header {
             text-align: center;
             font-size: 24px;
             font-weight: bold;
             color: #333;
+        }
+        .bbtn{
+            text-align: center;
         }
         .email-body {
             font-size: 16px;
@@ -52,11 +56,13 @@
         <div class="email-body">
             <p>Hello, <strong><?= $username ?></strong></p>
             <p>You have requested a password reset. Please click the link below to reset your password:</p>
-            <p><a href="<?= $resetLink ?>">Reset Password</a></p>
+            <button class="btn btn-primary bbtn">
+                <a class="link"> href="<?= $resetLink ?>">Reset Password</a>
+            </button>
             <p>If you did not request this, please ignore this email.</p>
         </div>
         <div class="email-footer">
-            <p>Thank you,<br><span>&#169</span> <?= date('Y') ?> Tum Tumeet</p>
+            <p>Thank you,<br><span>&copy;</span> <?= date('Y') ?> Tum Tumeet</p>
         </div>
     </div>
 </body>

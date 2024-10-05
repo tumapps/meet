@@ -19,9 +19,9 @@ class AppointmentRescheduler {
             self::rescheduleAppointment($appointment);
         }
 
-        return $affectedAppointments;
-
         self::sendNotifications($affectedAppointments);
+        
+        return $affectedAppointments;
 	}
 
 	private static function getAffectedAppointments($user_id, $start_date, $end_date, $start_time, $end_time)
@@ -71,7 +71,6 @@ class AppointmentRescheduler {
    	 	}
 	}
 
-
 	protected static function findSlotsThatFitDuration($availableSlots, $requiredSlotDuration, $appointment_date)
 	{
 	    $suitableSlots = [];
@@ -108,15 +107,18 @@ class AppointmentRescheduler {
 	    return $suitableSlots;
 	}
 
-
-
-
-
     private  function sendNotifications($appointments)
     {
-        // Implement logic to send notifications to users about the rescheduling
+    	$model = new Appointments();
+
+    	if(!empty($appointments)){
+    		$model->sendAffectedAppointmentsEvent($appointments);
+
+	        foreach($appointments as $appointment){
+	        	$model->sendAppointmentRescheduleEvent($appointment->email_address, $appointment->contact_name, $appointment->user_id);
+	        }
+    	}
     }
- 
 	
 	protected static function calculateAvailableSlots($user_id, $date, $startTime, $endTime, $slotDuration)
 	{
@@ -139,7 +141,5 @@ class AppointmentRescheduler {
         }
         return $availableSlots;
 	}
-
-
 }
 
