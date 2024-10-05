@@ -64,7 +64,6 @@ class AuthController extends \helpers\ApiController
 			
 			return $this->payloadResponse([
 				'username' => $user->username, 
-				'user_id' => $user->user_id, 
 				'can_be_booked' => $canBeBooked, 
 				'token' => $user->token, 
 				'menus' => $this->filterMenus($canBeBooked),
