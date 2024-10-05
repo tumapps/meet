@@ -59,12 +59,11 @@ class AuthController extends \helpers\ApiController
 		$dataRequest['Login'] = Yii::$app->request->getBodyParams();
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
-			$canBeBooked = Yii::$app->user->identity->can_be_booked;
+			$canBeBooked = $user->can_be_booked;
 			$this->generateRefreshToken($user);
 			
 			return $this->payloadResponse([
 				'username' => $user->username, 
-				'can_be_booked' => $canBeBooked, 
 				'token' => $user->token, 
 				'menus' => $this->filterMenus($canBeBooked),
 				], 
