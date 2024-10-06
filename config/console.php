@@ -20,6 +20,9 @@ $config = [
         'ws' => [
             'class' => 'cmd\controllers\WebSocketServerController',
         ],
+        'appointment' => [
+            'class' => 'cmd\controllers\AppointmentController',
+        ],
     ],
     'components' => [
         'cache' => [
