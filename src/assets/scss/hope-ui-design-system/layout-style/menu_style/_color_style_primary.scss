@@ -44,8 +44,24 @@
                 --shadow-dark-color: #{$white};
                 &.active, &[aria-expanded=true] {
                     color: var(--#{$variable-prefix}primary);
-                    background-color: $white;
-                    box-shadow: 0 10px 20px -10px rgba(var(--shadow-dark-color), 38%)
+                    background-color: rgb(14, 133, 14); // You can tweak this green or use a gradient
+                    box-shadow: 0 10px 20px -10px rgba(var(--shadow-dark-color), 38%);
+                    position: relative;  // Ensure the parent is positioned for the absolute element
+                
+                    // Add the golden vertical bar
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        width: 5px;  // Adjust this width as needed
+                        background-color:#D89837;  // Golden color
+
+                    }
+                
+                    // Optionally, apply a shade of green or gradient for the background
+                    background: white;  // Example gradient for a shade of green
                 }
                 &:hover {
                     &:not(.active):not([aria-expanded=true]){

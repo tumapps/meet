@@ -4,7 +4,9 @@ import AxiosInstance from '@/api/axios';
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue';
 import globalUtils from '@/utilities/globalUtils';
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue';
+import { useAuthStore } from '@/store/auth.store.js';
 
+const authStore = useAuthStore();
 // const globalUtils = require('@/utils/globalUtils');
 const appointmentModal = ref(null);
 const showModal = () => {
@@ -38,6 +40,9 @@ const errorDetails = ref({
     updated_at: '',
 });
 
+//get user_id from session storage
+const userId = authStore.getUserId();
+
 const appointmentDetails = ref({
     appointment_date: '',
     start_time: '',
@@ -51,7 +56,7 @@ const appointmentDetails = ref({
     created_at: '',
     updated_at: '',
     statusLabel: '',
-    user_id: '212409004',
+    user_id: userId,
 
 });
 
@@ -113,6 +118,8 @@ const getBadgeVariant = (statusLabel) => {
         case 'Active':
             return 'success';
         case 'Cancelled':
+            return 'warning';
+        case 'Deleted':
             return 'danger';
         default:
             return 'secondary';
@@ -135,19 +142,35 @@ onMounted(async () => {
     getAppointments(1);
 });
 
+const confirmDelete = (id) => {
+    // console.log("id", id);
+    selectedAppointmentId.value = id;
+    proxy.$showAlert({
+        title: 'Are you sure?',
+        text: 'You are about to Delete this appointment. Do you want to proceed?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Delete it!',
+        cancelButtonText: 'No, keep it',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteAppointment(id);
+            getAppointments(1);
+        }
+    });
+};
+
 const confirmCancel = (id) => {
     // console.log("id", id);
     selectedAppointmentId.value = id;
-
-    // console.log("selectedAppointmentId", selectedAppointmentId.value);
-    // console.log("id2", id)
-
     proxy.$showAlert({
         title: 'Are you sure?',
-        text: 'You are about to cancel this appointment. Do you want to proceed?',
+        text: 'You are about to CANCEL this appointment. Do you want to proceed?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it!',
+        confirmButtonText: 'Yes, Delete it!',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
@@ -160,6 +183,26 @@ const confirmCancel = (id) => {
 };
 
 const cancelAppointment = async (id) => {
+
+    try {
+        const response = await axiosInstance.put(`v1/scheduler/appointments/${id}`);
+        getAppointment(id);
+        getAppointments(1);
+        proxy.$showToast({
+            title: 'Appointment cancelled',
+            icon: 'success',
+        })
+
+    } catch (error) {
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured ',
+            icon: 'error',
+        });
+    }
+};
+const deleteAppointment = async (id) => {
 
     try {
         const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
@@ -186,7 +229,6 @@ const getAppointments = async (page = 1) => {
         //check if data is array
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
-
         // Update pagination data
         currentPage.value = response.data.dataPayload.currentPage;
         totalPages.value = response.data.dataPayload.totalPages;
@@ -218,7 +260,7 @@ const getAppointment = async (id) => {
 
 
         // Check if error.response is defined before accessing it
-        if (error.response && error.response.data && error.response.data.errorPayload) {
+        if (error.response && error.response.data && error.response.data.enprrorPayload) {
             errorDetails.value = error.response.data.errorPayload.errors;
         } else {
             // Handle the case where error.response is not defined
@@ -321,11 +363,12 @@ const suggestSlots = async (id) => {
 
 </script>
 <template>
-    <div>
-        <h2>Appointments</h2>
-    </div>
+
     <b-col lg="12">
         <b-card>
+            <div>
+                <h2>Appointments</h2>
+            </div>
             <b-row class="mb-3">
                 <b-col lg="12" md="12" sm="12" class="mb-3">
                     <div class="d-flex justify-content-end">
@@ -398,16 +441,23 @@ const suggestSlots = async (id) => {
                                 <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
                                         }}</span></td>
                                 <td>
-                                    <button type="button" class="btn btn-outline-primary btn-sm me-3"
+                                    <button v-if="item.is_deleted !== 1" class="btn btn-outline-primary btn-sm me-3"
                                         @click="openModal(item.id)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button v-if="item.status === 5 || item.status === 1 || item.status === 3"
-                                        class="btn btn-outline-danger btn-sm" @click="confirmCancel(item.id)">
+                                    <button v-if="item.is_deleted !== 1 && item.status !== 4"
+                                        class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)">
                                         <i class="fas fa-cancel"></i>
                                     </button>
-                                    <button v-if=" item.status === 4" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-cancel"></i>
+                                    <button v-if="item.status === 1" class="btn btn-outline-danger btn-sm me-3"
+                                        @click="confirmDelete(item.id)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+
+                                    <!-- delete -->
+                                    <button v-if="item.is_deleted === 1" class="btn btn-outline-danger btn-sm"
+                                        @click="confirmDelete(item.id)">
+                                        <i class="fas fa-undo"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -420,26 +470,27 @@ const suggestSlots = async (id) => {
                     </tbody>
                 </table>
                 <!-- Pagination -->
+
             </div>
+            <b-col sm="12" lg="12" md="12" class="d-flex justify-content-end mt-5 mb-n5">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" @click="goToPage(currentPage - 1)"
+                                :disabled="currentPage === 1">Previous</button>
+                        </li>
+                        <li v-for="page in totalPages" :key="page" class="page-item"
+                            :class="{ active: currentPage === page }">
+                            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                        </li>
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" @click="goToPage(currentPage + 1)"
+                                :disabled="currentPage === totalPages">Next</button>
+                        </li>
+                    </ul>
+                </nav>
+            </b-col>
         </b-card>
-        <b-col sm="12" lg="12" md="12" class="d-flex justify-content-end">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-end">
-                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                        <button class="page-link" @click="goToPage(currentPage - 1)"
-                            :disabled="currentPage === 1">Previous</button>
-                    </li>
-                    <li v-for="page in totalPages" :key="page" class="page-item"
-                        :class="{ active: currentPage === page }">
-                        <button class="page-link" @click="goToPage(page)">{{ page }}</button>
-                    </li>
-                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                        <button class="page-link" @click="goToPage(currentPage + 1)"
-                            :disabled="currentPage === totalPages">Next</button>
-                    </li>
-                </ul>
-            </nav>
-        </b-col>
     </b-col>
     <BookAppointment ref="appointmentModal" />
 
@@ -505,11 +556,8 @@ const suggestSlots = async (id) => {
                                             @click="confirmCancel">
                                             Cancel
                                         </b-button>
-                                        <!-- <b-button v-else-if="appointmentDetails.status === 4" variant="success"
-                                            @click="restoreAppointment">
-                                            Restore Appointment
-                                        </b-button> -->
-                                        <b-button v-else-if="appointmentDetails.status === 3" variant="success" @click="suggestSlots">Suggest Open
+                                        <b-button v-else-if="appointmentDetails.status === 3" variant="success"
+                                            @click="suggestSlots">Suggest Open
                                             slots</b-button>
                                     </div>
                                 </b-col>
@@ -549,3 +597,8 @@ const suggestSlots = async (id) => {
     </b-modal>
 
 </template>
+<style scoped>
+.error {
+    color: red;
+}
+</style>

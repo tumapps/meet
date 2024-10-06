@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import CreateAxiosInstance from '@/api/axios.js'
+import { useAuthStore } from '@/store/auth.store.js';
 
+const authStore = useAuthStore();
 const axiosInstance = CreateAxiosInstance();
 const errors = ref({ username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '', oldPassword: '' });
 const { proxy } = getCurrentInstance();
@@ -19,7 +21,10 @@ onMounted(() => {
     getProfile();
 });
 
-const user_id = ref(212409004);
+//get user_id from session storage
+const userId = authStore.getUserId();
+
+const user_id = ref(userId);
 
 const getProfile = async () => {
     try {

@@ -20,7 +20,7 @@ const timeOptions = ref([
   '15:00', '16:00', '17:00', '18:00'
 ]);
 
-const user_id = ref('212409003');
+const user_id = ref(sessionStorage.getItem('user_id'));
 const appointment_id = ref('');
 // Initial settings data
 const settings = ref({

@@ -70,47 +70,46 @@ const showModal = () => {
 };
 </script>
 <template>
-    <div>
-        <h2>Appointments</h2>
-    </div>
     <b-col lg="12">
         <b-card class="h-100">
-            
-                <b-row class="mb-3">
-                    <b-col lg="12" md="12" sm="12" class="mb-3">
-                        <div class="d-flex justify-content-end">
-                            <b-button variant="primary" @click="showModal">
-                                Add User
-                            </b-button>
+            <div>
+                <h2>Users</h2>
+            </div>
+            <b-row class="mb-3">
+                <b-col lg="12" md="12" sm="12" class="mb-3">
+                    <div class="d-flex justify-content-end">
+                        <b-button variant="primary" @click="showModal">
+                            Add User
+                        </b-button>
+                    </div>
+                </b-col>
+                <b-col lg="12" md="12" sm="12">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <label for="itemsPerPage" class="me-2">Items per page:</label>
+                            <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
+                                class="form-select form-select-sm" style="width: auto;">
+                                <option v-for="option in perPageOptions" :key="option" :value="option">
+                                    {{ option }}
+                                </option>
+                            </select>
                         </div>
-                    </b-col>
-                    <b-col lg="12" md="12" sm="12">
-                        <div class="d-flex justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <label for="itemsPerPage" class="me-2">Items per page:</label>
-                                <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
-                                    class="form-select form-select-sm" style="width: auto;">
-                                    <option v-for="option in perPageOptions" :key="option" :value="option">
-                                        {{ option }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <b-input-group>
-                                    <!-- Search Input -->
-                                    <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
-                                    <!-- Search Button -->
-                                    <b-input-group-append>
-                                        <b-button variant="primary" @click="performSearch">
-                                            Search
-                                        </b-button>
-                                    </b-input-group-append>
-                                </b-input-group>
-                            </div>
+                        <div class="d-flex align-items-center">
+                            <b-input-group>
+                                <!-- Search Input -->
+                                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
+                                <!-- Search Button -->
+                                <b-input-group-append>
+                                    <b-button variant="primary" @click="performSearch">
+                                        Search
+                                    </b-button>
+                                </b-input-group-append>
+                            </b-input-group>
                         </div>
-                    </b-col>
-                </b-row>
-                <div class="table-responsive">
+                    </div>
+                </b-col>
+            </b-row>
+            <div class="table-responsive">
                 <!-- Table Section -->
                 <table class="table table-hover">
                     <thead>
@@ -138,24 +137,23 @@ const showModal = () => {
                 <!-- Pagination -->
 
             </div>
-
+            <nav aria-label="Page navigation" class="mb-n5 mt-5">
+                <ul class="pagination justify-content-end">
+                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                        <button class="page-link" @click="goToPage(currentPage - 1)"
+                            :disabled="currentPage === 1">Previous</button>
+                    </li>
+                    <li v-for="page in totalPages" :key="page" class="page-item"
+                        :class="{ active: currentPage === page }">
+                        <button class="page-link" @click="goToPage(page)">{{ page }}</button>
+                    </li>
+                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                        <button class="page-link" @click="goToPage(currentPage + 1)"
+                            :disabled="currentPage === totalPages">Next</button>
+                    </li>
+                </ul>
+            </nav>
         </b-card>
-        <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-end">
-                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                            <button class="page-link" @click="goToPage(currentPage - 1)"
-                                :disabled="currentPage === 1">Previous</button>
-                        </li>
-                        <li v-for="page in totalPages" :key="page" class="page-item"
-                            :class="{ active: currentPage === page }">
-                            <button class="page-link" @click="goToPage(page)">{{ page }}</button>
-                        </li>
-                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                            <button class="page-link" @click="goToPage(currentPage + 1)"
-                                :disabled="currentPage === totalPages">Next</button>
-                        </li>
-                    </ul>
-                </nav>
     </b-col>
-    <Adduser ref="addUserModal"/>
+    <Adduser ref="addUserModal" />
 </template>

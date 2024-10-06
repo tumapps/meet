@@ -35,6 +35,7 @@ const AxiosInstance = () => {
         async (config) => {
 
             fetchUserIp(); // Fetch the IP address for every request
+            
 
             // Fetch the token from localStorage
             if (config.headers['X-Exclude-Interceptor']) {

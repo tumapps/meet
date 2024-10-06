@@ -33,6 +33,16 @@ const onSubmit = async () => {
         response.data.dataPayload.data.token,
         response.data.dataPayload.data.username
       );
+
+      const token = response.data.dataPayload.data.token;
+
+      //set user_id to session storage
+      authStore.setUserId(token);
+
+      //console log the user id from the session storage
+      console.log("hello", authStore.getUserId());
+
+
       menuStore.setMenus(response.data.dataPayload.data.menus);
 
 
@@ -41,7 +51,6 @@ const onSubmit = async () => {
         text: 'You have successfully logged in!',
         icon: 'success',
       });
-
       router.push('/');
 
     } else {

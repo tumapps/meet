@@ -4,7 +4,9 @@ import createAxiosInstance from '@/api/axios';
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'; // Import the child component
 import FlatPickr from 'vue-flatpickr-component';
 import IconComponent from '@/components/icons/IconComponent.vue'
+import { useAuthStore } from '@/store/auth.store.js';
 
+const authStore = useAuthStore();
 const axiosInstance = createAxiosInstance();
 const { proxy } = getCurrentInstance();
 const errors = ref({
@@ -31,16 +33,22 @@ const config = {
 
 const today = ref(new Date().toLocaleDateString());
 // console.log(today.value)
+const selectedUser_id = ref(null); // To store the corresponding user_id
+
+//get user id from session storage
+// const userId = authStore.getUserId();
+const userId = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+
 
 const slotsData = ref({
-    user_id: "212409003",
+    user_id: userId,
     date: '',
 });
 
 
 // Define your form data
 const appointmentData = ref({
-    user_id: "212409003",
+    user_id: userId,
     appointment_date: selectedDate.value,
     start_time: "",
     end_time: "",
@@ -102,19 +110,19 @@ const getSlots = async () => {
 
 // Function to send the POST request
 const submitAppointment = async () => {
-//reset errors
+    //reset errors
     errors.value = {};
     try {
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
 
 
         proxy.$showAlert({
-                title: 'Success',
-                text: 'Appointment booked successfully',
-                icon: 'success',
-            });
-            // Reset the form
-            appointmentData.value = { };
+            title: 'Success',
+            text: 'Appointment booked successfully',
+            icon: 'success',
+        });
+        // Reset the form
+        appointmentData.value = {};
     } catch (error) {
 
         if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
@@ -139,22 +147,46 @@ const getAppointmentType = async () => {
     }
 };
 
+
+const UsersOptions = ref([]);
+const selectedUsername = ref(''); // To hold the selected username
+
+const getusers_booked = async () => {
+    try {
+        const response = await axiosInstance.get('/v1/auth/users');
+        UsersOptions.value = response.data.dataPayload.data.profiles;
+        console.log("Users data:", UsersOptions.value);
+    } catch (error) {
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: 'Oops! An error has occurred',
+            icon: 'error',
+        });
+    }
+};
+
+// Watch for changes in the selected username to update selectedUser_id
+watch(selectedUsername, (newUsername) => {
+    const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
+    selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
+});
 const close = () => {
-    // Logic to close modal
+    //close the modal 
 };
 
 onMounted(() => {
     slotsData.value.date = today.value;
-    getSlots();
+    // getSlots();
     getAppointmentType();
     getAppointmentType();
+    getusers_booked();
 });
 
 </script>
 <template>
 
-    <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal" no-close-on-backdrop
-        no-close-on-esc size="xl" hide-footer>
+    <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal"
+        no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
         <form id="add-form" action="javascript:void(0)" method="post">
             <div class="d-flex flex-column align-items-start">
                 <input type="hidden" name="id" />
@@ -172,26 +204,45 @@ onMounted(() => {
                                     }}</div>
                             </b-col>
                         </b-row>
-                        <b-row class="g-3 align-items-center form-group">
-                            <b-col cols="2">
+                        <b-row class="align-items-center form-group">
+                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <label for="addphonenumber" class="col-form-label">Phone</label>
                             </b-col>
-                            <b-col cols="10">
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <input type="text" id="addphonenumber" v-model="appointmentData.mobile_number"
                                     class="form-control" />
                                 <div v-if="errors.mobile_number" class="error" aria-live="polite">{{
                                     errors.mobile_number }}</div>
                             </b-col>
-                        </b-row>
-                        <b-row class="g-3 align-items-center form-group">
-                            <b-col cols="2">
+
+                            <b-col cols="2" lg="1">
                                 <label for="addemail" class="col-form-label">Email</label>
                             </b-col>
-                            <b-col cols="10">
+                            <b-col cols="10" lg="5">
                                 <input type="text" id="addemail" v-model="appointmentData.email_address"
                                     class="form-control" />
                                 <div v-if="errors.email_address" class="error" aria-live="polite">{{
                                     errors.email_address }}</div>
+                            </b-col>
+                        </b-row>
+                        <b-row class="align-items-center form-group">
+                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <label for="addappointmenttype" class="col-form-label">
+                                    <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
+                                </label>
+                            </b-col>
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <!-- Bind the select dropdown to selectedUsername -->
+                                <select v-model="selectedUsername" name="service" class="form-select"
+                                    id="addappointmenttype">
+                                    <option value="">Recipient</option>
+                                    <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
+                                        {{ user.first_name }}
+                                    </option>
+                                </select>
+                                <div v-if="errors.appointment_type" class="error" aria-live="polite">
+                                    {{ errors.appointment_type }}
+                                </div>
                             </b-col>
                         </b-row>
 
@@ -207,11 +258,22 @@ onMounted(() => {
                         </b-row>
                         <b-row class="g-3 align-items-center form-group">
                             <b-col cols="2">
+                                <label for="addphonenumber" class="col-form-label">Notes</label>
+                            </b-col>
+                            <b-col cols="10">
+                                <input type="text" id="addphonenumber" v-model="appointmentData.description"
+                                    class="form-control" />
+                                <div v-if="errors.description" class="error" aria-live="polite">{{
+                                    errors.description }}</div>
+                            </b-col>
+                        </b-row>
+                        <b-row class="align-items-center form-group">
+                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <label for="addappointmenttype" class="col-form-label">
                                     <icon-component type="outlined" icon-name="pencil" :size="24"></icon-component>
                                 </label>
                             </b-col>
-                            <b-col cols="10">
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <select v-model="appointmentData.appointment_type" name="service" class="form-select"
                                     id="addappointmenttype">
                                     <!-- Default placeholder option -->
@@ -224,53 +286,25 @@ onMounted(() => {
                                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{
                                     errors.appointment_type }}</div>
                             </b-col>
-
-                        </b-row>
-                        <b-row class="g-3 align-items-center form-group">
-                            <b-col cols="2">
-                                <label for="addphonenumber" class="col-form-label">Notes</label>
+                            <b-col cols="2" lg="1" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <label for="addappointmenttype" class="col-form-label">
+                                    <icon-component type="outlined" icon-name="calendar" :size="24"></icon-component>
+                                </label>
                             </b-col>
-                            <b-col cols="10">
-                                <input type="text" id="addphonenumber" v-model="appointmentData.description"
-                                    class="form-control" />
-                                <div v-if="errors.description" class="error" aria-live="polite">{{
-                                    errors.description }}</div>
-                            </b-col>
-                        </b-row>
-                        <b-row>
-                            <div class="container mt-3">
-                                <div class="mb-3">
-                                    <label for="datePicker" class="form-label">Select a Date</label>
-                                    <flat-pickr v-model="selectedDate" class="form-control" :config="config"
-                                        id="datePicker" />
-                                </div>
+                            <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
 
-                            </div>
+                                <flat-pickr v-model="selectedDate" class="form-control" :config="config"
+                                    id="datePicker" />
+
+
+
+                            </b-col>
                         </b-row>
                         <b-row class="g-3 align-items-center form-group mt-3 mb-5 p-2">
-                            <b-col cols="12" class="d-flex justify-content-center align-content-center mb-2">
-                                <h3>Time slots</h3>
-                                <!-- make a key for the colors of the time slots -->
-                            </b-col>
-
                             <b-row>
                                 <b-col md="12" lg="12" sm="12">
                                     <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots"
                                         @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                                </b-col>
-                                <b-col lg="12">
-                                    <div class="d-flex align-items-center justify-content-center form-check">
-                                        <input type="checkbox" class="form-check-input" />
-                                        <label class="form-check-label ms-2" for="addconfirm2">Available slots</label>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-center form-check">
-                                        <input type="checkbox" class="form-check-input bg-warning" />
-                                        <label class="form-check-label ms-2" for="addconfirm2">Booked slots</label>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-center form-check">
-                                        <input type="checkbox" class="form-check-input bg-primary" />
-                                        <label class="form-check-label ms-2" for="addconfirm2">Selected slots</label>
-                                    </div>
                                 </b-col>
                             </b-row>
                             <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
@@ -288,7 +322,7 @@ onMounted(() => {
     </b-modal>
 
 </template>
-<style scoped>
+<style>
 .error {
     color: red;
     font-size: 0.9em;
@@ -299,5 +333,11 @@ onMounted(() => {
     width: 10px;
     border-radius: 50%;
     display: inline-block;
+}
+
+/* Add rounded corners to the modal */
+.modal-fullscreen .modal-content {
+    border-radius: 5px !important;
+    /* You can adjust the radius value */
 }
 </style>

@@ -7,10 +7,13 @@ import FlatPickr from 'vue-flatpickr-component';
 // Modal reference
 const newAvailability = ref(null);
 const updateAvailability = ref(null);
-const user_id = ref('212409003');
+
+//get user id from session storage
+
+const user_id = ref(sessionStorage.getItem('user_id'));
 // Selected date
 const availabilityDetails = ref({
-    user_id:user_id.value,
+    user_id: user_id.value,
     start_date: '',
     end_date: '',
     start_time: '',
@@ -200,42 +203,57 @@ const saveAvailability = async () => {
 
         getAvailabilities(1);
     } catch (error) {
-        proxy.$showToast({
-            title: 'Failed',
-            text: 'failed to update your settings',
-            icon: 'error',
-        });
+// check for errorPayload in response
+        if (error.response.data.errorPayload) {
+            errors.value = error.response.data.errorPayload.errors;
+            console.log(errors.value);
+        } else {
+            proxy.$showToast({
+                title: 'Failed',
+                text: 'an error occurred',
+                icon: 'error',
+            });
+        }
+
     }
 }
 
-const updateAvailabilityDetails = async () =>{
-    try{
+const updateAvailabilityDetails = async () => {
+    try {
         const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value)
         // console.log(response);
 
 
         proxy.$showToast({
-            title:'success',
+            title: 'success',
             text: 'updated successfully',
             icon: 'success'
         })
-    }catch(error){
-        proxy.$showToast({
+    } catch (error) {
+        // check for errorPayload in response
+        if (error.response.data.errorPayload) {
+            errors.value = error.response.data.errorPayload.errors;
+            console.log(errors.value);
+        } else {
+            proxy.$showToast({
             title: 'Failed',
             text: 'failed to update your settings',
             icon: 'error',
         });
+        }
+
     }
 }
 </script>
 
 <template>
     <!-- Modal Component -->
-    <div>
-        <h2>Availability</h2>
-    </div>
+
     <b-col lg="12">
         <b-card>
+            <div>
+                <h2>Availability</h2>
+            </div>
             <b-row class="mb-3">
                 <b-col lg="12" class="mb-3">
                     <div class="d-flex justify-content-end">
@@ -310,10 +328,9 @@ const updateAvailabilityDetails = async () =>{
                     </tbody>
                 </table>
             </div>
-        </b-card>
-        <!-- Pagination -->
-        <b-col sm="12" lg="12" class="mt-2 d-flex justify-content-end">
-            <nav aria-label="Page navigation">
+            <!-- Pagination -->
+            <b-col sm="12" lg="12" class="mt-5 d-flex justify-content-end mb-n5">
+                <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-end">
                         <li class="page-item" :class="{ disabled: currentPage === 1 }">
                             <button class="page-link" @click="goToPage(currentPage - 1)"
@@ -329,7 +346,8 @@ const updateAvailabilityDetails = async () =>{
                         </li>
                     </ul>
                 </nav>
-        </b-col>
+            </b-col>
+        </b-card>
     </b-col>
 
     <!-- //modal -->
@@ -340,14 +358,16 @@ const updateAvailabilityDetails = async () =>{
             <b-col md="12">
                 <div class="mb-3">
                     <label for="startDatePicker" class="form-label">Start Date</label>
-                    <flat-pickr v-model="availabilityDetails.start_date" class="form-control" :config="config" id="startDatePicker" />
+                    <flat-pickr v-model="availabilityDetails.start_date" class="form-control" :config="config"
+                        id="startDatePicker" />
                 </div>
                 <div v-if="errors.start_date" class="error" aria-live="polite">{{ errors.start_date }}</div>
             </b-col>
             <b-col md="12">
                 <div class="mb-3">
                     <label for="endDatePicker" class="form-label">Last Date</label>
-                    <flat-pickr v-model="availabilityDetails.end_date" class="form-control" :config="config" id="endDatePicker" />
+                    <flat-pickr v-model="availabilityDetails.end_date" class="form-control" :config="config"
+                        id="endDatePicker" />
                 </div>
                 <div v-if="errors.end_date" class="error" aria-live="polite">{{ errors.end_date }}</div>
             </b-col>
@@ -356,20 +376,23 @@ const updateAvailabilityDetails = async () =>{
             <b-col md="6">
                 <div class="mb-3">
                     <label for="startTimePicker" class="form-label">Start Time</label>
-                    <flat-pickr v-model="availabilityDetails.start_time" class="form-control" :config="config2" id="startTimePicker" />
+                    <flat-pickr v-model="availabilityDetails.start_time" class="form-control" :config="config2"
+                        id="startTimePicker" />
                 </div>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
             </b-col>
             <b-col md="5">
                 <div class="mb-3">
                     <label for="endTimePicker" class="form-label">End Time</label>
-                    <flat-pickr v-model="availabilityDetails.end_time" class="form-control" :config="config2" id="endTimePicker" />
+                    <flat-pickr v-model="availabilityDetails.end_time" class="form-control" :config="config2"
+                        id="endTimePicker" />
                 </div>
                 <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
             </b-col>
             <b-col md="12" class="mb-3">
                 <b-form-group label="Description" label-for="descriptionField">
-                    <b-form-input id="descriptionField" type="text" v-model="availabilityDetails.description"></b-form-input>
+                    <b-form-input id="descriptionField" type="text"
+                        v-model="availabilityDetails.description"></b-form-input>
                     <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
                 </b-form-group>
             </b-col>
@@ -386,14 +409,16 @@ const updateAvailabilityDetails = async () =>{
             <b-col md="12">
                 <div class="mb-3">
                     <label for="startDatePicker" class="form-label">Start Date</label>
-                    <flat-pickr v-model="availabilityDetails.start_date" class="form-control" :config="config" id="startDatePicker" />
+                    <flat-pickr v-model="availabilityDetails.start_date" class="form-control" :config="config"
+                        id="startDatePicker" />
                 </div>
                 <div v-if="errors.start_date" class="error" aria-live="polite">{{ errors.start_date }}</div>
             </b-col>
             <b-col md="12">
                 <div class="mb-3">
                     <label for="endDatePicker" class="form-label">Last Date</label>
-                    <flat-pickr v-model="availabilityDetails.end_date" class="form-control" :config="config" id="endDatePicker" />
+                    <flat-pickr v-model="availabilityDetails.end_date" class="form-control" :config="config"
+                        id="endDatePicker" />
                 </div>
                 <div v-if="errors.end_date" class="error" aria-live="polite">{{ errors.end_date }}</div>
             </b-col>
@@ -402,20 +427,23 @@ const updateAvailabilityDetails = async () =>{
             <b-col md="6">
                 <div class="mb-3">
                     <label for="startTimePicker" class="form-label">Start Time</label>
-                    <flat-pickr v-model="availabilityDetails.start_time" class="form-control" :config="config2" id="startTimePicker" />
+                    <flat-pickr v-model="availabilityDetails.start_time" class="form-control" :config="config2"
+                        id="startTimePicker" />
                 </div>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
             </b-col>
             <b-col md="5">
                 <div class="mb-3">
                     <label for="endTimePicker" class="form-label">End Time</label>
-                    <flat-pickr v-model="availabilityDetails.end_time" class="form-control" :config="config2" id="endTimePicker" />
+                    <flat-pickr v-model="availabilityDetails.end_time" class="form-control" :config="config2"
+                        id="endTimePicker" />
                 </div>
                 <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
             </b-col>
             <b-col md="12" class="mb-3">
                 <b-form-group label="Description" label-for="descriptionField">
-                    <b-form-input id="descriptionField" type="text" v-model="availabilityDetails.description"></b-form-input>
+                    <b-form-input id="descriptionField" type="text"
+                        v-model="availabilityDetails.description"></b-form-input>
                     <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
                 </b-form-group>
             </b-col>
