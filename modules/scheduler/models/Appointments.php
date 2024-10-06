@@ -28,6 +28,7 @@ use helpers\EventHandler;
 
 class Appointments extends BaseModel
 {
+    const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
@@ -38,9 +39,12 @@ class Appointments extends BaseModel
     const EVENT_APPOINTMENT_RESCHEDULE = 'appointmentReschedule';
     const EVENT_APPOINTMENT_RESCHEDULED = 'appointmentRescheduled';
     const EVENT_AFFECTED_APPOINTMENTS = 'affectedAppointments';
+    const EVENT_APPOINTMENT_REMINDER = 'appointmentReminder';
+
 
 
     protected static $statusLabels = [
+        self::STATUS_INACTIVE => 'Inactive',
         self::STATUS_ACTIVE => 'Active',
         self::STATUS_CONFIRMED => 'Confirmed',
         self::STATUS_RESCHEDULE => 'Reschedule',
@@ -211,6 +215,67 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED); 
     }
 
+    public static function markPassedAppointmentsInactive()
+    {
+        $currentDate = date('Y-m-d');
+        $currentTime = date('H:i:s');
+
+        $appointments = self::find()
+            ->where(['<=', 'appointment_date', $currentDate])
+            ->andWhere(['<', 'end_time', $currentTime])
+            ->andWhere(['status' => self::STATUS_ACTIVE])
+            ->all();
+
+        if(empty($appointments)){
+            return 'no appointments';
+        }
+        // if (!empty($appointments)) {
+        //     foreach ($appointments as $appointment) {
+        //         $appointment->status = self::STATUS_INACTIVE;
+        //         if ($appointment->save(false)) {
+        //             Yii::info("Appointment ID {$appointment->id} marked as inactive.");
+        //         } else {
+        //             Yii::error("Failed to mark Appointment ID {$appointment->id} as inactive.");
+        //         }
+        //     }
+        // }
+
+        return $appointments;
+    }
+
+    public static function getUpcomingAppointmentsForReminder()
+    {
+        $currentTime = date('H:i:s');
+        $reminderTime = date('H:i:s', strtotime('+30 minutes'));
+
+        $appointments = self::find()
+            ->where(['=', 'appointment_date', date('Y-m-d')])
+            ->andWhere(['>=', 'start_time', $currentTime])
+            ->andWhere(['<=', 'start_time', $reminderTime])
+            ->andWhere(['status' => self::STATUS_ACTIVE])
+            ->all();
+
+        return $appointments;
+    }
+
+    public function sendAppointmentsReminderEvent($email, $time, $user_id)
+    {
+        
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Reminder';
+
+        $event->data = [
+            'email' => $email,
+            'subject' => $subject,
+            'time' => $time,
+            'username' => $this->getUserName($user_id)
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $event);
+        $this->trigger(self::EVENT_APPOINTMENT_REMINDER); 
+    }
+
     public function sendAffectedAppointmentsEvent($appointments)
     {
         $user_id = $appointments[0]->user_id;
@@ -279,50 +344,7 @@ class Appointments extends BaseModel
             ->limit($limit)
             ->all(); 
     }
-    // public function getAppointmentsFromDate($startDate)
-    // {
-    //     return $this->find()
-    //         ->where(['>=', 'appointment_date', $startDate])
-    //         ->andWhere(['<', 'appointment_date', (new \DateTime($startDate))->modify('+1 day')->format('Y-m-d')])
-    //         ->all();
-    // }
-
-    // public function getAppointmentsFromDate($startDate, $limit = 10)
-    // {
-    //     $currentDateTime = (new \DateTime())->format('Y-m-d H:i:s');
-        
-    //     $query = $this->find()
-    //         ->where(['>=', 'appointment_date', $startDate])
-    //         ->andWhere(['<', 'appointment_date', (new \DateTime($startDate))->modify('+1 day')->format('Y-m-d')]);
-
-    //     // If the start date is today, filter by time as well
-    //     if ($startDate === (new \DateTime())->format('Y-m-d')) {
-    //         $query->andWhere(['>=', 'start_time', $currentDateTime]);
-    //     }
-        
-        // return $query->orderBy(['start_time' => SORT_ASC])
-        //                 ->limit($limit)
-        //                 ->all();
-    // }
-
-    // public function getUpcomingAppointments()
-    // {
-    //     $currentDate = (new \DateTime())->format('Y-m-d');
-    //     $appointments = [];
-        
-    //     while (empty($appointments)) {
-    //         $appointments = $this->getAppointmentsFromDate($currentDate);
-    //         if (empty($appointments)) {
-    //             // Move to the next date
-    //             $currentDate = (new \DateTime($currentDate))->modify('+1 day')->format('Y-m-d');
-    //         }
-    //     }
-        
-    //     return $appointments;
-    // }
-
-
-
+    
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
     {
 
