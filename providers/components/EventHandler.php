@@ -48,7 +48,7 @@ class EventHandler
 	        'recipientType' => 'vc', // Specify the recipient type
     	]));
 
-        self::send($bookedUserEmail, $event->data['subject'], $vcBody)
+        self::send($bookedUserEmail, $event->data['subject'], $vcBody);
     }
 
     public static function onAppointmentReschedule(Event $event)
@@ -88,6 +88,16 @@ class EventHandler
     	$body = Yii::$app->view->render('@ui/views/emails/appointmentsNeedReschedule',[
     		'affectedAppointments' => $event->data['appointments'],
     	]);
+
+    	self::send($email, $subject, $body);
+    }
+
+    public static function onAppointmentReminder(Event $event)
+    {
+    	$email = $event->data['email'];
+    	$subject = $event->data['subject'];
+
+    	$body = '';
 
     	self::send($email, $subject, $body);
     }
