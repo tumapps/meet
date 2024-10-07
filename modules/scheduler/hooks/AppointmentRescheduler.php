@@ -107,7 +107,7 @@ class AppointmentRescheduler {
 	    return $suitableSlots;
 	}
 
-    private  function sendNotifications($appointments)
+    private static function sendNotifications($appointments)
     {
     	$model = new Appointments();
 
