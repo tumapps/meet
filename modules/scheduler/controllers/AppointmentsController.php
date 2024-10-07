@@ -226,11 +226,32 @@ class AppointmentsController extends \helpers\ApiController{
         $model = $this->findModel($id);
         if ($model->is_deleted) {
             // Yii::$app->user->can('schedulerAppointmentsRestore');
+            $isAvailable = $this->checkAvailability(
+                $model->user_id, 
+                $model->appointment_date, 
+                $model->start_time, 
+                $model->end_time
+            );
+
+            $appointmentExists = Appointments::hasOverlappingAppointment(
+                $model->user_id, 
+                $model->appointment_date, 
+                $model->start_time, 
+                $model->end_time,
+                $model->id // exclude current appointment from the check
+            );
+            if (!$isAvailable || $appointmentExists) {
+                return $this->errorResponse(
+                    ['message' => 'The appointment cannot be restored because the time slot is no longer available.']
+                );
+            }
+
             $model->restore();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
+            $model->status = Appointments::STATUS_DELETED;
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors()); 
