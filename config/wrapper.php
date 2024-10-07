@@ -48,11 +48,13 @@ class ConfigWrapper
             'jwt_secret' => getenv('JWT_SECRET'),
             'adminEmail' => 'tum@gmail.com',
             'user.passwordResetTokenExpire' => 900,
+            'allowedDomains' => 'http://localhost:9000',
             'passwordResetLink' => 'http://10.17.0.26:3000/?token=',
             'menus' => [
+                    ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
                     ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'home'],
-                    ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
-                    ['route' => 'users', 'label' => 'Users', 'icon' => 'home'],
+                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'home'],
+                    ['route' => 'availability', 'label' => 'Availability', 'icon' => 'home'],
             ],
 
         ];
