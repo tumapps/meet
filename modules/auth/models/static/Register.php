@@ -32,6 +32,7 @@ class Register extends Model
             ['username', 'trim'],
             ['username', 'required', 'message' => 'Username is required'],
             ['username', 'unique', 'targetClass' => User::class, 'message' => 'An account with similar username already exists.'],
+            ['email_address', 'unique', 'targetClass' => Profiles::class, 'message' => 'An account with similar email already exists.'],
 
             ['confirm_password', 'required', 'message' => 'This field can not be blank'],
             ['password', 'required', 'message' => 'Please choose a password you can remember'],
