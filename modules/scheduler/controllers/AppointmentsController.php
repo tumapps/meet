@@ -241,9 +241,7 @@ class AppointmentsController extends \helpers\ApiController{
                 $model->id // exclude current appointment from the check
             );
             if (!$isAvailable || $appointmentExists) {
-                return $this->errorResponse(
-                    ['message' => 'The appointment cannot be restored because the time slot is no longer available.']
-                );
+                return $this->errorResponse(['The appointment cannot be restored because the time slot is no longer available.']);
             }
 
             $model->restore();
@@ -259,28 +257,28 @@ class AppointmentsController extends \helpers\ApiController{
 
     public function actionCancell($id)
     {
-            $model = $this->findModel($id);
-            $contact_email = $model->email_address;
-            $contact_name = $model->contact_name;
-            $date = $model->appointment_date;
-            $starTime = $model->start_time;
-            $endTime = $model->end_time;
+        $model = $this->findModel($id);
+        $contact_email = $model->email_address;
+        $contact_name = $model->contact_name;
+        $date = $model->appointment_date;
+        $starTime = $model->start_time;
+        $endTime = $model->end_time;
 
-            $user = User::findOne($model->user_id);
+        $user = User::findOne($model->user_id);
 
-            if ($user && $user->profile) {
-                $bookedUserEmail = $user->profile->email_address;
-            } else {
-                return $this->errorResponse(['message' => 'User profile or email not found']);
-            }
+        if ($user && $user->profile) {
+            $bookedUserEmail = $user->profile->email_address;
+        } else {
+            return $this->errorResponse(['message' => 'User profile or email not found']);
+        }
 
-            $model->status = Appointments::STATUS_CANCELLED;
-            if($model->save(false)){
+        $model->status = Appointments::STATUS_CANCELLED;
+        if($model->save(false)){
 
-                $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $bookedUserEmail);
-                return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments CANCELLED successfully']);
-            }
-            return $this->errorResponse($model->getErrors()); 
+            $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $bookedUserEmail);
+            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments CANCELLED successfully']);
+        }
+        return $this->errorResponse($model->getErrors()); 
     }
 
 
