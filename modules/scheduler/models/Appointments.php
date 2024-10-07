@@ -422,7 +422,7 @@ class Appointments extends BaseModel
             // Exclude appointments that are marked as deleted
             ->andWhere(['is_deleted' => 0])
             // Exclude appointments with a status of 'cancelled'
-            ->andWhere(['!=', 'status' => self::STATUS_CANCELLED]);
+            ->andWhere(['!=', 'status', self::STATUS_CANCELLED]);
 
             // Exclude the current appointment from the overlapping check during update
             if ($appointment_id !== null) {
