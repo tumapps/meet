@@ -187,7 +187,6 @@ class Availability extends BaseModel
         return $unavailableSlots;
     }
 
-
     public static function isUnavailableSlot($user_id, $date, $start_time, $end_time)
     {
         $isFullDayUnavailable = self::find()
@@ -209,6 +208,7 @@ class Availability extends BaseModel
                 ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
                 ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
             ])
+            ->andWhere(['is_deleted' => 0])
             ->exists();
     }
 }
