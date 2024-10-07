@@ -166,7 +166,7 @@ class TimeHelper
     {
         [$start_time, $end_time] = explode('-', $slot);
 
-        // Check in the unavailable slots table
+        // Check in  slots availability
         $unavailable = Availability::isUnavailableSlot($user_id, $date, $start_time, $end_time);
 
         if ($unavailable) {
