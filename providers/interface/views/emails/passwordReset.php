@@ -57,7 +57,7 @@
             <p>Hello, <strong><?= $username ?></strong></p>
             <p>You have requested a password reset. Please click the link below to reset your password:</p>
             <button class="btn btn-primary bbtn">
-                <a class="link"> href="<?= $resetLink ?>">Reset Password</a>
+                <a class="link" href="<?= $resetLink ?>">Reset Password</a>
             </button>
             <p>If you did not request this, please ignore this email.</p>
         </div>
