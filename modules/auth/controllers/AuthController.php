@@ -78,7 +78,7 @@ class AuthController extends \helpers\ApiController
 
 	   if (!$can_be_booked === false) {
 	        $menus = array_values(array_filter($menus, function ($menu) {
-	            return $menu['route'] !== 'users';
+	            return $menu['route'] !== 'default.users';
 	        }));
     	}
 
@@ -236,7 +236,7 @@ class AuthController extends \helpers\ApiController
 			'httpOnly' => true,
 			'sameSite' => 'none',
 			'secure' => true,
-			'path' => '/v1/iam/auth/refresh',  //endpoint URI for renewing the JWT token using this refresh-token, or deleting refresh-token
+			'path' => '/v1/auth/refresh',  //endpoint URI for renewing the JWT token using this refresh-token, or deleting refresh-token
 		]));
 		return $userRefreshToken;
 	}
