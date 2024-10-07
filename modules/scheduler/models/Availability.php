@@ -131,7 +131,9 @@ class Availability extends BaseModel
             ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
             // Check if the appointment is within an unavailable slot
             ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-        ]);
+        ])
+        // exclude deleted availabilities
+        ->andWhere(['is_deleted' => 0]);
     }
 
 
