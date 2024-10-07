@@ -34,6 +34,7 @@ class Appointments extends BaseModel
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_RESCHEDULED = 5;
+    const STATUS_DELETED = 9;
 
     const EVENT_APPOINTMENT_CANCELLED = 'appointmentCancelled';
     const EVENT_APPOINTMENT_RESCHEDULE = 'appointmentReschedule';
@@ -50,6 +51,7 @@ class Appointments extends BaseModel
         self::STATUS_RESCHEDULE => 'Reschedule',
         self::STATUS_RESCHEDULED => 'Rescheduled',
         self::STATUS_CANCELLED => 'Cancelled',
+        self::STATUS_DELETED => 'Deleted',
     ];
 
 
@@ -416,7 +418,11 @@ class Appointments extends BaseModel
 
                  // The requested appointment spans across an existing appointment
                 ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-            ]);
+            ])
+            // Exclude appointments that are marked as deleted
+            ->andWhere(['is_deleted' => 0])
+            // Exclude appointments with a status of 'cancelled'
+            ->andWhere(['!=', 'status' => self::STATUS_CANCELLED]);
 
             // Exclude the current appointment from the overlapping check during update
             if ($appointment_id !== null) {
