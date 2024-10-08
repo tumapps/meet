@@ -250,6 +250,7 @@ class AppointmentsController extends \helpers\ApiController{
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
             $model->status = Appointments::STATUS_DELETED;
+            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors()); 
@@ -271,7 +272,7 @@ class AppointmentsController extends \helpers\ApiController{
         } else {
             return $this->errorResponse(['message' => 'User profile or email not found']);
         }
-
+        
         $model->status = Appointments::STATUS_CANCELLED;
         if($model->save(false)){
 

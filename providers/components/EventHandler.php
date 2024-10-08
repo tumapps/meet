@@ -45,6 +45,7 @@ class EventHandler
         self::send($contactEmail, $event->data['subject'], $userBody);
 
         $vcBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
+	        'name' => $event->data['contact_name'],
 	        'recipientType' => 'vc', // Specify the recipient type
     	]));
 

@@ -54,6 +54,10 @@ class Appointments extends BaseModel
         self::STATUS_DELETED => 'Deleted',
     ];
 
+    public function init()
+    {
+        parent::init();
+    }
 
     /**
      * {@inheritdoc}
@@ -170,7 +174,7 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $subject = 'Appointment Cancelled';
 
-        $event->data = [
+        $eventData = [
             'contactEmail' => $email,
             'contact_name' => $name,
             'date' => $date,
@@ -179,7 +183,7 @@ class Appointments extends BaseModel
             'bookedUserEmail' => $bookedUserEmail,
             'subject' => $subject,
         ];
-        $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $event);
+        $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
     }
 
@@ -188,15 +192,15 @@ class Appointments extends BaseModel
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Reschedule';
-        $event->data = [
+        $eventData = [
             'email' => $email,
             'subject' => $subject,
             'name' => $name,
             'bookedUserName' => User::find()->select('username')->where(['user_id' => $bookedUserId])
         ];
 
-        $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $event);
-        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE); 
+        $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event); 
     }
 
     public function sendAppointmentRescheduledEvent($email, $date, $startTime, $endTime, $name)
@@ -204,7 +208,7 @@ class Appointments extends BaseModel
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Rescheduled';
-        $event->data = [
+        $eventData = [
             'email' => $email,
             'subject' => $subject,
             'date' => $date,
@@ -213,8 +217,8 @@ class Appointments extends BaseModel
             'name' => $name,
         ];
 
-        $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $event);
-        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED); 
+        $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED, $event); 
     }
 
     public static function markPassedAppointmentsInactive()
@@ -267,15 +271,15 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $subject = 'Appointment Reminder';
 
-        $event->data = [
+        $eventData = [
             'email' => $email,
             'subject' => $subject,
             'time' => $time,
             'username' => $this->getUserName($user_id)
         ];
 
-        $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $event);
-        $this->trigger(self::EVENT_APPOINTMENT_REMINDER); 
+        $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event); 
     }
 
     public function sendAffectedAppointmentsEvent($appointments)
@@ -288,14 +292,14 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $subject = 'Affected Appointments';
 
-        $event->data = [
+        $eventData = [
             'email' => $userEmail,
             'subject' => $subject,
             'appointments' => $appointments,
         ];
 
-        $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $event);
-        $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS); 
+        $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $eventData);
+        $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event); 
     }
 
     public function getRescheduledAppointment($id)
