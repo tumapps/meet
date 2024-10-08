@@ -256,7 +256,7 @@ class AppointmentsController extends \helpers\ApiController{
         return $this->errorResponse($model->getErrors()); 
     }
 
-    public function actionCancell($id)
+    public function actionCancel($id)
     {
         $model = $this->findModel($id);
         $contact_email = $model->email_address;
@@ -272,7 +272,7 @@ class AppointmentsController extends \helpers\ApiController{
         } else {
             return $this->errorResponse(['message' => 'User profile or email not found']);
         }
-        
+
         $model->status = Appointments::STATUS_CANCELLED;
         if($model->save(false)){
 

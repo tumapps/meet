@@ -235,7 +235,7 @@ return [
 *    ),
 * )
 */
-'PUT cancell/{id}'     => 'appointments/cancell',
+'PUT cancel/{id}'     => 'appointments/cancel',
 
 /**
 * @OA\Delete(path="/scheduler/appointments/{id}",

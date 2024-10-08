@@ -191,12 +191,13 @@ class Appointments extends BaseModel
     {
         $event = new Event();
         $event->sender = $this;
+        $userName = User::find()->select('username')->where(['user_id' => $bookedUserId]);
         $subject = 'Appointment Reschedule';
         $eventData = [
             'email' => $email,
             'subject' => $subject,
             'name' => $name,
-            'bookedUserName' => User::find()->select('username')->where(['user_id' => $bookedUserId])
+            'bookedUserName' => $userName
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $eventData);
