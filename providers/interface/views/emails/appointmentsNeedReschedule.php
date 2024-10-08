@@ -77,7 +77,7 @@
             <ul class="appointments-list">
                 <?php foreach ($affectedAppointments as $appointment): ?>
                     <li>
-                        <strong>Date:</strong> <?= htmlspecialchars($appointment['date']) ?>,
+                        <strong>Date:</strong> <?= htmlspecialchars($appointment['appointment_date']) ?>,
                         <strong>Time:</strong> <?= htmlspecialchars($appointment['start_time']) ?> - <?= htmlspecialchars($appointment['end_time']) ?>
                     </li>
                 <?php endforeach; ?>
