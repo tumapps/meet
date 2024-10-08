@@ -285,7 +285,7 @@ class Appointments extends BaseModel
     public function sendAffectedAppointmentsEvent($appointments)
     {
         $user_id = $appointments[0]->user_id;
-        $user = $user = User::findOne($model->user_id);
+        $user = $user = User::findOne($user_id);
         $userEmail = $user->profile->email_address;
 
         $event = new Event();
