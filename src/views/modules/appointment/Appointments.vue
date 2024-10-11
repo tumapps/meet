@@ -13,6 +13,8 @@ const showModal = () => {
     appointmentModal.value.$refs.appointmentModal.show();
 };
 
+
+
 const { proxy } = getCurrentInstance();
 const axiosInstance = AxiosInstance();
 const tableData = ref([]);
@@ -163,20 +165,41 @@ const confirmDelete = (id) => {
 };
 
 const confirmCancel = (id) => {
-    // console.log("id", id);
     selectedAppointmentId.value = id;
     proxy.$showAlert({
         title: 'Are you sure?',
         text: 'You are about to CANCEL this appointment. Do you want to proceed?',
         icon: 'warning',
+        input: 'textarea', // Adding input field
+        inputLabel: 'Reason for Cancellation',
+        inputPlaceholder: 'Please type your reason here...',
+        inputAttributes: {
+            'aria-label': 'Please type your reason here'
+        },
         showCancelButton: true,
-        confirmButtonText: 'Yes, Delete it!',
+        confirmButtonText: 'Yes, CANCEL it!',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#076232',
+        preConfirm: (inputValue) => {
+            if (!inputValue) {
+                // Display error message if input is empty
+                proxy.$showAlert({
+                    title: 'Ooops!',
+                    text: 'You need to provide a reason for cancellation.',
+                    icon: 'info',
+                    // background: '#d33',
+                });
+                return false; // Prevents closing the alert
+            }
+            return inputValue; // Passes the input value to the `then` block
+        }
     }).then((result) => {
         if (result.isConfirmed) {
-            cancelAppointment(id);
+            const reason = result.value; // Access the input value here
+            console.log('Cancellation reason:', reason); // Optional: log the reason
+            // Proceed with the cancellation using the provided reason
+            cancelAppointment(id, reason);
             getAppointments(1);
         }
     });
@@ -185,11 +208,11 @@ const confirmCancel = (id) => {
 const cancelAppointment = async (id) => {
 
     try {
-        const response = await axiosInstance.put(`v1/scheduler/appointments/${id}`);
+        const response = await axiosInstance.put(`v1/scheduler/cancell/${id}`);
         getAppointment(id);
         getAppointments(1);
         proxy.$showToast({
-            title: 'Appointment cancelled',
+            title: 'Appointment cancelled successfully',
             icon: 'success',
         })
 
@@ -209,18 +232,71 @@ const deleteAppointment = async (id) => {
         getAppointment(id);
         getAppointments(1);
         proxy.$showToast({
-            title: 'Appointment cancelled',
+            title: 'Appointment Deleted successfully',
             icon: 'success',
         })
 
     } catch (error) {
         // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured ',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
+
     }
+};
+
+const errorMessage = ref('');
+
+const restoreAppointment = async (id) => {
+
+    try {
+        const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
+        getAppointment(id);
+        getAppointments(1);
+        proxy.$showToast({
+            title: 'Appointment Restored successfully',
+            icon: 'success',
+        })
+        errorMessage.value = error.response.data.errorPayload.errors?.message || 'An unknown error occurred';
+
+
+
+    } catch (error) {
+        // console.error(error);
+
+        console.log("errorMessage", errorMessage);
+
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: errorMessage,
+            icon: 'error',
+        });
+
+    }
+};
+
+const confirmRestore = (id) => {
+    // console.log("id", id);
+    selectedAppointmentId.value = id;
+    proxy.$showAlert({
+        title: 'Are you sure?',
+        text: 'You are about to RESTORE thirestoreAppointments appointment. Do you want to proceed?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'RESTORE',
+        cancelButtonText: 'No, keep it',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            restoreAppointment(id);
+            getAppointments(1);
+        }
+    });
 };
 
 const getAppointments = async (page = 1) => {
@@ -441,22 +517,22 @@ const suggestSlots = async (id) => {
                                 <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
                                         }}</span></td>
                                 <td>
-                                    <button v-if="item.is_deleted !== 1" class="btn btn-outline-primary btn-sm me-3"
-                                        @click="openModal(item.id)">
-                                        <i class="fas fa-edit"></i>
+                                    <button v-if="item.is_deleted !== 1 && item.status !== 4"
+                                        class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                                        <i class="fas fa-edit" title="Edit"></i>
                                     </button>
                                     <button v-if="item.is_deleted !== 1 && item.status !== 4"
                                         class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)">
-                                        <i class="fas fa-cancel"></i>
+                                        <i class="fas fa-cancel" title="Cancel"></i>
                                     </button>
-                                    <button v-if="item.status === 1" class="btn btn-outline-danger btn-sm me-3"
+                                    <button v-if="item.is_deleted !== 1" class="btn btn-outline-danger btn-sm me-3"
                                         @click="confirmDelete(item.id)">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash" title="Delete"></i>
                                     </button>
 
                                     <!-- delete -->
                                     <button v-if="item.is_deleted === 1" class="btn btn-outline-danger btn-sm"
-                                        @click="confirmDelete(item.id)">
+                                        @click="confirmRestore(item.id)">
                                         <i class="fas fa-undo"></i>
                                     </button>
                                 </td>
@@ -552,11 +628,8 @@ const suggestSlots = async (id) => {
                                             class="me-3">
                                             {{ appointmentDetails.statusLabel }}
                                         </b-badge>
-                                        <b-button v-if="appointmentDetails.status === 1" variant="danger"
-                                            @click="confirmCancel">
-                                            Cancel
-                                        </b-button>
-                                        <b-button v-else-if="appointmentDetails.status === 3" variant="success"
+
+                                        <b-button v-if="appointmentDetails.status === 3" variant="success"
                                             @click="suggestSlots">Suggest Open
                                             slots</b-button>
                                     </div>

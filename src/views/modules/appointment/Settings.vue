@@ -3,7 +3,9 @@ import { onMounted, ref, getCurrentInstance } from 'vue';
 import AxiosInstance from '@/api/axios';
 import { useRoute } from 'vue-router';
 import FlatPickr from 'vue-flatpickr-component';
+import { useAuthStore } from '@/store/auth.store.js';
 
+const authStore = useAuthStore();
 
 const axiosInstance = AxiosInstance();
 const { proxy } = getCurrentInstance();
@@ -20,11 +22,13 @@ const timeOptions = ref([
   '15:00', '16:00', '17:00', '18:00'
 ]);
 
-const user_id = ref(sessionStorage.getItem('user_id'));
+//get user id from store
+const user_id = ref('');
+user_id.value = authStore.getUserId();
 const appointment_id = ref('');
 // Initial settings data
 const settings = ref({
-  user_id: user_id.value,
+  user_id: user_id,
   start_time: '',
   end_time: '',
   booking_window: '',
@@ -81,31 +85,31 @@ const start_Time = ref('');
 const end_Time = ref('');
 const description = ref('');
 
-// Function to save settings (add API or local storage logic here)
-const saveAvailability = async () => {
-  try {
-    const response = await axiosInstance.post('v1/scheduler/availability', {
-      user_id: user_id.value,
-      start_date: start_date.value,
-      end_date: end_date.value,
-      start_time: start_Time.value,
-      end_time: end_Time.value,
-      description:description.value
-    });
+// // Function to save settings (add API or local storage logic here)
+// const saveAvailability = async () => {
+//   try {
+//     const response = await axiosInstance.post('v1/scheduler/availability', {
+//       user_id: user_id.value,
+//       start_date: start_date.value,
+//       end_date: end_date.value,
+//       start_time: start_Time.value,
+//       end_time: end_Time.value,
+//       description:description.value
+//     });
 
-    proxy.$showToast({
-      title: 'Updated',
-      text: 'settings updated successfully!',
-      icon: 'success',
-    });
-  } catch (error) {
-    proxy.$showToast({
-      title: 'Failed',
-      text: 'failed to update your settings',
-      icon: 'error',
-    });
-  }
-}
+//     proxy.$showToast({
+//       title: 'Updated',
+//       text: 'settings updated successfully!',
+//       icon: 'success',
+//     });
+//   } catch (error) {
+//     proxy.$showToast({
+//       title: 'Failed',
+//       text: 'failed to update your settings',
+//       icon: 'error',
+//     });
+//   }
+// }
 
 // Function to save settings (add API or local storage logic here)
 const saveSettings = async () => {
@@ -152,7 +156,7 @@ const saveSettings = async () => {
         </b-card>
 
         <!-- availability -->
-        <b-card>
+        <!-- <b-card>
           <h4>Availability Settings</h4>
           <b-row>
             <b-col md="6">
@@ -191,7 +195,7 @@ const saveSettings = async () => {
           <div class="d-flex justify-content-end">
             <b-button @click="saveAvailability" variant="primary">Save</b-button>
           </div>
-        </b-card>
+        </b-card> -->
         <!-- Section: Booking Settings -->
         <b-card>
           <h4>Booking Settings</h4>

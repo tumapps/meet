@@ -2,20 +2,30 @@
 import Swal from 'sweetalert2';
 
 // Show alert function
-export function showAlert({ title = 'Alert', text = '', icon = 'warning', confirmButtonText = 'OK' }) {
+export function showAlert({
+    title = 'Alert',
+    text = '',
+    icon = 'warning',
+    confirmButtonText = 'OK',
+    showCancelButton = true,
+    confirmButtonColor = '#d33',
+    cancelButtonColor = '#076232',
+    ...otherOptions
+} = {}) {
     return Swal.fire({
         title,
         text,
         icon,
         confirmButtonText,
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#076232',
+        showCancelButton,
+        confirmButtonColor,
+        cancelButtonColor,
+        ...otherOptions // Spread additional options here
     });
 }
 
 // Show toast function
-export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top-end' }, background = '#79fcb4', grow = '' ) {
+export function showToast({ title = '', icon = '#fff', timer = 3000, position = 'top' }, background = '#8bf7ab', grow = '') {
     return Swal.fire({
         toast: true,
         title,
@@ -24,7 +34,11 @@ export function showToast({ title = '', icon = '#fff', timer = 3000, position = 
         timer,
         background,
         grow,
-        // timerProgressBar: true,
-
+        showConfirmButton: false, // Disable the confirmation button
+        timerProgressBar: true,   // Show a timer progress bar
+        customClass: {
+            popup: 'full-width-toast',
+        },
     });
 }
+

@@ -30,7 +30,7 @@ const getProfile = async () => {
     try {
         // add userid to request
     
-        const response = await axiosInstance.get('/v1/auth/profile-view/');
+        const response = await axiosInstance.get('/v1/auth/profile-view');
         username.value = response.data.dataPayload.data.username;
         first_name.value = response.data.dataPayload.data.first_name;
         middle_name.value = response.data.dataPayload.data.middle_name;

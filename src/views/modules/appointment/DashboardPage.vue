@@ -1,7 +1,14 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import Fullcalendar from '@/components/custom/calendar/FullCalender.vue'
 
-const username = localStorage.getItem('user.username');
+const username = ref('');
+
+
+onMounted(() => {
+    username.value = localStorage.getItem('user.username');
+
+});
 // data table end
 </script>
 <template>
@@ -26,21 +33,20 @@ const username = localStorage.getItem('user.username');
             </b-card>
         </b-col>
     </b-row>
+    <b-row>
+        <b-row class="mb-3">
+            <b-col lg="12" class="d-flex justify-content-end">
+                <span class="badge bg-success me-2">Upcoming</span>
+                <span class="badge bg-danger me-2">Canceled</span>
+                <span class="badge bg-warning me-2">Rescheduled</span>
+            </b-col>
+        </b-row>
 
-<b-row>
-    <b-row class="mb-3">
-    <b-col lg="12" class="d-flex justify-content-end">
-        <span class="badge bg-success me-2">Upcoming</span>
-        <span class="badge bg-danger me-2">Canceled</span>
-        <span class="badge bg-warning me-2">Rescheduled</span>
-    </b-col>
-</b-row>
-
-    <b-col lg="12">
-        <div class="full-calendar-container h-75"> <!-- Ensures FullCalendar takes full height -->
+        <b-col lg="12">
+            <div class="full-calendar-container h-75"> <!-- Ensures FullCalendar takes full height -->
                 <Fullcalendar />
-        </div>
-    </b-col>
+            </div>
+        </b-col>
     </b-row>
 
 </template>
@@ -52,24 +58,27 @@ const username = localStorage.getItem('user.username');
 
 .full-calendar-container .fc {
     width: 100%;
-    height: 50%; /* Ensures calendar fills the container */
+    height: 50%;
+    /* Ensures calendar fills the container */
 }
 
 
 h1 {
     font-size: 2rem;
 }
+
 .profile-img img {
     width: 100px;
     height: 100px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
-.headerimage{
+
+.headerimage {
     height: 20vh;
     background-image: url(@/assets/images/tum.jpg);
 }
 
-.headerimage img{
+.headerimage img {
     height: 100%;
     width: 100%;
     object-fit: cover;
@@ -80,5 +89,4 @@ b-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
 }
-
 </style>

@@ -22,7 +22,7 @@ export default defineConfig({
     proxy: {
       '/v1': {
         // target: 'http://scheduler-back_end:80', // Use the service name of the backend container in Docker
-        target: 'http://127.0.0.1/projects/vc/vc_scheduler/',
+        target: 'http://127.0.0.1:9000/',
         // target: 'https://api.crackit.co.ke/v1/iam/auth/login',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''), // Remove /api from the path

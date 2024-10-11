@@ -9,6 +9,12 @@ import { useAuthStore } from '@/store/auth.store.js';
 const authStore = useAuthStore();
 const axiosInstance = createAxiosInstance();
 const { proxy } = getCurrentInstance();
+//get can be booked status from store
+const CBB = ref('')
+CBB.value = authStore.getCanBeBooked();
+const userId = ref('');
+
+
 const errors = ref({
     contact_name: '',
     email_address: '',
@@ -36,8 +42,7 @@ const today = ref(new Date().toLocaleDateString());
 const selectedUser_id = ref(null); // To store the corresponding user_id
 
 //get user id from session storage
-// const userId = authStore.getUserId();
-const userId = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+userId.value = authStore.getUserId();
 
 
 const slotsData = ref({
@@ -88,6 +93,7 @@ const handleSelectedSlotsTimes = (selectedTimes) => {
 const getSlots = async () => {
     try {
         const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
+        console.log("user_id", userId.value)
         // Update the `apiResponse` ref with the response data
         apiResponse.value = response.data.dataPayload.data.slots;
         // Set all slots to `selected: false`
@@ -155,7 +161,7 @@ const getusers_booked = async () => {
     try {
         const response = await axiosInstance.get('/v1/auth/users');
         UsersOptions.value = response.data.dataPayload.data.profiles;
-        console.log("Users data:", UsersOptions.value);
+        // console.log("Users data:", UsersOptions.value);
     } catch (error) {
         proxy.$showToast({
             title: 'An error occurred',
@@ -169,7 +175,11 @@ const getusers_booked = async () => {
 watch(selectedUsername, (newUsername) => {
     const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
     selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
+    userId.value = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+
 });
+
+
 const close = () => {
     //close the modal 
 };
@@ -225,7 +235,8 @@ onMounted(() => {
                                     errors.email_address }}</div>
                             </b-col>
                         </b-row>
-                        <b-row class="align-items-center form-group">
+
+                        <b-row v-if="CBB === 0" class="align-items-center form-group">
                             <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <label for="addappointmenttype" class="col-form-label">
                                     <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
@@ -240,8 +251,8 @@ onMounted(() => {
                                         {{ user.first_name }}
                                     </option>
                                 </select>
-                                <div v-if="errors.appointment_type" class="error" aria-live="polite">
-                                    {{ errors.appointment_type }}
+                                <div v-if="errors.user_id" class="error" aria-live="polite">
+                                    {{ errors.user_id }}
                                 </div>
                             </b-col>
                         </b-row>

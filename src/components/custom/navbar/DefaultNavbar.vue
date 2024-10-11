@@ -102,8 +102,8 @@ export default {
       <b-collapse class="navbar-collapse" id="navbarSupportedContent" @show="emit('menuOpen')"
         @hide="emit('menuClose')">
         <ul class="mb-2 navbar-nav ms-auto align-items-center navbar-list mb-xl-0">
-          <!-- <slot name="navbar-buttons-start"></slot> -->
-          <b-dropdown
+          <slot name="navbar-buttons-start"></slot>
+          <b-dropdown 
             class="nav-item dropdown py-0 me-2 d-flex align-items-center" variant="none px-0" no-caret dropleft>
             <template #button-content>
               <b-button variant="primary btn-icon" pill size="sm">

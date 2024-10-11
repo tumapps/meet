@@ -2,15 +2,18 @@
 import { onMounted, ref, getCurrentInstance, computed } from 'vue';
 import AxiosInstance from '@/api/axios';
 import FlatPickr from 'vue-flatpickr-component';
+import { useAuthStore } from '@/store/auth.store.js';
 
 
+const authStore = useAuthStore();
 // Modal reference
 const newAvailability = ref(null);
 const updateAvailability = ref(null);
 
 //get user id from session storage
 
-const user_id = ref(sessionStorage.getItem('user_id'));
+const user_id = ref('');
+user_id.value = authStore.getUserId();
 // Selected date
 const availabilityDetails = ref({
     user_id: user_id.value,
@@ -206,7 +209,7 @@ const saveAvailability = async () => {
 // check for errorPayload in response
         if (error.response.data.errorPayload) {
             errors.value = error.response.data.errorPayload.errors;
-            console.log(errors.value);
+            // console.log(errors.value);
         } else {
             proxy.$showToast({
                 title: 'Failed',
@@ -233,7 +236,7 @@ const updateAvailabilityDetails = async () => {
         // check for errorPayload in response
         if (error.response.data.errorPayload) {
             errors.value = error.response.data.errorPayload.errors;
-            console.log(errors.value);
+            // console.log(errors.value);
         } else {
             proxy.$showToast({
             title: 'Failed',

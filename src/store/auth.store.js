@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import CryptoJS from 'crypto-js';
 
-const secretKey = 'u38r/[;[eu78eu3u 38+_-_-_-(::)';
+const secretKey = 'Gk$e3lbvXi!n7kpiLamr@i9eZ@q220T4';
 export const useAuthStore = defineStore('userAuth', {
     state: () => ({
         user: {
@@ -22,14 +22,7 @@ export const useAuthStore = defineStore('userAuth', {
 
             if (storedToken && storedUsername) {
                 this.setToken(storedToken, storedUsername);
-                // console.log('Initialized user', this.user);
             }
-
-            //check if user_id is stored
-            // const storedUserId = localStorage.getItem('user_token');
-            // if (storedUserId) {
-            //     this.setUserId(storedUserId);
-            // }
         },
 
         setToken(token, username) {
@@ -67,10 +60,10 @@ export const useAuthStore = defineStore('userAuth', {
                 const arrayToken = token.split('.');
                 const tokenPayload = JSON.parse(atob(arrayToken[1]));
 
-                console.log('Token payload:', tokenPayload);
+                // console.log('Token payload:', tokenPayload);
 
                 const user_id = tokenPayload.user_id; // Declare user_id here
-                console.log('User ID:', user_id);
+                // console.log('User ID:', user_id);
 
                 // Convert user_id to a string before encryption
                 const userIdString = user_id.toString();
@@ -110,7 +103,7 @@ export const useAuthStore = defineStore('userAuth', {
                         return null;
                     }
 
-                    console.log('Decrypted user_id:', userIdInt);
+                    // console.log('Decrypted user_id:', userIdInt);
                     return userIdInt;
                 } catch (error) {
                     console.error('Error during decryption:', error);
@@ -127,10 +120,10 @@ export const useAuthStore = defineStore('userAuth', {
                 const arrayToken = token.split('.');
                 const tokenPayload = JSON.parse(atob(arrayToken[1]));
 
-                console.log('Token payload:', tokenPayload);
+                // console.log('Token payload:', tokenPayload);
 
                 const canBeBooked = tokenPayload.can_be_booked; // Declare user_id here
-                console.log('can be booked', canBeBooked );
+                // console.log('can be booked', canBeBooked );
 
                 // Convert user_id to a string before encryption
                 const canBeBookedString = canBeBooked.toString();
@@ -167,7 +160,7 @@ export const useAuthStore = defineStore('userAuth', {
                         return null;
                     }
 
-                    console.log('Decrypted can be booked:', canBeBooked);
+                    // console.log('Decrypted can be booked:', canBeBooked);
                     return canBeBooked;
                 } catch (error) {
                     console.error('Error during decryption:', error);

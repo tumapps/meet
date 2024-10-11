@@ -4,13 +4,48 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import axios from 'axios'
+import AxiosInstance from '@/api/axios'
+import { useAuthStore } from '@/store/auth.store.js';
 
+const authStore = useAuthStore();
+const axiosInstance = AxiosInstance();
 // Reactive variables
 const events = ref([])  
 const selectedEvent = ref({})
 const isModalOpen = ref(false)
-const today = new Date().toISOString().split('T')[0]
+const today = new Date().toISOString().split('T')[0];
+
+//change the events owner
+const CBB = ref('');
+CBB.value = authStore.getCanBeBooked();
+const userId = ref('');
+
+const selectedUser_id = ref(null); // To store the corresponding user_id
+
+
+const UsersOptions = ref([]);
+const selectedUsername = ref(''); // To hold the selected username
+
+const getusers_booked = async () => {
+    try {
+        const response = await axiosInstance.get('/v1/auth/users');
+        UsersOptions.value = response.data.dataPayload.data.profiles;
+        // console.log("Users data:", UsersOptions.value);
+    } catch (error) {
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: 'Oops! An error has occurred',
+            icon: 'error',
+        });
+    }
+};
+
+watch(selectedUsername, (newUsername) => {
+    const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
+    selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
+    userId.value = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+
+});
 
 // Function to handle date click
 function handleDateClick(info) {
@@ -41,7 +76,7 @@ function handleEventClick(info) {
 // Fetch events from API
 async function fetchEvents() {
   try {
-    const response = await axios.get('/v1/scheduler/appointments')
+    const response = await axiosInstance.get('/v1/scheduler/appointments')
     const apiData = response.data.dataPayload.data
     events.value = apiData.map((item) => {
       return {
@@ -57,7 +92,7 @@ async function fetchEvents() {
         }
       }
     })
-    console.log("Events fetched:", events.value)  // Log events after fetch
+    // console.log("Events fetched:", events.value)  // Log events after fetch
   } catch (error) {
     console.error('Error fetching events:', error)
   }
@@ -93,12 +128,12 @@ const calendarOptions = ref({
 
 watch(events, (newEvents) => {
   calendarOptions.value.events = [...newEvents]
-  console.log("Updated calendar options:", calendarOptions.value)
+  // console.log("Updated calendar options:", calendarOptions.value)
 })
 
 // Watch for changes in events and update the calendar
 watch(events, (newEvents) => {
-  console.log("Events updated:", newEvents)  // Log the updated events
+  // console.log("Events updated:", newEvents)  // Log the updated events
 
   const calendarApi = calendarOptions.value?.getApi?.()
   if (calendarApi) {
@@ -121,14 +156,38 @@ onMounted(() => {
   // Log FullCalendar API on mount
   setTimeout(() => {
     const calendarApi = calendarOptions.value?.getApi?.()
-    console.log("FullCalendar API:", calendarApi)
+    // console.log("FullCalendar API:", calendarApi)
   }, 1000)  // Add a short delay to ensure the calendar is initialized
+
+  getusers_booked();
+
+  console.log("CBB", CBB.value)
 })
 
 
 </script>
 <template>
   <!-- FullCalendar Component -->
+  <b-row v-if="CBB === 0" class="align-items-center form-group">
+                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <label for="addappointmenttype" class="col-form-label">
+                                    <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
+                                </label>
+                            </b-col>
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <!-- Bind the select dropdown to selectedUsername -->
+                                <select v-model="selectedUsername" name="service" class="form-select"
+                                    id="addappointmenttype">
+                                    <option value="">Recipient</option>
+                                    <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
+                                        {{ user.first_name }}
+                                    </option>
+                                </select>
+                                <!-- <div v-if="errors.user_id" class="error" aria-live="polite">
+                                    {{ errors.user_id }}
+                                </div> -->
+                            </b-col>
+                        </b-row>
   <FullCalendar :options="calendarOptions" class="main-cont" />
 
   <!-- Modal for event details -->
