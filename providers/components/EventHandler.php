@@ -4,23 +4,35 @@ namespace helpers;
 
 use Yii;
 use yii\base\Event;
-use helpers\traits\Mail;
-
+// use helpers\traits\Mail;
+use PhpAmqpLib\Message\AMQPMessage;
 
 class EventHandler
 {
-	use Mail;
+	// use Mail;
 
 
 	public static function handlePasswordResetRequest(Event $event)
 	{
 		$data = $event->data;
 		 
-		if(self::send($data['email'], $data['subject'], $data['body'])){
+		// if(self::send($data['email'], $data['subject'], $data['body'])){
+		// 	$event->handled = true;
+		// } else {
+		// 	$event->handled = false;
+		// }
+		$emailData = [
+			'email' => $data['email'],
+			'subject' => $data['subject'], 
+			'body' => $data['body']
+		];
+   	
+		if(Yii::$app->rabbitmq->enqueueEmail($emailData)){
 			$event->handled = true;
 		} else {
 			$event->handled = false;
 		}
+
 	}
 
 	public static function onAppointmentCancelled(Event $event)
@@ -33,6 +45,7 @@ class EventHandler
 	        'date' => $event->data['date'],
 	        'startTime' => $event->data['startTime'],
 	        'endTime' => $event->data['endTime'],
+	        'reason' => $event->data['cancellation_reason'],
 	        'contactLink' => 'https://localhost',
     	];
 
