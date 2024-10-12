@@ -39,10 +39,22 @@ class AppointmentsController extends \helpers\ApiController{
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentsSearch');
         
 
-        $dataProvider = $searchModel->search($search);
+        // $dataProvider = $searchModel->search($search);
         
-        if($canBeBooked){
-            $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        // if($canBeBooked){
+        //     $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        // }
+
+         // Secretary (cannot be booked) can filter appointments by 'user_id'
+        if (!$canBeBooked && isset($search['user_id']) && !empty($search['user_id'])) {
+            // Secretary is allowed to filter by user_id
+            $dataProvider = $searchModel->search($search);
+        } else {
+            // Non-secretary users can only see their own appointments
+            $dataProvider = $searchModel->search($search);
+            if ($canBeBooked) {
+                $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+            }
         }
 
         $appointments = $dataProvider->getModels();
@@ -85,6 +97,30 @@ class AppointmentsController extends \helpers\ApiController{
             $types[] = $appointmentType->type;
         }
         return $this->payloadResponse(['types' => $types]);
+    }
+
+    public function actionGetPriorities()
+    {
+        $priorities = Appointments::getPriorityLabel();
+
+        return $this->payloadResponse($priorities);
+    }
+
+    public function actionCheckin($id)
+    {
+        // $id = Yii::$app->request->getBodyParam('id');
+
+        if(empty($id)) {
+            return $this->errorResponse(['message' => 'Appoitment id is required']);
+        }
+
+        $isChecedkIn = Appointments::checkedInAppointemnt($id);
+
+        if(!$isChecedkIn) {
+            return $this->errorResponse(['message' => 'Failed to mark Appoiment as Attended']);
+        }
+
+        return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been marked as Attended']);
     }
 
     public function actionCreate($dataRequest = null)
@@ -134,7 +170,8 @@ class AppointmentsController extends \helpers\ApiController{
                 $dataRequest['Appointments']['user_id'], 
                 $dataRequest['Appointments']['appointment_date'], 
                 $dataRequest['Appointments']['start_time'],
-                $dataRequest['Appointments']['end_time']
+                $dataRequest['Appointments']['end_time'],
+                // $dataRequest['Appointments']['priority']
             );
 
             if ($appoitmentExists) {
@@ -213,12 +250,7 @@ class AppointmentsController extends \helpers\ApiController{
 
                 return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
             }
-        }
-        // $model = $this->findModel($id);
-        // if($model->load($dataRequest) && $model->save()) {
-        //    return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
-        // }
-        // return $this->errorResponse($model->getErrors()); 
+        } 
     }
 
     public function actionDelete($id)
@@ -273,7 +305,25 @@ class AppointmentsController extends \helpers\ApiController{
             return $this->errorResponse(['message' => 'User profile or email not found']);
         }
 
+        // Set scenario to 'cancel' for validation
+        $model->scenario = Appointments::SCENARIO_CANCEL;
+
+        if (Yii::$app->request->isPost) {
+            $model->cancellation_reason = Yii::$app->request->post('cancellation_reason');
+        }
+
+        // Validate cancellation reason
+        if (!$model->validate()) {
+            return $this->errorResponse($model->getErrors());
+        }
+
         $model->status = Appointments::STATUS_CANCELLED;
+
+        // Capture who canceled the appointment (VC or Secretary)
+        $currentUser = Yii::$app->user->identity;
+        $cancelledBy = $currentUser->username;
+        $cancelledByRole = $currentUser->can_be_booked ? 'VC/DVC' : 'Secretary';
+
         if($model->save(false)){
 
             $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $bookedUserEmail);
