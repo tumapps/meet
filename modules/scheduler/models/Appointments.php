@@ -202,6 +202,20 @@ class Appointments extends BaseModel
 
     }
 
+    public static function checkedInAppointemnt($id)
+    {
+        $appointment = self::find($id);
+
+        if(!$appointment) {
+            return false;
+        }
+
+        $appointment->checked_in = true;
+        $appointment->save(false);
+
+        return true;
+    }
+
     public function sendAppointmentCancelledEvent($email, $name, $date, $startTime, $endTime, $bookedUserEmail)
     {
         $event = new Event();
