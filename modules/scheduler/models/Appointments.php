@@ -28,13 +28,20 @@ use helpers\EventHandler;
 
 class Appointments extends BaseModel
 {
-    const STATUS_INACTIVE = 0;
+    const STATUS_MISSED = 0;
+    const STATUS_ATTENDED = 10;
     const STATUS_ACTIVE = 1;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_RESCHEDULED = 5;
     const STATUS_DELETED = 9;
+
+    // appointment priorities
+
+    const PRIORITY_LOW = 1;
+    const PRIORITY_MEDIUM = 2;
+    const PRIORITY_HIGH = 3;
 
     const EVENT_APPOINTMENT_CANCELLED = 'appointmentCancelled';
     const EVENT_APPOINTMENT_RESCHEDULE = 'appointmentReschedule';
@@ -45,7 +52,8 @@ class Appointments extends BaseModel
 
 
     protected static $statusLabels = [
-        self::STATUS_INACTIVE => 'Inactive',
+        self::STATUS_MISSED => 'Missed',
+        self::STATUS_ATTENDED => 'Attended',
         self::STATUS_ACTIVE => 'Active',
         self::STATUS_CONFIRMED => 'Confirmed',
         self::STATUS_RESCHEDULE => 'Reschedule',
@@ -53,6 +61,10 @@ class Appointments extends BaseModel
         self::STATUS_CANCELLED => 'Cancelled',
         self::STATUS_DELETED => 'Deleted',
     ];
+
+    const SCENARIO_CANCEL = 'cancel';
+    
+    public $cancellation_reason;
 
     public function init()
     {
@@ -85,6 +97,9 @@ class Appointments extends BaseModel
             'subject',
             'appointment_type',
             'status',
+            'recordStatus' => function(){
+                return $this->recordStatus;
+            },
             'created_at',
             'updated_at',
             ]
@@ -111,7 +126,17 @@ class Appointments extends BaseModel
             ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 13 digits.'],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
+            // applied only when cancelling appointments
+            ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
+            ['cancellation_reason', 'string', 'max' => 255],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CANCEL] = ['cancellation_reason'];
+        return $scenarios;
     }
 
     public function validateTimeRange($attribute, $params)
@@ -157,6 +182,15 @@ class Appointments extends BaseModel
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
 
+    public static function getPriorityLabel()
+    {
+        return [
+            ['code' => self::PRIORITY_LOW, 'label' => 'Low'],
+            ['code' => self::PRIORITY_MEDIUM, 'label' => 'Medium'],
+            ['code' => self::PRIORITY_HIGH, 'label' => 'High'],
+        ];
+    }
+
     public static function getStatusLabel($status)
     {
         return self::$statusLabels[$status] ?? 'Unknown';
@@ -181,6 +215,7 @@ class Appointments extends BaseModel
             'startTime' => $startTime,
             'endTime' => $endTime,
             'bookedUserEmail' => $bookedUserEmail,
+            'cancellation_reason' => $this->cancellation_reason,
             'subject' => $subject,
         ];
         $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $eventData);
@@ -222,7 +257,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED, $event); 
     }
 
-    public static function markPassedAppointmentsInactive()
+    public static function updatePassedAppointments()
     {
         $currentDate = date('Y-m-d');
         $currentTime = date('H:i:s');
@@ -233,20 +268,28 @@ class Appointments extends BaseModel
             ->andWhere(['status' => self::STATUS_ACTIVE])
             ->all();
 
-        if(empty($appointments)){
-            return 'no appointments';
+        if (empty($appointments)) {
+            return 'No appointments to process.';
         }
-        // if (!empty($appointments)) {
-        //     foreach ($appointments as $appointment) {
-        //         $appointment->status = self::STATUS_INACTIVE;
-        //         if ($appointment->save(false)) {
-        //             Yii::info("Appointment ID {$appointment->id} marked as inactive.");
-        //         } else {
-        //             Yii::error("Failed to mark Appointment ID {$appointment->id} as inactive.");
-        //         }
-        //     }
-        // }
 
+        foreach ($appointments as $appointment) {
+            if (!$appointment->checked_in) {
+                // If not checked in, mark the appointment as 'Missed'
+                $appointment->status = self::STATUS_MISSED;
+            } else {
+                // If checked in, mark the appointment as 'Attended'
+                $appointment->status = self::STATUS_ATTENDED;
+            }
+
+            // Save the appointment and log the result
+            if ($appointment->save(false)) {
+                Yii::info("Appointment ID {$appointment->id} marked as {$appointment->status}.");
+            } else {
+                Yii::error("Failed to update status for Appointment ID {$appointment->id}.");
+            }
+        }
+
+        // return 'Appointments updated successfully.';
         return $appointments;
     }
 
@@ -393,13 +436,13 @@ class Appointments extends BaseModel
      /**
      * Checks if the requested appointment time overlaps with any existing appointments.
      *
-     * @param int $vc_id The VC's ID
+     * @param int $user The VC's ID
      * @param string $appointment_date The date of the appointment
      * @param string $start_time The start time of the appointment
      * @param string $end_time The end time of the appointment
      * @return bool True if an overlapping appointment exists, false otherwise
      */
-    public static function hasOverlappingAppointment($user_id, $date, $start_time, $end_time,  $appointment_id = null)
+    public static function hasOverlappingAppointment($user_id, $date, $start_time, $end_time, $appointment_id = null, $priorty = null)
     {
         $query = self::find()
             ->where(['user_id' => $user_id, 'appointment_date' => $date])
@@ -412,7 +455,7 @@ class Appointments extends BaseModel
                 ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
 
                 /*
-                    hecks if the end time of the new appointment ($end_time) falls within an existing appointment.
+                    checks if the end time of the new appointment ($end_time) falls within an existing appointment.
                  */
                 ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
 
@@ -434,8 +477,36 @@ class Appointments extends BaseModel
                 $query->andWhere(['!=', 'id', $appointment_id]);
             }
 
+            // Find any overlapping appointments
+            $overlappingAppointment = $query->one();
+
+            // If no overlapping appointment is found, return false
+            if (!$overlappingAppointment) {
+                return false;
+            }
+
+            // Call checkPriority to handle priority comparison and rescheduling logic
+            if($priority !== null){
+                return self::checkPriority($overlappingAppointment, $priority);
+            }
+
+            // return true;
             return $query->exists();
     } 
+
+    private static function checkPriority($overlappingAppointment, $newPriority)
+    {
+        if ($overlappingAppointment->priority >= $newPriority) {
+            // If overlapping appointment has higher or equal priority, do not allow overriding
+            return true;
+        } else {
+            // If the new appointment has higher priority, mark the existing one as "rescheduled"
+            $overlappingAppointment->status = Appointments::STATUS_RESCHEDULED;
+            $overlappingAppointment->save(false);
+            return false; // Allow the new appointment to be created
+        }
+    }
+
 
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
     {
