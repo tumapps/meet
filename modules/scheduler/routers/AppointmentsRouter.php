@@ -118,6 +118,41 @@ return [
 'GET types'  => 'appointments/appointments-types',
 
 /**
+ * @OA\Get(path="/scheduler/priorities",
+ *   summary="Get appointment priority lables and codes",
+ *   tags={"Appointment Priorities"},
+ *   @OA\Parameter(description="Page No.",in="query",name="page", @OA\Schema(type="integer")),
+ *   @OA\Parameter(description="Page Size",in="query",name="per-page", @OA\Schema(type="integer")),
+ *   @OA\Parameter(description="Search",in="query",name="_search", @OA\Schema(type="string")),
+ *
+ *  
+ *
+ *   @OA\Response(
+ *     response=200,
+ *     description="Returns a data payload object for all scheduler/priorities",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="dataPayload", type="object",
+ *              @OA\Property(property="data", type="array",@OA\Items(ref="#/components/schemas/Appointments")),
+ *              @OA\Property(property="countOnPage", type="integer", example="25"),
+ *              @OA\Property(property="totalCount", type="integer",example="50"),
+ *              @OA\Property(property="perPage", type="integer",example="25"),
+ *              @OA\Property(property="totalPages", type="integer",example="2"),
+ *              @OA\Property(property="currentPage", type="integer",example="1"),
+ *              @OA\Property(property="paginationLinks", type="object",
+ *                  @OA\Property(property="first", type="string",example="v1/v1/scheduler/appointments?page=1&per-page=25"),
+ *                  @OA\Property(property="previous", type="string",example="v1/v1/scheduler/appointments?page=1&per-page=25"),
+ *                  @OA\Property(property="self", type="string",example="v1/v1/scheduler/appointments?page=1&per-page=25"),
+ *                  @OA\Property(property="next", type="string",example="v1/v1/scheduler/appointments?page=1&per-page=25"),
+ *                  @OA\Property(property="last", type="string",example="v1/v1/scheduler/appointments?page=1&per-page=25"),
+ *              ),
+ *          )
+ *      )
+ *   ),
+ * )
+ */
+'GET priorities' => 'appointments/get-priorities',
+
+/**
  * @OA\Post(
  * path="/scheduler/appointments",
  * summary="Creates a new Appointments model ",
@@ -155,6 +190,32 @@ return [
  *),
  */
 'POST appointments'         => 'appointments/create',
+
+
+/**
+ * @OA\Post(path="/scheduler/checkin/{id}",
+ *   summary="Mark an appointment as Attended",
+ *   tags={"Appointments"},
+ *   @OA\Parameter(description="Appointments unique ID to find the appointment",@OA\Schema(type="string",)),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Finds a single Appointments model.",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/Appointments"))
+ *      ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Resource not found",
+ *      @OA\JsonContent(
+ *           @OA\Property(property="errorPayload", type="object",
+ *               @OA\Property(property="statusCode", type="integer", example=404 ),
+ *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+ *           )
+ *      )
+ *   ),
+ * )
+ */
+'POST checkin/{id}' => 'appointments/checkin',
 
 /**
  * @OA\Get(path="/scheduler/appointments/{id}",
