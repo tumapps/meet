@@ -75,11 +75,16 @@
             <!-- Different content based on the recipient -->
             <?php if ($recipientType === 'user'): ?>
                 <p>We regret to inform you that your appointment scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.</p>
-                <p>If you have any questions or need further assistance, please feel free to contact us.</p>
+
             <?php elseif ($recipientType === 'vc'): ?>
                 <p>The appointment you had with <strong><?= htmlspecialchars($name) ?></strong> scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.</p>
             <?php endif; ?>
+
+            <P><strong>Reason:</strong> <?= htmlspecialchars($reason); ?></P>
+
             <?php if ($recipientType === 'user'): ?>
+                <p>If you have any questions or need further assistance, please feel free to contact us.</p>
+
                 <a href="<?= htmlspecialchars($contactLink) ?>" class="button">Contact Support</a>
             <?php endif; ?>
         </div>
