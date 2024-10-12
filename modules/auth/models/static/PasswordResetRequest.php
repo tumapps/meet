@@ -82,7 +82,7 @@ class PasswordResetRequest extends Model
             'subject' => $subject,
             'body' => $body
         ];
-
+       
         $this->on(self::EVENT_PASSWORD_RESET_REQUEST, [EventHandler::class, 'handlePasswordResetRequest'], $eventData);
 
         $event = new Event();
