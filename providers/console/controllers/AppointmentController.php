@@ -19,11 +19,13 @@ class AppointmentController extends Controller
 	public function actionCheckPassedAppointments()
     {
 
-        $appointments = Appointments::markPassedAppointmentsInactive();
+        $appointments = Appointments::updatePassedAppointments();
+
+        console::output($appointments);
         
-        foreach($appointments as $appointment){
-        	console::output($appointment->appointment_date);
-        }
+        // foreach($appointments as $appointment){
+        	// console::output($appointment->appointment_date);
+        // }
 
     }
 
