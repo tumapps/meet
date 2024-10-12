@@ -35,6 +35,15 @@ $config = [
                 ],
             ],
         ],
+        'rabbitmq' => [
+            'class' => \helpers\RabbitMqComponent::class,
+            'host' => $_ENV['_HOST'],
+            'port' => $_ENV['_PORT'],
+            'user' => $_ENV['_USER'],
+            'password' => $_ENV['_PASSWORD'],
+            'vhost' => $_ENV['V_HOST'],
+            'logFile' => '@app/providers/bin/logs/worker.log'
+        ],
         'request' => [
             'cookieValidationKey' => hash_hmac('sha256', md5(date('DYM')), sha1(date('myd'))),
             'parsers' => [
@@ -101,8 +110,16 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning', 'trace'],
+                    'levels' => ['error', 'info', 'warning',],
                 ],
+                // [
+                //     'class' => 'yii\log\FileTarget',
+                //     'levels' => ['error', 'info', 'warning',],
+                //     'categories' => ['email_worker'],
+                //     'logFile' => '@app/providers/bin/logs/worker.log',
+                //     'maxFileSize' => 1024 * 2,
+                //     'maxLogFiles' => 5,
+                // ],
             ],
         ],
         'db' => $wrapper->dbDriver('CORE_DB'),

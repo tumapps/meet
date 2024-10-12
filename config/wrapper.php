@@ -56,6 +56,14 @@ class ConfigWrapper
                     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'home'],
                     ['route' => 'availability', 'label' => 'Availability', 'icon' => 'home'],
             ],
+            'rabbitmq' => [
+                'host' => 'localhost',
+                'port' => 5672,
+                'user' => 'root',
+                'password' => 'toor',
+                'vhost' => '/yii_vhost',
+                'logfile' => '@app/providers/bin/logs/worker.log',
+            ],
 
         ];
     }

@@ -23,6 +23,12 @@ $config = [
         'appointment' => [
             'class' => 'cmd\controllers\AppointmentController',
         ],
+        'email-worker' => [
+            'class' => 'cmd\controllers\EmailWorkerController',
+        ],
+        'test-rabbitmq' => [
+            'class' => 'cmd\controllers\TestRabbitmqController',
+        ],
     ],
     'components' => [
         'cache' => [
@@ -32,11 +38,25 @@ $config = [
             'class' => \helpers\auth\AuthManager::class,
             'cache' => 'cache',
         ],
+        'rabbitmq' => [
+            'class' => \helpers\RabbitMqComponent::class,
+            'host' => 'localhost',
+            'port' => 5672,
+            'user' => 'root',
+            'password' => 'toor',
+            'vhost' => '/yii_vhost',
+            'logFile' => '@app/providers/bin/logs/worker.log'
+        ],
         'log' => [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                     // for mail worker
+                    'categories' => ['email_worker'],
+                    'logFile' => '@app/providers/bin/logs/worker.log',
+                    'maxFileSize' => 1024 * 2,
+                    'maxLogFiles' => 5,
                 ],
             ],
         ],
