@@ -86,7 +86,7 @@ class TimeHelper
      * @param int $interval - The slot duration in minutes (e.g., 30)
      * @return array - List of available time slots
      */
-    public static function getAvailableSlots($user_id, $date)
+    public static function getAvailableSlots($user_id, $date, $priority = 1)
     {
         $allSlots = self::generateTimeSlots($user_id);
         // return $allSlots;
@@ -101,16 +101,19 @@ class TimeHelper
             // return $isAvailable;
             list($slotStart, $slotEnd) = explode('-', $slot);
             $expireTime = self::checkExpireTime($date, $slotStart);
-            $slotsWithAvailability[] = [
-                // 'slot' => $slot,
-                // 'isAvailable' => $isAvailable,
-                // 'slot' => [
+            $slotDetails = [
                     'startTime' => $slotStart,
                     'endTime' => $slotEnd,
                     'booked' => !$isAvailable,
-                    'is_expired' => $expireTime
-                // ]
+                    'is_expired' => $expireTime,
+                    // 'can_overide' => self::checkOveride($user_id, $date, $slot, $priority)
             ];
+
+            // if ($priority !== null) {
+            //     $slotDetails['can_override'] = self::checkOveride($user_id, $date, $slot, $priority);
+            // }
+
+            $slotsWithAvailability[] = $slotDetails;
         }
 
         return $slotsWithAvailability;
@@ -172,7 +175,7 @@ class TimeHelper
         if ($unavailable) {
             return false;
         }
-
+        
         // Check in the appointments table
         $appointmentOverlap = Appointments::hasOverlappingAppointment($user_id, $date, $start_time, $end_time);
 
@@ -272,4 +275,16 @@ class TimeHelper
         // For future dates, the slot is not expired
         return false;
     }
+
+   public static function checkOveride($user_id, $date, $slot, $priority = 3)
+   {
+        // If there's an overlapping appointment, check if it can be overridden
+        if ($appointment) {
+            return Appointments::canOverride($appointment, $priority);
+        }
+
+        // If no appointment overlaps, no override is necessary
+        return false;
+    }
+
 }

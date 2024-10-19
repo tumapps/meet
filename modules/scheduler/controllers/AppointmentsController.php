@@ -171,7 +171,7 @@ class AppointmentsController extends \helpers\ApiController{
                 $dataRequest['Appointments']['appointment_date'], 
                 $dataRequest['Appointments']['start_time'],
                 $dataRequest['Appointments']['end_time'],
-                // $dataRequest['Appointments']['priority']
+                $dataRequest['Appointments']['priority']
             );
 
             if ($appoitmentExists) {
@@ -357,11 +357,19 @@ class AppointmentsController extends \helpers\ApiController{
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
         $user_id = $dataRequest['Appointments']['user_id'];
         $date = $dataRequest['Appointments']['date'];
+        $priority = $dataRequest['Appointments']['priority'] ?? null;
+
 
         if(empty($user_id) || empty($date)){
             return $this->errorResponse(['message' => ['user id and date are required']]);
         }
-        $slots = TimeHelper::getAvailableSlots($user_id, $date);
+
+        // Validate priority if it is provided
+        // if ($priority !== null && !is_int($priority)) {
+        //     return $this->errorResponse(['message' => ['Priority must be an integer']]);
+        // }
+        
+        $slots = TimeHelper::getAvailableSlots($user_id, $date, $priority);
         return $this->payloadResponse(['slots' => $slots]);
     }
 

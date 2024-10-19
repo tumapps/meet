@@ -113,7 +113,7 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address','start_time','end_time','user_id','subject', 'contact_name','mobile_number', 'appointment_type','description'], 'required'],
+            [['appointment_date', 'email_address','start_time','end_time','user_id','subject', 'contact_name','mobile_number', 'appointment_type','description', 'priority'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
@@ -204,7 +204,7 @@ class Appointments extends BaseModel
 
     public static function checkedInAppointemnt($id)
     {
-        $appointment = self::find($id);
+        $appointment = self::findOne(['id' => $id]);
 
         if(!$appointment) {
             return false;
@@ -456,7 +456,7 @@ class Appointments extends BaseModel
      * @param string $end_time The end time of the appointment
      * @return bool True if an overlapping appointment exists, false otherwise
      */
-    public static function hasOverlappingAppointment($user_id, $date, $start_time, $end_time, $appointment_id = null, $priorty = null)
+    public static function hasOverlappingAppointment($user_id, $date, $start_time, $end_time, $appointment_id = null, $priority = null)
     {
         $query = self::find()
             ->where(['user_id' => $user_id, 'appointment_date' => $date])
@@ -503,7 +503,7 @@ class Appointments extends BaseModel
             if($priority !== null){
                 return self::checkPriority($overlappingAppointment, $priority);
             }
-
+             
             // return true;
             return $query->exists();
     } 
@@ -520,6 +520,17 @@ class Appointments extends BaseModel
             return false; // Allow the new appointment to be created
         }
     }
+
+    public static function canOverride($existingAppointment, $newPriority)
+    {
+        // Compare the priority of the existing appointment with the new appointment
+        if ($existingAppointment->priority >= $newPriority) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
 
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
