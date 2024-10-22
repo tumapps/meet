@@ -114,13 +114,24 @@ class AppointmentsController extends \helpers\ApiController{
             return $this->errorResponse(['message' => 'Appoitment id is required']);
         }
 
-        $isChecedkIn = Appointments::checkedInAppointemnt($id);
+        // Call the model method to toggle the checked_in status
+        // $isToggled = Appointments::toggleCheckedInAppointment($id);
 
-        if(!$isChecedkIn) {
-            return $this->errorResponse(['message' => 'Failed to mark Appoiment as Attended']);
+        // if (!$isToggled) {
+        //     return $this->errorResponse(['message' => 'Failed to toggle appointment status']);
+        // }
+
+        $checkinResponse = Appointments::checkedInAppointemnt($id);
+
+        if (!$checkinResponse['success']) {
+            return $this->errorResponse(['message' => $checkinResponse['message']]);
         }
 
-        return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been marked as Attended']);
+        // $appointment = Appointments::findOne($id);
+        // $message = $appointment->checked_in ? 'Appointment has been marked as Attended' : 'Appointment has been unchecked';
+
+        return $this->toastResponse(['statusCode'=>202,'message'=>$checkinResponse['message']]);
+        // return $this->toastResponse(['statusCode' => 202, 'message' => $message]);
     }
 
     public function actionCreate($dataRequest = null)
@@ -275,8 +286,9 @@ class AppointmentsController extends \helpers\ApiController{
             if (!$isAvailable || $appointmentExists) {
                 return $this->errorResponse(['The appointment cannot be restored because the time slot is no longer available.']);
             }
-
             $model->restore();
+            $model->status = Appointments::STATUS_ACTIVE;
+            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');

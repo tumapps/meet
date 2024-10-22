@@ -9,13 +9,11 @@ trait Status
     {
         switch ($code) {
             case 0:
-                $status = ['label' => 'MISSED', 'theme' => 'warning',];
+                $status = ['label' => 'DELETED', 'theme' => 'danger',];
                 break;
-                
             case 1:
                 $status = ['label' => 'ACTIVE', 'theme' => 'success',];
                 break;
-                
             case 2:
                 $status = ['label' => 'CONFIRMED', 'theme' => 'primary',];
                 break;
@@ -29,7 +27,7 @@ trait Status
                 $status = ['label' => 'RESCHEDULED', 'theme' => 'info',];
                 break;
             case 9:
-                $status = ['label' => 'DELETED', 'theme' => 'danger',];
+                $status = ['label' => 'MISSED', 'theme' => 'warning',];
                 break;
             case 10:
                 $status = ['label' => 'ATTENDED', 'theme' => 'dark',];
