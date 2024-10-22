@@ -64,7 +64,7 @@ class Appointments extends BaseModel
 
     const SCENARIO_CANCEL = 'cancel';
     
-    public $cancellation_reason;
+    // public $cancellation_reason;
 
     public function init()
     {
@@ -94,6 +94,7 @@ class Appointments extends BaseModel
             'contact_name',
             'email_address',
             'mobile_number',
+            'cancellation_reason',
             'subject',
             'appointment_type',
             'status',
@@ -165,6 +166,7 @@ class Appointments extends BaseModel
             'mobile_number' => 'Mobile Number',
             'subject' => 'Subject',
             'description' => 'Notes',
+            'cancellation_reason' => 'Reason',
             'appointment_type' => 'Appointment Type',
             'status' => 'Status',
             'created_at' => 'Created At',

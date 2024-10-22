@@ -11,9 +11,11 @@ trait Status
             case 0:
                 $status = ['label' => 'MISSED', 'theme' => 'warning',];
                 break;
+                
             case 1:
                 $status = ['label' => 'ACTIVE', 'theme' => 'success',];
                 break;
+                
             case 2:
                 $status = ['label' => 'CONFIRMED', 'theme' => 'primary',];
                 break;

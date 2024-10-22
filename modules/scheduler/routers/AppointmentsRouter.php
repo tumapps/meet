@@ -215,7 +215,7 @@ return [
  *   ),
  * )
  */
-'POST checkin/{id}' => 'appointments/checkin',
+'PUT checkin/{id}' => 'appointments/checkin',
 
 /**
  * @OA\Get(path="/scheduler/appointments/{id}",

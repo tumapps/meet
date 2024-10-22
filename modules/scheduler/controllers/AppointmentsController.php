@@ -290,13 +290,15 @@ class AppointmentsController extends \helpers\ApiController{
 
     public function actionCancel($id)
     {
+        $request = Yii::$app->request;
+
         $model = $this->findModel($id);
         $contact_email = $model->email_address;
         $contact_name = $model->contact_name;
         $date = $model->appointment_date;
         $starTime = $model->start_time;
         $endTime = $model->end_time;
-
+         
         $user = User::findOne($model->user_id);
 
         if ($user && $user->profile) {
@@ -308,9 +310,12 @@ class AppointmentsController extends \helpers\ApiController{
         // Set scenario to 'cancel' for validation
         $model->scenario = Appointments::SCENARIO_CANCEL;
 
-        if (Yii::$app->request->isPost) {
-            $model->cancellation_reason = Yii::$app->request->post('cancellation_reason');
+        if ($request->isPut) {
+            $putParams = $request->getBodyParams();
+            $reason = isset($putParams['cancellation_reason']) ? $putParams['cancellation_reason'] : null;
         }
+
+        $model->cancellation_reason = $reason;
 
         // Validate cancellation reason
         if (!$model->validate()) {
@@ -331,7 +336,6 @@ class AppointmentsController extends \helpers\ApiController{
         }
         return $this->errorResponse($model->getErrors()); 
     }
-
 
     protected function findModel($id)
     {

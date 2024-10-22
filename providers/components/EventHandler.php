@@ -4,12 +4,12 @@ namespace helpers;
 
 use Yii;
 use yii\base\Event;
-// use helpers\traits\Mail;
+use helpers\traits\Mail;
 use PhpAmqpLib\Message\AMQPMessage;
 
 class EventHandler
 {
-	// use Mail;
+	use Mail;
 
 
 	public static function handlePasswordResetRequest(Event $event)
