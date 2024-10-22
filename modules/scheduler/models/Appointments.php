@@ -28,14 +28,14 @@ use helpers\EventHandler;
 
 class Appointments extends BaseModel
 {
-    const STATUS_MISSED = 0;
+    const STATUS_MISSED = 9;
     const STATUS_ATTENDED = 10;
     const STATUS_ACTIVE = 1;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_RESCHEDULED = 5;
-    const STATUS_DELETED = 9;
+    const STATUS_DELETED = 0;
 
     // appointment priorities
 
@@ -98,9 +98,9 @@ class Appointments extends BaseModel
             'subject',
             'appointment_type',
             'status',
-            'recordStatus' => function(){
-                return $this->recordStatus;
-            },
+            // 'recordStatus' => function(){
+            //     return $this->recordStatus;
+            // },
             'created_at',
             'updated_at',
             ]
@@ -209,14 +209,61 @@ class Appointments extends BaseModel
         $appointment = self::findOne(['id' => $id]);
 
         if(!$appointment) {
+            // return false;
+            return [
+                'success' => false,
+                'message' => 'Appointment not found.'
+            ];
+        }
+
+        $currentTime = date('Y-m-d H:i:s');
+        $appointmentTime = date('Y-m-d H:i:s', strtotime($appointment->appointment_date.' '.$appointment->start_time));
+
+        if ($currentTime < $appointmentTime) {
+            return [
+                'success' => false,
+                'message' => 'You cannot check in before the appointment start time.'
+            ];
+        }
+
+        $appointment->checked_in = !$appointment->checked_in;
+
+        // $appointment->checked_in = true;
+        // $appointment->save(false);
+
+        if ($appointment->save(false)) {
+            $message = $appointment->checked_in ? 'Appointment successfully checked in.':'Appointment successfully unchecked.';
+            
+            return [
+                'success' => true,
+                'message' => $message
+            ];
+        }
+
+        // return true;
+        // return [
+        //     'success' => true,
+        //     'message' => 'Appointment successfully checked in.'
+        // ];
+        return [
+            'success' => false,
+            'message' => 'Failed to update appointment status.'
+        ];
+    }
+
+    public static function toggleCheckedInAppointment($id)
+    {
+        $appointment = self::findOne(['id' => $id]);
+
+        if (!$appointment) {
             return false;
         }
 
-        $appointment->checked_in = true;
-        $appointment->save(false);
+        $appointment->checked_in = !$appointment->checked_in;
 
-        return true;
+        return $appointment->save(false);
     }
+
 
     public function sendAppointmentCancelledEvent($email, $name, $date, $startTime, $endTime, $bookedUserEmail)
     {
