@@ -8,9 +8,6 @@ trait Status
     public static function badge($code)
     {
         switch ($code) {
-            // case 0:
-            //     $status = ['label' => 'ACTIVE', 'theme' => 'success',];
-            //     break;
             case 1:
                 $status = ['label' => 'DELETED', 'theme' => 'danger',];
                 break;
@@ -21,13 +18,13 @@ trait Status
                 $status = ['label' => 'RESCHEDULE', 'theme' => 'light',];
                 break;
             case 4:
-                $status = ['label' => 'CANCELLED', 'theme' => 'secondary',];
+                $status = ['label' => 'CANCELLED', 'theme' => 'warning',];
                 break;
             case 5:
                 $status = ['label' => 'RESCHEDULED', 'theme' => 'info',];
                 break;
             case 9:
-                $status = ['label' => 'MISSED', 'theme' => 'warning',];
+                $status = ['label' => 'MISSED', 'theme' => 'secondary',];
                 break;
             case 10:
                 $status = ['label' => 'ACTIVE', 'theme' => 'success',];
