@@ -44,6 +44,8 @@ class AppointmentsSearch extends Appointments
     {
         $query = Appointments::find();
 
+        // $query->joinWith('user');
+
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -77,6 +79,8 @@ class AppointmentsSearch extends Appointments
             ->orFilterWhere(['ilike', 'subject', $this->search])
             ->orFilterWhere(['ilike', 'appointment_type', $this->search])
             ->orFilterWhere(['ilike', 'description', $this->search]);
+            // ->orFilterWhere(['ilike', 'users.username', $this->search]);
+            
             // ->orFilterWhere(['ilike', 'status', $this->search]);
 
         return $dataProvider;
