@@ -118,7 +118,8 @@ class AppointmentsController extends \helpers\ApiController{
         $checkinResponse = Appointments::checkedInAppointemnt($id);
 
         if (!$checkinResponse['success']) {
-            return $this->errorResponse(['message' => $checkinResponse['message']]);
+            // return $this->errorResponse(['message' => $checkinResponse['message']]);
+            return $this->toastResponse(['statusCode'=>202,'message'=>$checkinResponse['message']]);
         }
 
         // $appointment = Appointments::findOne($id);
@@ -184,7 +185,17 @@ class AppointmentsController extends \helpers\ApiController{
             }
 
             if($model->save()) {
+               $model->sendAppointmentCreatedEvent(
+                    $dataRequest['Appointments']['email_address'],
+                    $dataRequest['Appointments']['contact_name'], 
+                    $dataRequest['Appointments']['user_id'],
+                    $dataRequest['Appointments']['appointment_date'], 
+                    $dataRequest['Appointments']['start_time'],
+                    $dataRequest['Appointments']['end_time'],
+               );
+
                return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Appointment added successfully']);
+
             }
         }
     }
