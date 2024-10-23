@@ -33,7 +33,7 @@ class AppointmentController extends Controller
 
      	if(!empty($reminders)) {
      		foreach($reminders as $reminder){
-     			Console::output($reminder->start_time);
+     			 Console::output("Sending reminder for appointment at: " . $reminder->start_time);
                 $appointment->sendAppointmentsReminderEvent(
                     $reminder->email_address,
                     $reminder->contact_name, 
@@ -45,7 +45,7 @@ class AppointmentController extends Controller
      		}
      	} else {
      		// $this->stdout('No reminders ');
-            echo "No reminders \n";
+            echo "No reminders to send\n";
      	}
      }
 }
