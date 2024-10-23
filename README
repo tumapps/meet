@@ -7,4 +7,11 @@ php yii gii/model --tableName=databanks --modelClass=Databanks --ns='mainstream\
 start serevre: php -S localhost:8088 -t . index.php 
 
 
+// vm credentials
+ CREATE DATABASE scheduler;
+
+CREATE USER tummeet_root  WITH PASSWORD 'tummeet@2024';
+
+
+
 
