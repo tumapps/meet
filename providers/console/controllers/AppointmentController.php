@@ -20,12 +20,8 @@ class AppointmentController extends Controller
     {
 
         $appointments = Appointments::updatePassedAppointments();
-
-        console::output($appointments);
         
-        // foreach($appointments as $appointment){
-        	// console::output($appointment->appointment_date);
-        // }
+        console::output($appointments);
 
     }
 
@@ -45,6 +41,7 @@ class AppointmentController extends Controller
                     $reminder->start_time,
                     $reminder->end_time, 
                     $reminder->user_id);
+                echo "[*] :: " . "Reminder sent for :" . $reminder->email_address . "\n";
      		}
      	} else {
      		// $this->stdout('No reminders ');
