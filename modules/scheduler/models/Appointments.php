@@ -379,17 +379,30 @@ class Appointments extends BaseModel
 
     public static function getUpcomingAppointmentsForReminder()
     {
-        $currentTime = date('H:i:s');
+        // $currentTime = date('H:i:s');
+        $currentTime = new \DateTime();
         $reminderTime = date('H:i:s', strtotime('+30 minutes'));
 
         $appointments = self::find()
             ->where(['=', 'appointment_date', date('Y-m-d')])
-            ->andWhere(['>=', 'start_time', $currentTime])
-            ->andWhere(['<=', 'start_time', $reminderTime])
+            // ->andWhere(['>=', 'start_time', $currentTime])
+            // ->andWhere(['<=', 'start_time', $reminderTime])
             ->andWhere(['status' => self::STATUS_ACTIVE])
             ->all();
+        $upcomingAppointments = [];
 
-        return $appointments;
+        foreach ($appointments as $appointment) {
+            $appointmentStartTime = new \DateTime($appointment->start_time);
+            
+            $timeDifference = $appointmentStartTime->diff($currentTime)->i + ($appointmentStartTime->diff($currentTime)->h * 60);
+
+            if ($timeDifference === 30) {
+                $upcomingAppointments[] = $appointment;
+            }
+        }
+
+        // return $appointments;
+        return $upcomingAppointments;
     }
 
     public function sendAppointmentsReminderEvent($email, $contact_name, $date, $start_time, $end_time, $user_id)
@@ -402,14 +415,22 @@ class Appointments extends BaseModel
         $eventData = [
             'email' => $email,
             'subject' => $subject,
-            'start_time' => $start_time,
-            'end_time' => $end_time,
+            'date' => $date,
+            'startTime' => $start_time,
+            'endTime' => $end_time,
             'contact_name' => $contact_name,
             'username' => $this->getUserName($user_id),
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);
-        $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event); 
+        $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event);
+
+        // $this->updateAttributes(['reminder_sent_at' => date('Y-m-d H:i:s')]);
+    }
+
+    public function resetReminder()
+    {
+        $this->updateAttributes(['reminder_sent_at' => null]);
     }
 
     public function sendAffectedAppointmentsEvent($appointments)
