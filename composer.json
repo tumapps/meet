@@ -28,7 +28,8 @@
         "ratchet/pawl": "^0.4.1",
         "textalk/websocket": "^1.5",
         "php-amqplib/php-amqplib": "^3.7",
-        "yiisoft/yii2-queue": "^2.3"
+        "yiisoft/yii2-queue": "^2.3",
+        "yiisoft/yii2-redis": "~2.0.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

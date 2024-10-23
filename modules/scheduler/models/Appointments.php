@@ -29,8 +29,8 @@ use helpers\EventHandler;
 class Appointments extends BaseModel
 {
     const STATUS_MISSED = 9;
-    const STATUS_ATTENDED = 10;
-    const STATUS_ACTIVE = 1;
+    const STATUS_ATTENDED = 6;
+    const STATUS_ACTIVE = 10;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
@@ -98,9 +98,9 @@ class Appointments extends BaseModel
             'subject',
             'appointment_type',
             'status',
-            // 'recordStatus' => function(){
-            //     return $this->recordStatus;
-            // },
+            'recordStatus' => function(){
+                return $this->recordStatus;
+            },
             'created_at',
             'updated_at',
             ]
@@ -371,7 +371,7 @@ class Appointments extends BaseModel
         return $appointments;
     }
 
-    public function sendAppointmentsReminderEvent($email, $time, $user_id)
+    public function sendAppointmentsReminderEvent($email, $contact_name, $date, $start_time, $end_time, $user_id)
     {
         
         $event = new Event();
@@ -381,8 +381,10 @@ class Appointments extends BaseModel
         $eventData = [
             'email' => $email,
             'subject' => $subject,
-            'time' => $time,
-            'username' => $this->getUserName($user_id)
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            'contact_name' => $contact_name,
+            'username' => $this->getUserName($user_id),
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);

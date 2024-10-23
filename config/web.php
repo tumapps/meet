@@ -44,6 +44,15 @@ $config = [
             'vhost' => $_ENV['V_HOST'],
             'logFile' => '@app/providers/bin/logs/worker.log'
         ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
+            'hostname' => 'localhost',
+            'port' => 6379,
+            'database' => 0,
+            'on afterOpen' => function($event) {
+                Yii::info('Connected to Redis', __METHOD__);
+            },
+        ],
         'request' => [
             'cookieValidationKey' => hash_hmac('sha256', md5(date('DYM')), sha1(date('myd'))),
             'parsers' => [
@@ -97,12 +106,12 @@ $config = [
             'viewPath' => '@app/mail',
             'useFileTransport' => false,
             'transport' => [
-                'scheme' => 'smtps',
-                'host' => 'smtp.gmail.com',
-                'username' => 'francisyuppie@gmail.com',
-                'password' => 'utws lgpt hsjr jdec',
-                'port' => 465,
-                'encryption' => 'tls',
+                'scheme' => $_ENV['SCHEME'],
+                'host' => $_ENV['HOST'],
+                'username' => $_ENV['USERNAME'],
+                'password' => $_ENV['PASSWORD'],
+                'port' =>$_ENV['MAIL_PORT'],
+                'encryption' => $_ENV['ENCRYPTION'],
             ],
         ],
         'log' => [
@@ -120,6 +129,14 @@ $config = [
                 //     'maxFileSize' => 1024 * 2,
                 //     'maxLogFiles' => 5,
                 // ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['mailQueue'],
+                    'logFile' => '@app/providers/bin/logs/mail_queue.log',
+                    // 'maxFileSize' => 1024 * 2,
+                    // 'maxLogFiles' => 5,
+                ],
             ],
         ],
         'db' => $wrapper->dbDriver('CORE_DB'),
@@ -142,10 +159,6 @@ $config = [
                     'extraPatterns' => $wrapper->load('routes'),
                     'tokens' =>  $wrapper->load('tokens'),
                 ],
-                // 'POST v1/auth/login' => 'auth/auth/login',
-                // 'POST v1/auth/user' => 'auth/auth/me',
-                // 'POST v1/auth/refresh' => 'auth/auth/refresh',
-                // 'GET v1/auth/default' => 'auth/default/login',
             ],
 
             

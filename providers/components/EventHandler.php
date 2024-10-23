@@ -4,35 +4,44 @@ namespace helpers;
 
 use Yii;
 use yii\base\Event;
-use helpers\traits\Mail;
+// use helpers\traits\Mail;
 use PhpAmqpLib\Message\AMQPMessage;
+use app\providers\components\MailQueueManager;
 
 class EventHandler
 {
-	use Mail;
+	// use Mail;
+	private static $mailQueue;
+
+    public function __construct()
+    {
+        self::initQueue();
+    }
+
+    private static function initQueue()
+    {
+        if (self::$mailQueue === null) {
+            self::$mailQueue = new MailQueueManager();
+        }
+    }
 
 
 	public static function handlePasswordResetRequest(Event $event)
 	{
 		$data = $event->data;
+		$queueMail = new MailQueueManager();
 		 
-		// if(self::send($data['email'], $data['subject'], $data['body'])){
-		// 	$event->handled = true;
-		// } else {
-		// 	$event->handled = false;
-		// }
 		$emailData = [
 			'email' => $data['email'],
 			'subject' => $data['subject'], 
 			'body' => $data['body']
 		];
-   	
-		if(Yii::$app->rabbitmq->enqueueEmail($emailData)){
+
+		if($queueMail->addToQueue($emailData)){
 			$event->handled = true;
 		} else {
 			$event->handled = false;
 		}
-
 	}
 
 	public static function onAppointmentCancelled(Event $event)
@@ -55,14 +64,16 @@ class EventHandler
     	]));
 
         // notify contact user
-        self::send($contactEmail, $event->data['subject'], $userBody);
+        // self::send($contactEmail, $event->data['subject'], $userBody);
+        self::addEmailToQueue($contactEmail, $event->data['subject'], $userBody);
 
         $vcBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
 	        'name' => $event->data['contact_name'],
 	        'recipientType' => 'vc', // Specify the recipient type
     	]));
 
-        self::send($bookedUserEmail, $event->data['subject'], $vcBody);
+        // self::send($bookedUserEmail, $event->data['subject'], $vcBody);
+        self::addEmailToQueue($bookedUserEmail, $event->data['subject'], $vcBody);
     }
 
     public static function onAppointmentReschedule(Event $event)
@@ -76,7 +87,8 @@ class EventHandler
     		'supportEmail' => 'example@gmail.com'
     	]);
 
-    	self::send($email, $subject, $body);
+    	// self::send($email, $subject, $body);
+    	self::addEmailToQueue($email, $subject, $body);
     }
 
     public static function onAppointmentRescheduled(Event $event)
@@ -91,7 +103,8 @@ class EventHandler
         	'endTime' => $event->data['endTime'],
         ]);
 
-        self::send($email, $subject, $body);
+        // self::send($email, $subject, $body);
+        self::addEmailToQueue($email, $subject, $body);
     }
 
     public static function onAffectedAppointments(Event $event)
@@ -103,7 +116,8 @@ class EventHandler
     		'affectedAppointments' => $event->data['appointments'],
     	]);
 
-    	self::send($email, $subject, $body);
+    	// self::send($email, $subject, $body);
+    	self::addEmailToQueue($email, $subject, $body);
     }
 
     public static function onAppointmentReminder(Event $event)
@@ -111,8 +125,32 @@ class EventHandler
     	$email = $event->data['email'];
     	$subject = $event->data['subject'];
 
-    	$body = '';
+    	$body = Yii::$app->view->render('@ui/views/emails/appointmentReminder',[
+        	'date' => $event->data['date'],
+        	'startTime' => $event->data['startTime'],
+        	'endTime' => $event->data['endTime'],
+        	'contact_name' => $event->data['contact_name'],
+        	'username' => $event->data['username'],
+        ]);
 
-    	self::send($email, $subject, $body);
+    	// self::send($email, $subject, $body);
+    	self::addEmailToQueue($email, $subject, $body);
     }
+
+    public static function addEmailToQueue($email, $subject, $body)
+	{
+		self::initQueue();
+
+	    $emailData = [
+	        'email' => $email,
+	        'subject' => $subject,
+	        'body' => $body,
+	    ];
+
+	    if (self::$mailQueue->addToQueue($emailData)) {
+	        Yii::info('Email queued successfully for: ' . $email, __METHOD__);
+	    } else {
+	        Yii::error('Failed to queue email for: ' . $email, __METHOD__);
+	    }
+	}
 }

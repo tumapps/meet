@@ -11,6 +11,8 @@ use scheduler\models\Appointments;
  */
 class AppointmentsSearch extends Appointments
 {
+    public $search;
+
     /**
      * {@inheritdoc}
      */
@@ -18,7 +20,7 @@ class AppointmentsSearch extends Appointments
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['appointment_date', 'is_deleted','start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'is_deleted','start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'search','subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -69,12 +71,13 @@ class AppointmentsSearch extends Appointments
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'contact_name', $this->contact_name])
-            ->andFilterWhere(['ilike', 'email_address', $this->email_address])
-            ->andFilterWhere(['ilike', 'mobile_number', $this->mobile_number])
-            ->andFilterWhere(['ilike', 'subject', $this->subject])
-            ->andFilterWhere(['ilike', 'appointment_type', $this->appointment_type])
-            ->andFilterWhere(['ilike', 'status', $this->status]);
+        $query->orFilterWhere(['ilike', 'contact_name', $this->search])
+            ->orFilterWhere(['ilike', 'email_address', $this->search])
+            ->orFilterWhere(['ilike', 'mobile_number', $this->search])
+            ->orFilterWhere(['ilike', 'subject', $this->search])
+            ->orFilterWhere(['ilike', 'appointment_type', $this->search])
+            ->orFilterWhere(['ilike', 'description', $this->search]);
+            // ->orFilterWhere(['ilike', 'status', $this->search]);
 
         return $dataProvider;
     }

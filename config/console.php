@@ -26,6 +26,9 @@ $config = [
         'email-worker' => [
             'class' => 'cmd\controllers\EmailWorkerController',
         ],
+        'mail-queue' => [
+            'class' => 'cmd\controllers\MailQueueController',
+        ],
         'test-rabbitmq' => [
             'class' => 'cmd\controllers\TestRabbitmqController',
         ],
@@ -46,6 +49,28 @@ $config = [
             'password' => 'toor',
             'vhost' => '/yii_vhost',
             'logFile' => '@app/providers/bin/logs/worker.log'
+        ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
+            'hostname' => 'localhost',
+            'port' => 6379,
+            'database' => 0,
+            'on afterOpen' => function($event) {
+                Yii::info('Connected to Redis', __METHOD__);
+            },
+        ],
+        'mailer' => [
+            'class' => \yii\symfonymailer\Mailer::class,
+            'viewPath' => '@app/mail',
+            'useFileTransport' => false,
+            'transport' => [
+                'scheme' => $_ENV['SCHEME'],
+                'host' => $_ENV['HOST'],
+                'username' => $_ENV['USERNAME'],
+                'password' => $_ENV['PASSWORD'],
+                'port' =>$_ENV['MAIL_PORT'],
+                'encryption' => $_ENV['ENCRYPTION'],
+            ],
         ],
         'log' => [
             'targets' => [

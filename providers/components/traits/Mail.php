@@ -2,6 +2,7 @@
 
 namespace helpers\traits;
 
+use  Yii;
 
 trait Mail
 {
@@ -12,9 +13,9 @@ trait Mail
      */
     public static function send($email, $subject, $body)
     {
-        $message = \Yii::$app->mailer->compose()
+        $message = Yii::$app->mailer->compose()
             ->setTo($email)
-            ->setFrom([\Yii::$app->params['adminEmail']])
+            ->setFrom([Yii::$app->params['adminEmail']])
             ->setSubject($subject)
             ->setHtmlBody($body);
 

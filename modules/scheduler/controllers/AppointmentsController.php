@@ -62,7 +62,7 @@ class AppointmentsController extends \helpers\ApiController{
         // Add statusLabel to each appointment
         foreach ($appointments as &$appointment) {
             $appointmentData = $appointment->toArray();
-            $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
+            // $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
             $appointment = $appointmentData;
         }
@@ -108,12 +108,6 @@ class AppointmentsController extends \helpers\ApiController{
 
     public function actionCheckin($id)
     {
-        // $id = Yii::$app->request->getBodyParam('id');
-
-        if(empty($id)) {
-            return $this->errorResponse(['message' => 'Appoitment id is required']);
-        }
-
         // Call the model method to toggle the checked_in status
         // $isToggled = Appointments::toggleCheckedInAppointment($id);
 
@@ -287,14 +281,10 @@ class AppointmentsController extends \helpers\ApiController{
                 return $this->errorResponse(['The appointment cannot be restored because the time slot is no longer available.']);
             }
             $model->restore();
-            $model->status = Appointments::STATUS_ACTIVE;
-            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
-            $model->status = Appointments::STATUS_DELETED;
-            $model->save(false);
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors()); 

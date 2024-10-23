@@ -33,11 +33,18 @@ class AppointmentController extends Controller
      {
         // $date = date('Y-m-d H:1:s');
      	$reminders = Appointments::getUpcomingAppointmentsForReminder();
+        $appointment = new Appointments();
 
      	if(!empty($reminders)) {
      		foreach($reminders as $reminder){
      			Console::output($reminder->start_time);
-                // new Appointments()->sendAppointmentsReminderEvent($reminder->email_address, $reminder->start_time, $reminder->user_id);
+                $appointment->sendAppointmentsReminderEvent(
+                    $reminder->email_address,
+                    $reminder->contact_name, 
+                    $reminder->appointment_date, 
+                    $reminder->start_time,
+                    $reminder->end_time, 
+                    $reminder->user_id);
      		}
      	} else {
      		// $this->stdout('No reminders ');
