@@ -48,6 +48,7 @@ class Appointments extends BaseModel
     const EVENT_APPOINTMENT_RESCHEDULED = 'appointmentRescheduled';
     const EVENT_AFFECTED_APPOINTMENTS = 'affectedAppointments';
     const EVENT_APPOINTMENT_REMINDER = 'appointmentReminder';
+    const EVENT_APPOINTMENT_CREATED = 'appointmentCreated';
 
 
 
@@ -283,6 +284,26 @@ class Appointments extends BaseModel
         ];
         $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
+    }
+
+    public function sendAppointmentCreatedEvent($email, $name, $user_id, $date, $startTime, $endTime){
+
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Created';
+
+        $eventData = [
+            'email' => $email,
+            'subject' => $subject,
+            'contact_name' => $name,
+            'date' => $date,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'username' => $this->getUserName($user_id)
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_CREATED, [EventHandler::class, 'onCreatedAppointment'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_CREATED, $event);
     }
 
     public function sendAppointmentRescheduleEvent($email, $name, $bookedUserId)
