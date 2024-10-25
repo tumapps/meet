@@ -292,6 +292,9 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $subject = 'Appointment Created';
 
+        $user = User::findOne($user_id);
+        $bookedUserEmail = $user->profile->email_address;
+
         $eventData = [
             'email' => $email,
             'subject' => $subject,
@@ -299,7 +302,8 @@ class Appointments extends BaseModel
             'date' => $date,
             'start_time' => $startTime,
             'end_time' => $endTime,
-            'username' => $this->getUserName($user_id)
+            'username' => $this->getUserName($user_id),
+            'user_email' => $bookedUserEmail,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_CREATED, [EventHandler::class, 'onCreatedAppointment'], $eventData);

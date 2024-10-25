@@ -48,16 +48,27 @@ class EventHandler
 	{
 		$email = $event->data['email'];
     	$subject = $event->data['subject'];
+    	$bookedUserEmail = $event->data['user_email'];
 
-    	$body = Yii::$app->view->render('@ui/views/emails/appointmentCreated', [
-    		'contact_name' => $event->data['contact_name'],
+    	$commonData = [
     		'date' => $event->data['date'],
     		'startTime' => $event->data['start_time'],
     		'endTime' => $event->data['end_time'],
     		'username' => $event->data['username'],
-    	]);
+    		'contact_name' => $event->data['contact_name'],
+    	];
 
-    	self::addEmailToQueue($email, $subject, $body);
+    	$userEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
+	        'recipientType' => 'user',
+    	]));
+
+    	self::addEmailToQueue($email, $subject, $userEmailBody);
+
+    	$vcEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
+	        'recipientType' => 'vc',
+    	]));
+
+    	self::addEmailToQueue($bookedUserEmail, $subject, $vcEmailBody);
 	}
 
 	public static function onAppointmentCancelled(Event $event)

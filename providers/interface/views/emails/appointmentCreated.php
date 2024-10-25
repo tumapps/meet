@@ -83,12 +83,18 @@
             <h2>Appointment Created</h2>
         </div>
         <div class="email-body">
-            <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
-            <p>An appointment has been successfully created for you with <?= htmlspecialchars($username) ?>. Below are the appointment details:</p>
+            <?php if ($recipientType === 'user'): ?>
+                <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
+                <p>An appointment has been successfully created for you with <?= htmlspecialchars($username) ?>. Below are the appointment details:</p>
+            <?php elseif ($recipientType === 'vc'): ?>
+                <p>Dear <?= htmlspecialchars($username) ?>,</p>
+                <p>A new appointment has been booked with you by <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
+            <?php endif; ?>
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
-                <p><strong>With:</strong> <?= htmlspecialchars($username) ?></p>
+                <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'user' ? $username : $contact_name) ?></p>
+
             </div>
         </div>
         <div class="contact-info">
