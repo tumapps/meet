@@ -65,9 +65,27 @@ class m240808_213712_create_scheduler_tables extends Migration
 
         // $this->createTable('{{%spaces}}', [
         //     'id' => $this->primaryKey(),
+        //     'name' => $this->string()->notNull()->unique(),
+        //     'location' => $this->string()->null(),
+        //     'description' => $this->text()->null(),
         //     'is_deleted' => $this->integer()->defaultValue(0),
         //     'created_at' => $this->integer()->notNull(),
         //     'updated_at' => $this->integer()->notNull(),
+        // ], $tableOptions);
+
+
+        // $this->createTable('{{%space_availability}}', [
+        //     'id' => $this->primaryKey(),
+        //     'space_id' => $this->integer()->notNull(),
+        //     'date' => $this->date()->notNull(),
+        //     'start_time' => $this->time()->notNull(),
+        //     'end_time' => $this->time()->notNull(),
+        //     'is_available' => $this->boolean()->defaultValue(true),
+        //     'is_deleted' => $this->integer()->defaultValue(0),
+        //     'created_at' => $this->integer()->notNull(),
+        //     'updated_at' => $this->integer()->notNull(),
+        //     'FOREIGN KEY ([[space_id]]) REFERENCES {{%spaces}} ([[space_id]])' .
+        //         $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         // ], $tableOptions);
 
     }
@@ -77,6 +95,7 @@ class m240808_213712_create_scheduler_tables extends Migration
      */
     public function safeDown()
     {   
+        // $this->dropTable('{{%space_availability}}');
         // $this->dropTable('{{%spaces}}');
         $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
         $this->dropTable('{{%appointments}}');
