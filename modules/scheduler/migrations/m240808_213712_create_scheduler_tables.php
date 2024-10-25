@@ -63,6 +63,13 @@ class m240808_213712_create_scheduler_tables extends Migration
             'created_at'
         );
 
+        // $this->createTable('{{%spaces}}', [
+        //     'id' => $this->primaryKey(),
+        //     'is_deleted' => $this->integer()->defaultValue(0),
+        //     'created_at' => $this->integer()->notNull(),
+        //     'updated_at' => $this->integer()->notNull(),
+        // ], $tableOptions);
+
     }
 
     /**
@@ -70,6 +77,7 @@ class m240808_213712_create_scheduler_tables extends Migration
      */
     public function safeDown()
     {   
+        // $this->dropTable('{{%spaces}}');
         $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
         $this->dropTable('{{%appointments}}');
         $this->dropTable('{{%unavailable_slots}}');

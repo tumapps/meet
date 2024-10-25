@@ -65,7 +65,6 @@ class Appointments extends BaseModel
 
     const SCENARIO_CANCEL = 'cancel';
     
-    // public $cancellation_reason;
 
     public function init()
     {
@@ -128,6 +127,7 @@ class Appointments extends BaseModel
             ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 13 digits.'],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
+            
             // applied only when cancelling appointments
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
