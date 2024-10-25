@@ -46,9 +46,9 @@ $config = [
         ],
         'redis' => [
             'class' => 'yii\redis\Connection',
-            'hostname' => 'localhost',
-            'port' => 6379,
-            'database' => 0,
+            'hostname' => $_ENV['HOST_NAME'],
+            'port' => $_ENV['REDIS_PORT'],
+            'database' => $_ENV['DATABASE'],
             'on afterOpen' => function($event) {
                 Yii::info('Connected to Redis', __METHOD__);
             },
