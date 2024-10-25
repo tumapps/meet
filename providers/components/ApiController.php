@@ -39,37 +39,46 @@ class ApiController extends \yii\rest\Controller
     /**
      * error response
      */
-    public function errorResponse($errors,$acidErrors=false,$message=false)
+    public function errorResponse($errors, $acidErrors = false, $message = false)
     {
         Yii::$app->response->statusCode = 422;
-        foreach($errors as $key=>$value){
-            $errors[$key]=$value[0];
+
+        // Convert string error message to an array if necessary
+        if (is_string($errors)) {
+            $errors = ['error' => $errors];
+        } elseif (is_array($errors)) {
+            foreach ($errors as $key => $value) {
+                $errors[$key] = $value[0];
+            }
         }
-        if(is_array($acidErrors)){
-            foreach($acidErrors['acidErrorModel'] as $key=>$value){
-                foreach($value->getErrors() as $k=>$value){
+
+        if (is_array($acidErrors)) {
+            foreach ($acidErrors['acidErrorModel'] as $key => $value) {
+                foreach ($value->getErrors() as $k => $value) {
                     $error[$acidErrors['errorKey']][$key][$k] = $value[0];
                 }
             }
         }
-        if(isset($error)){
-            $errors = array_merge($errors,$error);
+        
+        if (isset($error)) {
+            $errors = array_merge($errors, $error);
         }
         
-        $array['errorPayload']['errors']=$errors;
+        $array['errorPayload']['errors'] = $errors;
 
-        if($message){
+        if ($message) {
             $array['errorPayload'] = array_merge($array['errorPayload']['errors'], $this->toastResponse(
                 [
-                    'statusCode'=>422,
-                    'message'=>$message ? $message : 'Some data could not be validated',
-                    'theme'=>'danger'
+                    'statusCode' => 422,
+                    'message' => $message ? $message : 'Some data could not be validated',
+                    'theme' => 'danger'
                 ]
             )['toastPayload']);
-
         }
+
         return $array;
     }
+
     /**
      * payload response
      */
