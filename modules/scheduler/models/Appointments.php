@@ -118,7 +118,7 @@ class Appointments extends BaseModel
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
-            ['appointment_date', 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '>=', 'type' => 'date', 'message' => 'The date must not be in the past'],
+            ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
             [['subject','description'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
@@ -383,33 +383,33 @@ class Appointments extends BaseModel
 
     public static function getUpcomingAppointmentsForReminder()
     {
-        // $currentTime = date('H:i:s');
+        // Get the current time
         $currentTime = new \DateTime();
-        $reminderTime = date('H:i:s', strtotime('+30 minutes'));
+        $reminderTime = (clone $currentTime)->modify('+30 minutes');
 
         $appointments = self::find()
             ->where(['=', 'appointment_date', date('Y-m-d')])
             // ->andWhere(['>=', 'start_time', $currentTime])
             // ->andWhere(['<=', 'start_time', $reminderTime])
             ->andWhere(['status' => self::STATUS_ACTIVE])
+            ->andWhere(['reminder_sent_at' => null])
             ->all();
+
         $upcomingAppointments = [];
 
         foreach ($appointments as $appointment) {
             $appointmentStartTime = new \DateTime($appointment->start_time);
-            
-            $timeDifference = $appointmentStartTime->diff($currentTime)->i + ($appointmentStartTime->diff($currentTime)->h * 60);
 
-            if ($timeDifference === 30) {
+            // Check if the start time is between the current time and 30 minutes from now
+            if ($appointmentStartTime > $currentTime && $appointmentStartTime <= $reminderTime) {
                 $upcomingAppointments[] = $appointment;
             }
         }
 
-        // return $appointments;
         return $upcomingAppointments;
     }
 
-    public function sendAppointmentsReminderEvent($email, $contact_name, $date, $start_time, $end_time, $user_id)
+    public function sendAppointmentsReminderEvent($id, $email, $contact_name, $date, $start_time, $end_time, $user_id)
     {
         
         $event = new Event();
@@ -424,17 +424,28 @@ class Appointments extends BaseModel
             'endTime' => $end_time,
             'contact_name' => $contact_name,
             'username' => $this->getUserName($user_id),
+            'appointment_id' => $id,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event);
 
-        // $this->updateAttributes(['reminder_sent_at' => date('Y-m-d H:i:s')]);
     }
 
     public function resetReminder()
     {
         $this->updateAttributes(['reminder_sent_at' => null]);
+    }
+
+    public static function updateReminder($id)
+    {
+        $appointment = self::findOne($id);
+        if ($appointment) {
+            $appointment->updateAttributes(['reminder_sent_at' => date('Y-m-d H:i:s')]);
+            Yii::info("Updated reminder_sent_at for appointment ID: {$id}", __METHOD__);
+        } else {
+            Yii::warning("Appointment not found for ID: {$id}", __METHOD__);
+        }
     }
 
     public function sendAffectedAppointmentsEvent($appointments)
