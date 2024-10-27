@@ -5,6 +5,7 @@ namespace app\providers\components;
 use Yii;
 use yii\base\Component;
 use helpers\traits\Mail;
+use scheduler\models\Appointments;
 
 class MailQueueManager extends Component
 {
@@ -41,9 +42,17 @@ class MailQueueManager extends Component
 	        $email = $emailData['email'];
 	        $subject = $emailData['subject'];
 	        $body = $emailData['body'];
+
+
+	        $type = $emailData['type']; // Retrieve the type of the email event 
 	        
+	        $date = date('Y-m-d H:i:s');
+
 	        if (self::send($email, $subject, $body)) {
-	            echo "Email sent to {$email}\n";
+	        	if($type !== null && $type === 'reminder') {
+	        		Appointments::updateReminder($emailData['id']);
+	        	}
+	            echo "Email sent to {$email} at: {$date}\n";
 	            $this->logEmailStatus($email, true);
 	        } else {
 	            echo "Failed to send email to {$email}\n";
