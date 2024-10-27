@@ -42,6 +42,7 @@ class Settings extends BaseModel
             'slot_duration',
             'booking_window',
             'advanced_booking',
+            'reminder_time',
             'created_at',
             'updated_at',
             ]
@@ -59,6 +60,7 @@ class Settings extends BaseModel
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
+             [['user_id'], 'validateSingleSetting'],
         ];
     }
 
@@ -69,7 +71,22 @@ class Settings extends BaseModel
         }
     }
 
-    
+    public function validateSingleSetting($attribute, $params)
+    {
+        if ($this->isNewRecord) {
+            // Check if a setting already exists for this user_id
+            $existingSetting = self::find()
+                ->where(['user_id' => $this->user_id])
+                ->one();
+
+            if ($existingSetting) {
+                $this->addError($attribute, 'A setting already exists for this user.');
+            }
+        }
+    }
+
+
+
 
     /**
      * {@inheritdoc}
@@ -84,6 +101,7 @@ class Settings extends BaseModel
             'slot_duration' => 'Slot Duration',
             'advanced_booking' => 'Advance Booking',
             'booking_window' => 'Booking Window',
+            'reminder_time' => 'Reminder Duration',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
