@@ -19,9 +19,10 @@ class m240808_210420_default_setting_presets extends Migration
             'user_id' => $this->bigInteger(),
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
-            'slot_duration' => $this->integer()->notNull()->defaultValue(30),
-            'booking_window' => $this->integer()->notNull()->defaultValue(12),
-            'advanced_booking' => $this->integer()->notNull()->defaultValue(1),
+            'slot_duration' => $this->integer()->notNull()->defaultValue(30), // minutes
+            'booking_window' => $this->integer()->notNull()->defaultValue(12), // months
+            'advanced_booking' => $this->integer()->notNull()->defaultValue(30), // minutes
+            'reminder_time' => $this->integer()->notNull()->defaultValue(30), // minutes
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
             'is_deleted' => $this->boolean()->defaultValue(false),
