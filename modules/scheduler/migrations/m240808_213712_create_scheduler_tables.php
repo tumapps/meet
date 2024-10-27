@@ -50,6 +50,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'checked_in' => $this->boolean()->defaultValue(false),
             // 'is_deleted' => $this->boolean()->defaultValue(false),
             'is_deleted' => $this->integer()->defaultValue(0),
+            'reminder_sent_at' => $this->integer()->null()->defaultValue(null),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
