@@ -151,6 +151,8 @@ class EventHandler
     {
     	$email = $event->data['email'];
     	$subject = $event->data['subject'];
+    	// getting the appoiment id to update the reminder_sent_at when the reminder is sent
+    	$id = $event->data['appointment_id']; 
 
     	$body = Yii::$app->view->render('@ui/views/emails/appointmentReminder',[
         	'date' => $event->data['date'],
@@ -161,10 +163,10 @@ class EventHandler
         ]);
 
     	// self::send($email, $subject, $body);
-    	self::addEmailToQueue($email, $subject, $body);
+    	self::addEmailToQueue($email, $subject, $body, 'reminder', $id);
     }
 
-    public static function addEmailToQueue($email, $subject, $body)
+    public static function addEmailToQueue($email, $subject, $body, $type = null, $id = null)
 	{
 		self::initQueue();
 
@@ -172,6 +174,8 @@ class EventHandler
 	        'email' => $email,
 	        'subject' => $subject,
 	        'body' => $body,
+	        'type' => $type,
+	        'id' => $id
 	    ];
 
 	    if (self::$mailQueue->addToQueue($emailData)) {
