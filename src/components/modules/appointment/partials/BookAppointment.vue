@@ -25,6 +25,10 @@ const errors = ref({
     description: ''
 });
 
+const props = defineProps({
+    selectedDate: String
+});
+
 const timeSlots = ref([]);
 const apiResponse = ref([]);
 const selectedDate = ref(null);
@@ -40,6 +44,7 @@ const config = {
 const today = ref(new Date().toLocaleDateString());
 // console.log(today.value)
 const selectedUser_id = ref(null); // To store the corresponding user_id
+const selectedPriority = ref(null); // To store the corresponding priority
 
 //get user id from session storage
 userId.value = authStore.getUserId();
@@ -62,7 +67,8 @@ const appointmentData = ref({
     mobile_number: "",
     subject: "",
     description: "",
-    appointment_type: ""
+    appointment_type: "",
+    priority: "",
 });
 //handle date change 
 const handleDateChange = (newValue, oldValue) => {
@@ -74,6 +80,7 @@ const handleDateChange = (newValue, oldValue) => {
 
 //watcher for date change
 watch(selectedDate, (newValue, oldValue) => {
+    // console.log("new date??", newValue)
 
     handleDateChange(newValue, oldValue);
 });
@@ -93,7 +100,7 @@ const handleSelectedSlotsTimes = (selectedTimes) => {
 const getSlots = async () => {
     try {
         const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
-        console.log("user_id", userId.value)
+        // console.log("user_id", userId.value)
         // Update the `apiResponse` ref with the response data
         apiResponse.value = response.data.dataPayload.data.slots;
         // Set all slots to `selected: false`
@@ -120,8 +127,6 @@ const submitAppointment = async () => {
     errors.value = {};
     try {
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
-
-
         proxy.$showAlert({
             title: 'Success',
             text: 'Appointment booked successfully',
@@ -155,6 +160,7 @@ const getAppointmentType = async () => {
 
 
 const UsersOptions = ref([]);
+const PriorityOptions = ref([]);
 const selectedUsername = ref(''); // To hold the selected username
 
 const getusers_booked = async () => {
@@ -171,12 +177,30 @@ const getusers_booked = async () => {
     }
 };
 
+const getPriority = async () => {
+    try {
+        const response = await axiosInstance.get('/v1/scheduler/priorities');
+        PriorityOptions.value = response.data.dataPayload.data;
+        // console.log("Priority data:", PriorityOptions.value);
+    } catch (error) {
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: 'Oops! An error has occurred',
+            icon: 'error',
+        });
+    }
+};
+
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
     const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
     selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
     userId.value = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+});
 
+watch(selectedPriority, (newPriority) => {
+    const selectedPriority = PriorityOptions.value.find(priority => priority.code === newPriority);
+    appointmentData.value.priority = selectedPriority ? selectedPriority.code : null;
 });
 
 
@@ -190,6 +214,7 @@ onMounted(() => {
     getAppointmentType();
     getAppointmentType();
     getusers_booked();
+    getPriority();
 });
 
 </script>
@@ -257,11 +282,32 @@ onMounted(() => {
                             </b-col>
                         </b-row>
 
-                        <b-row class="g-3 align-items-center form-group">
-                            <b-col cols="2">
+
+                        <b-row class="align-items-center form-group">
+                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <label for="addappointmenttype" class="col-form-label">
+                                    Priority
+                                </label>
+                            </b-col>
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <!-- Bind the select dropdown to selectedPriority -->
+                                <select v-model="selectedPriority" name="priority" class="form-select"
+                                    id="addappointmenttype">
+                                    <option value="">Select Priority</option>
+                                    <option v-for="priority in PriorityOptions" :key="priority.code"
+                                        :value="priority.code">
+                                        {{ priority.label }}
+                                    </option>
+                                </select>
+                                <div v-if="errors.priority" class="error" aria-live="polite">
+                                    {{ errors.priority }}
+                                </div>
+                            </b-col>
+
+                            <b-col cols="2" lg="1" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <label for="addsubject" class="col-form-label">RE:</label>
                             </b-col>
-                            <b-col cols="10">
+                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <input type="text" id="addsubject" v-model="appointmentData.subject"
                                     class="form-control" placeholder="what the meeting is about" />
                                 <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
@@ -288,7 +334,7 @@ onMounted(() => {
                                 <select v-model="appointmentData.appointment_type" name="service" class="form-select"
                                     id="addappointmenttype">
                                     <!-- Default placeholder option -->
-                                    <option value="">Meeting Type</option>
+                                    <option value="">Appointment Type</option>
                                     <!-- Dynamically populated options from API -->
                                     <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
                                         {{ type }}

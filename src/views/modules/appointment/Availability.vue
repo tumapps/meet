@@ -9,6 +9,7 @@ const authStore = useAuthStore();
 // Modal reference
 const newAvailability = ref(null);
 const updateAvailability = ref(null);
+const toastPayload = ref({});
 
 //get user id from session storage
 
@@ -117,13 +118,13 @@ const confirmCancel = (id) => {
 
     proxy.$showAlert({
         title: 'Are you sure?',
-        text: 'You are about to cancel this entry. Do you want to proceed?',
+        text: 'You are about to DELETE this entry. Do you want to proceed?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it!',
+        confirmButtonText: 'Yes, DELETE it!',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#097B3E',
     }).then((result) => {
         if (result.isConfirmed) {
             cancelAvailability(id);
@@ -135,10 +136,26 @@ const confirmCancel = (id) => {
 const cancelAvailability = async (id) => {
     try {
         const response = await axiosInstance.delete(`v1/scheduler/availability/${id}`);
-        proxy.$showToast({
-            title: 'Appointment cancelled',
-            icon: 'success',
-        });
+        // proxy.$showToast({
+        //     title: 'Appointment cancelled',
+        //     icon: 'success',
+        // });
+
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'operation successful',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'operation successful',
+                icon: 'success',
+            });
+        }
         getAvailabilities(1);
     } catch (error) {
         // console.error(error);
@@ -196,57 +213,91 @@ const sortedData = computed(() => {
 // Function to save settings (add API or local storage logic here)
 const saveAvailability = async () => {
     try {
+        // Make the API call to save availability details
         const response = await axiosInstance.post('v1/scheduler/availability', availabilityDetails.value);
 
-        proxy.$showToast({
-            title: 'Updated',
-            text: 'settings updated successfully!',
-            icon: 'success',
-        });
-
-        getAvailabilities(1);
-    } catch (error) {
-// check for errorPayload in response
-        if (error.response.data.errorPayload) {
-            errors.value = error.response.data.errorPayload.errors;
-            // console.log(errors.value);
-        } else {
+        // Display success notification using proxy
+        // proxy.$showToast({
+        //     title: 'Updated',
+        //     text: 'Settings updated successfully!',
+        //     icon: 'success',
+        // });
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // Show toast notification using the response data
             proxy.$showToast({
-                title: 'Failed',
-                text: 'an error occurred',
-                icon: 'error',
+                title: toastPayload.value.toastMessage || 'created successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Created successfully',
+                icon: 'success',
             });
         }
 
+        
+
+        // Refresh availabilities
+        getAvailabilities(1);
+    } catch (error) {
+        // Safely handle the error response and check for errorPayload
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            // Display error notification if something went wrong
+            proxy.$showToast({
+                title: 'Failed',
+                text: 'An error occurred',
+                icon: 'error',
+            });
+        }
     }
-}
+};
+
 
 const updateAvailabilityDetails = async () => {
     try {
-        const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value)
-        // console.log(response);
+    // console.log(availabilityDetails.value);
 
+        // Make the API call to update availability details
+        const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value);
 
-        proxy.$showToast({
-            title: 'success',
-            text: 'updated successfully',
-            icon: 'success'
-        })
-    } catch (error) {
-        // check for errorPayload in response
-        if (error.response.data.errorPayload) {
-            errors.value = error.response.data.errorPayload.errors;
-            // console.log(errors.value);
-        } else {
+        // Show success toast notification
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // Show toast notification using the response data
             proxy.$showToast({
-            title: 'Failed',
-            text: 'failed to update your settings',
-            icon: 'error',
-        });
+                title: toastPayload.value.toastMessage || 'Updated successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Updated successfully',
+                icon: 'success',
+            });
         }
-
+    } catch (error) {
+        // Check if error.response exists to avoid TypeError
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            // Handle other errors (e.g., network issues)
+            proxy.$showToast({
+                title: 'Failed',
+                text: 'Failed to update your settings.',
+                icon: 'error',
+            });
+        }
     }
-}
+};
+
 </script>
 
 <template>
@@ -270,7 +321,6 @@ const updateAvailabilityDetails = async () => {
                     <div class="d-flex justify-content-between">
                         <!-- Pagination Controls -->
                         <div class="d-flex align-items-center">
-                            <label for="itemsPerPage" class="me-2">Items per page:</label>
                             <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
                                 class="form-select form-select-sm">
                                 <option v-for="option in perPageOptions" :key="option" :value="option">{{ option }}
@@ -314,11 +364,11 @@ const updateAvailabilityDetails = async () => {
                                 <td>
                                     <button type="button" class="btn btn-outline-primary btn-sm me-3"
                                         @click="openModal(item.id)">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-edit" title="edit entry"></i>
                                     </button>
-                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
                                         @click="confirmCancel(item.id)">
-                                        <i class="fas fa-cancel"></i>
+                                        <i class="fas fa-trash" title="delete entry"></i>
                                     </button>
                                 </td>
                             </tr>

@@ -1,16 +1,17 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js';
+import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue';
 
 const authStore = useAuthStore();
 const axiosInstance = AxiosInstance();
 // Reactive variables
-const events = ref([])  
+const events = ref([])
 const selectedEvent = ref({})
 const isModalOpen = ref(false)
 const today = new Date().toISOString().split('T')[0];
@@ -20,32 +21,15 @@ const CBB = ref('');
 CBB.value = authStore.getCanBeBooked();
 const userId = ref('');
 
-const selectedUser_id = ref(null); // To store the corresponding user_id
 
+const appointmentModal = ref(null);
 
-const UsersOptions = ref([]);
-const selectedUsername = ref(''); // To hold the selected username
-
-const getusers_booked = async () => {
-    try {
-        const response = await axiosInstance.get('/v1/auth/users');
-        UsersOptions.value = response.data.dataPayload.data.profiles;
-        // console.log("Users data:", UsersOptions.value);
-    } catch (error) {
-        proxy.$showToast({
-            title: 'An error occurred',
-            text: 'Oops! An error has occurred',
-            icon: 'error',
-        });
-    }
+//modal
+const showModal = () => {
+    appointmentModal.value.$refs.appointmentModal.show();
 };
+const selectedDate = ref('');
 
-watch(selectedUsername, (newUsername) => {
-    const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
-    selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
-    userId.value = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
-
-});
 
 // Function to handle date click
 function handleDateClick(info) {
@@ -53,7 +37,15 @@ function handleDateClick(info) {
   if (clickedDate < today) {
     alert('You cannot select a past date.')
   } else {
-    alert(`Date clicked: ${clickedDate}`)
+    //show booking modal
+    //pass clicked date to selecedDate
+    selectedDate.value = clickedDate;
+    // console.log("Selected date:", selectedDate.value);
+    // console.log(typeof(selectedDate.value));
+    //pass the selected date to the modal
+
+    showModal()
+
   }
 }
 
@@ -71,7 +63,6 @@ function handleEventClick(info) {
   }
   isModalOpen.value = true
 }
-
 // Fetch events from API
 // Fetch events from API
 async function fetchEvents() {
@@ -79,20 +70,40 @@ async function fetchEvents() {
     const response = await axiosInstance.get('/v1/scheduler/appointments')
     const apiData = response.data.dataPayload.data
     events.value = apiData.map((item) => {
+
+      let backgroundColor;
+
+      // Determine the background color based on the statusLabel
+      switch (item.recordStatus.label) {
+        case 'ACTIVE':
+          backgroundColor = 'green';  // Active is red
+          break;
+        case 'CANCELLED':
+          backgroundColor = 'orange'; // Cancelled is green
+          break;
+
+        case 'DELETED':
+          backgroundColor = '#dc3545'; // Different shade of red for deleted
+          break;
+          
+        default:
+          backgroundColor = 'gray'; // Default color if no match
+      }
+
       return {
         title: item.subject,
         start: `${item.appointment_date}T${item.start_time}`,
         end: `${item.appointment_date}T${item.end_time}`,
+        backgroundColor: backgroundColor,
         extendedProps: {
           start_time: item.start_time,
           end_time: item.end_time,
           description: item.description,
           contact_name: item.contact_name,
-          status: item.statusLabel
+          status: item.recordStatus.label
         }
       }
     })
-    // console.log("Events fetched:", events.value)  // Log events after fetch
   } catch (error) {
     console.error('Error fetching events:', error)
   }
@@ -111,29 +122,48 @@ function handleDayCellClassNames(arg) {
 // FullCalendar options
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'dayGridMonth',
+  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth',
+  height: 'auto',
   weekends: true,
+  dayMaxEvents: 3,
+  slotMinTime: '08:00:00', // Start time of the day view
+  slotMaxTime: '18:00:00', // End time of the day view
+  dateClick: handleDateClick,
+  eventClick: handleEventClick,
+  dayCellClassNames: handleDayCellClassNames,
+  // dayHeaderFormat: window.innerWidth < 768 ? { weekday : 'narrow' } : { weekday: 'short', month: 'numeric', day: 'numeric' },
+  views: {
+    timeGridWeek: {
+      dayHeaderFormat: { weekday: 'narrow' } // Narrow format only for timeGridWeek
+    }
+  },
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
     right: 'dayGridMonth,timeGridWeek,timeGridDay'
   },
-  dateClick: handleDateClick,
-  eventClick: handleEventClick,
-  dayCellClassNames: handleDayCellClassNames,
+
   eventClassNames: (event) => {
     return event.extendedProps?.status === 'Active' ? 'event-active' : 'event-cancelled'
-  }
-})
+  },
 
-watch(events, (newEvents) => {
-  calendarOptions.value.events = [...newEvents]
-  // console.log("Updated calendar options:", calendarOptions.value)
+  windowResize: function (view) {
+    // Switch to a simpler view for small screens
+    if (window.innerWidth < 768) {
+      calendarOptions.value.initialView = 'timeGridDay';
+      calendarOptions.value.height = 'auto';
+      calendarOptions.value.dayMaxEvents = 2;
+    } else {
+      calendarOptions.value.initialView = 'dayGridMonth';
+      calendarOptions.value.height = 650;
+    }
+  },
 })
 
 // Watch for changes in events and update the calendar
 watch(events, (newEvents) => {
   // console.log("Events updated:", newEvents)  // Log the updated events
+  calendarOptions.value.events = [...newEvents]
 
   const calendarApi = calendarOptions.value?.getApi?.()
   if (calendarApi) {
@@ -144,10 +174,9 @@ watch(events, (newEvents) => {
     })
 
     // Force the calendar to re-render (update the size)
-    calendarApi.updateSize()  
+    calendarApi.updateSize()
   }
 })
-
 
 // Load events when the component is mounted
 onMounted(() => {
@@ -156,40 +185,15 @@ onMounted(() => {
   // Log FullCalendar API on mount
   setTimeout(() => {
     const calendarApi = calendarOptions.value?.getApi?.()
-    // console.log("FullCalendar API:", calendarApi)
   }, 1000)  // Add a short delay to ensure the calendar is initialized
 
-  getusers_booked();
-
-  console.log("CBB", CBB.value)
 })
 
 
 </script>
 <template>
-  <!-- FullCalendar Component -->
-  <b-row v-if="CBB === 0" class="align-items-center form-group">
-                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                                <label for="addappointmenttype" class="col-form-label">
-                                    <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
-                                </label>
-                            </b-col>
-                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                                <!-- Bind the select dropdown to selectedUsername -->
-                                <select v-model="selectedUsername" name="service" class="form-select"
-                                    id="addappointmenttype">
-                                    <option value="">Recipient</option>
-                                    <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
-                                        {{ user.first_name }}
-                                    </option>
-                                </select>
-                                <!-- <div v-if="errors.user_id" class="error" aria-live="polite">
-                                    {{ errors.user_id }}
-                                </div> -->
-                            </b-col>
-                        </b-row>
+  <BookAppointment ref="appointmentModal" :selectedDate="selectedDate"/>
   <FullCalendar :options="calendarOptions" class="main-cont" />
-
   <!-- Modal for event details -->
   <b-modal v-model="isModalOpen" title="Event Details" dialog-class="centered-modal">
     <p><strong>Title:</strong> {{ selectedEvent.title }}</p>
@@ -202,4 +206,14 @@ onMounted(() => {
       <b-button variant="warning" @click="isModalOpen = false">Close</b-button>
     </template>
   </b-modal>
+
+  <!-- Modal for booking -->
+  <!-- <Booking -->
 </template>
+
+<style scoped>
+.past-date {
+  background-color: #c2bcbc;
+  color: #df1010;
+}
+</style>

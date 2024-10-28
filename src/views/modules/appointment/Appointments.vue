@@ -7,8 +7,12 @@ import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlo
 import { useAuthStore } from '@/store/auth.store.js';
 
 const authStore = useAuthStore();
+
+const CBB = ref('')
+CBB.value = authStore.getCanBeBooked();
 // const globalUtils = require('@/utils/globalUtils');
 const appointmentModal = ref(null);
+const toastPayload = ref('');
 const showModal = () => {
     appointmentModal.value.$refs.appointmentModal.show();
 };
@@ -155,7 +159,7 @@ const confirmDelete = (id) => {
         confirmButtonText: 'Yes, Delete it!',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#076232',
     }).then((result) => {
         if (result.isConfirmed) {
             deleteAppointment(id);
@@ -180,7 +184,7 @@ const confirmCancel = (id) => {
         confirmButtonText: 'Yes, CANCEL it!',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#076232',
+        cancelButtonColor: '#097B3E',
         preConfirm: (inputValue) => {
             if (!inputValue) {
                 // Display error message if input is empty
@@ -197,7 +201,7 @@ const confirmCancel = (id) => {
     }).then((result) => {
         if (result.isConfirmed) {
             const reason = result.value; // Access the input value here
-            console.log('Cancellation reason:', reason); // Optional: log the reason
+            // console.log('Cancellation reason:', reason); // Optional: log the reason
             // Proceed with the cancellation using the provided reason
             cancelAppointment(id, reason);
             getAppointments(1);
@@ -205,16 +209,21 @@ const confirmCancel = (id) => {
     });
 };
 
-const cancelAppointment = async (id) => {
 
+
+const cancelAppointment = async (id, reason) => {
     try {
-        const response = await axiosInstance.put(`v1/scheduler/cancell/${id}`);
+        // console.log("reasinsnius", reason);
+        const response = await axiosInstance.put(`v1/scheduler/cancel/${id}`, { cancellation_reason: reason });
         getAppointment(id);
         getAppointments(1);
+        toastPayload.value = response.data.toastPayload;
         proxy.$showToast({
-            title: 'Appointment cancelled successfully',
+            title: toastPayload.value.toastMessage || 'Appointment Deleted successfully2',
+            // icon: toastPayload.value.toastTheme || 'success',
             icon: 'success',
-        })
+        });
+
 
     } catch (error) {
         // console.error(error);
@@ -226,15 +235,31 @@ const cancelAppointment = async (id) => {
     }
 };
 const deleteAppointment = async (id) => {
+    toastPayload.value = null;
 
     try {
         const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
         getAppointment(id);
         getAppointments(1);
-        proxy.$showToast({
-            title: 'Appointment Deleted successfully',
-            icon: 'success',
-        })
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Appointment Deleted successfully',
+                icon: 'success',
+            });
+        }
+
 
     } catch (error) {
         // console.error(error);
@@ -252,32 +277,50 @@ const deleteAppointment = async (id) => {
 const errorMessage = ref('');
 
 const restoreAppointment = async (id) => {
+    // Reset toastPayload to an empty object
+    toastPayload.value = {};
+    // console.log("restore", toastPayload.value);
 
     try {
+        // Make sure the correct HTTP method is used (assuming it's PUT for restoration)
         const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`);
+
+        // Refresh the appointments after restoring
         getAppointment(id);
         getAppointments(1);
-        proxy.$showToast({
-            title: 'Appointment Restored successfully',
-            icon: 'success',
-        })
-        errorMessage.value = error.response.data.errorPayload.errors?.message || 'An unknown error occurred';
 
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
 
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Appointment Restored successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Appointment restored successfully',
+                icon: 'success',
+            });
+        }
 
     } catch (error) {
-        // console.error(error);
+        // Optionally log the error for debugging purposes
+        console.error('Error restoring appointment:', error);
 
-        console.log("errorMessage", errorMessage);
-
+        // Show error toast notification
         proxy.$showToast({
             title: 'An error occurred',
-            text: errorMessage,
+            text: error.response?.data?.error || 'An unknown error occurred',
             icon: 'error',
         });
-
     }
 };
+
 
 const confirmRestore = (id) => {
     // console.log("id", id);
@@ -290,7 +333,7 @@ const confirmRestore = (id) => {
         confirmButtonText: 'RESTORE',
         cancelButtonText: 'No, keep it',
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        cancelButtonColor: '#076232',
     }).then((result) => {
         if (result.isConfirmed) {
             restoreAppointment(id);
@@ -332,9 +375,6 @@ const getAppointment = async (id) => {
             selectedAppointmentId.value = id;
         }
     } catch (error) {
-        // console.log(error);
-
-
         // Check if error.response is defined before accessing it
         if (error.response && error.response.data && error.response.data.enprrorPayload) {
             errorDetails.value = error.response.data.errorPayload.errors;
@@ -362,13 +402,23 @@ const updateAppointment = async () => {
 
         const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value);
 
-        if (response.data.dataPayload && !response.data.errorPayload) {
-            proxy.$showAlert({
-                title: 'Success',
-                text: 'Appointment updated successfully!',
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Appointment Updated successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
                 icon: 'success',
             });
-            getAppointment(selectedAppointmentId.value);
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Appointment Updated successfully',
+                icon: 'success',
+            });
         }
 
     } catch (error) {
@@ -398,6 +448,11 @@ const performSearch = async () => {
     }
 };
 
+const UsersOptions = ref([]);
+const selectedUsername = ref(''); // To hold the selected username
+
+
+
 
 const suggestions = ref([]);
 const suggestedDate = ref('');
@@ -417,11 +472,24 @@ const suggestSlots = async (id) => {
         timeSlots.value = suggestions.value.slots;
 
         // Show a success toast message
-        proxy.$showToast({
-            title: 'Success',
-            text: 'Slots suggested successfully!',
-            icon: 'success',
-        });
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'success',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Operation successful',
+                icon: 'success',
+            });
+        }
         //update date to suggessted date 
         appointmentDetails.value.appointment_date = suggestedDate;
 
@@ -434,6 +502,52 @@ const suggestSlots = async (id) => {
             icon: 'error',
         });
 
+    }
+};
+
+const toggleCheckIn = async (id) => {
+    try {
+        const response = await axiosInstance.put(`/v1/scheduler/checkin/${id}`);
+        getAppointment(id);
+        getAppointments(1);
+
+        // Check if toastPayload exists in the response and update it
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Appointment Checked In successfully',
+                icon: 'success',
+            });
+        }
+
+    } catch (error) {
+        // console.error(error);
+        let errorMessage = 'An error occurred';
+
+        if (error.response && error.response.data.errorPayload) {
+            // Check if errorPayload exists and has errors
+            const errors = error.response.data.errorPayload.errors;
+            if (errors && errors.message) {
+                errorMessage = errors.message; // Use specific error message
+            }
+        }
+
+        // Show toast notification for error
+        proxy.$showToast({
+            title: errorMessage, // Change title to be more indicative of an error
+            text: errorMessage, // Show specific error message
+            icon: 'error',
+        });
     }
 };
 
@@ -456,7 +570,7 @@ const suggestSlots = async (id) => {
                 <b-col lg="12" md="12" sm="12">
                     <div class="d-flex justify-content-between">
                         <div class="d-flex align-items-center">
-                            <label for="itemsPerPage" class="me-2">Items per page:</label>
+                            <!-- <label for="itemsPerPage" class="me-2">Items per page:</label> -->
                             <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage"
                                 class="form-select form-select-sm" style="width: auto;">
                                 <option v-for="option in perPageOptions" :key="option" :value="option">
@@ -464,6 +578,17 @@ const suggestSlots = async (id) => {
                                 </option>
                             </select>
                         </div>
+                        <!-- <div v-if="CBB === 0" class="mb-3">
+                            <div class="dropdown" style="float: right;"> <!-- Align to the right --
+                                <select v-model="selectedUsername" name="service" class="form-select form-select-sm"
+                                    id="addappointmenttype">
+                                    <option value="">Recipient</option>
+                                    <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
+                                        {{ user.first_name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div> -->
                         <div class="d-flex align-items-center">
                             <b-input-group>
                                 <!-- Search Input -->
@@ -496,11 +621,25 @@ const suggestSlots = async (id) => {
                                 <i class="fas fa-sort"></i>
                             </th>
                             <th @click="sortTable('start_time')">
+                                Subject
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th @click="sortTable('email_address')">
+                                Email
+                                <i class="fas fa-sort"></i>
+                            </th>
+                            <th @click="sortTable('start_time')">
                                 Time
                                 <i class="fas fa-sort"></i>
                             </th>
+                            <th v-if="CBB === 0">
+                                Recipient
+                            </th>
                             <th>
                                 Status
+                            </th>
+                            <th>
+                                Checked In
                             </th>
                             <th>
                                 Actions
@@ -513,28 +652,56 @@ const suggestSlots = async (id) => {
                                 <td>{{ item.contact_name }}</td>
                                 <td>{{ item.mobile_number }}</td>
                                 <td>{{ item.appointment_date }}</td>
+                                <td>{{ item.subject }}</td>
+                                <td>{{ item.email_address }}</td>
                                 <td>{{ item.start_time }} - {{ item.end_time }}</td>
-                                <td><span class="badge" :class="getStatusClass(item.statusLabel)">{{ item.statusLabel
+                                <td v-if="CBB === 0">{{ item.userName }}</td>
+                                <td><span :class="'badge bg-' + item.recordStatus.theme">{{ item.recordStatus.label
                                         }}</span></td>
+
                                 <td>
-                                    <button v-if="item.is_deleted !== 1 && item.status !== 4"
+                                    <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox"
+                                            id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in === 1"
+                                            @change="toggleCheckIn(item.id)" />
+                                        <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
+                                            {{ item.checked_in === 1 ? 'Checked In' : 'Check In' }}
+                                        </label>
+                                    </div>
+
+                                    <div v-if="item.recordStatus.label !== 'ACTIVE'"  class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox"
+                                            id="flexSwitchCheckDisabled" checked="" disabled="">
+                                        
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <button
+                                        v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
                                         class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
                                         <i class="fas fa-edit" title="Edit"></i>
                                     </button>
-                                    <button v-if="item.is_deleted !== 1 && item.status !== 4"
+                                    <button
+                                        v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
                                         class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)">
                                         <i class="fas fa-cancel" title="Cancel"></i>
                                     </button>
-                                    <button v-if="item.is_deleted !== 1" class="btn btn-outline-danger btn-sm me-3"
-                                        @click="confirmDelete(item.id)">
+                                    <button
+                                        v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
+                                        class="btn btn-outline-danger btn-sm me-3" @click="confirmDelete(item.id)">
                                         <i class="fas fa-trash" title="Delete"></i>
                                     </button>
-
-                                    <!-- delete -->
-                                    <button v-if="item.is_deleted === 1" class="btn btn-outline-danger btn-sm"
-                                        @click="confirmRestore(item.id)">
-                                        <i class="fas fa-undo"></i>
+                                    <button v-if="item.recordStatus.label === 'DELETED'"
+                                        class="btn btn-outline-danger btn-sm" @click="confirmRestore(item.id)">
+                                        <i class="fas fa-undo" title="Restore"></i>
                                     </button>
+                                    <button v-if="item.recordStatus.label === 'CANCELLED'"
+                                        class="btn btn-outline-exclamation-circle btn-sm">
+                                        <i class="fas fa-undo"
+                                            title="appointment has been cancelled no further action can be done"></i>
+                                    </button>
+
                                 </td>
                             </tr>
                         </template>
