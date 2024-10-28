@@ -133,7 +133,7 @@ class Availability extends BaseModel
             ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
         ])
         // exclude deleted availabilities
-        ->andWhere(['is_deleted' => 0]);
+        ->andWhere(['is_deleted' => (int) 0]);
     }
 
 
@@ -208,7 +208,7 @@ class Availability extends BaseModel
                 ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
                 ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
             ])
-            ->andWhere(['is_deleted' => 0])
+            ->andWhere(['is_deleted' => (int) 0])
             ->exists();
     }
 }
