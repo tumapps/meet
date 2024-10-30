@@ -49,7 +49,7 @@ const changeTab = (value) => {
             <b-row>
                 <b-col md="12" lg="12">
                     <b-form-group label="Email: *" class="mb-3">
-                        <b-form-input type="email" class="form-control" name="email" placeholder="Email Id"
+                        <b-form-input type="email" class="form-control" name="email" placeholder="email address"
                             v-model="localAccountData.email_address"
                             @input="updateData('email_address', localAccountData.email_address)" required />
                     </b-form-group>

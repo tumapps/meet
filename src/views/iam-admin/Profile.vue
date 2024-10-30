@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/auth.store.js';
 
 const authStore = useAuthStore();
 const axiosInstance = CreateAxiosInstance();
-const errors = ref({ username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '', oldPassword: '' });
+const errors = ref({ });
 const { proxy } = getCurrentInstance();
 const username = ref("");
 const password = ref("");
@@ -47,7 +47,7 @@ const getProfile = async () => {
 }
 
 const updateProfile = async () => {
-    errors.value = { username: '', password: '', first_name: '', middle_name: '', last_name: '', mobile_number: '', email_address: '', confirm_password: '' };
+    errors.value = '';
     try {
         const response = await axiosInstance.put('v1/auth/profile-update', {
             username: username.value,
@@ -60,41 +60,44 @@ const updateProfile = async () => {
             email_address: email_address.value
         });
 
-        if (response.data.dataPayload && !response.data.dataPayload.error) {
-            proxy.$showAlert({
-                title: 'Profile updated successfully',
-                text: 'Profile has been updated successfully!',
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Updated successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Updated successfully',
                 icon: 'success',
             });
         }
 
+        getProfile();
+
     } catch (error) {
 
-        proxy.$showAlert({
-            title: 'Ooops!',
-            text: 'Ooops! an error has occured while updating the profile!',
-            icon: 'error',
-        });
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
 
-        if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-
-            const errorDetails = error.response.data.errorPayload.errors;
-
-            errors.value.username = errorDetails.username || '';
-            errors.value.password = errorDetails.password || '';
-            errors.value.first_name = errorDetails.first_name || '';
-            errors.value.middle_name = errorDetails.middle_name || '';
-            errors.value.last_name = errorDetails.last_name || '';
-            errors.value.mobile_number = errorDetails.mobile_number || '';
-            errors.value.email_address = errorDetails.email_address || '';
-            errors.value.confirm_password = errorDetails.confirm_password || '';
-
+            proxy.$showToast({
+                title: 'An error occurred',
+                text: errorMessage,
+                icon: 'error',
+            });
         }
-    }
+
+}
 }
 
 const updatePassword = async () => {
-    errors.value = { password: '', confirm_password: '', oldPassword: '' };
+    errors.value = '';
     try {
         const response = await axiosInstance.post('v1/auth/update-password', {
             password: password.value,
@@ -102,33 +105,35 @@ const updatePassword = async () => {
             oldPassword: oldPassword.value
         });
 
-        if (response.data.dataPayload && !response.data.dataPayload.error) {
-            //set cookie
-            proxy.$showAlert({
-                title: 'Password updated successfully',
-                text: 'Password has been updated successfully!',
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || 'Updated successfully',
+                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'Updated successfully',
                 icon: 'success',
             });
         }
         // console.log(response.data);
     } catch (error) {
 
-        if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
 
-            const errorDetails = error.response.data.errorPayload.errors;
-            // console.log("Validation error details:", errorDetails);
-
-            errors.value.password = errorDetails.password || '';
-            errors.value.confirm_password = errorDetails.confirm_password || '';
-            errors.value.oldPassword = errorDetails.oldPassword || '';
-
-        }else{
-
-        proxy.$showAlert({
-            title: 'Ooops!',
-            text: 'Ooops! an error has occured while updating the password!',
-            icon: 'error',
-        });
+            proxy.$showToast({
+                title: 'An error occurred',
+                text: errorMessage,
+                icon: 'error',
+            });
         }
     }
 }
@@ -216,7 +221,7 @@ const updatePassword = async () => {
                                     <label class="form-label" for="pass">Password:</label>
                                     <input v-model="password" type="password" class="form-control" id="pass"
                                         placeholder="Password" />
-                                    <div v-if="errors.password" class="error" aria-live="polite">{{ errors.password
+                                    <div v-if="errors.newPassword" class="error" aria-live="polite">{{ errors.newPassword
                                         }}</div>
                                 </b-col>
                                 <b-col md="12" class="form-group">

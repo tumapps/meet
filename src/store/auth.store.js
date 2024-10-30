@@ -120,12 +120,13 @@ export const useAuthStore = defineStore('userAuth', {
                 const arrayToken = token.split('.');
                 const tokenPayload = JSON.parse(atob(arrayToken[1]));
 
-                // console.log('Token payload:', tokenPayload);
+                console.log('Token payload:', tokenPayload);
 
-                const canBeBooked = tokenPayload.can_be_booked; // Declare user_id here
-                // console.log('can be booked', canBeBooked );
+                        // Convert can_be_booked to an integer (1 or 0)
+                const canBeBooked = tokenPayload.can_be_booked ? 1 : 0; // Declare user_id here
+                console.log('can be booked', canBeBooked );
 
-                // Convert user_id to a string before encryption
+                // Convert user booking to a string before encryption
                 const canBeBookedString = canBeBooked.toString();
                 try {
                     // Encrypt the user_id using AES encryption

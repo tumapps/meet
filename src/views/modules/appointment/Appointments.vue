@@ -227,9 +227,11 @@ const cancelAppointment = async (id, reason) => {
 
     } catch (error) {
         // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured ',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
@@ -310,12 +312,11 @@ const restoreAppointment = async (id) => {
 
     } catch (error) {
         // Optionally log the error for debugging purposes
-        console.error('Error restoring appointment:', error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
 
-        // Show error toast notification
         proxy.$showToast({
             title: 'An error occurred',
-            text: error.response?.data?.error || 'An unknown error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
@@ -344,7 +345,8 @@ const confirmRestore = (id) => {
 
 const getAppointments = async (page = 1) => {
     try {
-        const response = await axiosInstance.get('v1/scheduler/appointments?page=${page}&perPage=${selectedPerPage.value}');
+        console.log("selected", selectedPerPage.value)
+        const response = await axiosInstance.get(`/v1/scheduler/appointments?page=${page}&per-page=${selectedPerPage.value}`);
         //check if data is array
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
@@ -354,10 +356,11 @@ const getAppointments = async (page = 1) => {
         perPage.value = response.data.dataPayload.perPage;
 
     } catch (error) {
-        // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured!',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
@@ -376,12 +379,13 @@ const getAppointment = async (id) => {
         }
     } catch (error) {
         // Check if error.response is defined before accessing it
-        if (error.response && error.response.data && error.response.data.enprrorPayload) {
-            errorDetails.value = error.response.data.errorPayload.errors;
-        } else {
-            // Handle the case where error.response is not defined
-            errorDetails.value = { general: 'An unexpected error occurred.' };
-        }
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: errorMessage,
+            icon: 'error',
+        });
     }
 }
 
@@ -425,11 +429,13 @@ const updateAppointment = async () => {
         if (error.response && error.response.data.errorPayload) {
             errorDetails.value = error.response.data.errorPayload.errors;
         } else {
-            proxy.$showAlert({
-                title: 'Failed',
-                text: 'It seems there was an error updating your appointment. Please try again!',
-                icon: 'error',
-            });
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+
+proxy.$showToast({
+    title: 'An error occurred',
+    text: errorMessage,
+    icon: 'error',
+});
         }
     }
 };
@@ -440,9 +446,11 @@ const performSearch = async () => {
         tableData.value = response.data.dataPayload.data;
     } catch (error) {
         // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
@@ -496,9 +504,11 @@ const suggestSlots = async (id) => {
     } catch (error) {
         // Handle errors
         errorDetails.value = error.response.data.errorPayload.errors;
-        proxy.$showAlert({
-            title: 'Failed',
-            text: 'An error occurred',
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
 

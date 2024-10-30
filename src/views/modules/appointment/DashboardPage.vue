@@ -96,7 +96,7 @@ onMounted(() => {
 
     <!-- Right Column (Badges) -->
     <b-col lg="10" class="d-flex justify-content-end align-items-end">
-        <span class="badge bg-success me-2">Upcoming</span>
+        <span class="badge bg-success me-2">Active</span>
         <span class="badge bg-warning me-2">Canceled</span>
         <span class="badge bg-danger me-2">Deleted</span>
         <!-- <span class="badge bg-warning me-2">Rescheduled</span> -->

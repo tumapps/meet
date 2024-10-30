@@ -17,7 +17,7 @@ const isArray = ref(false);
 // Fetch users from API with pagination
 const getUsers = async (page = 1) => {
     try {
-        const response = await axiosInstance.get(`/v1/auth/users?page=${page}&perPage=${selectedPerPage.value}`);
+        const response = await axiosInstance.get(`/v1/auth/users?page=${page}&per-page=${selectedPerPage.value}`);
 
         if (response.data && response.data.dataPayload) {
             tableData.value = response.data.dataPayload.data.profiles || [];
@@ -37,12 +37,23 @@ const updatePerPage = () => {
 };
 
 // Perform search (if search query is used)
-const performSearch = () => {
-    getUsers(1);
+const performSearch = async () => {
+    try {
+        const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`);
+        tableData.value = response.data.dataPayload.data;
+    } catch (error) {
+        // console.error(error);
+        proxy.$showToast({
+            title: 'An error occurred ',
+            text: 'Ooops! an error occured',
+            icon: 'error',
+        });
+    }
 };
 
 // Pagination logic
 const goToPage = (page) => {
+    console.log('page', page);
     if (page > 0 && page <= totalPages.value) {
         getUsers(page);
     }
@@ -65,8 +76,8 @@ onMounted(() => {
 });
 
 const addUserModal = ref(null);
-const showModal = () => {
-    addUserModal.value.$refs.addUserModal.show();
+const openAddUserModal = () => {
+    addUserModal.value.toggleModal();
 };
 </script>
 <template>
@@ -78,9 +89,9 @@ const showModal = () => {
             <b-row class="mb-3">
                 <b-col lg="12" md="12" sm="12" class="mb-3">
                     <div class="d-flex justify-content-end">
-                        <b-button variant="primary" @click="showModal">
+                        <button variant="primary" @click="openAddUserModal" class="btn btn-primary">
                             Add User
-                        </b-button>
+                        </button>
                     </div>
                 </b-col>
                 <b-col lg="12" md="12" sm="12">

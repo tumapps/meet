@@ -26,7 +26,7 @@ const appointmentModal = ref(null);
 
 //modal
 const showModal = () => {
-    appointmentModal.value.$refs.appointmentModal.show();
+  appointmentModal.value.$refs.appointmentModal.show();
 };
 const selectedDate = ref('');
 
@@ -76,7 +76,7 @@ async function fetchEvents() {
       // Determine the background color based on the statusLabel
       switch (item.recordStatus.label) {
         case 'ACTIVE':
-          backgroundColor = 'green';  // Active is red
+          backgroundColor = '#6c3baa';  // Active is red
           break;
         case 'CANCELLED':
           backgroundColor = 'orange'; // Cancelled is green
@@ -85,7 +85,7 @@ async function fetchEvents() {
         case 'DELETED':
           backgroundColor = '#dc3545'; // Different shade of red for deleted
           break;
-          
+
         default:
           backgroundColor = 'gray'; // Default color if no match
       }
@@ -122,7 +122,7 @@ function handleDayCellClassNames(arg) {
 // FullCalendar options
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth',
+  initialView: 'timeGridWeek',
   height: 'auto',
   weekends: true,
   dayMaxEvents: 3,
@@ -192,7 +192,7 @@ onMounted(() => {
 
 </script>
 <template>
-  <BookAppointment ref="appointmentModal" :selectedDate="selectedDate"/>
+  <BookAppointment ref="appointmentModal" :selectedDate="selectedDate" />
   <FullCalendar :options="calendarOptions" class="main-cont" />
   <!-- Modal for event details -->
   <b-modal v-model="isModalOpen" title="Event Details" dialog-class="centered-modal">
@@ -212,8 +212,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.past-date {
-  background-color: #c2bcbc;
-  color: #df1010;
+.fc.v-event {
+  background-color: black !important;
+  border: 1px solid red !important;
 }
 </style>

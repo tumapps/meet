@@ -1,9 +1,10 @@
 <script>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useSetting } from '@/store/pinia'
-// import { useAuthStore } from '@/store/auth.store.js'
+import { useAuthStore } from '@/store/auth.store.js'
 import { useRouter } from 'vue-router'
 import AxiosInstance from '@/api/axios'
+
 
 export default {
   components: {},
@@ -13,6 +14,11 @@ export default {
     const store = useSetting()
 
     const router = useRouter()
+
+    const authStore = useAuthStore()
+
+    const CBB = computed(() => authStore.getCanBeBooked())
+
 
     const headerNavbar = computed(() => store.header_navbar_value)
 
@@ -79,6 +85,7 @@ export default {
       logOut,
       toProfile,
       toSettings,
+      CBB
     }
   },
 }
@@ -113,7 +120,7 @@ export default {
               </b-button>
             </template>
             <b-dropdown-item variant="none" @click="toProfile">Profile</b-dropdown-item>
-            <b-dropdown-item variant="none" @click="toSettings">Settings</b-dropdown-item>
+            <b-dropdown-item v-if="CBB !== 0" variant="none" @click="toSettings">Settings</b-dropdown-item>
             <li>
               <hr class="dropdown-divider" />
             </li>

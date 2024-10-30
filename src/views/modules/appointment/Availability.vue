@@ -15,6 +15,8 @@ const toastPayload = ref({});
 
 const user_id = ref('');
 user_id.value = authStore.getUserId();
+const perPage = ref(50);     // Number of items per page (from API response)
+
 // Selected date
 const availabilityDetails = ref({
     user_id: user_id.value,
@@ -40,9 +42,6 @@ const config2 = {
     minuteIncrement: 10,
 };
 
-
-
-
 // Function to show the modal
 const showModal = () => {
     if (newAvailability.value) {
@@ -57,7 +56,6 @@ const openModal = (id) => {
     }
 }
 
-
 const { proxy } = getCurrentInstance();
 const axiosInstance = AxiosInstance();
 const tableData = ref([]);
@@ -66,24 +64,12 @@ const sortOrder = ref('asc');  // Sorting order: 'asc' or 'desc'
 const isArray = ref(false);
 const currentPage = ref(1);  // The current page being viewed
 const totalPages = ref(1);   // Total number of pages from the API
-const perPage = ref(20);     // Number of items per page (from API response)
 const selectedPerPage = ref(20);  // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100]);
 const searchQuery = ref('');
 const selectedAvailability = ref('');
 const errors = ref({});
 
-const goToPage = (page) => {
-    if (page > 0 && page <= totalPages.value) {
-        currentPage.value = page;
-        getAppointments(page);
-    }
-};
-
-const updatePerPage = async () => {
-    currentPage.value = 1;
-    await getAppointments(1);
-};
 
 const sortTable = (key) => {
     if (sortKey.value === key) {
@@ -96,22 +82,19 @@ const sortTable = (key) => {
 
 const performSearch = async () => {
     try {
-        const response = await axiosInstance.get(`v1/scheduler/availabilities?search=${searchQuery.value}`);
+        const response = await axiosInstance.get(`v1/scheduler/availabilities?_search=${searchQuery.value}`);
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
     } catch (error) {
         // console.error(error);
         proxy.$showToast({
-            title: 'An error occurred ',
+            title: 'An error occurred',
             text: 'Ooops! an error occured',
             icon: 'error',
         });
     }
 };
 
-onMounted(async () => {
-    getAvailabilities(1);
-});
 
 const confirmCancel = (id) => {
     selectedAvailability.value = id;
@@ -159,9 +142,11 @@ const cancelAvailability = async (id) => {
         getAvailabilities(1);
     } catch (error) {
         // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
@@ -169,21 +154,28 @@ const cancelAvailability = async (id) => {
 
 const getAvailabilities = async (page = 1) => {
     try {
-        const response = await axiosInstance.get(`v1/scheduler/availabilities?page=${page}&perPage=${selectedPerPage.value}`);
+        console.log(selectedPerPage.value);
+        const response = await axiosInstance.get(`v1/scheduler/availabilities?page=${page}&per-page=${selectedPerPage.value}`);
         isArray.value = Array.isArray(response.data);
         tableData.value = response.data.dataPayload.data;
         currentPage.value = response.data.dataPayload.currentPage;
         totalPages.value = response.data.dataPayload.totalPages;
         perPage.value = response.data.dataPayload.perPage;
     } catch (error) {
-        // console.error(error);
+
+        const errorMessage = error.response?.data?.errorPayload?.errors?.message ||
+            error.response?.data?.errorPayload?.message ||
+            'An unknown error occurred';
+
         proxy.$showToast({
             title: 'An error occurred ',
-            text: 'Ooops! an error occured',
+            text: errorMessage,
             icon: 'error',
         });
     }
 };
+
+
 
 const getAvailability = async (id) => {
     try {
@@ -192,14 +184,15 @@ const getAvailability = async (id) => {
 
     } catch (error) {
         // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
         proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error occured',
+            title: 'An error occurred',
+            text: errorMessage,
             icon: 'error',
         });
     }
 };
-
 
 const sortedData = computed(() => {
     return [...tableData.value].sort((a, b) => {
@@ -215,13 +208,6 @@ const saveAvailability = async () => {
     try {
         // Make the API call to save availability details
         const response = await axiosInstance.post('v1/scheduler/availability', availabilityDetails.value);
-
-        // Display success notification using proxy
-        // proxy.$showToast({
-        //     title: 'Updated',
-        //     text: 'Settings updated successfully!',
-        //     icon: 'success',
-        // });
         if (response.data.toastPayload) {
             toastPayload.value = response.data.toastPayload;
             // Show toast notification using the response data
@@ -238,7 +224,7 @@ const saveAvailability = async () => {
             });
         }
 
-        
+
 
         // Refresh availabilities
         getAvailabilities(1);
@@ -248,9 +234,11 @@ const saveAvailability = async () => {
             errors.value = error.response.data.errorPayload.errors;
         } else {
             // Display error notification if something went wrong
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
             proxy.$showToast({
-                title: 'Failed',
-                text: 'An error occurred',
+                title: errorMessage,
+                text: errorMessage,
                 icon: 'error',
             });
         }
@@ -260,7 +248,7 @@ const saveAvailability = async () => {
 
 const updateAvailabilityDetails = async () => {
     try {
-    // console.log(availabilityDetails.value);
+        // console.log(availabilityDetails.value);
 
         // Make the API call to update availability details
         const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value);
@@ -288,15 +276,32 @@ const updateAvailabilityDetails = async () => {
             // Extract and handle errors from server response
             errors.value = error.response.data.errorPayload.errors;
         } else {
-            // Handle other errors (e.g., network issues)
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
             proxy.$showToast({
-                title: 'Failed',
-                text: 'Failed to update your settings.',
+                title: 'An error occurred',
+                text: errorMessage,
                 icon: 'error',
             });
         }
     }
 };
+
+const updatePerPage = async () => {
+    await getAvailabilities(1);
+}; 
+
+const goToPage = (page) => {
+    if (page > 0 && page <= totalPages.value) {
+        currentPage.value = page;
+        getAvailabilities(page);
+    }
+};
+
+onMounted(async () => {
+    getAvailabilities(1);
+});
+
 
 </script>
 

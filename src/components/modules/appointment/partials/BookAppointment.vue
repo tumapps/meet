@@ -13,7 +13,15 @@ const { proxy } = getCurrentInstance();
 const CBB = ref('')
 CBB.value = authStore.getCanBeBooked();
 const userId = ref('');
+const appointmentModal = ref(null) // Reference for <b-modal>
 
+const openModal = () => {
+    appointmentModal.value.show() // Open the modal using the show() method
+}
+
+const closeModal = () => {
+    appointmentModal.value.hide() // Close the modal using the hide() method
+}
 
 const errors = ref({
     contact_name: '',
@@ -127,6 +135,7 @@ const submitAppointment = async () => {
     errors.value = {};
     try {
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
+        appointmentModal.value.hide();
         proxy.$showAlert({
             title: 'Success',
             text: 'Appointment booked successfully',
@@ -215,6 +224,8 @@ onMounted(() => {
     getAppointmentType();
     getusers_booked();
     getPriority();
+    //clear errors
+    errors.value = {};
 });
 
 </script>
@@ -269,9 +280,11 @@ onMounted(() => {
                             </b-col>
                             <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <!-- Bind the select dropdown to selectedUsername -->
+                                 <!-- //make it required -->
+
                                 <select v-model="selectedUsername" name="service" class="form-select"
-                                    id="addappointmenttype">
-                                    <option value="">Recipient</option>
+                                    id="receipent" required>
+                                    <option value="" disabled selected-hidden >Choose Recipient</option>
                                     <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
                                         {{ user.first_name }}
                                     </option>
@@ -292,7 +305,7 @@ onMounted(() => {
                             <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <!-- Bind the select dropdown to selectedPriority -->
                                 <select v-model="selectedPriority" name="priority" class="form-select"
-                                    id="addappointmenttype">
+                                    id="addappointmenttype" required>
                                     <option value="">Select Priority</option>
                                     <option v-for="priority in PriorityOptions" :key="priority.code"
                                         :value="priority.code">
@@ -371,10 +384,10 @@ onMounted(() => {
             </div>
         </form>
         <div class="modal-footer border-0">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="close()">Discard
-                Changes</button>
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save"
-                @click="submitAppointment">Save</button>
+            @click="submitAppointment">Save</button>
+            <button type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
+
         </div>
     </b-modal>
 
@@ -385,12 +398,6 @@ onMounted(() => {
     font-size: 0.9em;
 }
 
-.dot {
-    height: 10px;
-    width: 10px;
-    border-radius: 50%;
-    display: inline-block;
-}
 
 /* Add rounded corners to the modal */
 .modal-fullscreen .modal-content {

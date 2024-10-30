@@ -73,7 +73,7 @@ const AxiosInstance = () => {
                 } catch (error) {
                     const statusCode = error.response.status
 
-                    if (statusCode === 500) {
+                    if (statusCode === 440) {
                         // console.error('Session expired or token issue. Handle accordingly.')
                         router.push({ path: `/auth/login` })
                         // return Promise.reject(error)
@@ -86,8 +86,20 @@ const AxiosInstance = () => {
 
             if (error.response) {
                 const statusCode = error.response.status
+                console.log('Error status code:', typeof statusCode, statusCode)
+
+                if (statusCode === 440) {
+                    console.error('Session expired or token issue. Handle accordingly.')
+                    localStorage.removeItem('user.token');
+                    router.push({ path: `/auth/login` })
+                    return Promise.reject(error)
+                } else if (statusCode === !422 || statusCode === !401) {
+                    router.push({ path: `/error/${statusCode}` })
+                    return Promise.reject(error)
+                }
 
                 if (statusCode === 401) {
+                    console.log('Refreshing token...')
                     if (!isRefreshing) {
                         isRefreshing = true
                         try {
@@ -100,7 +112,7 @@ const AxiosInstance = () => {
                             refreshAndRetryQueue.length = 0
                             return axiosInstance(originalRequest)
                         } catch (refreshError) {
-                            router.push({ path: `/error/${statusCode}` })
+                            // router.push({ path: `/error/${statusCode}` })
                             throw refreshError
                         } finally {
                             isRefreshing = false
@@ -110,16 +122,7 @@ const AxiosInstance = () => {
                         refreshAndRetryQueue.push({ config: originalRequest, resolve, reject })
                     })
                 }
-                if (statusCode === 440) {
-                    // console.error('Session expired or token issue. Handle accordingly.')
-                    localStorage.removeItem('user.token');
-                    router.push({ path: `/auth/login` })
-                    
-                    return Promise.reject(error)
-                } else if (statusCode === !422) {
-                    router.push({ path: `/error/${statusCode}` })
-                    return Promise.reject(error)
-                }
+
             }
             return Promise.reject(error);
         }
