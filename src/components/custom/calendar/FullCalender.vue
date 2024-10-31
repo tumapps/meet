@@ -76,7 +76,7 @@ async function fetchEvents() {
       // Determine the background color based on the statusLabel
       switch (item.recordStatus.label) {
         case 'ACTIVE':
-          backgroundColor = '#6c3baa';  // Active is red
+          backgroundColor = '#199F52';  // Active is red
           break;
         case 'CANCELLED':
           backgroundColor = 'orange'; // Cancelled is green

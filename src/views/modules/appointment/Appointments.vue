@@ -12,10 +12,12 @@ const CBB = ref('')
 CBB.value = authStore.getCanBeBooked();
 // const globalUtils = require('@/utils/globalUtils');
 const appointmentModal = ref(null);
-const toastPayload = ref('');
 const showModal = () => {
     appointmentModal.value.$refs.appointmentModal.show();
 };
+
+
+const toastPayload = ref('');
 
 
 
@@ -561,6 +563,33 @@ const toggleCheckIn = async (id) => {
     }
 };
 
+const confirmCheckIn = (id) => {
+    selectedAppointmentId.value = id;
+    proxy.$showAlert({
+        title: 'Are you sure?',
+        text: 'You are about to Check In this appointment. Do you want to proceed?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Check In!',
+        cancelButtonText: 'close',
+        confirmButtonColor: '#076232',
+        cancelButtonColor: '#d33',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            toggleCheckIn(id);
+            getAppointments(1);
+        }
+    });
+};
+
+// Function to handle actions after modal closes
+const handleModalClose = () => {
+  // Perform any actions you need after modal closes
+//   console.log('Modal has been closed');
+
+  getAppointments(1);  // Refresh the appointments after closing the modal
+};
+
 </script>
 <template>
 
@@ -588,17 +617,6 @@ const toggleCheckIn = async (id) => {
                                 </option>
                             </select>
                         </div>
-                        <!-- <div v-if="CBB === 0" class="mb-3">
-                            <div class="dropdown" style="float: right;"> <!-- Align to the right --
-                                <select v-model="selectedUsername" name="service" class="form-select form-select-sm"
-                                    id="addappointmenttype">
-                                    <option value="">Recipient</option>
-                                    <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
-                                        {{ user.first_name }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div> -->
                         <div class="d-flex align-items-center">
                             <b-input-group>
                                 <!-- Search Input -->
@@ -672,10 +690,10 @@ const toggleCheckIn = async (id) => {
                                 <td>
                                     <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox"
-                                            id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in === 1"
-                                            @change="toggleCheckIn(item.id)" />
+                                            id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in === true" disabled="item.checked_in === true"
+                                            @change="confirmCheckIn(item.id)" />
                                         <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
-                                            {{ item.checked_in === 1 ? 'Checked In' : 'Check In' }}
+                                            {{ item.checked_in === true ? 'Checked In' : 'Check In' }}
                                         </label>
                                     </div>
 
@@ -745,7 +763,7 @@ const toggleCheckIn = async (id) => {
             </b-col>
         </b-card>
     </b-col>
-    <BookAppointment ref="appointmentModal" />
+    <BookAppointment ref="appointmentModal"  @close="handleModalClose" />
 
     <b-modal ref="myModal" hide-footer title="Appointment Details" size="xl">
         <b-row class="justify-content-center">
