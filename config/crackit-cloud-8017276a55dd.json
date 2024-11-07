@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "crackit-cloud",
+  "private_key_id": "8017276a55dd0e3a070393e3a1d3d38ca31178c4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQCxzfk5b3v/kmX+\nIdtB5au54wFK50qZKv9FQusHA+RWKki8AF/45dkEPqzIfN6lTYPixyMEvb4AhMUR\nbhbQJTSczl47eh5wdGsz8brvIRLN1buRwxp6eC/3DIA6B0dzb4CkQ2dwe3GVqZPB\nRAsJP7nUPrfhWwaED/bA0W8Q7JlIB6F8HEykHldHYF5xSm6WuQVP13NjwLx5dZh0\n9Tk7/9mtL7sb8SslmgJN+AhrubJd5PhJChq9B745aaObYquaiam8rH4sKw7k/BUu\nCbhbhqxZJMoCsmeOe3rX7HOyPjKr2jPSergUG5IIr1hwjs7XhSGh0GwH8GXr9NKC\nJ2Qrr8+dAgMBAAECggEAOWdk45itIVV8DUCT/6HtP83cwHiM2oeJs6xHodOtV+49\n3kiGs55NYrPzZ6T84sR0ZHZjRWgW3CcBUr/GqLuiUU/FF5G1GxxS8gnEjuiQIBk1\nfflN5qU/4xRLn7By7n9cumuyjRulj6qYc+iKYZmL3szC5ARVxbQ7t4PGRmIEmL6n\n0OjHs7HzDOZBo9eXJZo/8YYyyZunNZHsnZ29OU8y7fAWN74+rjvjyJPDZKB7DCRX\ngtfFqvMWnKQGGAyhJSDTNbUKbK21yRNkMmgnE7nviIfsebnwnNONFYguwMYrnIOc\nGhRORcx9nL3EZXuKRDGReeHNyq+yVvI9tqPK9oFVNwKBgQDlfvh9n/IRn5BiQCVB\n5+VJGYXOJVyMLHDv8wkVD0eahWfHtpNsB9v8PAGKlt8iHAGWAuIpZpx+kZEgwY+G\nkels24rp5pqY2FNGxh6VOnM8IubNPNYFVB/Pj4e23m8ONhc3RgZbJDRNYIEdUgj3\nHNU56r20q7yB7xSgu4jiLCPo1wKBgQDGVsBJI7IJkqvnq603s/I/rBiw5DkeLf6N\nTVRDNVwEmx22uIMV4SYbQyIdiqnLtg21/3s+yy9PBlza2/g9AtfH7CsqimUP2CvO\nfK0qYMisq/k3ONu7d9aE2Uu7M1hS9G/pjPnWMAN9lKdtMEXm1QwRgyPgdgvwWGk0\nDthSh5X4qwJ/SmfgKNqyoQQay8AAVF3a+NhNiYiTeN7vvtwNFcbecDrQau/G3D+w\nExdhaI2Byo1J9lj4+nNKSb7oTrZy0i58f86uOyeI+AUq+sdBIyDQO68VJXWT7iZY\nKfNfDOsRFopy/Hi3ltUmH/Ap7FeskHHIr/5rgygq9fWNuo8S0kF9YwKBgHfnki+l\nSMjIxuwzuXBndRhRLkwibPV10OIT0dEfvRV7wSbpvTXI+4SXvVQmtCfXU8qnPRbl\nNyCLNC+LtDMOOO1ANYhuSlKd2T3n2bg48piRDwT3dr+K30FJLKNrkwXziISlGZUH\nSdTtvZohCOFYAwfDRDk6pFUU3eT+5IBgP6YpAoGATWZrkZzweKNdMm35l/aN+nnp\nbHymuvSqLor1W+9ZyPV2Y9cQLNKm/9/cn16D0A61WRPhlbarP85AdTkMygwQfWDW\nIG9tV6xMTNxpOQyP4d7yUzq/FfGOr4oj7BmjKCO7IiFLAr8dYWBlLevQzEGmexO6\nh2O89zNKLoCOVKwH9mo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "filestream@crackit-cloud.iam.gserviceaccount.com",
+  "client_id": "100017181852742463453",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/filestream%40crackit-cloud.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
