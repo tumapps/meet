@@ -29,6 +29,9 @@ trait Status
             case 10:
                 $status = ['label' => 'ACTIVE', 'theme' => 'success',];
                 break;
+            case 11:
+                $status = ['label' => 'PENDING', 'theme' => 'info',];
+                break;
             default:
                 $status = ['label' => 'Unknown', 'theme' => 'dark',];
         }
