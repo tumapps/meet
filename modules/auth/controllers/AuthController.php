@@ -184,18 +184,25 @@ class AuthController extends \helpers\ApiController
 	{
 		$refreshToken = Yii::$app->request->cookies->getValue('refresh-token', false);
 		if (!$refreshToken) {
-			return $this->errorResponse(440);
+			// return $this->errorResponse(['statusCode' => [440]]);
+			Yii::$app->response->statusCode = 440;
+			return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
 		}
 		$userRefreshToken = RefreshToken::findOne(['token' => $refreshToken]);
 		if (Yii::$app->request->getMethod() == 'POST') {
 			// Getting new JWT after it has expired
 			if (empty($userRefreshToken)) {
-				return $this->errorResponse(440);
+				// return $this->errorResponse(['statusCode' => [440]]);
+				Yii::$app->response->statusCode = 440;
+				return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
+
 			}
 			$user = User::findIdentity($userRefreshToken->user_id);
 			if (empty($user)) {
 				$userRefreshToken->delete();
-				return $this->errorResponse(440);
+				// return $this->errorResponse(['statusCode' => [440]]);
+				Yii::$app->response->statusCode = 440;
+				return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
 			}
 			$this->generateRefreshToken($user);
 			return $this->payloadResponse(['username' => $user->username, 'token' => (string) $user->token], ['statusCode' => 200]);
@@ -227,7 +234,9 @@ class AuthController extends \helpers\ApiController
 			]);
 		}
 		if (!$userRefreshToken->save(false)) {
-			return $this->errorResponse(440);
+			// return $this->errorResponse(['statusCode' => [440]]);
+			Yii::$app->response->statusCode = 440;
+			return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
 		}
 		// Send the refresh-token to the user in a HttpOnly cookie that Javascript can never read and that's limited by path
 		Yii::$app->response->cookies->add(new \yii\web\Cookie([
