@@ -27,7 +27,8 @@ class ChangePassword extends Model
         return [
          
             ['oldPassword', 'required', 'message' => 'This field can not be blank'],
-            ['newPassword', 'required', 'message' => 'Please choose a password you can remember'],
+            // ['newPassword', 'required', 'message' => 'Please choose a password you can remember'],
+            ['newPassword', 'required', 'message' => 'This field can not be blank'],
             ['newPassword', 'string', 'min' => 8],
             ['newPassword', 'validateNewPassword'],
             ['oldPassword', 'validateOldPassword'],
