@@ -56,6 +56,9 @@ class ConfigWrapper
                     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'home'],
                     ['route' => 'availability', 'label' => 'Availability', 'icon' => 'home'],
             ],
+            'mdm.admin.configs' => [
+                
+            ],
         ];
     }
     public function load($item)

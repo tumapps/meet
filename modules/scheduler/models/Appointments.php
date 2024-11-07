@@ -31,6 +31,7 @@ class Appointments extends BaseModel
     const STATUS_MISSED = 9;
     const STATUS_ATTENDED = 6;
     const STATUS_ACTIVE = 10;
+    const STATUS_PENDING = 11;
     const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
@@ -49,7 +50,6 @@ class Appointments extends BaseModel
     const EVENT_AFFECTED_APPOINTMENTS = 'affectedAppointments';
     const EVENT_APPOINTMENT_REMINDER = 'appointmentReminder';
     const EVENT_APPOINTMENT_CREATED = 'appointmentCreated';
-
 
 
     protected static $statusLabels = [
@@ -519,7 +519,6 @@ class Appointments extends BaseModel
     
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
     {
-
         // Check for time-slot-based unavailability within a date range
         return self::find()
         ->where(['user_id' => $user_id])

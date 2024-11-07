@@ -59,7 +59,7 @@ class Availability extends BaseModel
             [['user_id'], 'integer'],
             [['start_date', 'end_date', 'start_time', 'end_time', 'description'], 'required'],
             [['start_date', 'end_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
-            [['start_time', 'end_time'], 'validateTimeRange'],
+            [['start_time', 'end_time'], 'validateDateTimeRange'],
             [['start_date', 'end_date'], 'validateDateRange'],
             [['is_full_day'], 'boolean'],
             [['description'], 'string', 'max' => 255],
@@ -67,12 +67,17 @@ class Availability extends BaseModel
         ];
     }
 
-    public function validateTimeRange($attribute, $params)
+    public function validateDateTimeRange($attribute, $params)
     {
-        if (strtotime($this->end_time) <= strtotime($this->start_time)) {
-            $this->addError($attribute, 'End time must be later than start time.');
+        $startDateTime = new \DateTime("{$this->start_date} {$this->start_time}");
+        $endDateTime = new \DateTime("{$this->end_date} {$this->end_time}");
+
+        // Check if the end DateTime is earlier or equal to the start DateTime
+        if ($endDateTime <= $startDateTime) {
+            $this->addError($attribute, 'End date and time must be later than start date and time.');
         }
     }
+
 
     public function validateDateRange($attribute, $params)
     {

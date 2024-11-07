@@ -242,6 +242,8 @@ return [
  */
 'GET appointments/{id}'     => 'appointments/view',
 
+'GET space-details' => 'appointments/space-details',
+
 /**
 * @OA\Put(
 *     path="/scheduler/appointments/{id}",
