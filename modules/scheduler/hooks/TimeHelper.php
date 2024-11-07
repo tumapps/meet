@@ -242,23 +242,23 @@ class TimeHelper
      */
     public static function validateAdvanceBooking($user_id, $appointmentTime, $date)
     {
-        //fetch advance booking time from settings
         $advancedBookingTime = (int)Settings::getAdvanceBookingDuration($user_id);
 
-        if(!$advancedBookingTime){
+        if (!$advancedBookingTime) {
             return 'Advance Booking Time not set';
         }
 
-        // clalculate minimum time one can book an appoiment
-        $advanceTime = date('Y-m-d H:i:sa', strtotime('+'.$advancedBookingTime.'minutes'));
-        // return $advanceTime;
-        if(date($date.' '.$appointmentTime) <= $advanceTime)
-        {
-            return true;
+        $appointmentDateTime = strtotime($date . ' ' . $appointmentTime);
+
+        $advanceTime = strtotime('+' . $advancedBookingTime . ' minutes', time());
+        
+        if ($appointmentDateTime <= $advanceTime) {
+            return true; 
         }
 
         return false;
     }
+
 
     public static function checkExpireTime($appointment_date, $slot_start_time)
     {
