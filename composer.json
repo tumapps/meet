@@ -28,6 +28,8 @@
         "ratchet/pawl": "^0.4.1",
         "textalk/websocket": "^1.5",
         "php-amqplib/php-amqplib": "^3.7",
+        "google/cloud-storage": "^1.42",
+        "guzzlehttp/guzzle": "^7.0",
         "yiisoft/yii2-queue": "^2.3",
         "yiisoft/yii2-redis": "~2.0.0"
     },
