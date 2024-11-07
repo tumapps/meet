@@ -31,7 +31,7 @@ class m241031_090730_seeding_migration extends Migration
         for ($i = 1; $i <= 4; $i++) {
             $this->insert('{{%levels}}', [
                 'name' => 'Level ' . $i,
-                'code' => 'L' . $1 . '00',
+                'code' => 'L' . $i . '00',
                 'created_at' => time(),
                 'updated_at' => time(),
             ]);
