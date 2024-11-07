@@ -476,9 +476,9 @@ class AppointmentsController extends \helpers\ApiController {
 
     protected function saveAttendees($dataRequest, $id) {
         $attendees = $dataRequest['Appointments']['attendees'] ?? [];
-        $date = $dataRequest['Appointments']['appointment_date'], 
-        $startTime = $dataRequest['Appointments']['start_time'],
-        $endTime =$dataRequest['Appointments']['end_time']
+        $date = $dataRequest['Appointments']['appointment_date'];
+        $startTime = $dataRequest['Appointments']['start_time'];
+        $endTime =$dataRequest['Appointments']['end_time'];
 
         $addAttendees = new AppointmentAttendees();
 
