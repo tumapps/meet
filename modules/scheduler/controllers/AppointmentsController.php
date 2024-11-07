@@ -484,7 +484,7 @@ class AppointmentsController extends \helpers\ApiController {
 
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
-                $staffId = $attendeeId, 
+                $staffId = $attendeeId; 
                 $addAttendees->save($id, $staffId, $date, $starTime, $endTime);
             }
         }
