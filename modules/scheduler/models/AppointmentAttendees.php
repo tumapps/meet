@@ -3,6 +3,7 @@
 namespace scheduler\models;
 
 use Yii;
+use auth\models\User;
 /**
  *@OA\Schema(
  *  schema="AppointmentAttendees",
@@ -124,5 +125,23 @@ class AppointmentAttendees extends BaseModel
 
         // return false;
     }
- 
+
+    public static function getAttendeesEmailsByAppointmentId($appointmentId)
+    {
+        $attendees = self::find()
+            ->where(['appointment_id' => $appointmentId])
+            ->all();
+
+        $emails = [];
+
+        foreach ($attendees as $attendee) {
+            $user = User::find()->where(['username' => $attendee->staff_id])->one();
+
+            if ($user && $user->profile->email_address) {
+                $emails[] = $user->profile->email_address;
+            }
+        }
+
+        return $emails;
+    }
 }
