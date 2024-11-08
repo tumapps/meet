@@ -16,7 +16,7 @@
      *
      *   @OA\Response(
      *     response=200,
-     *     description="Returns a data payload object for all scheduler/appointments",
+     *     description="Returns a data payload object for all auth/appointments",
      *      @OA\JsonContent(
      *          @OA\Property(property="dataPayload", type="object",
      *              @OA\Property(property="data", type="array",@OA\Items(ref="#/components/schemas/Appointments")),
@@ -41,17 +41,17 @@
 
      /**
      * @OA\Post(
-     * path="/auth/permission",
-     * summary="Create a new permission",
+     * path="/auth/role",
+     * summary="Create a new role",
      * security={{}},
-     * tags={"Permissions"},
+     * tags={"Roles"},
      * @OA\RequestBody(
      *    required=true,
-     *    description="Provide Username & Password",
+     *    description="Provide name & Type",
      *    @OA\JsonContent(
-     *       required={"username","password"},
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
+     *       required={"Name","Type"},
+     *              @OA\Property(property="Name", type="string",title="Name", example="admin"),
+     *              @OA\Property(property="Type", type="string",title="Type", example="admin"),
      *          
      *    ),
      * ),
@@ -61,8 +61,8 @@
      *    @OA\JsonContent(
      *       @OA\Property(property="dataPayload", type="object",
      *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
+     *              @OA\Property(property="Name", type="string",title="Name", example="admin"),
+     *              @OA\Property(property="Type", type="string",title="Type", example="admin"),
      *          ),
      *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
      *          @OA\Property(property="toastTheme", type="string",example="success"),
@@ -75,8 +75,8 @@
      *    @OA\JsonContent(
      *       @OA\Property(property="errorPayload", type="object",
      *          @OA\Property(property="errors", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
+     *              @OA\Property(property="Name", type="string",title="Name", example="admin"),
+     *              @OA\Property(property="Type", type="string",title="Type", example="admin"),
      *          ),
      *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
      *          @OA\Property(property="toastTheme", type="string",example="danger"),
@@ -87,280 +87,88 @@
      */
      'POST role'         => 'role/create',
 
-    /**
-     * @OA\Post(
-     * path="/auth/register",
-     * summary="Authenticates user based on the credentials provided",
-     * security={{}},
-     * tags={"Authentication"},
-     * @OA\RequestBody(
-     *    required=true,
-     *    description="Provide Username & Password, confirm_password",
-     *    @OA\JsonContent(
-     *       required={"username","password", "comfirm_password"},
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *              @OA\Property(property="confirm_password", type="string",title="confirm password", example="admin"),
-     *              
-     *          
-     *    ),
-     * ),
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *              @OA\Property(property="confirm_password", type="string",title="confirm password", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * ),
-     * @OA\Response(
-     *    response=422,
-     *    description="Data Validation Error",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="errorPayload", type="object",
-     *          @OA\Property(property="errors", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *              @OA\Property(property="confirm_password", type="string",title="confirm password", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
-     *          @OA\Property(property="toastTheme", type="string",example="danger"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-     'POST register'         => 'auth/register',
-
-
      /**
-     * @OA\Post(
-     * path="/auth/password-reset-request",
-     * summary="request for a password reset for user",
-     * security={{}},
-     * tags={"Authentication"},
-     * @OA\RequestBody(
-     *    required=true,
-     *    description="Provide Username",
-     *    @OA\JsonContent(
-     *       required={"Username"},
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *    ),
-     * ),
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * ),
-     * @OA\Response(
-     *    response=422,
-     *    description="Data Validation Error",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="errorPayload", type="object",
-     *          @OA\Property(property="errors", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
-     *          @OA\Property(property="toastTheme", type="string",example="danger"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'POST password-reset-request'  => 'auth/password-reset-request',
-
+ * @OA\Get(path="/auth/role/{id}",
+ *   summary="Displays a single role model",
+ *   tags={"role"},
+ *   @OA\Parameter(description="role unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Displays a single role model.",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/role"))
+ *      ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Resource not found",
+ *      @OA\JsonContent(
+ *           @OA\Property(property="errorPayload", type="object",
+ *               @OA\Property(property="statusCode", type="integer", example=404 ),
+ *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+ *           )
+ *      )
+ *   ),
+ * )
+ */
+'GET role/{id}'     => 'role/view',
 
     /**
-     * @OA\Post(
-     * path="/auth/reset-password",
-     * summary="resets password",
-     * security={{}},
-     * tags={"Authentication"},
-     * @OA\RequestBody(
-     *    required=true,
-     *    description="Provide Password, Comfirm Password",
-     *    @OA\JsonContent(
-     *       required={"Password", "Comfirm Password"},
-     *              @OA\Property(property="Password", type="string",title="Password", example="admin"),
-     *              @OA\Property(property="ComfirmPassword", type="string",title="Comfirm Password", example="admin"),
-     *    ),
-     * ),
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * ),
-     * @OA\Response(
-     *    response=422,
-     *    description="Data Validation Error",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="errorPayload", type="object",
-     *          @OA\Property(property="errors", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
-     *          @OA\Property(property="toastTheme", type="string",example="danger"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'POST reset-password' => 'auth/reset-password',
-
+    * @OA\Put(
+    *     path="/auth/role/{id}",
+    *     tags={"Space"},
+    *     summary="Updates an existing  model",
+    *     @OA\Parameter(description="Space unique ID to load and update",in="path",name="id",required=true,@OA\Schema(type="string",)),
+    *     @OA\RequestBody(
+    *        required=true,
+    *        description="Finds the Space model to be updated based on its primary key value",
+    *        @OA\JsonContent(
+    *           ref="#/components/schemas/Space",
+    *        ),
+    *     ),
+    *    @OA\Response(
+    *       response=202,
+    *       description="Data payload",
+    *       @OA\JsonContent(
+    *          @OA\Property(property="dataPayload", type="object",
+    *             @OA\Property(property="data", type="object",ref="#/components/schemas/Space"),
+    *             @OA\Property(property="toastMessage", type="string", example="space updated succefully"),
+    *             @OA\Property(property="toastTheme", type="string",example="success"),
+    *          )
+    *       )
+    *    ),
+    * )
+    */
+    'POST role/{id}' => 'role/update',
 
     /**
-     * @OA\Post(
-     * path="/auth/update-password",
-     * summary="change user current password to a new password",
-     * security={{}},
-     * tags={"Authentication"},
-     * @OA\RequestBody(
-     *    required=true,
-     *    description="Old Password, New Password",
-     *    @OA\JsonContent(
-     *       required={"Old Password", "Old Password"},
-     *              @OA\Property(property="Old Password", type="string",title="Old Password", example="admin"),
-     *              @OA\Property(property="New Password", type="string",title="New Password", example="admin"),
-     *    ),
-     * ),
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * ),
-     * @OA\Response(
-     *    response=422,
-     *    description="Data Validation Error",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="errorPayload", type="object",
-     *          @OA\Property(property="errors", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
-     *          @OA\Property(property="toastTheme", type="string",example="danger"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'POST update-password' => 'auth/change-password',
+    * @OA\Delete(path="/auth/role/{id}",
+    *    tags={"Role"},
+    *    summary="Deletes an existing Role model.",
+    *     @OA\Parameter(description="Role unique ID to delete",in="path",name="id",required=true,@OA\Schema(type="string",)),
+    *     @OA\Response(
+    *         response=202,
+    *         description="Deletion successful",
+    *         @OA\JsonContent(
+    *           @OA\Property(property="dataPayload", type="object")
+    *         )
+    *     ),
+    * )
+    */
+    'DELETE role/{id}'  => 'role/delete',
 
     /**
-     * @OA\Get(
-     * path="/auth/me",
-     * summary="Get the currently logged in user profile details",
-     * tags={"Authentication"},
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'GET profile-view'         => 'auth/me',
-
-    /**
-     * @OA\Get(
-     * path="/auth/me",
-     * summary="Updates user profile details",
-     * tags={"Authentication"},
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="username", type="string",title="Username", example="admin"),
-     *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *          ),
-     *          @OA\Property(property="toastMessage", type="string", example="Access Granted"),
-     *          @OA\Property(property="toastTheme", type="string",example="success"),
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'PUT profile-update'         => 'auth/me',
-
-
-    /**
-     * @OA\Get(
-     * path="/auth/refresh",
-     * summary="Get the currently logged in user",
-     * tags={"Authentication"},
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="token", type="string", example="xxx.xxx.xxx"),
-     *          )
-     *       )
-     *    )
-     * )
-     *),
-     */
-    'POST refresh'         => 'auth/refresh',
-
-
-    /**
-     * @OA\DELETE(
-     * path="/auth/refresh",
-     * summary="log out currently logged in user",
-     * tags={"Authentication"},
-     * @OA\Response(
-     *    response=201,
-     *    description="Data payload",
-     *    @OA\JsonContent(
-     *       @OA\Property(property="dataPayload", type="object",
-     *          @OA\Property(property="data", type="object",
-     *              @OA\Property(property="token", type="string", example="xxx.xxx.xxx"),
-     *          )
-     *       )
-     *    )
-     * )
-     *),
-     */
-     'DELETE refresh'     => 'auth/refresh'
+    * @OA\Patch(path="/auth/role/{id}",
+    *    tags={"Space"},
+    *    summary="Restores a deleted role model.",
+    *     @OA\Parameter(description="role unique ID to restore",in="path",name="id",required=true,@OA\Schema(type="string",)),
+    *     @OA\Response(
+    *         response=202,
+    *         description="Restoration successful",
+    *         @OA\JsonContent(
+    *           @OA\Property(property="dataPayload", type="object")
+    *         )
+    *     ),
+    * )
+    */
+    'PATCH role/{id}'  => 'role/delete',
     ];
