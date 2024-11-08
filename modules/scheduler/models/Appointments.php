@@ -32,11 +32,11 @@ class Appointments extends BaseModel
     const STATUS_ATTENDED = 6;
     const STATUS_ACTIVE = 10;
     const STATUS_PENDING = 11;
-    const STATUS_CONFIRMED = 2;
     const STATUS_RESCHEDULE = 3;
     const STATUS_CANCELLED = 4;
     const STATUS_RESCHEDULED = 5;
     const STATUS_DELETED = 0;
+    const STATUS_REJECTED = 2;
 
     // appointment priorities
 
@@ -56,7 +56,7 @@ class Appointments extends BaseModel
         self::STATUS_MISSED => 'Missed',
         self::STATUS_ATTENDED => 'Attended',
         self::STATUS_ACTIVE => 'Active',
-        self::STATUS_CONFIRMED => 'Confirmed',
+        self::STATUS_REJECTED => 'Rejected',
         self::STATUS_RESCHEDULE => 'Reschedule',
         self::STATUS_RESCHEDULED => 'Rescheduled',
         self::STATUS_CANCELLED => 'Cancelled',
