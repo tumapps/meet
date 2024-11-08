@@ -5,18 +5,20 @@ namespace auth\controllers;
 use Yii;
 use auth\models\AuthItem;
 use auth\models\searches\AuthItemSearch;
+use yii\rbac\Item;
 
 class RoleController extends \helpers\ApiController
 {
 	public function actionIndex()
-	{
+    {
         $searchModel = new AuthItemSearch();
+        $searchModel->type = Item::TYPE_ROLE;
+
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AuthItemSearch');
         Yii::debug($search, 'searchParams');
         $dataProvider = $searchModel->search($search);
         return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
-
-	}
+    }
 
 	public function actionView($id)
     {
