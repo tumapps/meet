@@ -49,6 +49,7 @@ class EventHandler
 		$email = $event->data['email'];
     	$subject = $event->data['subject'];
     	$bookedUserEmail = $event->data['user_email'];
+    	$attendeesEmails = $event->data['attendees_emails'];
 
     	$commonData = [
     		'date' => $event->data['date'],
@@ -69,6 +70,57 @@ class EventHandler
     	]));
 
     	self::addEmailToQueue($bookedUserEmail, $subject, $vcEmailBody);
+
+    	if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+        		$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
+            	'recipientType' => 'attendee',
+            	'attendeeName' => $attendeeName
+        		]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+    		}
+    	}
+	}
+
+	public static function onAppointmentRejected(Event $event)
+	{
+		$email = $event->data['email'];
+    	$subject = $event->data['subject'];
+    	$bookedUserEmail = $event->data['user_email'];
+    	$attendeesEmails = $event->data['attendees_emails'];
+
+    	$commonData = [
+    		'date' => $event->data['date'],
+    		'startTime' => $event->data['start_time'],
+    		'endTime' => $event->data['end_time'],
+    		'username' => $event->data['username'],
+    		'contact_name' => $event->data['contact_name'],
+    		'rejectionReason' => $event->data['rejection_reason']
+    	];
+
+    	$userEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
+	        'recipientType' => 'user',
+    	]));
+
+    	self::addEmailToQueue($email, $subject, $userEmailBody);
+
+    	$vcEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
+	        'recipientType' => 'vc',
+    	]));
+
+    	self::addEmailToQueue($bookedUserEmail, $subject, $vcEmailBody);
+
+    	if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+        		$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
+            	'recipientType' => 'attendee',
+            	'attendeeName' => $attendeeName
+        		]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+    		}
+    	}
 	}
 
 	public static function onAppointmentCancelled(Event $event)
