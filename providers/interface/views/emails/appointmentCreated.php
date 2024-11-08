@@ -86,9 +86,14 @@
             <?php if ($recipientType === 'user'): ?>
                 <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
                 <p>An appointment has been successfully created for you with <?= htmlspecialchars($username) ?>. Below are the appointment details:</p>
+
             <?php elseif ($recipientType === 'vc'): ?>
                 <p>Dear <?= htmlspecialchars($username) ?>,</p>
                 <p>A new appointment has been booked with you by <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
+             
+            <?php elseif ($recipientType === 'attendee'): ?>
+                <p>Dear <?= htmlspecialchars($attendeeName) ?>,</p>
+                <p>You have been invited to attend a scheduled appointment with <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
             <?php endif; ?>
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
