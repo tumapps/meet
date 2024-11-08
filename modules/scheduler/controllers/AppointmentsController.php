@@ -106,16 +106,25 @@ class AppointmentsController extends \helpers\ApiController {
     public function actionApprove($id)
     {
         // Yii::$app->user->can('superAdmin');
-        $appointment = Appointments::findOne($id);
+        $model = $this->findModel($id);
 
-        if (!$appointment || $appointment->status !== Appointments::STATUS_PENDING) {
+        if ($model->status !== Appointments::STATUS_PENDING) {
             return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be approved. It may not exist or is not pending.']);
         }
 
-        $appointment->status = Appointments::STATUS_ACTIVE;
+        $model->status = Appointments::STATUS_ACTIVE;
 
-        if ($appointment->save(false)) {
-            // send notifications
+        if ($model->save(false)) {
+            $model->sendAppointmentCreatedEvent(
+                $model->id,
+                $model->email_address,
+                $model->contact_name, 
+                $model->user_id,
+                $model->appointment_date, 
+                $model->start_time,
+                $model->end_time
+            );
+
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been approved successfully.']);
 
         }
@@ -126,16 +135,38 @@ class AppointmentsController extends \helpers\ApiController {
     public function actionReject($id)
     {
         // Yii::$app->user->can('superAdmin');
-        $appointment = Appointments::findOne($id);
+        $request = Yii::$app->request;
+        $model = $this->findModel($id);
 
-        if (!$appointment || $appointment->status !== Appointments::STATUS_PENDING) {
+        if ($model->status !== Appointments::STATUS_PENDING) {
             return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be rejected. It may not exist or is not pending.']);
         }
 
-        $appointment->status = Appointments::STATUS_REJECTED;
+        $model->scenario = Appointments::SCENARIO_REJECT;
 
-        if ($appointment->save(false)) {
+        if ($request->isPut) {
+            $putParams = $request->getBodyParams();
+            $reason = isset($putParams['rejection_reason']) ? $putParams['rejection_reason'] : null;
+        }
+
+        $model->rejection_reason = $reason;
+
+        if (!$model->validate()) {
+            return $this->errorResponse($model->getErrors());
+        }
+
+        $model->status = Appointments::STATUS_REJECTED;
+
+        if ($model->save(false)) {
             // send notification
+            $model->sendAppointmentRejectedEvent(
+                $model->email_address,
+                $model->contact_name,
+                $model->user_id,
+                $model->date,
+                $model->start_time,
+                $model->end_time
+            );
             return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been rejected successfully.']);
         }
 
@@ -258,6 +289,7 @@ class AppointmentsController extends \helpers\ApiController {
                     $this->handleFileUpload($uploadedFile, $model->id);
 
                     $model->sendAppointmentCreatedEvent(
+                        $model->id,
                         $dataRequest['Appointments']['email_address'],
                         $dataRequest['Appointments']['contact_name'], 
                         $dataRequest['Appointments']['user_id'],
