@@ -46,6 +46,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(10),
             'cancellation_reason' => $this->string(255)->null(),
+            'rejection_reason' => $this->string(255)->null(),
             'priority' => $this->integer()->notNull(),
             'checked_in' => $this->boolean()->defaultValue(false),
             // 'is_deleted' => $this->boolean()->defaultValue(false),
