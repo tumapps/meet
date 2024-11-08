@@ -101,6 +101,14 @@ class Register extends Model
                 $settings->advanced_booking = 30; //dfault 30 min
 
                 if($settings->save()){
+
+                    $auth = Yii::$app->authManager;
+                    $defaultRole = $auth->getRole('user');
+
+                    if ($defaultRole) {
+                        $auth->assign($defaultRole, $user->user_id);
+                    }
+                    
                     return $user;
                 }
             }
@@ -111,8 +119,6 @@ class Register extends Model
 
         } else {
             return false;
-        }
-        
+        } 
     }
-
 }
