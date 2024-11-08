@@ -4,6 +4,7 @@ namespace scheduler\models;
 
 use Yii;
 use auth\models\User;
+use scheduler\models\AppointmentAttendees;
 use yii\base\Event;
 use helpers\EventHandler;
 
@@ -50,6 +51,7 @@ class Appointments extends BaseModel
     const EVENT_AFFECTED_APPOINTMENTS = 'affectedAppointments';
     const EVENT_APPOINTMENT_REMINDER = 'appointmentReminder';
     const EVENT_APPOINTMENT_CREATED = 'appointmentCreated';
+    const EVENT_APPOINTMENT_REJECTED = 'appointmentRejected';
 
 
     protected static $statusLabels = [
@@ -64,6 +66,8 @@ class Appointments extends BaseModel
     ];
 
     const SCENARIO_CANCEL = 'cancel';
+    const SCENARIO_REJECT = 'reject';
+
     
 
     public function init()
@@ -131,6 +135,9 @@ class Appointments extends BaseModel
             // applied only when cancelling appointments
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
+
+            ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
+            ['rejection_reason', 'string', 'max' => 255],
         ];
     }
 
@@ -138,6 +145,7 @@ class Appointments extends BaseModel
     {
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CANCEL] = ['cancellation_reason'];
+        $scenarios[self::SCENARIO_REJECT] = ['rejection_reason'];
         return $scenarios;
     }
 
@@ -168,6 +176,7 @@ class Appointments extends BaseModel
             'subject' => 'Subject',
             'description' => 'Notes',
             'cancellation_reason' => 'Reason',
+            'rejection_reason'  => 'Rejection Reason'
             'appointment_type' => 'Appointment Type',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -286,7 +295,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
     }
 
-    public function sendAppointmentCreatedEvent($email, $name, $user_id, $date, $startTime, $endTime){
+    public function sendAppointmentCreatedEvent($id, $email, $name, $user_id, $date, $startTime, $endTime){
 
         $event = new Event();
         $event->sender = $this;
@@ -294,6 +303,8 @@ class Appointments extends BaseModel
 
         $user = User::findOne($user_id);
         $bookedUserEmail = $user->profile->email_address;
+
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id);
 
         $eventData = [
             'email' => $email,
@@ -304,6 +315,7 @@ class Appointments extends BaseModel
             'end_time' => $endTime,
             'username' => $this->getUserName($user_id),
             'user_email' => $bookedUserEmail,
+            'attendees_emails' => $attendeesEmails,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_CREATED, [EventHandler::class, 'onCreatedAppointment'], $eventData);
@@ -466,6 +478,34 @@ class Appointments extends BaseModel
 
         $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $eventData);
         $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event); 
+    }
+
+    public function sendAppointmentRejectedEvent($email, $name, $user_id, $date, $startTime, $endTime)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Appointment Rejected';
+
+        $user = User::findOne($user_id);
+        $bookedUserEmail = $user->profile->email_address;
+
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+
+        $eventData = [
+            'email' => $email,
+            'subject' => $subject,
+            'contact_name' => $name,
+            'date' => $date,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'username' => $this->getUserName($user_id),
+            'user_email' => $bookedUserEmail,
+            'attendees_emails' => $attendeesEmails,
+            'rejection_reason' => $this->rejection_reason,
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_REJECTED, [EventHandler::class, 'onAppointmentRejected'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_REJECTED, $event);
     }
 
     public function getRescheduledAppointment($id)
