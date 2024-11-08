@@ -80,6 +80,68 @@ class AppointmentsController extends \helpers\ApiController {
         return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
     }
 
+    public function actionPendingAppointments()
+    {
+        // Yii::$app->user->can('superAdmin');
+
+        $searchModel = new AppointmentsSearch();
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
+        $dataProvider = $searchModel->search($search);
+
+        $dataProvider->query->andWhere(['status' => Appointments::STATUS_PENDING]);
+
+        $appointments = $dataProvider->getModels();
+
+        foreach ($appointments as &$appointment) {
+            $appointmentData = $appointment->toArray();
+            $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
+            $appointment = $appointmentData;
+        }
+
+        $dataProvider->setModels($appointments);
+
+        return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
+    }
+
+    public function actionApprove($id)
+    {
+        // Yii::$app->user->can('superAdmin');
+        $appointment = Appointments::findOne($id);
+
+        if (!$appointment || $appointment->status !== Appointments::STATUS_PENDING) {
+            return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be approved. It may not exist or is not pending.']);
+        }
+
+        $appointment->status = Appointments::STATUS_ACTIVE;
+
+        if ($appointment->save(false)) {
+            // send notifications
+            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been approved successfully.']);
+
+        }
+
+         return $this->toastResponse(['statusCode'=>500,'message'=>'Failed to approve appointment']);
+    }
+
+    public function actionReject($id)
+    {
+        // Yii::$app->user->can('superAdmin');
+        $appointment = Appointments::findOne($id);
+
+        if (!$appointment || $appointment->status !== Appointments::STATUS_PENDING) {
+            return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be rejected. It may not exist or is not pending.']);
+        }
+
+        $appointment->status = Appointments::STATUS_REJECTED;
+
+        if ($appointment->save(false)) {
+            // send notification
+            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been rejected successfully.']);
+        }
+
+        return $this->toastResponse(['statusCode'=>500,'message'=>'Failed to reject appointment.']);
+    }
+
     public function actionView($id)
     {
         // Yii::$app->user->can('schedulerAppointmentsView');
@@ -474,7 +536,8 @@ class AppointmentsController extends \helpers\ApiController {
         }
     }
 
-    protected function saveAttendees($dataRequest, $id) {
+    protected function saveAttendees($dataRequest, $id)
+    {
         $attendees = $dataRequest['Appointments']['attendees'] ?? [];
         $date = $dataRequest['Appointments']['appointment_date'];
         $startTime = $dataRequest['Appointments']['start_time'];
