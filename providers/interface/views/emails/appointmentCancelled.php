@@ -74,10 +74,20 @@
 
             <!-- Different content based on the recipient -->
             <?php if ($recipientType === 'user'): ?>
-                <p>We regret to inform you that your appointment scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.</p>
+                <p>
+                    We regret to inform you that your appointment scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.
+                </p>
 
             <?php elseif ($recipientType === 'vc'): ?>
-                <p>The appointment you had with <strong><?= htmlspecialchars($name) ?></strong> scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.</p>
+                <p>
+                    The appointment you had with <strong><?= htmlspecialchars($name) ?></strong> scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been cancelled.
+                </p>
+            <?php elseif ($recipientType === 'attendee'): ?>
+                <p>Dear <?= htmlspecialchars($attendeeName) ?>,</p>
+                <p>
+                    Unfortunately, the appointment you were invited to attend on 
+                    <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?></strong> to <strong><?= htmlspecialchars($endTime) ?></strong> has been Cancelled.
+                </p>
             <?php endif; ?>
 
             <P><strong>Reason:</strong> <?= htmlspecialchars($reason); ?></P>
