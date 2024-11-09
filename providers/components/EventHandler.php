@@ -128,6 +128,7 @@ class EventHandler
     	 
         $contactEmail = $event->data['contactEmail'];
         $bookedUserEmail = $event->data['bookedUserEmail'];
+        $attendeesEmails = $event->data['attendees_emails'];
 
          $commonData = [
 	        'date' => $event->data['date'],
@@ -153,37 +154,82 @@ class EventHandler
 
         // self::send($bookedUserEmail, $event->data['subject'], $vcBody);
         self::addEmailToQueue($bookedUserEmail, $event->data['subject'], $vcBody);
+
+        if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+        		$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
+            	'recipientType' => 'attendee',
+            	'attendeeName' => $attendeeName
+        		]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+    		}
+    	}
     }
 
     public static function onAppointmentReschedule(Event $event)
     {
     	$email = $event->data['email'];
     	$subject = $event->data['subject'];
+    	$attendeesEmails = $event->data['attendees_emails'];
 
-    	$body = Yii::$app->view->render('@ui/views/emails/appointmentAffected', [
-    		'name' => $event->data['name'],
+    	$commonData = [
     		'bookedUserName' => $event->data['bookedUserName'],
     		'supportEmail' => 'example@gmail.com'
-    	]);
+    	];
+
+    	$body = Yii::$app->view->render('@ui/views/emails/appointmentAffected', 
+    		array_merge($commonData, [
+    			'name' => $event->data['name'],
+    			'recipientType' => 'user',
+    	]));
 
     	// self::send($email, $subject, $body);
     	self::addEmailToQueue($email, $subject, $body);
+
+    	if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+        		$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentAffected', array_merge($commonData, [
+            		'recipientType' => 'attendee',
+            		'attendeeName' => $attendeeName
+        		]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+    		}
+    	}
     }
 
     public static function onAppointmentRescheduled(Event $event)
     {
     	$email = $event->data['email'];
     	$subject = $event->data['subject'];
+    	$attendeesEmails = $event->data['attendees_emails'];
 
-        $body = Yii::$app->view->render('@ui/views/emails/appointmentRescheduled',[
-        	'name' => $event->data['name'],
-        	'date' => $event->data['date'],
+    	$commonData = [
+    		'username' => $event->data['username'],
+    		'date' => $event->data['date'],
         	'startTime' => $event->data['startTime'],
         	'endTime' => $event->data['endTime'],
-        ]);
+    	];
 
-        // self::send($email, $subject, $body);
+        $body = Yii::$app->view->render('@ui/views/emails/appointmentRescheduled', 
+        	array_merge($commonData, [
+        	'recipientType' => 'user',
+        	'name' => $event->data['name'],
+        ]));
+
         self::addEmailToQueue($email, $subject, $body);
+
+        if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+        		$attendeeBody = Yii::$app->view->render('@ui/views/emails/appointmentRescheduled', array_merge($commonData, [
+            		'recipientType' => 'attendee',
+            		'attendeeName' => $attendeeName
+        		]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody);
+    		}
+    	}
     }
 
     public static function onAffectedAppointments(Event $event)
@@ -203,19 +249,38 @@ class EventHandler
     {
     	$email = $event->data['email'];
     	$subject = $event->data['subject'];
+    	$attendeesEmails = $event->data['attendees_emails'];
     	// getting the appoiment id to update the reminder_sent_at when the reminder is sent
     	$id = $event->data['appointment_id']; 
 
-    	$body = Yii::$app->view->render('@ui/views/emails/appointmentReminder',[
-        	'date' => $event->data['date'],
+    	$commonData = [
+    		'date' => $event->data['date'],
         	'startTime' => $event->data['startTime'],
         	'endTime' => $event->data['endTime'],
-        	'contact_name' => $event->data['contact_name'],
         	'username' => $event->data['username'],
-        ]);
+    	];
+
+    	$body = Yii::$app->view->render('@ui/views/emails/appointmentReminder', 
+    		array_merge($commonData, [
+        		'contact_name' => $event->data['contact_name'],
+        		'recipientType' => 'user'
+        ]));
 
     	// self::send($email, $subject, $body);
     	self::addEmailToQueue($email, $subject, $body, 'reminder', $id);
+
+    	if(!empty($attendeesEmails)) {
+    		foreach ($attendeesEmails as $attendeeEmail) {
+    			$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+
+        		$attendeeBody = Yii::$app->view->render('@ui/views/emails/appointmentReminder', 
+		    		array_merge($commonData, [
+		        		'attendeeName' => $attendeeName,
+		        		'recipientType' => 'attendee'
+		        ]));
+        		self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody, 'reminder', $id);
+    		}
+    	}
     }
 
     public static function addEmailToQueue($email, $subject, $body, $type = null, $id = null)
