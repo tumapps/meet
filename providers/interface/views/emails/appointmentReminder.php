@@ -75,8 +75,15 @@
             <h2>Appointment Reminder</h2>
         </div>
         <div class="email-body">
-            <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
-            <p>This is a reminder for your upcoming appointment with <?= htmlspecialchars($username) ?>. Please review the details below:</p>
+            <p>Dear <?= htmlspecialchars($recipientType === 'attendee' ? $attendeeName : $contact_name) ?>,</p>
+            
+            <?php if ($recipientType === 'user'): ?>
+                <p>This is a reminder for your upcoming appointment with <?= htmlspecialchars($username) ?>. Please review the details below:</p>
+            
+            <?php elseif ($recipientType === 'attendee'): ?>
+                <p>This is a reminder that you have been invited to attend an appointment with <?= htmlspecialchars($username) ?>. Please review the details below:</p>
+            <?php endif; ?>
+
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
