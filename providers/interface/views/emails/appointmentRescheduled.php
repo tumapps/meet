@@ -71,20 +71,28 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h2>Appointment Rescheduled Successfully</h2>
+            <h2>Appointment Rescheduled</h2>
         </div>
         <div class="email-body">
-            <p>Dear <?= htmlspecialchars($name) ?>,</p>
-            <p>Your appointment has been successfully rescheduled. Below are the updated details:</p>
-            <ul class="appointment-details">
-                <li><strong>Date:</strong> <?= htmlspecialchars($date) ?></li>
-                <li><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></li>
-            </ul>
-            <p>If you have any questions or need further assistance, please feel free to contact us.</p>
+            <p>Dear <?= htmlspecialchars($recipientType === 'attendee' ? $attendeeName : $name) ?>,</p>
+            
+            <?php if ($recipientType === 'user'): ?>
+                <p>Your appointment with <?= htmlspecialchars($username) ?> has been rescheduled. Please review the updated details below:</p>
+            
+            <?php elseif ($recipientType === 'attendee'): ?>
+                <p>The appointment you are invited to attend with <?= htmlspecialchars($username) ?> has been rescheduled. Please review the updated details below:</p>
+            <?php endif; ?>
+
+            <div class="appointment-details">
+                <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
+                <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
+            </div>
         </div>
         <div class="email-footer">
-            <p>&copy; <?= date('Y') ?> Your Company. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> Tum Tumeet. All rights reserved.</p>
         </div>
     </div>
 </body>
 </html>
+
+
