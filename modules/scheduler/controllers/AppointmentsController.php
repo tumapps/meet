@@ -158,7 +158,6 @@ class AppointmentsController extends \helpers\ApiController {
         $model->status = Appointments::STATUS_REJECTED;
 
         if ($model->save(false)) {
-            // send notification
             $model->sendAppointmentRejectedEvent(
                 $model->email_address,
                 $model->contact_name,
