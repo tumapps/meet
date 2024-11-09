@@ -74,8 +74,16 @@
         </div>
         <div class="email-body" style="font-family: Arial, sans-serif; color: #333;">
             <p>Dear <?= htmlspecialchars($name) ?>,</p>
-            <p>We wanted to inform you that due to <?= htmlspecialchars($bookedUserName) ?> updating their availability, your appointment has been affected.</p>
-            <p>We will contact you shortly to reschedule the appointment. We apologize for any inconvenience this may cause, and we appreciate your understanding and patience.</p>
+            
+            <?php if ($recipientType === 'user'): ?>
+                <p>We wanted to inform you that due to <?= htmlspecialchars($bookedUserName) ?> updating their availability, your appointment has been affected.</p>
+                <p>We will contact you shortly to reschedule the appointment. We apologize for any inconvenience this may cause, and we appreciate your understanding and patience.</p>
+            
+            <?php elseif ($recipientType === 'attendee'): ?>
+                <p>We wanted to inform you that the appointment you were invited to with <?= htmlspecialchars($bookedUserName) ?> has been affected due to a change in availability.</p>
+                <p>You will be notified of the new schedule once it is confirmed. We apologize for any inconvenience this may cause, and thank you for your patience.</p>
+            <?php endif; ?>
+            
             <p>If you have any questions in the meantime, feel free to reach out to us at <?= htmlspecialchars($supportEmail) ?>.</p>
             <p>Thank you.</p>
         </div>
@@ -84,4 +92,5 @@
         </div>
     </div>
 </body>
+
 </html>
