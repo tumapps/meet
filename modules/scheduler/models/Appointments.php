@@ -176,7 +176,7 @@ class Appointments extends BaseModel
             'subject' => 'Subject',
             'description' => 'Notes',
             'cancellation_reason' => 'Reason',
-            'rejection_reason'  => 'Rejection Reason'
+            'rejection_reason'  => 'Rejection Reason',
             'appointment_type' => 'Appointment Type',
             'status' => 'Status',
             'created_at' => 'Created At',
@@ -281,6 +281,8 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $subject = 'Appointment Cancelled';
 
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+
         $eventData = [
             'contactEmail' => $email,
             'contact_name' => $name,
@@ -290,6 +292,8 @@ class Appointments extends BaseModel
             'bookedUserEmail' => $bookedUserEmail,
             'cancellation_reason' => $this->cancellation_reason,
             'subject' => $subject,
+            'attendees_emails' => $attendeesEmails,
+
         ];
         $this->on(self::EVENT_APPOINTMENT_CANCELLED, [EventHandler::class, 'onAppointmentCancelled'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
@@ -328,11 +332,15 @@ class Appointments extends BaseModel
         $event->sender = $this;
         $userName = User::find()->select('username')->where(['user_id' => $bookedUserId]);
         $subject = 'Appointment Reschedule';
+
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+
         $eventData = [
             'email' => $email,
             'subject' => $subject,
             'name' => $name,
-            'bookedUserName' => $userName
+            'bookedUserName' => $userName,
+            'attendees_emails' => $attendeesEmails,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $eventData);
@@ -344,6 +352,8 @@ class Appointments extends BaseModel
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Rescheduled';
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+
         $eventData = [
             'email' => $email,
             'subject' => $subject,
@@ -351,6 +361,8 @@ class Appointments extends BaseModel
             'sartTime' => $startTime,
             'endTime' => $endTime,
             'name' => $name,
+            'username' => $this->getUserName($user_id),
+            'attendees_emails' => $attendeesEmails,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $eventData);
@@ -427,6 +439,7 @@ class Appointments extends BaseModel
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Reminder';
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
 
         $eventData = [
             'email' => $email,
@@ -437,6 +450,7 @@ class Appointments extends BaseModel
             'contact_name' => $contact_name,
             'username' => $this->getUserName($user_id),
             'appointment_id' => $id,
+            'attendees_emails' => $attendeesEmails,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);
