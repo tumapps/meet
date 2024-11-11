@@ -116,4 +116,9 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     public function getProfile(){
          return $this->hasOne(Profiles::class, ['user_id' => 'user_id']);
     }
+
+    public function getAppointments()
+    {
+        return $this->hasMany(Appointments::class, ['user_id' => 'user_id']);
+    }
 }
