@@ -14,12 +14,12 @@ class UserSearch extends User
     /**
      * {@inheritdoc}
      */
-    public $globalSearch;
+    public $search;
     public function rules()
     {
         return [
             [['user_id', 'status', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['username', 'auth_key', 'password_hash'], 'safe'],
+            [['username', 'auth_key', 'password_hash', 'search'], 'safe'],
         ];
     }
 
@@ -59,9 +59,14 @@ class UserSearch extends User
             return $dataProvider;
         }
 
+        $query->joinWith('profile');
+
         // grid filtering conditions
-        if (isset($this->globalSearch)) {
-            $query->orFilterWhere(['ilike', 'username', $this->globalSearch]);
+        if (isset($this->search)) {
+            $query->orFilterWhere(['ilike', 'username', $this->search])
+                  ->orFilterWhere(['ilike', 'profiles.first_name', $this->search])
+                  ->orFilterWhere(['ilike', 'profiles.last_name', $this->search])
+                  ->orFilterWhere(['ilike', 'profiles.email_address', $this->search]);
         } else {
             $query->andFilterWhere(['ilike', 'username', $this->username]);
         }

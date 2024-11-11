@@ -52,6 +52,10 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
+	public function actionSearchUser()
+	{
+		
+	}
 
 	public function actionLogin()
 	{
