@@ -46,6 +46,24 @@ class SpaceController extends \helpers\ApiController{
         return $this->errorResponse($model->getErrors()); 
     }
 
+    public function actionLockSpace($id)
+    {
+        $space = Space::findOne($id);
+        
+        if (!$space) {
+            return $this->toastResponse(['statusCode'=>400,'message'=>'Space not found.']);
+        }
+
+        $space->is_locked = !$space->is_locked;
+
+        if ($space->save()) {
+             return $this->toastResponse(['statusCode'=>200,'message'=> $space->is_locked ? 'Space has been locked.' : 'Space has been unlocked.']);
+        } else {
+            return $this->errorResponse($space->getErrors()); 
+        }
+    }
+
+
     public function actionUpdate($id)
     {
         Yii::$app->user->can('schedulerSpaceUpdate');
