@@ -3,6 +3,7 @@
 namespace scheduler\models;
 
 use Yii;
+use scheduler\models\Space;
 /**
  *@OA\Schema(
  *  schema="SpaceAvailability",
@@ -55,7 +56,7 @@ class SpaceAvailability extends BaseModel
             [['space_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['space_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
-            [['space_id'], 'exist', 'skipOnError' => true, 'targetClass' => Spaces::class, 'targetAttribute' => ['space_id' => 'id']],
+            [['space_id'], 'exist', 'skipOnError' => true, 'targetClass' => Space::class, 'targetAttribute' => ['space_id' => 'id']],
         ];
     }
 
@@ -95,11 +96,8 @@ class SpaceAvailability extends BaseModel
             ->where(['space_id' => $spaceId, 'date' => $date, 'is_deleted' => 0])
             ->andWhere(['or',
                 ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
-                
                 ['and', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-                
                 ['and', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-                
                 ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
             ])
             ->exists();
