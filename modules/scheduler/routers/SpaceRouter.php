@@ -139,6 +139,31 @@ return [
 'PUT space/{id}'     => 'space/update',
 
 /**
+ * @OA\Put(path="/scheduler/lock-space/{id}",
+ *   summary="Locks a space",
+ *   tags={"Space"},
+ *   @OA\Parameter(description="Space unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
+ *   @OA\Response(
+ *     response=200,
+ *     description="Lock a space",
+ *      @OA\JsonContent(
+ *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/Space"))
+ *      ),
+ *   @OA\Response(
+ *     response=404,
+ *     description="Resource not found",
+ *      @OA\JsonContent(
+ *           @OA\Property(property="errorPayload", type="object",
+ *               @OA\Property(property="statusCode", type="integer", example=404 ),
+ *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+ *           )
+ *      )
+ *   ),
+ * )
+ */
+'PUT lock-space/{id}'    => 'space/lock-space',
+
+/**
 * @OA\Delete(path="/scheduler/space/{id}",
 *    tags={"Space"},
 *    summary="Deletes an existing Space model.",
