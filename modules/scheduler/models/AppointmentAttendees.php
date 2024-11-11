@@ -110,7 +110,7 @@ class AppointmentAttendees extends BaseModel
             return $overlap;
     }
 
-    public function save($id, $staffId, $date, $startTime, $endTime)
+    public function addAttendee($id, $staffId, $date, $startTime, $endTime)
     {
         $this->appointment_id = $id;
         $this->staff_id = $staffId;
