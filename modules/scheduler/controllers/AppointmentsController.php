@@ -72,6 +72,24 @@ class AppointmentsController extends \helpers\ApiController {
             $appointmentData = $appointment->toArray();
             // $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
+
+            $space = SpaceAvailability::find()
+                ->where(['appointment_id' => $appointment->id])
+                ->asArray()
+                ->one();
+
+            if ($space && isset($space['space_id'])) {
+                $spaceDetails = Space::getSpaceNameDetails($space['space_id']);
+                $appointmentData['space'] = $spaceDetails;
+            } else {
+                $appointmentData['space'] = null;
+            }   
+
+            $attendees = AppointmentAttendees::find()
+                ->where(['appointment_id' => $appointment->id])
+                ->asArray()
+                ->all();
+            $appointmentData['attendees'] = $attendees;
             $appointment = $appointmentData;
         }
 
@@ -188,7 +206,6 @@ class AppointmentsController extends \helpers\ApiController {
 
     public function actionAppointmentsTypes()
     {
-
         $model = new AppointmentType();
         $appointmentTypes = $model->getAppointmentTypes();
 
@@ -235,6 +252,73 @@ class AppointmentsController extends \helpers\ApiController {
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+        
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+
+            if($model->load($dataRequest)) {
+                if(!$model->validate()) {
+                    return $this->errorResponse($model->getErrors()); 
+                }
+
+                $uploadedFile = UploadedFile::getInstanceByName('file');
+
+                $space = Space::findOne($dataRequest['Appointments']['space_id']);
+
+                if (!$space) {
+                  return $this->payloadResponse(['message' => 'The specified space does not exist']);
+                }
+
+                $levelName = $space->level ? $space->level->name : null;
+
+                $model->status = Appointments::STATUS_ACTIVE;
+
+                if ($levelName !== 'Level 4') {
+                    $model->status = Appointments::STATUS_PENDING;
+                }
+
+                if ($model->save()){
+
+                    $this->saveAttendees($dataRequest, $model->id);
+                    $this->saveSpaceAvailability($dataRequest, $model->id);
+                    $this->handleFileUpload($uploadedFile, $model->id);
+
+                   if ($model->status === Appointments::STATUS_ACTIVE) {
+                        $model->sendAppointmentCreatedEvent(
+                            $model->id,
+                            $model->email_address,
+                            $model->contact_name,
+                            $model->user_id,
+                            $model->appointment_date,
+                            $model->start_time,
+                            $model->end_time
+                        );
+                        $transaction->commit();
+                        return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment added successfully']);
+                    } else {
+
+                        $transaction->commit();
+                        return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment created successfully, Pending Approval']);
+                        }
+                } else {
+                    throw new \Exception('Failed to save appointment');
+                }
+            }
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return $this->errorResponse(['message' => [$e->getMessage()]]);
+        }
+    }
+
+    public function actionUpdate($id)
+    {
+        // Yii::$app->user->can('schedulerAppointmentsUpdate');
+        $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+        $model = $this->findModel($id);
+
+        $attendees = AppointmentAttendees::findAll(['appointment_id' => $id]);
+        $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
 
         if($model->load($dataRequest)) {
             if(!$model->validate()) {
@@ -248,94 +332,13 @@ class AppointmentsController extends \helpers\ApiController {
             if (($spaceOverlapResponse = $this->checkOverlappingSpace($dataRequest)) !== true) {
                 return $spaceOverlapResponse;
             }
-
+        
             if (($advanceResponse = $this->checkAdvanceBooking($dataRequest)) !== true) {
                 return $advanceResponse;
             }
 
             if (($windowResponse = $this->checkBookingWindow($dataRequest)) !== true) {
                 return $windowResponse;
-            }
-
-            if (($availabilityResponse = $this->confirmAvailability($dataRequest)) !== true) {
-                return $availabilityResponse;
-            }
-
-            if (($attendeesResponse = $this->checkAttendeesAvailability($dataRequest)) !== true) {
-                return $attendeesResponse;
-            }
-
-            // cheking if there is overlapping appoiment ie if the appoitment is already placed
-            if (($overlappingAppoiment = $this->checkOverlappingAppoiment($dataRequest, $model)) !== true) {
-                return $overlappingAppoiment;
-            }
-
-            // get uploaded files ie
-            $uploadedFile = UploadedFile::getInstanceByName('file');
-
-            // Check space level
-            $space = Space::findOne($dataRequest['Appointments']['space_id']);
-            if (!$space) {
-                return $this->payloadResponse(['message' => 'The specified space does not exist.']);
-            }
-
-            $levelName = $space->level ? $space->level->name : null;
-
-             if ($levelName === 'Level 4') {
-                if ($model->save()) {
-                    // save attendees
-                    $this->saveAttendees($dataRequest, $model->id);
-                    $this->handleFileUpload($uploadedFile, $model->id);
-
-                    $model->sendAppointmentCreatedEvent(
-                        $model->id,
-                        $dataRequest['Appointments']['email_address'],
-                        $dataRequest['Appointments']['contact_name'], 
-                        $dataRequest['Appointments']['user_id'],
-                        $dataRequest['Appointments']['appointment_date'], 
-                        $dataRequest['Appointments']['start_time'],
-                        $dataRequest['Appointments']['end_time']
-                    );
-                    return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment added successfully']);
-                }
-             } else {
-                $model->status = Appointments::STATUS_PENDING;
-                if ($model->save()) {
-                    // save attendees
-                    $this->saveAttendees($dataRequest, $model->id);
-                    $this->handleFileUpload($uploadedFile, $model->id);
-                    return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment created successfully, Pending Approval']);
-                }
-             }
-        }
-    }
-
-    public function actionUpdate($id)
-    {
-        // Yii::$app->user->can('schedulerAppointmentsUpdate');
-        $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        $model = $this->findModel($id);
-
-        if($model->load($dataRequest)) {
-            if(!$model->validate()) {
-                return $this->errorResponse($model->getErrors()); 
-            }
-        
-            $advanced = TimeHelper::validateAdvanceBooking(
-                 $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['start_time'],
-                 $dataRequest['Appointments']['appointment_date']
-            );
-
-            if($advanced) {
-                return $this->payloadResponse(['message' => 'The selected appoitment start time overlaps with the minimum advanced booking time']); 
-            }
-
-            $validateBookingWindow = TimeHelper::isWithinBookingWindow(
-                $dataRequest['Appointments']['user_id'],$dataRequest['Appointments']['appointment_date']
-            );
-
-            if(!$validateBookingWindow){
-                return $this->payloadResponse(['message' => 'Appoitment is not within the open booking period',]); 
             }
 
             $isAvailable = $this->checkAvailability(
@@ -366,15 +369,29 @@ class AppointmentsController extends \helpers\ApiController {
                 $model->status = Appointments::STATUS_RESCHEDULED;
             }
             
-            if($model->save()) {
-                if($model->status === Appointments::STATUS_RESCHEDULED){
-                    $model->sendAppointmentRescheduledEvent(
-                        $model->email_address, $model->appointment_date, $model->start_time, $model->end_time, 
-                        $model->contact_name
-                    );
-                }
+            $transaction = Yii::$app->db->beginTransaction();
 
-                return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
+            try {
+                if($model->save()) {
+                    $this->updateAttendees($dataRequest, $attendees);
+                    $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
+
+                    if($model->status === Appointments::STATUS_RESCHEDULED){
+                        $model->sendAppointmentRescheduledEvent(
+                            $model->email_address, $model->appointment_date, $model->start_time, $model->end_time, 
+                            $model->contact_name
+                        );
+                    }
+
+                    $transaction->commit();
+
+                    return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
+                } else {
+                    throw new \Exception('Failed to save appointment');
+                }
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                return $this->errorResponse(['message' => [$e->getMessage()]]);
             }
         } 
     }
@@ -579,7 +596,86 @@ class AppointmentsController extends \helpers\ApiController {
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
                 $staffId = $attendeeId; 
-                $addAttendees->save($id, $staffId, $date, $starTime, $endTime);
+                $addAttendees->addAttendee($id, $staffId, $date, $starTime, $endTime);
+            }
+        }
+    }
+
+    protected function saveSpaceAvailability($dataRequest, $appointmentId)
+    {
+        $model = new SpaceAvailability();
+
+        $model->space_id = $dataRequest['Appointments']['space_id'];
+        $model->appointment_id =  $appointmentId;
+        $model->date = $dataRequest['Appointments']['appointment_date'];
+        $model->start_time = $dataRequest['Appointments']['start_time'];
+        $model->end_time = $dataRequest['Appointments']['end_time'];
+
+        if (!$model->save()) {
+            throw new \Exception('Failed to save space availability: ' . implode(', ', $model->getErrorSummary(true)));
+        }
+    }
+
+    protected function updateAttendees($dataRequest, $currentAttendees)
+    {
+        if (empty($dataRequest['Appointments']['attendees'])) {
+            return;
+        }
+
+        $newAttendeesData = $dataRequest['Appointments']['attendees'];
+        $existingAttendeesIds = array_column($currentAttendees, 'id');
+        $newAttendeeIds = array_column($newAttendeesData, 'id');
+
+        foreach ($currentAttendees as $attendee) {
+            if (!in_array($attendee->id, $newAttendeeIds)) {
+                $attendee->delete();
+            }
+        }
+
+        foreach ($newAttendeesData as $attendeeData) {
+            if (in_array($attendeeData['id'], $existingAttendeesIds)) {
+                $attendee = AppointmentAttendees::findOne($attendeeData['id']);
+                $attendee->attributes = $attendeeData;
+
+                //Ensure that appointment_id is not modified in updates
+                unset($attendee->appointment_id);
+
+                if (!$attendee->validate() || !$attendee->save()) {
+                    throw new \Exception('Failed to update attendee');
+                }
+            } else {
+                $newAttendee = new AppointmentAttendees();
+                $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
+                $newAttendee->attributes = $attendeeData;
+                if (!$newAttendee->validate() || !$newAttendee->save()) {
+                    throw new \Exception('Failed to add new attendee');
+                }
+            }
+        }
+    }
+
+    protected function updateSpaceAvailability($dataRequest,$currentSpaceAvailability,$appointmentId)
+    {
+        if (empty($dataRequest['Appointments']['space'])) {
+            throw new \Exception('No space data provided');
+        }
+
+        $spaceData = $dataRequest['Appointments']['space'];
+
+        if ($currentSpaceAvailability) {
+            $currentSpaceAvailability->attributes = $spaceData;
+            $currentSpaceAvailability->appointment_id = $appointmentId;
+
+            if (!$currentSpaceAvailability->validate() || !$currentSpaceAvailability->save()) {
+                throw new \Exception('Failed to update space availability');
+            }
+        } else {
+            $newSpaceAvailability = new SpaceAvailability();
+            $newSpaceAvailability->attributes = $spaceData;
+            $newSpaceAvailability->appointment_id = $appointmentId;
+
+            if (!$newSpaceAvailability->validate() || !$newSpaceAvailability->save()) {
+                throw new \Exception('Failed to create space availability');
             }
         }
     }
