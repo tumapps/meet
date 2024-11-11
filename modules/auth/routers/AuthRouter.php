@@ -47,6 +47,8 @@
      * )
      */
     'GET users'     => 'auth/get-users',
+    // 'GET users'     => 'auth/index',
+
 
      /**
      * @OA\Post(
