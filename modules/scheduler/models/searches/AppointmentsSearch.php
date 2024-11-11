@@ -44,10 +44,6 @@ class AppointmentsSearch extends Appointments
     {
         $query = Appointments::find();
 
-        // $query->joinWith('user');
-
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -60,11 +56,13 @@ class AppointmentsSearch extends Appointments
             return $dataProvider;
         }
 
+        // $query->joinWith('user');
+
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'user_id' => $this->user_id,
+            'user_id' => $this->user_id, // comment this for join with to work
             'appointment_date' => $this->appointment_date,
             // 'is_deleted' => false,
             'start_time' => $this->start_time,
