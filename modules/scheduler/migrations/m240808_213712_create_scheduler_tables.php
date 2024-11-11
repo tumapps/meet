@@ -95,6 +95,7 @@ class m240808_213712_create_scheduler_tables extends Migration
         $this->createTable('{{%space_availability}}', [
             'id' => $this->primaryKey(),
             'space_id' => $this->integer()->notNull(),
+            'appointment_id' => $this->integer()->notNull(),
             'date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
@@ -104,6 +105,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[space_id]]) REFERENCES {{%spaces}} ([[id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
+            'FOREIGN KEY ([[appointment_id]]) REFERENCES {{%appointments}} ([[id]])' .
+            $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
 
