@@ -245,19 +245,21 @@ class TimeHelper
         $advancedBookingTime = (int)Settings::getAdvanceBookingDuration($user_id);
 
         if (!$advancedBookingTime) {
-            return 'Advance Booking Time not set';
+            $advancedBookingTime = 30; // default to 30 minutes
         }
 
+        $currentDateTime = time();
         $appointmentDateTime = strtotime($date . ' ' . $appointmentTime);
 
-        $advanceTime = strtotime('+' . $advancedBookingTime . ' minutes', time());
-        
-        if ($appointmentDateTime <= $advanceTime) {
-            return true; 
+        $minimumAdvanceTime = strtotime('+' . $advancedBookingTime . ' minutes', $currentDateTime);
+
+        if ($date == date('Y-m-d') && $appointmentDateTime < $minimumAdvanceTime) {
+            return false;
         }
 
-        return false;
+        return true;
     }
+
 
 
     public static function checkExpireTime($appointment_date, $slot_start_time)
