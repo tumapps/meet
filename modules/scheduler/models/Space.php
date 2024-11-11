@@ -119,4 +119,25 @@ class Space extends BaseModel
     {
         return $this->hasMany(SpaceAvailability::class, ['space_id' => 'id']);
     }
+
+    public static function getSpaceName($spaceId)
+    {
+        $space = self::findOne(['id' => $spaceId]);
+        if ($space) {
+            return [
+                'name' => $space->name,
+                'location' => $space->location,
+            ];
+        }
+        return null;
+    }
+
+    public static function getSpaceNameDetails($spaceId)
+    {
+        return self::find()
+            ->select(['name', 'location'])
+            ->where(['id' => $spaceId])
+            ->asArray()
+            ->one();
+    }
 }
