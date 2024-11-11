@@ -5,7 +5,11 @@ namespace scheduler\models;
 use Yii;
 use auth\models\User;
 use scheduler\models\AppointmentAttendees;
+use scheduler\models\Events;
+use scheduler\hooks\TimeHelper;
+use scheduler\models\SpaceAvailability;
 use yii\base\Event;
+use scheduler\models\Availability;
 use helpers\EventHandler;
 
 /**
@@ -68,6 +72,9 @@ class Appointments extends BaseModel
     const SCENARIO_CANCEL = 'cancel';
     const SCENARIO_REJECT = 'reject';
 
+
+    public $attendees = [];
+    public $space_id;
     
 
     public function init()
@@ -118,12 +125,24 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address','start_time','end_time','user_id','subject', 'contact_name','mobile_number', 'appointment_type','description', 'priority'], 'required'],
-            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'priority'], 'required'],
+            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
+            
+            // Custom inline validators as separate rules
             [['start_time', 'end_time'], 'validateTimeRange'],
+            [['start_time', 'end_time'], 'validateOverlappingEvents'],
+            [['start_time', 'end_time'], 'validateAdvanceBooking'],
+            [['start_time', 'end_time'], 'validateAvailability'],
+            [['start_time', 'end_time'], 'validateOverlappingAppointment'],
+
+            [['appointment_date'], 'validateOverlappingEvents'],
+            [['appointment_date'], 'validateBookingWindow'],
+            [['appointment_date'], 'validateOverlappingAppointment'],
+
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
-            [['subject','description'], 'string'],
+            
+            [['subject', 'description'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
@@ -132,14 +151,14 @@ class Appointments extends BaseModel
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
             
-            // applied only when cancelling appointments
+            // Rules for cancellation and rejection scenarios
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
-
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
             ['rejection_reason', 'string', 'max' => 255],
         ];
     }
+
 
     public function scenarios()
     {
@@ -156,6 +175,104 @@ class Appointments extends BaseModel
 
         if (strtotime($this->end_time) <= strtotime($this->start_time) || strtotime($dateTime) < strtotime($currentTime)) {
             $this->addError($attribute, 'invalid time range');
+        }
+    }
+
+    public function validateOverlappingEvents($attribute, $params)
+    {
+        $hasOverlappingEvents = Events::getOverlappingEvents(
+            $this->appointment_date,
+            $this->start_time,
+            $this->end_time
+        );
+
+        if ($hasOverlappingEvents) {
+            $this->addError($attribute, 'The selected time overlaps with another event.');
+        }
+    }
+
+    public function validateOverlappingSpace($attribute, $params)
+    {
+        $hasOverlappingSpace = SpaceAvailability::getOverlappingSpace(
+            $this->space_id,
+            $this->appointment_date,
+            $this->start_time,
+            $this->end_time
+        );
+
+        if ($hasOverlappingSpace) {
+            $this->addError($attribute, 'The selected space is not available at the chosen time.');
+        }
+    }
+
+    public function validateAdvanceBooking($attribute, $params)
+    {
+        $isAdvancedBookingValid = TimeHelper::validateAdvanceBooking(
+            $this->user_id,
+            $this->start_time,
+            $this->appointment_date
+        );
+
+        if (!$isAdvancedBookingValid) {
+            $this->addError($attribute, 'You cannot book an appointment this soon. Please choose a later time.');
+        }
+    }
+
+    public function validateBookingWindow($attribute, $params)
+    {
+        $validateBookingWindow = TimeHelper::isWithinBookingWindow(
+            $this->user_id,
+            $this->appointment_date
+        );
+
+        if (!$validateBookingWindow) {
+            $this->addError($attribute, 'The appointment is outside the allowed booking window.');
+        }
+    }
+
+    public function validateAvailability($attribute, $params)
+    {
+        $isAvailable = $this->getAvailability(
+            $this->user_id,
+            $this->appointment_date,
+            $this->start_time,
+            $this->end_time
+        );
+
+        if (!$isAvailable) {
+            $this->addError($attribute, 'The selected time is unavailable for booking.');
+        }
+    }
+
+    public function validateOverlappingAppointment($attribute, $params)
+    {
+        $appointmentExists = self::hasOverlappingAppointment(
+            $this->user_id,
+            $this->appointment_date,
+            $this->start_time,
+            $this->end_time,
+            // $this->priority
+        );
+
+        if ($appointmentExists) {
+            $this->addError($attribute, 'An overlapping appointment already exists.');
+        }
+    }
+
+    public function validateAttendeesAvailability($attribute, $params)
+    {
+        foreach ($this->attendees as $attendeeId) {
+            $appointmentConflict = AppointmentAttendees::isAttendeeUnavailable(
+                $attendeeId,
+                $this->appointment_date,
+                $this->start_time,
+                $this->end_time
+            );
+
+            if ($appointmentConflict) {
+                $this->addError($attribute, 'One or more attendees are already booked for this time slot.');
+                break;
+            }
         }
     }
 
@@ -573,7 +690,6 @@ class Appointments extends BaseModel
     
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
     {
-        // Check for time-slot-based unavailability within a date range
         return self::find()
         ->where(['user_id' => $user_id])
         ->andWhere([
@@ -583,13 +699,9 @@ class Appointments extends BaseModel
         ])
         ->andWhere([
             'OR',
-            // Check if the start time of the appointment overlaps with any unavailable slot
             ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
-            // Check if the end time of the appointment overlaps with any unavailable slot
             ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-            // Check if the appointment fully overlaps an unavailable slot
             ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-            // Check if the appointment is within an unavailable slot
             ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
         ]);
     }
@@ -623,48 +735,27 @@ class Appointments extends BaseModel
             ->where(['user_id' => $user_id, 'appointment_date' => $date])
             ->andWhere([
                 'OR',
-
-                /* checks if the start time of the new appointment ($start_time) falls within an existing appointment.
-                */
-
                 ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
-
-                /*
-                    checks if the end time of the new appointment ($end_time) falls within an existing appointment.
-                 */
                 ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-
-                /*
-                    checks if the existing appointment completely spans over the new appointment's time slot.
-                 */
                 ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-
-                 // The requested appointment spans across an existing appointment
                 ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
             ])
-            // Exclude appointments that are marked as deleted
             ->andWhere(['is_deleted' => 0])
-            // Exclude appointments with a status of 'cancelled'
             ->andWhere(['!=', 'status', self::STATUS_CANCELLED]);
 
-            // Exclude the current appointment from the overlapping check during update
             if ($appointment_id !== null) {
                 $query->andWhere(['!=', 'id', $appointment_id]);
             }
 
-            // Find any overlapping appointments
             $overlappingAppointment = $query->one();
 
-            // If no overlapping appointment is found, return false
             if (!$overlappingAppointment) {
                 return false;
             }
 
-            // Call checkPriority to handle priority comparison and rescheduling logic
             if($priority !== null){
                 return self::checkPriority($overlappingAppointment, $priority);
             }
-             
             // return true;
             return $query->exists();
     } 
@@ -672,13 +763,11 @@ class Appointments extends BaseModel
     private static function checkPriority($overlappingAppointment, $newPriority)
     {
         if ($overlappingAppointment->priority >= $newPriority) {
-            // If overlapping appointment has higher or equal priority, do not allow overriding
             return true;
         } else {
-            // If the new appointment has higher priority, mark the existing one as "rescheduled"
             $overlappingAppointment->status = Appointments::STATUS_RESCHEDULED;
             $overlappingAppointment->save(false);
-            return false; // Allow the new appointment to be created
+            return false;
         }
     }
 
@@ -693,37 +782,36 @@ class Appointments extends BaseModel
     }
 
 
-
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
     {
         return self::find()
         ->where(['user_id' => $user_id])
         ->andWhere([
             'AND',
-            // Appointments within the unavailable date range
             ['>=', 'appointment_date', $start_date],
             ['<=', 'appointment_date', $end_date],
         ])
         ->andWhere([
             'OR',
-            // user is unavailable for the entire day
-            // Any appointment on the same date is affected
             ['AND', ['=', 'appointment_date', $start_date], ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-
-            // Appointment starts within the unavailable time range
             ['AND', ['>=', 'start_time', $start_time], ['<', 'start_time', $end_time]],
-            
-            // Appointment ends within the unavailable time range
             ['AND', ['>', 'end_time', $start_time], ['<=', 'end_time', $end_time]],
-            
-            // Appointment completely overlaps with unavailable time range
             ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-            
-            // Appointment starts before unavailability ends but ends after
             ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
         ])
         // ->andWhere(['!=', 'status', 'self'])
         ->orderBy(['created_at' => SORT_ASC])
         ->all();
+    }
+
+    private function getAvailability($user_id, $appointment_date, $start_time, $end_time)
+    {
+        $bookedSlots = Availability::getUnavailableSlots($user_id, $appointment_date, $start_time, 
+            $end_time);
+
+        if($bookedSlots){
+            return false;
+        }
+        return true;
     }
 }
