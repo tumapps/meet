@@ -88,29 +88,54 @@
      'POST role'         => 'role/create',
 
      /**
- * @OA\Get(path="/auth/role/{id}",
- *   summary="Displays a single role model",
- *   tags={"role"},
- *   @OA\Parameter(description="role unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
- *   @OA\Response(
- *     response=200,
- *     description="Displays a single role model.",
- *      @OA\JsonContent(
- *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/role"))
- *      ),
- *   @OA\Response(
- *     response=404,
- *     description="Resource not found",
- *      @OA\JsonContent(
- *           @OA\Property(property="errorPayload", type="object",
- *               @OA\Property(property="statusCode", type="integer", example=404 ),
- *               @OA\Property(property="errorMessage", type="string", example="Not found" )
- *           )
- *      )
- *   ),
- * )
- */
-'GET role/{id}'     => 'role/view',
+     * @OA\Get(path="/auth/role/{name}",
+     *   summary="Displays a single role model",
+     *   tags={"role"},
+     *   @OA\Parameter(description="role unique name to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Displays a single role model.",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/role"))
+     *      ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Resource not found",
+     *      @OA\JsonContent(
+     *           @OA\Property(property="errorPayload", type="object",
+     *               @OA\Property(property="statusCode", type="integer", example=404 ),
+     *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+     *           )
+     *      )
+     *   ),
+     * )
+     */
+    'GET role'     => 'role/view',
+
+    /**
+     * @OA\Get(path="/auth/role/{name}",
+     *   summary="Displays a single role model",
+     *   tags={"role"},
+     *   @OA\Parameter(description="role unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Displays a single role model.",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/role"))
+     *      ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Resource not found",
+     *      @OA\JsonContent(
+     *           @OA\Property(property="errorPayload", type="object",
+     *               @OA\Property(property="statusCode", type="integer", example=404 ),
+     *               @OA\Property(property="errorMessage", type="string", example="Not found" )
+     *           )
+     *      )
+     *   ),
+     * )
+     */
+    'GET get-role/{name}'     => 'role/get-role',
 
     /**
     * @OA\Put(
