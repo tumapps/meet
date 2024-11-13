@@ -38,7 +38,8 @@ class Events extends BaseModel
             'id',
             'title',
             'description',
-            'event_date',
+            'start_date',
+            'end_date',
             'start_time',
             'end_time',
             'is_deleted',
@@ -53,9 +54,11 @@ class Events extends BaseModel
     public function rules()
     {
         return [
-            [['title', 'event_date', 'start_time', 'end_time'], 'required'],
+            [['title', 'event_date', 'start_time', 'end_time', 'description'], 'required'],
             [['description'], 'string'],
-            [['event_date', 'start_time', 'end_time'], 'safe'],
+            [['start_date', 'end_date', 'start_time', 'end_time'], 'safe'],
+            ['end_date', 'validateEndDate'],
+            [['start_date', 'end_date'], 'date', 'format', 'php:Y-m-d'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['is_deleted', 'created_at', 'updated_at'], 'integer'],
@@ -66,13 +69,32 @@ class Events extends BaseModel
 
     public function validateTimeRange($attribute, $params)
     {
-        $currentTime = date('Y-m-d h:i:sa');
-        $dateTime = date($this->event_date.' '.$this->start_time);
+        $currentDateTime = strtotime(date('Y-m-d H:i:s'));
+        $startDateTime = strtotime($this->start_date . ' ' . $this->start_time);
+        $endDateTime = strtotime($this->end_date . ' ' . $this->end_time);
 
-        if (strtotime($this->end_time) <= strtotime($this->start_time) || strtotime($dateTime) < strtotime($currentTime)) {
-            $this->addError($attribute, 'invalid time range');
+        if ($endDateTime < $startDateTime) {
+            $this->addError($attribute, 'End time must be after start time.');
+        }
+
+        if ($startDateTime < $currentDateTime) {
+            $this->addError($attribute, 'The event cannot start in the past.');
+        }
+
+        // Ensure end time is valid if the event starts and ends on the same day
+        if ($this->start_date === $this->end_date && strtotime($this->end_time) <= strtotime($this->start_time)) {
+            $this->addError($attribute, 'End time must be later than start time');
         }
     }
+
+    public function validateEndDate($attribute, $params)
+    {
+        if (strtotime($this->end_date) < strtotime($this->start_date)) {
+            $this->addError($attribute, 'The end date cannot be earlier than the start date.');
+        }
+    }
+
+
 
     /**
      * {@inheritdoc}
@@ -83,7 +105,8 @@ class Events extends BaseModel
             'id' => 'ID',
             'title' => 'Title',
             'description' => 'Description',
-            'event_date' => 'Event Date',
+            'start_date' => 'Start Date',
+            'end_date' => 'End Date',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
             'is_deleted' => 'Is Deleted',
@@ -95,17 +118,25 @@ class Events extends BaseModel
     public static function getOverlappingEvents($date, $start_time, $end_time)
     {
         $overlappingEvents = self::find()
-            ->where(['event_date' => $date])
-            ->andWhere(['is_deleted' => 0])
+            ->where(['is_deleted' => 0])
             ->andWhere(['or',
-                ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
-                ['and', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-                ['and', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-                ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                ['and',
+                    ['<=', 'start_date', $date],
+                    ['>=', 'end_date', $date],
+                    ['or',
+                        ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
+                        ['and', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+                        ['and', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+                        ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                    ]
+                ],
+                ['and',
+                    ['<=', 'start_date', $date],
+                    ['>=', 'end_date', $date],
+                ]
             ])
             ->exists();
 
         return $overlappingEvents;
     }
-
 }
