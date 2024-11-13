@@ -113,5 +113,6 @@
      * )
      */
     'GET assignments' => 'assignment/list-assignments',
-     
+
+    'GET get-items/{id}' => 'assignment/get-items',
     ];
