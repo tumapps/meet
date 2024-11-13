@@ -18,7 +18,7 @@ class EventsSearch extends Events
     {
         return [
             [['id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['title', 'description', 'event_date', 'start_time', 'end_time'], 'safe'],
+            [['title', 'description', 'start_date', 'end_date', 'start_time', 'end_time'], 'safe'],
         ];
     }
 
@@ -59,7 +59,8 @@ class EventsSearch extends Events
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'event_date' => $this->event_date,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'is_deleted' => $this->is_deleted,
