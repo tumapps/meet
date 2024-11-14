@@ -127,8 +127,12 @@ const openAddUserModal = () => {
                         <tr>
                             <th @click="sortTable('first_name')">FirstName <i class="fas fa-sort"></i></th>
                             <th @click="sortTable('last_name')">LastName <i class="fas fa-sort"></i></th>
-                            <th @click="sortTable('mobile_number')">Contact <i class="fas fa-sort"></i></th>
+                            <th @click="sortTable('mobile_number')">Mobile Number <i class="fas fa-sort"></i></th>
                             <th @click="sortTable('email')">Email <i class="fas fa-sort"></i></th>
+                            <th @click="sortTable('role')">Role <i class="fas fa-sort"></i></th>
+                            <th @click="sortTable('last_Activity')">Last Activity <i class="fas fa-sort"></i></th>
+                            <th @click="sortTable('status')">Status <i class="fas fa-sort"></i></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,6 +142,29 @@ const openAddUserModal = () => {
                                 <td>{{ item.last_name }}</td>
                                 <td>{{ item.mobile_number }}</td>
                                 <td>{{ item.email }}</td>
+                                <td> {{ item.role }}</td>
+                                <td>{{ item.last_Activity }}</td>
+                                <td>{{ status }}</td>
+                                <td>
+                                    <b-dropdown right variant="link" toggle-class="text-dark" no-caret
+                                        menu-class="custom-dropdown-menu">
+                                        <template #button-content>
+                                            <i class="fas fa-ellipsis-v"></i> <!-- Font Awesome kebab icon -->
+                                        </template>
+
+                                        <!-- Dropdown menu items with icons -->
+                                        <b-dropdown-item @click="handleView">
+                                            <i class="fas fa-eye mr-2"></i> View
+                                        </b-dropdown-item>
+                                        <b-dropdown-item @click="handleEdit">
+                                            <i class="fas fa-pen mr-2"></i> Edit
+                                        </b-dropdown-item>
+                                        <b-dropdown-item @click="handleDelete">
+                                            <i class="fas fa-trash mr-2"></i> Delete
+                                        </b-dropdown-item>
+                                    </b-dropdown>
+                                </td>
+
                             </tr>
                         </template>
                         <tr v-else>
@@ -168,3 +195,18 @@ const openAddUserModal = () => {
     </b-col>
     <Adduser ref="addUserModal" />
 </template>
+<style>
+/* Adjust the dropdown to fit items without scrolling */
+.custom-dropdown-menu {
+    max-height: none;
+    /* Removes vertical scrolling constraint */
+    min-width: 150px;
+    /* Ensures adequate width for items with icons */
+}
+
+/* Styling for icons with margin for spacing */
+.custom-dropdown-menu i {
+    margin-right: 8px;
+    /* Space between icon and text */
+}
+</style>

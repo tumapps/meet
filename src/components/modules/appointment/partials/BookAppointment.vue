@@ -14,7 +14,7 @@ const CBB = ref('')
 CBB.value = authStore.getCanBeBooked();
 const userId = ref('');
 const appointmentModal = ref(null) // Reference for <b-modal>
-
+const spaces = ref([]); // To store the spaces from the API
 const openModal = () => {
     appointmentModal.value.show() // Open the modal using the show() method
 }
@@ -22,6 +22,9 @@ const openModal = () => {
 const closeModal = () => {
     appointmentModal.value.hide() // Close the modal using the hide() method
 }
+
+const toastPayload = ref('');
+
 
 const errors = ref({
     contact_name: '',
@@ -53,6 +56,7 @@ const today = ref(new Date().toLocaleDateString());
 // console.log(today.value)
 const selectedUser_id = ref(null); // To store the corresponding user_id
 const selectedPriority = ref(null); // To store the corresponding priority
+const selectedSpaceName = ref(null); // To store the corresponding space name
 
 //get user id from session storage
 userId.value = authStore.getUserId();
@@ -76,7 +80,8 @@ const appointmentData = ref({
     subject: "",
     description: "",
     appointment_type: "",
-    priority: "",
+    space_id: selectedSpaceName.value,
+    priority: "1",
 });
 //handle date change 
 const handleDateChange = (newValue, oldValue) => {
@@ -104,6 +109,32 @@ const handleSelectedSlotsTimes = (selectedTimes) => {
     appointmentData.value.end_time = selectedTimes?.endTime || '';
 };
 
+//funtion to get spaces
+const getSpaces = async () => {
+    try {
+        const response = await axiosInstance.get('/v1/scheduler/spaces');
+        spaces.value = response.data.dataPayload.data;
+        console.log("Spaces data:", response.data.dataPayload.data);
+
+
+    } catch (error) {
+        // console.error('Error fetching spaces:', error);
+
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+            proxy.$showToast({
+                title: errorMessage,
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
+    }
+};
+
 // Function to fetch slots from the API
 const getSlots = async () => {
     try {
@@ -120,11 +151,17 @@ const getSlots = async () => {
         timeSlots.value = slotsWithSelected;
     } catch (error) {
         // console.error('Error getting slots:', error);
-        proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error has occured ',
-            icon: 'error',
-        });
+        if (error.response && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+
+            proxy.$showToast({
+                title: 'An error occurred',
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
 
     }
 };
@@ -136,11 +173,23 @@ const submitAppointment = async () => {
     try {
         const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value);
         appointmentModal.value.hide();
-        proxy.$showAlert({
-            title: 'Success',
-            text: 'Appointment booked successfully',
-            icon: 'success',
-        });
+        if (response.data.toastPayload) {
+            toastPayload.value = response.data.toastPayload;
+            // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+            // Show toast notification using the response data
+            proxy.$showToast({
+                title: toastPayload.value.toastMessage || ' success',
+                icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                // icon: 'success',
+            });
+        } else {
+            // Fallback if toastPayload is not provided in the response
+            proxy.$showToast({
+                title: 'success',
+                icon: 'success',
+            });
+        }
         // Reset the form
         appointmentData.value = {};
     } catch (error) {
@@ -159,11 +208,19 @@ const getAppointmentType = async () => {
         appointmentTypeOptions.value = response.data.dataPayload.data.types;
     } catch (error) {
         // console.error('Error fetching appointment types:', error);
-        proxy.$showToast({
-            title: 'An error occurred ',
-            text: 'Ooops! an error has occured',
-            icon: 'error',
-        });
+
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+            proxy.$showToast({
+                title: errorMessage,
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
     }
 };
 
@@ -178,11 +235,19 @@ const getusers_booked = async () => {
         UsersOptions.value = response.data.dataPayload.data.profiles;
         // console.log("Users data:", UsersOptions.value);
     } catch (error) {
-        proxy.$showToast({
-            title: 'An error occurred',
-            text: 'Oops! An error has occurred',
-            icon: 'error',
-        });
+
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+            proxy.$showToast({
+                title: errorMessage,
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
     }
 };
 
@@ -192,11 +257,19 @@ const getPriority = async () => {
         PriorityOptions.value = response.data.dataPayload.data;
         // console.log("Priority data:", PriorityOptions.value);
     } catch (error) {
-        proxy.$showToast({
-            title: 'An error occurred',
-            text: 'Oops! An error has occurred',
-            icon: 'error',
-        });
+
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+            proxy.$showToast({
+                title: errorMessage,
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
     }
 };
 
@@ -219,7 +292,7 @@ const close = () => {
 
 onMounted(() => {
     slotsData.value.date = today.value;
-    // getSlots();
+    getSpaces();
     getAppointmentType();
     getAppointmentType();
     getusers_booked();
@@ -280,11 +353,11 @@ onMounted(() => {
                             </b-col>
                             <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <!-- Bind the select dropdown to selectedUsername -->
-                                 <!-- //make it required -->
+                                <!-- //make it required -->
 
-                                <select v-model="selectedUsername" name="service" class="form-select"
-                                    id="receipent" required>
-                                    <option value="" disabled selected-hidden >Choose Recipient</option>
+                                <select v-model="selectedUsername" name="service" class="form-select" id="receipent"
+                                    required>
+                                    <option value="" disabled selected>Choose Recipient</option>
                                     <option v-for="user in UsersOptions" :key="user.user_id" :value="user.first_name">
                                         {{ user.first_name }}
                                     </option>
@@ -293,34 +366,36 @@ onMounted(() => {
                                     {{ errors.user_id }}
                                 </div>
                             </b-col>
+                            <b-col cols="1" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <label for="addappointmenttype" class="col-form-label">
+                                    <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
+                                </label>
+                            </b-col>
+                            <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
+                                <select v-model="appointmentData.space_id" name="service" class="form-select" id="space"
+                                    required>
+                                    <option value="" disabled selected>Choose Space</option>
+                                    <!-- Loop through spaces array and bind the option value to space.id -->
+                                    <option v-for="space in spaces" :key="space.id" :value="space.id">
+                                        {{ space.id }} : {{ space.name }}
+                                    </option>
+                                </select>
+                                <!-- Display errors if there are any -->
+                                <div v-if="errors.space_id" class="error" aria-live="polite">
+                                    {{ errors.space_id}}
+                                </div>
+                            </b-col>
+
                         </b-row>
 
 
                         <b-row class="align-items-center form-group">
-                            <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                                <label for="addappointmenttype" class="col-form-label">
-                                    Priority
-                                </label>
-                            </b-col>
-                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                                <!-- Bind the select dropdown to selectedPriority -->
-                                <select v-model="selectedPriority" name="priority" class="form-select"
-                                    id="addappointmenttype" required>
-                                    <option value="">Select Priority</option>
-                                    <option v-for="priority in PriorityOptions" :key="priority.code"
-                                        :value="priority.code">
-                                        {{ priority.label }}
-                                    </option>
-                                </select>
-                                <div v-if="errors.priority" class="error" aria-live="polite">
-                                    {{ errors.priority }}
-                                </div>
-                            </b-col>
+                    
 
-                            <b-col cols="2" lg="1" class="mb-sm-3 mb-md-3 mb-lg-0">
+                            <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <label for="addsubject" class="col-form-label">RE:</label>
                             </b-col>
-                            <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                            <b-col cols="10" lg="10" class="mb-sm-3 mb-md-3 mb-lg-0">
                                 <input type="text" id="addsubject" v-model="appointmentData.subject"
                                     class="form-control" placeholder="what the meeting is about" />
                                 <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
@@ -385,7 +460,7 @@ onMounted(() => {
         </form>
         <div class="modal-footer border-0">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save"
-            @click="submitAppointment">Save</button>
+                @click="submitAppointment">Save</button>
             <button type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
 
         </div>

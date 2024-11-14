@@ -13,6 +13,8 @@ const username = ref('');
 const CBB = ref('');
 CBB.value = authStore.getCanBeBooked();
 const userId = ref('');
+const searchQuery = ref('');
+
 
 
 
@@ -37,17 +39,35 @@ const getusers_booked = async () => {
     }
 };
 
+const performSearch = async () => {
+    try {
+        const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`);
+        tableData.value = response.data.dataPayload.data;
+    } catch (error) {
+        // console.error(error);
+        const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+        proxy.$showToast({
+            title: 'An error occurred',
+            text: errorMessage,
+            icon: 'error',
+        });
+    }
+};
+
 //watch for selected user name 
 watch(selectedUsername, (newUsername) => {
     const selectedUser = UsersOptions.value.find(user => user.first_name === newUsername);
     selectedUser_id.value = selectedUser ? selectedUser.user_id : null;
     userId.value = selectedUser_id.value ? selectedUser_id.value : authStore.getUserId();
+    // console.log("Selected User ID:", selectedUser_id.value);
+
 });
 
 
 
 onMounted(() => {
-   
+
     username.value = localStorage.getItem('user.username');
     getusers_booked();
 

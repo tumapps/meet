@@ -38,11 +38,18 @@ const getProfile = async () => {
         mobile_number.value = response.data.dataPayload.data.mobile_number;
         email_address.value = response.data.dataPayload.data.email_address;
     } catch (error) {
-        proxy.$showAlert({
-            title: 'An error occurred ',
-            text: 'Ooops! an error has occured while fetching the profile!',
-            icon: 'error',
-        });
+        if (error.response && error.response.data && error.response.data.errorPayload) {
+            // Extract and handle errors from server response
+            errors.value = error.response.data.errorPayload.errors;
+        } else {
+            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
+
+            proxy.$showToast({
+                title: 'An error occurred',
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
     }
 }
 

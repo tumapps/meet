@@ -45,6 +45,8 @@ const onSubmit = async () => {
 
       menuStore.setMenus(response.data.dataPayload.data.menus);
 
+      
+
 
       proxy.$showToast({
         title: 'success',

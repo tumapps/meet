@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed } from 'vue';
+import { onMounted, ref, getCurrentInstance, computed, watch } from 'vue';
 import AxiosInstance from '@/api/axios';
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue';
 import globalUtils from '@/utilities/globalUtils';
@@ -16,11 +16,7 @@ const showModal = () => {
     appointmentModal.value.$refs.appointmentModal.show();
 };
 
-
 const toastPayload = ref('');
-
-
-
 const { proxy } = getCurrentInstance();
 const axiosInstance = AxiosInstance();
 const tableData = ref([]);
@@ -34,22 +30,10 @@ const selectedPerPage = ref(20);  // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100]);
 const searchQuery = ref('');
 
-const errorDetails = ref({
-    contact_name: '',
-    email_address: '',
-    mobile_number: '',
-    appointment_date: '',
-    start_time: '',
-    end_time: '',
-    subject: '',
-    appointment_type: '',
-    status: '',
-    created_at: '',
-    updated_at: '',
-});
+const errorDetails = ref({});
 
 //get user_id from session storage
-const userId = authStore.getUserId();
+// const userId = authStore.getUserId();
 
 const appointmentDetails = ref({
     appointment_date: '',
@@ -64,7 +48,7 @@ const appointmentDetails = ref({
     created_at: '',
     updated_at: '',
     statusLabel: '',
-    user_id: userId,
+    user_id: '',
 
 });
 
@@ -89,8 +73,8 @@ const updateTimeSlots = (updatedSlots) => {
 // Handle selected slots
 
 const handleSelectedSlotsTimes = (selectedTimes) => {
-    appointmentData.value.start_time = selectedTimes?.startTime || '';
-    appointmentData.value.end_time = selectedTimes?.endTime || '';
+    appointmentDetails.value.start_time = selectedTimes?.startTime || '';
+    appointmentDetails.value.end_time = selectedTimes?.endTime || '';
 };
 
 
@@ -347,7 +331,7 @@ const confirmRestore = (id) => {
 
 const getAppointments = async (page = 1) => {
     try {
-        console.log("selected", selectedPerPage.value)
+        // console.log("selected", selectedPerPage.value)
         const response = await axiosInstance.get(`/v1/scheduler/appointments?page=${page}&per-page=${selectedPerPage.value}`);
         //check if data is array
         isArray.value = Array.isArray(response.data);
@@ -368,8 +352,27 @@ const getAppointments = async (page = 1) => {
     }
 };
 
+//slots for time
+const slotsData = ref({
+    user_id: '',
+    date: '',
+});
+const setUserId = () => {
+    // set user id depending on the user role
+    if (authStore.getCanBeBooked() === 0) {
+        //get the user id from the owner of the appointment
+        slotsData.value.user_id = appointmentDetails.value.user_id;
+        // console.log("user_id", slotsData.value.user_id);
+
+    } else {
+        slotsData.value.user_id = authStore.getUserId();
+    }
+}
+
+
 const getAppointment = async (id) => {
     try {
+
         errorDetails.value = {};
         const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`);
 
@@ -378,7 +381,13 @@ const getAppointment = async (id) => {
             //convert start created at to yyyy-mm-dd
             appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at);
             selectedAppointmentId.value = id;
+
+            //set user id depending on the user role
+            setUserId();
+            // console.log("user_id", slotsData.value.user_id);
         }
+
+
     } catch (error) {
         // Check if error.response is defined before accessing it
         const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred';
@@ -403,43 +412,58 @@ const openModal = (id) => {
 };
 
 const updateAppointment = async () => {
-    try {
-        errorDetails.value = {};
+console.log(appointmentDetails.value.checked_in);
+    if (appointmentDetails.value.checked_in) {
+        //show toast
+        proxy.$showToast({
+            title: 'Cannot update: Appointment is already checked in',
+            // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+            icon: 'info',
+        });
 
-        const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value);
+    } else {
+        // Call the update function if checked_in is false
+        try {
+            errorDetails.value = {};
 
-        // Check if toastPayload exists in the response and update it
-        if (response.data.toastPayload) {
-            toastPayload.value = response.data.toastPayload;
-            // console.log("toastPayload", toastPayload.value); // Log for debugging
+            const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value);
 
-            // Show toast notification using the response data
-            proxy.$showToast({
-                title: toastPayload.value.toastMessage || 'Appointment Updated successfully',
-                // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-                icon: 'success',
-            });
-        } else {
-            // Fallback if toastPayload is not provided in the response
-            proxy.$showToast({
-                title: 'Appointment Updated successfully',
-                icon: 'success',
-            });
-        }
+            // Check if toastPayload exists in the response and update it
+            if (response.data.toastPayload) {
+                toastPayload.value = response.data.toastPayload;
 
-    } catch (error) {
-        if (error.response && error.response.data.errorPayload) {
-            errorDetails.value = error.response.data.errorPayload.errors;
-        } else {
-            const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+                getAppointments();
+                // console.log("toastPayload", toastPayload.value); // Log for debugging
 
-proxy.$showToast({
-    title: 'An error occurred',
-    text: errorMessage,
-    icon: 'error',
-});
+                // Show toast notification using the response data
+                proxy.$showToast({
+                    title: toastPayload.value.toastMessage || 'Appointment Updated successfully',
+                    // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+                    icon: 'success',
+                });
+            } else {
+                // Fallback if toastPayload is not provided in the response
+                proxy.$showToast({
+                    title: 'Appointment Updated successfully',
+                    icon: 'success',
+                });
+            }
+
+        } catch (error) {
+            if (error.response && error.response.data.errorPayload) {
+                errorDetails.value = error.response.data.errorPayload.errors;
+            } else {
+                const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred';
+
+                proxy.$showToast({
+                    title: 'An error occurred',
+                    text: errorMessage,
+                    icon: 'error',
+                });
+            }
         }
     }
+
 };
 
 const performSearch = async () => {
@@ -458,15 +482,12 @@ const performSearch = async () => {
     }
 };
 
-const UsersOptions = ref([]);
-const selectedUsername = ref(''); // To hold the selected username
-
-
-
+// const UsersOptions = ref([]);
+// const selectedUsername = ref(''); // To hold the selected username
 
 const suggestions = ref([]);
 const suggestedDate = ref('');
-const timeSlots = ref([]);
+const timeSlots = ref([]); ``
 
 // Function to fetch suggested slots
 const suggestSlots = async (id) => {
@@ -584,11 +605,90 @@ const confirmCheckIn = (id) => {
 
 // Function to handle actions after modal closes
 const handleModalClose = () => {
-  // Perform any actions you need after modal closes
-//   console.log('Modal has been closed');
+    // Perform any actions you need after modal closes
+    //   console.log('Modal has been closed');
 
-  getAppointments(1);  // Refresh the appointments after closing the modal
+    getAppointments(1);  // Refresh the appointments after closing the modal
 };
+
+// const getSlots = async () => {
+//     try {
+//         const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
+//         // console.log("user_id", userId.value)
+//         // Update the `apiResponse` ref with the response data
+//         apiResponse.value = response.data.dataPayload.data.slots;
+//         // Set all slots to `selected: false`
+//         const slotsWithSelected = apiResponse.value.map(slot => ({
+//             ...slot,
+//             selected: false
+//         }));
+//         // Update `timeSlots`
+//         timeSlots.value = slotsWithSelected;
+//     } catch (error) {
+//         // console.error('Error getting slots:', error);
+//         if (error.response && error.response.data.errorPayload) {
+//             errorDetails.value = error.response.data.errorPayload.errors;
+//         } else {
+//             const errorMessage = error.response?.data.errorPayload?.errors?.message || errorPayload?.message || 'An error occurred';
+
+//             proxy.$showToast({
+//                 title: 'An error occurred',
+//                 text: errorMessage,
+//                 icon: 'error',
+//             });
+//         }
+//     }
+// };
+
+const apiResponse = ref([]);
+
+const getSlots = async () => {
+    try {
+        const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value);
+
+        // Update the `apiResponse` ref with the response data
+        apiResponse.value = response.data.dataPayload.data.slots;
+
+        // Set all slots to `selected: false`
+        const slotsWithSelected = apiResponse.value.map(slot => ({
+            ...slot,
+            selected: false
+        }));
+
+        // Update `timeSlots`
+        timeSlots.value = slotsWithSelected;
+
+    } catch (error) {
+        console.error(error);        // Handle error response if available
+        if (error.response && error.response.data.errorPayload) {
+            errorDetails.value = error.response.data.errorPayload.errors;
+        } else {
+            // Handle general error with a fallback message
+            const errorMessage = error.response?.data.errorPayload?.errors?.message || 'An error occurred';
+
+            proxy.$showToast({
+                title: 'An error occurred',
+                text: errorMessage,
+                icon: 'error',
+            });
+        }
+    }
+};
+
+const handleDateChange = (newValue, oldValue) => {
+    slotsData.value.date = newValue;
+    console.log('date changed:', newValue);
+
+    // console.log('date changed:', newValue);
+    getSlots(); searchQuery
+};
+
+//watch for changes in appointmentDetails.appointment_date and call getSlots
+
+watch(() => appointmentDetails.value.appointment_date, (newValue, oldValue) => {
+    // console.log('date changed:', newValue);
+    handleDateChange(newValue, oldValue);
+});
 
 </script>
 <template>
@@ -690,17 +790,17 @@ const handleModalClose = () => {
                                 <td>
                                     <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox"
-                                            id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in === true" disabled="item.checked_in === true"
-                                            @change="confirmCheckIn(item.id)" />
+                                            id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in"
+                                            :disabled="item.checked_in" @change="confirmCheckIn(item.id)" />
                                         <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
-                                            {{ item.checked_in === true ? 'Checked In' : 'Check In' }}
+                                            {{ item.checked_in ? 'Checked In' : 'Check In' }}
                                         </label>
                                     </div>
 
-                                    <div v-if="item.recordStatus.label !== 'ACTIVE'"  class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="flexSwitchCheckDisabled" checked="" disabled="">
-                                        
+                                    <div v-else="item.recordStatus.label !== 'ACTIVE'" class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDisabled"
+                                            checked="" disabled="">
+
                                     </div>
                                 </td>
 
@@ -712,7 +812,8 @@ const handleModalClose = () => {
                                     </button>
                                     <button
                                         v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
-                                        class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)">
+                                        class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)"
+                                        :disabled="item.checked_in">
                                         <i class="fas fa-cancel" title="Cancel"></i>
                                     </button>
                                     <button
@@ -763,7 +864,7 @@ const handleModalClose = () => {
             </b-col>
         </b-card>
     </b-col>
-    <BookAppointment ref="appointmentModal"  @close="handleModalClose" />
+    <BookAppointment ref="appointmentModal" @close="handleModalClose" />
 
     <b-modal ref="myModal" hide-footer title="Appointment Details" size="xl">
         <b-row class="justify-content-center">
@@ -780,18 +881,9 @@ const handleModalClose = () => {
                                         {{ errorDetails.appointment_date }}</div>
                                 </b-col>
 
-                                <b-col lg="6" md="6" class="mb-3">
-                                    <label for="input-107" class="form-label">Start Time</label>
-                                    <b-form-input v-model="appointmentDetails.start_time" id="input-107"></b-form-input>
-                                    <div v-if="errorDetails.start_time" class="error">
-                                        {{ errorDetails.start_time }}</div>
-                                </b-col>
-
-                                <b-col lg="6" md="6" class="mb-3">
-                                    <label for="input-107" class="form-label">End Time</label>
-                                    <b-form-input v-model="appointmentDetails.end_time" id="input-107"></b-form-input>
-                                    <div v-if="errorDetails.end_time" class="error">
-                                        {{ errorDetails.end_time }}</div>
+                                <b-col md="12" lg="12" sm="12">
+                                    <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots"
+                                        @selectedSlotsTimes="handleSelectedSlotsTimes" />
                                 </b-col>
 
                                 <b-col lg="12" md="12" class="mb-3">
@@ -851,9 +943,12 @@ const handleModalClose = () => {
                                 <b-row class="m-5">
                                     <b-col>
                                         <div class="d-flex justify-content-center">
-                                            <b-button variant="primary" class="me-1"
-                                                @click="updateAppointment">Update</b-button>
+                                            <b-button variant="primary" class="me-3" @click="updateAppointment"
+                                                ref="updateButton">
+                                                Update
+                                            </b-button>
                                         </div>
+
                                     </b-col>
                                 </b-row>
                             </b-row>

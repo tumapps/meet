@@ -2,6 +2,8 @@
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
 import App from './App.vue'
 // import './registerServiceWorker'
 import router from './router'
@@ -27,7 +29,6 @@ import Vue3Autocounter from 'vue3-autocounter';
 import 'flatpickr/dist/flatpickr.css';
 import 'flatpickr/dist/themes/material_blue.css'; // Optional theme, pick one that fits
 import { useMenuStore } from '@/store/menuStore'
-import { createPinia } from 'pinia'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
 
@@ -37,7 +38,7 @@ const pinia = createPinia()
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.component('vue3-autocounter', Vue3Autocounter)
 //router
-app.use(router).use(pinia)
+app.use(pinia).use(router)
 // Library Components
 app.use(VueSweetalert2)
 app.use(BootstrapVueNext)

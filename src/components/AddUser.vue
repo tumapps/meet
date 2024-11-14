@@ -61,7 +61,7 @@ const submitForm = async () => {
             toggleModal();
         }
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         errors.value = error.response?.data?.errorPayload?.errors || {};
 
         //if errors are empty then check error message

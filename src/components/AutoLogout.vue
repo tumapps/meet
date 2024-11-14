@@ -13,10 +13,10 @@ const showAlert = () => {
         text: 'You are about to be logged out!',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes, cancel it!',
-        cancelButtonText: 'No, keep it',
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'logout',
+        cancelButtonText: 'No, keep me logged in',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
     });
 };
 

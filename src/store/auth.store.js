@@ -80,7 +80,7 @@ export const useAuthStore = defineStore('userAuth', {
                     this.setBookingStatus(token);
 
                 } catch (error) {
-                    console.error('Error during encryption:', error);
+                    // console.error('Error during encryption:', error);
                 }
             }
         },
@@ -98,7 +98,7 @@ export const useAuthStore = defineStore('userAuth', {
                     // Convert the decrypted value back to an integer
                     const userIdInt = parseInt(decryptedUserId, 10);
                     if (isNaN(userIdInt)) {
-                        console.error('Decryption result is not a valid number', userIdInt);
+                        // console.error('Decryption result is not a valid number', userIdInt);
 
                         return null;
                     }
@@ -106,7 +106,7 @@ export const useAuthStore = defineStore('userAuth', {
                     // console.log('Decrypted user_id:', userIdInt);
                     return userIdInt;
                 } catch (error) {
-                    console.error('Error during decryption:', error);
+                    // console.error('Error during decryption:', error);
                 }
             }
 
@@ -120,11 +120,11 @@ export const useAuthStore = defineStore('userAuth', {
                 const arrayToken = token.split('.');
                 const tokenPayload = JSON.parse(atob(arrayToken[1]));
 
-                console.log('Token payload:', tokenPayload);
+                // console.log('Token payload:', tokenPayload);
 
                         // Convert can_be_booked to an integer (1 or 0)
                 const canBeBooked = tokenPayload.can_be_booked ? 1 : 0; // Declare user_id here
-                console.log('can be booked', canBeBooked );
+                // console.log('can be booked', canBeBooked );
 
                 // Convert user booking to a string before encryption
                 const canBeBookedString = canBeBooked.toString();
@@ -139,7 +139,7 @@ export const useAuthStore = defineStore('userAuth', {
                     localStorage.setItem('CBB', encryptedcanbebooked);
 
                 } catch (error) {
-                    console.error('Error during encryption:', error);
+                    // console.error('Error during encryption:', error);
                 }
             }
         },
@@ -156,15 +156,15 @@ export const useAuthStore = defineStore('userAuth', {
                     // Convert the decrypted value back to an integer
                     const canBeBooked = parseInt(decryptedUserId, 10);
                     if (isNaN(canBeBooked)) {
-                        console.error('Decryption result is not a valid number', canBeBooked);
+                        // console.error('Decryption result is not a valid number', canBeBooked);
 
                         return null;
                     }
 
-                    // console.log('Decrypted can be booked:', canBeBooked);
+                    console.log('Decrypted can be booked:', canBeBooked);
                     return canBeBooked;
                 } catch (error) {
-                    console.error('Error during decryption:', error);
+                    // console.error('Error during decryption:', error);
                 }
             }
 

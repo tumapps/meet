@@ -22,7 +22,7 @@ export function useAutoLogout() {
 
     const logoutUser = () => {
         localStorage.removeItem('user.token');
-        router.push('/Lockscreen');
+        router.push('/lockscreen');
     };
 
     const resetTimer = () => {

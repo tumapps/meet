@@ -65,10 +65,12 @@ function handleEventClick(info) {
 }
 // Fetch events from API
 // Fetch events from API
+const apiData = ref([]);
+
 async function fetchEvents() {
   try {
     const response = await axiosInstance.get('/v1/scheduler/appointments')
-    const apiData = response.data.dataPayload.data
+    apiData.value = response.data.dataPayload.data
     events.value = apiData.map((item) => {
 
       let backgroundColor;
@@ -105,7 +107,7 @@ async function fetchEvents() {
       }
     })
   } catch (error) {
-    console.error('Error fetching events:', error)
+    // console.error('Error fetching events:', error)
   }
 }
 
