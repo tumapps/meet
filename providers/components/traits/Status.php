@@ -23,6 +23,9 @@ trait Status
             case 5:
                 $status = ['label' => 'RESCHEDULED', 'theme' => 'info',];
                 break;
+            case 7:
+                $status = ['label' => 'PASSED', 'theme' => 'info',];
+                break;
             case 9:
                 $status = ['label' => 'MISSED', 'theme' => 'secondary',];
                 break;
