@@ -135,7 +135,7 @@
      *   ),
      * )
      */
-    'GET get-role/{name}'     => 'role/get-role',
+    'POST get-role/{name}'     => 'role/get-role',
 
     /**
     * @OA\Put(
