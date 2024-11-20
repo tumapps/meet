@@ -139,6 +139,7 @@ trait UserJwt
             'nbf' => $currentTime,
             'user_id' => $this->getPrimaryKey(),
             'can_be_booked' => $this->can_be_booked,
+            'roles' => array_keys(Yii::$app->authManager->getRolesByUser($this->user_id)),
             'exp' => static::getExpireIn()
         ];
         // Set up id
