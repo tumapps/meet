@@ -63,22 +63,23 @@ class AuthItem extends Model
      * @inheritdoc
      */
     public function rules()
-    {
-        return [
-            [['ruleName'], 'checkRule'],
-            [['name', 'type', 'data'], 'required'],
-            [['name'], 'checkUnique', 'when' => function () {
-                return $this->isNewRecord || ($this->_item->name != $this->name);
-            }],
-            [['type'], 'integer'],
-            [['description', 'ruleName'], 'default'],
-            [['name'], 'string', 'max' => 64],
-            ['name', 'match', 'pattern' => '/^[a-z0-9\-]*$/', 'message' => 'Code should consist of lowercase letters (a-z), numbers or hyphens'],
-            ['data', 'match', 'pattern' => '/^[a-zA-Z\s]*$/', 'message' => 'Only Aphabets and spaces are allowed'],
-            ['data', 'trim'],
-            ['name', 'trim']
-        ];
-    }
+{
+    return [
+        [['ruleName'], 'checkRule'],
+        [['name', 'type', 'data'], 'required'],
+        [['name'], 'checkUnique', 'when' => function () {
+            return $this->isNewRecord || ($this->_item->name != $this->name);
+        }],
+        [['type'], 'integer'],
+        [['description', 'ruleName'], 'default'],
+        [['name'], 'string', 'max' => 64],
+        ['name', 'match', 'pattern' => '/^[a-zA-Z0-9\-]+$/', 'message' => 'Code should consist of letters (a-z, A-Z), numbers, or hyphens (-)'],
+        ['data', 'match', 'pattern' => '/^[a-zA-Z\s]*$/', 'message' => 'Only Alphabets and spaces are allowed'],
+        ['data', 'trim'],
+        ['name', 'trim']
+    ];
+}
+
 
     /**
      * Check role is unique
