@@ -20,6 +20,14 @@ use Yii;
 
 class Events extends BaseModel
 {
+
+    const STATUS_PASSED = 7;
+    const STATUS_ACTIVE = 10;
+    const STATUS_CANCELLED = 4;
+    const STATUS_DELETED = 0;
+
+    const SCENARIO_CANCEL = 'cancel';
+
     /**
      * {@inheritdoc}
      */
@@ -42,6 +50,9 @@ class Events extends BaseModel
             'end_date',
             'start_time',
             'end_time',
+            'recordStatus' => function(){
+                return $this->recordStatus;
+            },
             'is_deleted',
             'created_at',
             'updated_at',
@@ -63,7 +74,17 @@ class Events extends BaseModel
             [['is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['title'], 'string', 'max' => 255],
+
+            ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
+            ['cancellation_reason', 'string', 'max' => 255],
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CANCEL] = ['cancellation_reason'];
+        return $scenarios;
     }
 
 
@@ -118,7 +139,8 @@ class Events extends BaseModel
     public static function getOverlappingEvents($date, $start_time, $end_time)
     {
         $overlappingEvents = self::find()
-            ->where(['is_deleted' => 0])
+            ->where(['is_deleted' => self::STATUS_DELETED])
+            ->where(['status' => self::STATUS_ACTIVE])
             ->andWhere(['or',
                 ['and',
                     ['<=', 'start_date', $date],
