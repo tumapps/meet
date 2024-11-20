@@ -101,6 +101,15 @@ class m240118_110956_default_user_presets extends Migration
             'updated_at' => time(),
         ));
         (new Assignment($uid))->assign(['su']);
+
+        $this->syncPermissions();
+    }
+
+    private function syncPermissions()
+    {
+        $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
+        $controller->actionSyncPermissions();
+        echo "Permissions synced successfully.\n";
     }
 
     public function down()
