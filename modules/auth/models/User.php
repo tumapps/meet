@@ -4,6 +4,8 @@ namespace auth\models;
 
 use Yii;
 use helpers\traits\UserJWT;
+use scheduler\models\Appointments;
+use yii\web\User as WebUser;
 
 class User extends BaseModel implements \yii\web\IdentityInterface
 {
@@ -27,6 +29,30 @@ class User extends BaseModel implements \yii\web\IdentityInterface
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE]],
         ];
     }
+
+    public function afterLogin(WebUser $identity, $cookieBased, $duration)
+    {
+        parent::afterLogin($identity, $cookieBased, $duration);
+        $this->last_login_at = date('Y-m-d H:i:s');
+        $this->save(false, ['last_login_at']);
+    }  
+
+    public function getOnlineStatus()
+    {
+        if (!$this->last_login_at) {
+            return 'Never logged in';
+        }
+
+        $lastLoginTime = strtotime($this->last_login_at);
+        $timeDifference = time() - $lastLoginTime;
+
+        if ($timeDifference <= 1) { 
+            return 'Online';
+        }
+
+        return Yii::$app->formatter->asRelativeTime($this->last_login_at);
+    }
+
 
     public static function findIdentity($id)
     {
