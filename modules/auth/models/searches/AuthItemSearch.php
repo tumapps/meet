@@ -26,7 +26,7 @@ class AuthItemSearch extends Model
     public function rules()
     {
         return [
-            [['name', 'ruleName', 'description'], 'safe'],
+            [['name', 'ruleName', 'description','id'], 'safe'],
             [['type'], 'integer'],
         ];
     }
