@@ -43,9 +43,8 @@ class AuthController extends \helpers\ApiController
 			$formattedProfiles[] = [
 				'user_id' => $profile->user_id,
 				'email' => $profile->email_address,
-				'first_name' => $profile->first_name,
+				'name' => $profile->first_name. ' ' . $profile->last_name,
 				'middle_name' => $profile->middle_name,
-				'last_name' => $profile->last_name,
 				'mobile_number' => $profile->mobile_number
 			];
 		}
@@ -70,6 +69,7 @@ class AuthController extends \helpers\ApiController
 				'username' => $user->username, 
 				'token' => $user->token, 
 				'menus' => $this->filterMenus($canBeBooked),
+				'roles' => array_keys(Yii::$app->authManager->getRolesByUser($user->user_id))
 				], 
 				['statusCode' => 200, 'message' => 'Access granted']);
 		}
