@@ -125,7 +125,7 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'priority'], 'required'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'space_id'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
             
             // Custom inline validators as separate rules
@@ -353,25 +353,25 @@ class Appointments extends BaseModel
             ];
         }
 
-        $appointment->checked_in = !$appointment->checked_in;
+        // $appointment->checked_in = !$appointment->checked_in;
 
-        // $appointment->checked_in = true;
+        $appointment->checked_in = true;
+        $appointment->status = self::STATUS_ATTENDED;
+
         // $appointment->save(false);
 
         if ($appointment->save(false)) {
-            $message = $appointment->checked_in ? 'Appointment successfully checked in.':'Appointment successfully unchecked.';
+            // $message = $appointment->checked_in ? 'Appointment successfully checked in' : '';
+            if($appointment->checked_in) {
+                $message = 'Appointment successfully checked in';
+            }
             
             return [
                 'success' => true,
                 'message' => $message
             ];
         }
-
-        // return true;
-        // return [
-        //     'success' => true,
-        //     'message' => 'Appointment successfully checked in.'
-        // ];
+        
         return [
             'success' => false,
             'message' => 'Failed to update appointment status.'

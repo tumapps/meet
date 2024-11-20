@@ -377,6 +377,7 @@ class AppointmentsController extends \helpers\ApiController {
 
                     if($model->status === Appointments::STATUS_RESCHEDULED){
                         $model->sendAppointmentRescheduledEvent(
+                            $model->user_id,
                             $model->email_address, $model->appointment_date, $model->start_time, $model->end_time, 
                             $model->contact_name
                         );
