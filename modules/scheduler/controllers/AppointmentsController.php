@@ -243,7 +243,6 @@ class AppointmentsController extends \helpers\ApiController {
         // $message = $appointment->checked_in ? 'Appointment has been marked as Attended' : 'Appointment has been unchecked';
 
         return $this->toastResponse(['statusCode'=>202,'message'=>$checkinResponse['message']]);
-        // return $this->toastResponse(['statusCode' => 202, 'message' => $message]);
     }
 
     public function actionCreate($dataRequest = null)
@@ -596,7 +595,7 @@ class AppointmentsController extends \helpers\ApiController {
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
                 $staffId = $attendeeId; 
-                $addAttendees->addAttendee($id, $staffId, $date, $starTime, $endTime);
+                $addAttendees->addAttendee($id, $staffId, $date, $startTime, $endTime);
             }
         }
     }
