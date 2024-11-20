@@ -4,7 +4,9 @@ namespace auth\controllers;
 
 use Yii;
 use auth\models\Assignment;
+use auth\models\AuthItem;
 use auth\models\User;
+use yii\rbac\Item;
 use auth\models\searches\AssignmentSearch;
 
 
@@ -119,14 +121,88 @@ class AssignmentController extends \helpers\ApiController {
         $auth = Yii::$app->authManager;
 
         $roles = $auth->getRoles();
-        $permissions = $auth->getPermissions();
 
-        $assignments = [
-            'roles' => array_keys($roles),
-            'permissions' => array_keys($permissions),
-        ];
+        $assignments = [];
+
+        foreach ($roles as $roleName => $role) {
+            $rolePermissions = $auth->getPermissionsByRole($roleName);
+            $userAssignments = $auth->getUserIdsByRole($roleName);
+
+            $childRoles = $auth->getChildRoles($roleName);
+            $childRoleNames = array_keys($childRoles);
+            $childRoleNames = array_filter($childRoleNames, fn($childRole) => $childRole !== $roleName);
+
+            $assignments[] = [
+                'role' => $roleName,
+                'description' => $role->description,
+                'permissions' => array_keys($rolePermissions),
+                'users' => $userAssignments,
+                'child_roles' => $childRoleNames,
+            ];
+        }
 
         return $this->payloadResponse($assignments);
     }
-     
+
+    public function actionGetItems($id)
+    {
+        $model = new Assignment($id);
+
+        $items = $model->getItems();
+
+        return $this->payloadResponse($items);
+    }
+
+    public function actionSyncPermissions()
+    {
+        $auth = Yii::$app->authManager; 
+        $processedPermissions = [];
+        $failedPermissions = [];
+
+        foreach ((new AuthItem(null))->scanPermissions() as $key => $value) {
+            $model = new AuthItem(null);
+            $model->type = Item::TYPE_PERMISSION;
+            $model->name = $key;
+            $model->data = $value;
+
+            if ($model->save(false)) {
+                $str = str_replace('-', ' ', $model->name);
+                try {
+                    if (!str_contains($model->name, '-')) {
+                        (new AuthItem($auth->getRole('api')))->addChildren([$model->name]);
+                        $processedPermissions[] = "Permission '{$model->name}' assigned to 'api' role.";
+                    } else {
+                        if (str_contains($str, 'create') || str_contains($str, 'update')) {
+                            (new AuthItem($auth->getRole('editor')))->addChildren([$model->name]);
+                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'editor' role.";
+                        } elseif (str_contains($str, 'list')) {
+                            (new AuthItem($auth->getRole('viewer')))->addChildren([$model->name]);
+                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'viewer' role.";
+                        } else {
+                            (new AuthItem($auth->getRole('su')))->addChildren([$model->name]);
+                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'su' role.";
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $failedPermissions[] = "Failed to assign permission '{$model->name}': " . $e->getMessage();
+                }
+            } else {
+                $failedPermissions[] = "Failed to save permission '{$model->name}'.";
+            }
+        }
+
+        // Generate response
+        if (empty($failedPermissions)) {
+            return $this->toastResponse([
+                'statusCode' => 200,
+                'message' => 'All permissions were successfully synced and assigned to roles.',
+            ]);
+        } else {
+            return $this->toastResponse([
+                'statusCode' => 500,
+                'message' => 'Some permissions failed to sync. Details: ' . implode(', ', $failedPermissions),
+            ]);
+        }
+    }
+
 }
