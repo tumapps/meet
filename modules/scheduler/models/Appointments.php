@@ -464,7 +464,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event); 
     }
 
-    public function sendAppointmentRescheduledEvent($email, $date, $startTime, $endTime, $name)
+    public function sendAppointmentRescheduledEvent($user_id, $email, $date, $startTime, $endTime, $name)
     {
         $event = new Event();
         $event->sender = $this;
