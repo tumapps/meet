@@ -47,7 +47,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'status' => $this->integer()->notNull()->defaultValue(10),
             'cancellation_reason' => $this->string(255)->null(),
             'rejection_reason' => $this->string(255)->null(),
-            'priority' => $this->integer()->notNull(),
+            'priority' => $this->integer()->null(),
             'checked_in' => $this->boolean()->defaultValue(false),
             // 'is_deleted' => $this->boolean()->defaultValue(false),
             'is_deleted' => $this->integer()->defaultValue(0),
@@ -118,15 +118,17 @@ class m240808_213712_create_scheduler_tables extends Migration
             'end_date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
+            'status' => $this->integer()->notNull()->defaultValue(10),
+            'cancellation_reason' => $this->string(255)->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
         ]);
         
         $this->createIndex(
-            'idx-events-event_date',
+            'idx-events-start_date',
             '{{%events}}',
-            'event_date'
+            'start_date'
         );
 
         // appointment attendees table
@@ -165,7 +167,7 @@ class m240808_213712_create_scheduler_tables extends Migration
     {   
         $this->dropTable('{{%appointment_files}}');
         $this->dropTable('{{%appointment_attendees}}');
-        $this->dropIndex('idx-events-event_date','{{%events}}');
+        $this->dropIndex('idx-events-start_date','{{%events}}');
         $this->dropTable('{{%events}}');
         $this->dropTable('{{%space_availability}}');
         $this->dropTable('{{%spaces}}');
