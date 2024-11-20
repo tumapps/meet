@@ -10,14 +10,15 @@ use yii\rbac\Item;
 use auth\models\searches\AssignmentSearch;
 
 
-class AssignmentController extends \helpers\ApiController {
+class AssignmentController extends \helpers\ApiController
+{
 
-	/**
-    * Assigns a permission to a role
-    * @param string $roleName
-    * @param string $permissionName
-    * @return \yii\web\Response
-    */
+    /**
+     * Assigns a permission to a role
+     * @param string $roleName
+     * @param string $permissionName
+     * @return \yii\web\Response
+     */
     public function actionPermissionToRole()
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
@@ -25,22 +26,22 @@ class AssignmentController extends \helpers\ApiController {
         $roleName = $dataRequest['Assignment']['role'];
         $permissionName = $dataRequest['Assignment']['permission'];
 
-        if(empty($roleName) || empty($permissionName)) {
+        if (empty($roleName) || empty($permissionName)) {
             return $this->errorResponse(['message' => ['Role and Permission name is required']]);
         }
 
         $auth = Yii::$app->authManager;
-        
+
         $role = $auth->getRole($roleName);
         $permission = $auth->getPermission($permissionName);
-        
+
         if (!$role || !$permission) {
             return $this->errorResponse(['message' => ['Role or Permission not found.']]);
         }
-        
+
         $auth->addChild($role, $permission);
-         
-        return $this->toastResponse(['statusCode'=>202,'message'=>"Permission '{$permissionName}' assigned to role '{$roleName}'."]);
+
+        return $this->toastResponse(['statusCode' => 202, 'message' => "Permission '{$permissionName}' assigned to role '{$roleName}'."]);
     }
 
     /**
@@ -56,7 +57,7 @@ class AssignmentController extends \helpers\ApiController {
         $childRoleName = $dataRequest['Assignment']['child_role'];
         $parentRoleName = $dataRequest['Assignment']['parent_role'];
 
-        if(empty($childRoleName) || empty($childRoleName)) {
+        if (empty($childRoleName) || empty($childRoleName)) {
             return $this->errorResponse(['message' => ['Child and Parent Role is required']]);
         }
 
@@ -70,7 +71,7 @@ class AssignmentController extends \helpers\ApiController {
         }
 
         $auth->addChild($parentRole, $childRole);
-        return $this->toastResponse(['statusCode'=>202,'message'=>"Role '{$childRoleName}' assigned to role '{$parentRoleName}'."]);
+        return $this->toastResponse(['statusCode' => 202, 'message' => "Role '{$childRoleName}' assigned to role '{$parentRoleName}'."]);
     }
 
     /**
@@ -86,12 +87,12 @@ class AssignmentController extends \helpers\ApiController {
         $userId = $dataRequest['Assignment']['user_id'];
         $roleName = $dataRequest['Assignment']['role_name'];
 
-        if(empty($userId) || empty($roleName)) {
+        if (empty($userId) || empty($roleName)) {
             return $this->errorResponse(['message' => ['User Id and Role is required']]);
         }
 
-        if(!is_numeric($userId)){
-           return $this->errorResponse(['message' => ['User id must be an integer']]); 
+        if (!is_numeric($userId)) {
+            return $this->errorResponse(['message' => ['User id must be an integer']]);
         }
 
         $auth = Yii::$app->authManager;
@@ -109,7 +110,7 @@ class AssignmentController extends \helpers\ApiController {
         }
 
         $auth->assign($role, $userId);
-        return $this->toastResponse(['statusCode'=>202,'message'=>"Role '{$roleName}' assigned to user with ID '{$userId}'."]);
+        return $this->toastResponse(['statusCode' => 202, 'message' => "Role '{$roleName}' assigned to user with ID '{$userId}'."]);
     }
 
     /**
@@ -155,33 +156,49 @@ class AssignmentController extends \helpers\ApiController {
 
     public function actionSyncPermissions()
     {
-        $auth = Yii::$app->authManager; 
+        $auth = Yii::$app->authManager;
+        $manager = \auth\hooks\Configs::authManager();
         $processedPermissions = [];
         $failedPermissions = [];
 
         foreach ((new AuthItem(null))->scanPermissions() as $key => $value) {
+            // Check if permission already exists
+            if ($manager->getPermission(['name' => $key])) {
+                $failedPermissions[] = "Permission '{$key}' already exists.";
+                continue;
+            }
+
             $model = new AuthItem(null);
             $model->type = Item::TYPE_PERMISSION;
             $model->name = $key;
             $model->data = $value;
 
+            // Validate model before saving
+            if (!$model->validate()) {
+                $failedPermissions[] = "Validation failed for '{$key}': " . implode(', ', $model->getFirstErrors());
+                continue;
+            }
+
             if ($model->save(false)) {
                 $str = str_replace('-', ' ', $model->name);
                 try {
+                    $roleName = '';
                     if (!str_contains($model->name, '-')) {
-                        (new AuthItem($auth->getRole('api')))->addChildren([$model->name]);
-                        $processedPermissions[] = "Permission '{$model->name}' assigned to 'api' role.";
+                        $roleName = 'api';
+                    } elseif (str_contains($str, 'create') || str_contains($str, 'update')) {
+                        $roleName = 'editor';
+                    } elseif (str_contains($str, 'list')) {
+                        $roleName = 'viewer';
                     } else {
-                        if (str_contains($str, 'create') || str_contains($str, 'update')) {
-                            (new AuthItem($auth->getRole('editor')))->addChildren([$model->name]);
-                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'editor' role.";
-                        } elseif (str_contains($str, 'list')) {
-                            (new AuthItem($auth->getRole('viewer')))->addChildren([$model->name]);
-                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'viewer' role.";
-                        } else {
-                            (new AuthItem($auth->getRole('su')))->addChildren([$model->name]);
-                            $processedPermissions[] = "Permission '{$model->name}' assigned to 'su' role.";
-                        }
+                        $roleName = 'su';
+                    }
+
+                    $role = $auth->getRole($roleName);
+                    if ($role) {
+                        (new AuthItem($role))->addChildren([$model->name]);
+                        $processedPermissions[] = "Permission '{$model->name}' assigned to '{$roleName}' role.";
+                    } else {
+                        $failedPermissions[] = "Role '{$roleName}' does not exist.";
                     }
                 } catch (\Exception $e) {
                     $failedPermissions[] = "Failed to assign permission '{$model->name}': " . $e->getMessage();
@@ -204,5 +221,4 @@ class AssignmentController extends \helpers\ApiController {
             ]);
         }
     }
-
 }
