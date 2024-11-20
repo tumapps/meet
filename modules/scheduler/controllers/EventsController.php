@@ -34,6 +34,35 @@ class EventsController extends \helpers\ApiController{
         return $this->payloadResponse($this->findModel($id));
     }
 
+    public function actionCancel($id)
+    {
+        $request = Yii::$app->request;
+
+        $model = $this->findModel($id);
+    
+        // Set scenario to 'cancel' for validation
+        $model->scenario = Events::SCENARIO_CANCEL;
+
+        if ($request->isPut) {
+            $putParams = $request->getBodyParams();
+            $reason = isset($putParams['cancellation_reason']) ? $putParams['cancellation_reason'] : null;
+        }
+
+        $model->cancellation_reason = $reason;
+
+        // Validate cancellation reason
+        if (!$model->validate()) {
+            return $this->errorResponse($model->getErrors());
+        }
+
+        $model->status = Events::STATUS_CANCELLED;
+
+        if($model->save(false)){
+            return $this->toastResponse(['statusCode'=>202,'message'=>'Event CANCELLED successfully']);
+        }
+        return $this->errorResponse($model->getErrors()); 
+    }
+
     public function actionCreate()
     {
         // Yii::$app->user->can('schedulerEventsCreate');
