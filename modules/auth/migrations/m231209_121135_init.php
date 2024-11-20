@@ -27,6 +27,7 @@ class m231209_121135_init extends Migration
             'auth_key' => $this->string(32),
             'password_hash' => $this->string()->notNull(),
             'status' => $this->integer(4)->notNull()->defaultValue(10),
+            'last_login_at' => $this->timestamp()->null()->after('updated_at'),
             'is_deleted' => $this->integer(2)->notNull()->defaultValue(0),
             'can_be_booked' => $this->boolean()->defaultValue(true),
             'created_at' => $this->integer()->notNull(),

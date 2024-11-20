@@ -6,7 +6,13 @@ $config = [
     'id' => $_ENV['APP_CODE'],
     'name' => $_ENV['APP_NAME'],
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => [
+        'log',
+        function () {
+            $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
+            $controller->actionSyncPermissions();
+        }
+    ],
     'controllerNamespace' => 'main\controllers',
     'timeZone' => 'Africa/Nairobi',
     'aliases' =>  $wrapper->load('aliases'),
@@ -49,7 +55,7 @@ $config = [
             'hostname' => $_ENV['HOST_NAME'],
             'port' => $_ENV['REDIS_PORT'],
             'database' => $_ENV['DATABASE'],
-            'on afterOpen' => function($event) {
+            'on afterOpen' => function ($event) {
                 Yii::info('Connected to Redis', __METHOD__);
             },
         ],
@@ -110,7 +116,7 @@ $config = [
                 'host' => $_ENV['HOST'],
                 'username' => $_ENV['USERNAME'],
                 'password' => $_ENV['PASSWORD'],
-                'port' =>$_ENV['MAIL_PORT'],
+                'port' => $_ENV['MAIL_PORT'],
                 'encryption' => $_ENV['ENCRYPTION'],
             ],
         ],
@@ -161,7 +167,7 @@ $config = [
                 ],
             ],
 
-            
+
         ],
     ],
     'params' => $wrapper->load('params'),
