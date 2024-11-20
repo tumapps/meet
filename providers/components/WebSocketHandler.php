@@ -9,7 +9,6 @@ use Ratchet\Client\Connector;
 use React\EventLoop\Factory;
 use scheduler\models\Appointments;
 use React\EventLoop\Timer\Timer;
-// use cmd\controllers\Console;
 
 class WebSocketHandler implements MessageComponentInterface
 {
@@ -61,7 +60,7 @@ class WebSocketHandler implements MessageComponentInterface
         foreach ($this->clients as $client) {
             echo $message;
 
-            Yii::info('Broadcasting message:'.$message . 'WebSocket');
+            \Yii::info('Broadcasting message:'.$message . 'WebSocket');
             $client->send($message);
         }
     }
