@@ -137,10 +137,38 @@ return [
 'PUT events/{id}'     => 'events/update',
 
 /**
+* @OA\Put(
+*     path="/scheduler/cancel/{id}",
+*     tags={"Events"},
+*     summary="Cancel an existing Events model",
+*     @OA\Parameter(description="Events unique ID to load and update",in="path",name="id",required=true,@OA\Schema(type="string",)),
+*     @OA\RequestBody(
+*        required=true,
+*        description="Finds the Events model to be updated based on its primary key value",
+*        @OA\JsonContent(
+*           ref="#/components/schemas/Events",
+*        ),
+*     ),
+*    @OA\Response(
+*       response=202,
+*       description="Data payload",
+*       @OA\JsonContent(
+*          @OA\Property(property="dataPayload", type="object",
+*             @OA\Property(property="data", type="object",ref="#/components/schemas/Events"),
+*             @OA\Property(property="toastMessage", type="string", example="events updated succefully"),
+*             @OA\Property(property="toastTheme", type="string",example="success"),
+*          )
+*       )
+*    ),
+* )
+*/
+'PUT events/{id}'     => 'events/update',
+
+/**
 * @OA\Delete(path="/scheduler/events/{id}",
-*    tags={"Events"},
-*    summary="Deletes an existing Events model.",
-*     @OA\Parameter(description="Events unique ID to delete",in="path",name="id",required=true,@OA\Schema(type="string",)),
+*    tags={"Space"},
+*    summary="Deletes an existing Event model.",
+*     @OA\Parameter(description="Event unique ID to delete",in="path",name="id",required=true,@OA\Schema(type="string",)),
 *     @OA\Response(
 *         response=202,
 *         description="Deletion successful",
