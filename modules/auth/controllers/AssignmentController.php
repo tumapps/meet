@@ -154,7 +154,7 @@ class AssignmentController extends \helpers\ApiController
         return $this->payloadResponse($items);
     }
 
-    public function actionSyncPermissions()
+    public function actionSyncPermissions($toastResponse = true)
     {
         $auth = Yii::$app->authManager;
         $manager = \auth\hooks\Configs::authManager();
@@ -209,16 +209,18 @@ class AssignmentController extends \helpers\ApiController
         }
 
         // Generate response
-        if (empty($failedPermissions)) {
-            return $this->toastResponse([
-                'statusCode' => 200,
-                'message' => 'All permissions were successfully synced and assigned to roles.',
-            ]);
-        } else {
-            return $this->toastResponse([
-                'statusCode' => 500,
-                'message' => 'Some permissions failed to sync. Details: ' . implode(', ', $failedPermissions),
-            ]);
+        if ($toastResponse) {
+            if (empty($failedPermissions)) {
+                return $this->toastResponse([
+                    'statusCode' => 200,
+                    'message' => 'All permissions were successfully synced and assigned to roles.',
+                ]);
+            } else {
+                return $this->toastResponse([
+                    'statusCode' => 500,
+                    'message' => 'Some permissions failed to sync. Details: ' . implode(', ', $failedPermissions),
+                ]);
+            }
         }
     }
 }

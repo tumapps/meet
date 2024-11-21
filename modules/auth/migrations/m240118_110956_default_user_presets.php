@@ -108,7 +108,7 @@ class m240118_110956_default_user_presets extends Migration
     private function syncPermissions()
     {
         $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
-        $controller->actionSyncPermissions();
+        $controller->actionSyncPermissions(false);
         echo "Permissions synced successfully.\n";
     }
 
