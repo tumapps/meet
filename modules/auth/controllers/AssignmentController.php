@@ -233,4 +233,66 @@ class AssignmentController extends \helpers\ApiController
             }
         }
     }
+
+    /**
+     * Bulk assigns roles and permissions to a specific role
+     * @return \yii\web\Response
+     */
+    public function actionBulkAssignToRole()
+    {
+        $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
+
+        $parentRoleName = $dataRequest['Assignment']['parent_role'];
+        $items = $dataRequest['Assignment']['items']; // Array of roles and permissions
+
+        if (empty($parentRoleName) || empty($items)) {
+            return $this->errorResponse(['message' => ['Parent Role and Items are required']]);
+        }
+
+        $auth = Yii::$app->authManager;
+        $parentRole = $auth->getRole($parentRoleName);
+
+        if (!$parentRole) {
+            return $this->errorResponse(['message' => ["Parent Role '{$parentRoleName}' not found."]]);
+        }
+
+        $errors = [];
+        $success = [];
+
+        foreach ($items as $itemName) {
+            $role = $auth->getRole($itemName);
+            $permission = $auth->getPermission($itemName);
+
+            if ($role) {
+                try {
+                    $auth->addChild($parentRole, $role);
+                    $success[] = "Role '{$itemName}' assigned to '{$parentRoleName}'.";
+                } catch (\Exception $e) {
+                    $errors[] = "Failed to assign Role '{$itemName}' to '{$parentRoleName}': " . $e->getMessage();
+                }
+            } elseif ($permission) {
+                try {
+                    $auth->addChild($parentRole, $permission);
+                    $success[] = "Permission '{$itemName}' assigned to '{$parentRoleName}'.";
+                } catch (\Exception $e) {
+                    $errors[] = "Failed to assign Permission '{$itemName}' to '{$parentRoleName}': " . $e->getMessage();
+                }
+            } else {
+                $errors[] = "Item '{$itemName}' not found as Role or Permission.";
+            }
+        }
+
+        // Generate response
+        if (empty($errors)) {
+            return $this->toastResponse([
+                'statusCode' => 200,
+                'message' => implode(' ', $success),
+            ]);
+        }
+
+        return $this->toastResponse([
+            'statusCode' => 500,
+            'message' => implode(' ', $errors),
+        ]);
+    }
 }

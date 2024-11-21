@@ -46,8 +46,8 @@
      *   ),
      * )
      */
-    'GET users'     => 'auth/get-users',
-    // 'GET users'     => 'auth/index',
+    // 'GET users'     => 'auth/get-users',
+    'GET users'     => 'auth/index',
 
 
      /**

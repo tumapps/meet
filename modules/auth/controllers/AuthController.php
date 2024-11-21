@@ -18,22 +18,53 @@ use yii\base\InvalidArgumentException;
 class AuthController extends \helpers\ApiController
 {
 
+	// public function actionIndex()
+	// {
+	// 	// Yii::$app->user->can('schedulerAvailabilityList');
+	// 	$searchModel = new UserSearch();
+	// 	$search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
+	// 	$dataProvider = $searchModel->search($search);
+	// 	return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
+	// }
+
 	public function actionIndex()
 	{
-		// Yii::$app->user->can('schedulerAvailabilityList');
 		$searchModel = new UserSearch();
 		$search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
 		$dataProvider = $searchModel->search($search);
+
+		// Fetch data
+		$users = $dataProvider->getModels();
+		$authManager = Yii::$app->authManager;
+
+		foreach ($users as &$user) {
+			$userData = $user->toArray();
+			$roles = $authManager->getRolesByUser($user->id);
+			$roleNames = array_keys($roles);
+
+			$userData['id'] = $user->id;
+			$userData['username'] = $user->username;
+			$userData['email'] = $user->profile->email_address;
+			$userData['fullname'] = $user->profile->first_name . ' ' . $user->profile->last_name;
+			$userData['mobile'] = $user->profile->mobile_number;
+			$userData['roles'] = $roleNames;
+
+			$user = $userData;
+		}
+
+		$dataProvider->setModels($users);
+
 		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
 	}
+
 
 	public function actionGetUsers()
 	{
 		// $profiles = Profiles::find()->all();
 		$profiles = Profiles::find()
-	        ->joinWith('user')
-	        ->where(['users.can_be_booked' => true])
-	        ->all();
+			->joinWith('user')
+			->where(['users.can_be_booked' => true])
+			->all();
 
 		if (empty($profiles)) {
 			return $this->errorResponse(['message' => 'No profiles found']);
@@ -43,7 +74,7 @@ class AuthController extends \helpers\ApiController
 			$formattedProfiles[] = [
 				'user_id' => $profile->user_id,
 				'email' => $profile->email_address,
-				'name' => $profile->first_name. ' ' . $profile->last_name,
+				'name' => $profile->first_name . ' ' . $profile->last_name,
 				'middle_name' => $profile->middle_name,
 				'mobile_number' => $profile->mobile_number
 			];
@@ -51,10 +82,7 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
-	public function actionSearchUser()
-	{
-		
-	}
+	public function actionSearchUser() {}
 
 	public function actionLogin()
 	{
@@ -64,29 +92,31 @@ class AuthController extends \helpers\ApiController
 			$user = Yii::$app->user->identity;
 			$canBeBooked = $user->can_be_booked;
 			$this->generateRefreshToken($user);
-			
-			return $this->payloadResponse([
-				'username' => $user->username, 
-				'token' => $user->token, 
-				'menus' => $this->filterMenus($canBeBooked),
-				'roles' => array_keys(Yii::$app->authManager->getRolesByUser($user->user_id))
-				], 
-				['statusCode' => 200, 'message' => 'Access granted']);
+
+			return $this->payloadResponse(
+				[
+					'username' => $user->username,
+					'token' => $user->token,
+					'menus' => $this->filterMenus($canBeBooked),
+					'roles' => array_keys(Yii::$app->authManager->getRolesByUser($user->user_id))
+				],
+				['statusCode' => 200, 'message' => 'Access granted']
+			);
 		}
 		return $this->errorResponse($model->getErrors());
 	}
 
 	public function filterMenus($can_be_booked)
 	{
-	    $menus = Yii::$app->params['menus'];
+		$menus = Yii::$app->params['menus'];
 
-	   if (!$can_be_booked === false) {
-	        $menus = array_values(array_filter($menus, function ($menu) {
-	            return $menu['route'] !== 'default.users';
-	        }));
-    	}
+		if (!$can_be_booked === false) {
+			$menus = array_values(array_filter($menus, function ($menu) {
+				return $menu['route'] !== 'default.users';
+			}));
+		}
 
-	    return $menus;
+		return $menus;
 	}
 
 
@@ -149,7 +179,7 @@ class AuthController extends \helpers\ApiController
 		$model = new ChangePassword();
 		$dataRequest['ChangePassword'] = Yii::$app->request->getBodyParams();
 
-		if($model->load($dataRequest) && $model->updatePassword()) {
+		if ($model->load($dataRequest) && $model->updatePassword()) {
 			return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
 		}
 		return $this->errorResponse($model->getErrors());
@@ -199,7 +229,6 @@ class AuthController extends \helpers\ApiController
 				// return $this->errorResponse(['statusCode' => [440]]);
 				Yii::$app->response->statusCode = 440;
 				return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
-
 			}
 			$user = User::findIdentity($userRefreshToken->user_id);
 			if (empty($user)) {
