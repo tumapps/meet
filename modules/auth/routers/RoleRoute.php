@@ -110,7 +110,7 @@
      *   ),
      * )
      */
-    'GET role'     => 'role/view',
+    'POST role-view'     => 'role/view',
 
     /**
      * @OA\Get(path="/auth/role/{name}",
@@ -135,7 +135,7 @@
      *   ),
      * )
      */
-    'POST get-role/{name}'     => 'role/get-role',
+    'GET get-role'     => 'role/get-role',
 
     /**
     * @OA\Put(
@@ -163,7 +163,7 @@
     *    ),
     * )
     */
-    'POST role/{id}' => 'role/update',
+    'PUT role' => 'role/update',
 
     /**
     * @OA\Delete(path="/auth/role/{id}",
@@ -179,7 +179,7 @@
     *     ),
     * )
     */
-    'DELETE role/{id}'  => 'role/delete',
+    'DELETE role'  => 'role/delete',
 
     /**
     * @OA\Patch(path="/auth/role/{id}",

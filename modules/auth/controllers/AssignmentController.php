@@ -113,6 +113,16 @@ class AssignmentController extends \helpers\ApiController
         return $this->toastResponse(['statusCode' => 202, 'message' => "Role '{$roleName}' assigned to user with ID '{$userId}'."]);
     }
 
+    // public function actionRemove($id)
+    // {
+    //     $items = Yii::$app->getRequest()->post('items', []);
+    //     $model = $this->findModel($id);
+    //     $success = $model->removeChildren($items);
+    //     Yii::$app->getResponse()->format = 'json';
+
+    //     return array_merge($model->getItems(), ['success' => $success]);
+    // }
+
     /**
      * Lists all roles, permissions, and their assignments
      * @return \yii\web\Response
