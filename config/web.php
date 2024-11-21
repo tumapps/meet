@@ -10,7 +10,7 @@ $config = [
         'log',
         function () {
             $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
-            $controller->actionSyncPermissions();
+            $controller->actionSyncPermissions(false);
         }
     ],
     'controllerNamespace' => 'main\controllers',
