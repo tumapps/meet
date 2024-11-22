@@ -160,15 +160,17 @@ class AssignmentController extends \helpers\ApiController
         return $this->toastResponse(['statusCode' => 202, 'message' => "Role '{$roleName}' assigned to user with ID '{$userId}'."]);
     }
 
-    // public function actionRemove($id)
-    // {
-    //     $items = Yii::$app->getRequest()->post('items', []);
-    //     $model = $this->findModel($id);
-    //     $success = $model->removeChildren($items);
-    //     Yii::$app->getResponse()->format = 'json';
+    public function actionRemove($id)
+    {
+        $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
+        $items =$dataRequest['Assignment']['items'];
 
-    //     return array_merge($model->getItems(), ['success' => $success]);
-    // }
+        $model = $this->findModel($id);
+        $success = $model->removeChildren($items);
+        Yii::$app->getResponse()->format = 'json';
+
+        return array_merge($model->getItems(), ['success' => $success]);
+    }
 
     /**
      * Lists all roles, permissions, and their assignments
@@ -290,7 +292,7 @@ class AssignmentController extends \helpers\ApiController
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
         // $parentRoleName = $dataRequest['Assignment']['role'];
-        $items = $dataRequest['Assignment']['items']; // Array of roles and permissions
+        $items = $dataRequest['Assignment']['items']; 
 
         if (empty($items)) {
             return $this->errorResponse(['message' => ['Parent Role and Items are required']]);

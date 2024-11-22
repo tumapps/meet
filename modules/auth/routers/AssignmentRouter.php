@@ -165,6 +165,33 @@
      */
     'POST assign-role-user'     => 'assignment/role-to-user',
 
+     /**
+     * @OA\Get(path="/auth/assignment",
+     *   summary="Remove a role or permissions from a Parent role",
+     *   tags={"Assignment"},
+     *   @OA\Parameter(description="Page Size",in="query",name="per-page", @OA\Schema(type="integer")),
+     *   @OA\Parameter(description="Search",in="query",name="_search", @OA\Schema(type="string")),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="Returns a data payload object for all auth/appointments",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="dataPayload", type="object",
+     *              @OA\Property(property="data", type="array",@OA\Items(ref="#/components/schemas/Appointments")),
+     *              @OA\Property(property="countOnPage", type="integer", example="25"),
+     *              @OA\Property(property="totalCount", type="integer",example="50"),
+     *              @OA\Property(property="perPage", type="integer",example="25"),
+     *              @OA\Property(property="totalPages", type="integer",example="2"),
+     *              @OA\Property(property="currentPage", type="integer",example="1"),
+     *              @OA\Property(property="paginationLinks", type="object",
+     *              ),
+     *          )
+     *      )
+     *   ),
+     * )
+     */
+    'POST remove'     => 'assignment/remove',
+
     /**
      * @OA\Get(path="/auth/assignments",
      *   summary="Lists all roles, permissions, and their assignments ",
