@@ -163,7 +163,7 @@ class AssignmentController extends \helpers\ApiController
     public function actionRemove($id)
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
-        $items =$dataRequest['Assignment']['items'];
+        $items = $dataRequest['Assignment']['items'];
 
         $model = $this->findModel($id);
         $success = $model->removeChildren($items);
@@ -291,8 +291,7 @@ class AssignmentController extends \helpers\ApiController
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
-        // $parentRoleName = $dataRequest['Assignment']['role'];
-        $items = $dataRequest['Assignment']['items']; 
+        $items = $dataRequest['Assignment']['items'];
 
         if (empty($items)) {
             return $this->errorResponse(['message' => ['Parent Role and Items are required']]);
@@ -309,22 +308,22 @@ class AssignmentController extends \helpers\ApiController
         $success = [];
 
         foreach ($items as $itemName) {
-            $role = $auth->getRole($itemName);
-            $permission = $auth->getPermission($itemName);
+            $roleObject = $auth->getRole($itemName);
+            $permissionObject = $auth->getPermission($itemName);
 
-            if ($role) {
+            if ($roleObject) {
                 try {
-                    $auth->addChild($parentRole, $role);
-                    $success[] = "Role '{$itemName}' assigned to '{$role}'.";
+                    $auth->addChild($parentRole, $roleObject);
+                    $success[] = "Role '{$itemName}' assigned to '{$parentRole->name}'.";
                 } catch (\Exception $e) {
-                    $errors[] = "Failed to assign Role '{$itemName}' to '{$role}': " . $e->getMessage();
+                    $errors[] = "Failed to assign Role '{$itemName}' to '{$parentRole->name}': " . $e->getMessage();
                 }
-            } elseif ($permission) {
+            } elseif ($permissionObject) {
                 try {
-                    $auth->addChild($parentRole, $permission);
-                    $success[] = "Permission '{$itemName}' assigned to '{$role}'.";
+                    $auth->addChild($parentRole, $permissionObject);
+                    $success[] = "Permission '{$itemName}' assigned to '{$parentRole->name}'.";
                 } catch (\Exception $e) {
-                    $errors[] = "Failed to assign Permission '{$itemName}' to '{$role}': " . $e->getMessage();
+                    $errors[] = "Failed to assign Permission '{$itemName}' to '{$parentRole->name}': " . $e->getMessage();
                 }
             } else {
                 $errors[] = "Item '{$itemName}' not found as Role or Permission.";
@@ -344,6 +343,7 @@ class AssignmentController extends \helpers\ApiController
             'message' => implode(' ', $errors),
         ]);
     }
+
 
     protected function findModel($id)
     {
