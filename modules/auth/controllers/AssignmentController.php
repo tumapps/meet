@@ -292,7 +292,7 @@ class AssignmentController extends \helpers\ApiController
         // $parentRoleName = $dataRequest['Assignment']['role'];
         $items = $dataRequest['Assignment']['items']; // Array of roles and permissions
 
-        if (empty($parentRoleName) || empty($items)) {
+        if (empty($items)) {
             return $this->errorResponse(['message' => ['Parent Role and Items are required']]);
         }
 
