@@ -28,6 +28,34 @@
      */
     'POST assign-permission'     => 'assignment/permission-to-role',
 
+     /**
+     * @OA\Get(path="/auth/manage-role",
+     *   summary="Assign Permissions to Role",
+     *   tags={"Assignment"},
+     *   @OA\Parameter(description="Page Size",in="query",name="per-page", @OA\Schema(type="integer")),
+     *   @OA\Parameter(description="Search",in="query",name="_search", @OA\Schema(type="string")),
+     *
+     *   @OA\Response(
+     *     response=200,
+     *     description="Returns a data payload object for all auth/appointments",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="dataPayload", type="object",
+     *              @OA\Property(property="data", type="array",@OA\Items(ref="#/components/schemas/Appointments")),
+     *              @OA\Property(property="countOnPage", type="integer", example="25"),
+     *              @OA\Property(property="totalCount", type="integer",example="50"),
+     *              @OA\Property(property="perPage", type="integer",example="25"),
+     *              @OA\Property(property="totalPages", type="integer",example="2"),
+     *              @OA\Property(property="currentPage", type="integer",example="1"),
+     *              @OA\Property(property="paginationLinks", type="object",
+     *              ),
+     *          )
+     *      )
+     *   ),
+     * )
+     */
+    'GET manage-role'     => 'assignment/manage-role',
+
+
     /**
      * @OA\Get(path="/auth/assignment",
      *   summary="Assign Role to another Role",

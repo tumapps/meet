@@ -7,11 +7,58 @@ use auth\models\Assignment;
 use auth\models\AuthItem;
 use auth\models\User;
 use yii\rbac\Item;
+use auth\hooks\Configs;
 use auth\models\searches\AssignmentSearch;
 
 
 class AssignmentController extends \helpers\ApiController
 {
+    protected $type = Item::TYPE_ROLE;
+
+    public function actionAssing() {}
+
+    public function actionManageRole2($id)
+    {
+        // Yii::$app->user->can('manage-roles');
+        $model = $this->findModel($id);
+        return $model;
+    }
+
+    public function actionManageRole($id)
+    {
+        $authManager = Yii::$app->authManager;
+
+        // Find the role by ID or name
+        $role =  $authManager->getRole($id);
+
+        if (!$role) {
+            return $this->errorResponse('Role not found', 404);
+        }
+
+        // Fetch all roles and permissions
+        $allRoles = $authManager->getRoles();
+        $allPermissions = $authManager->getPermissions();
+
+        // Fetch assigned roles and permissions for this role
+        $assignedRoles = $authManager->getChildRoles($role->name);
+        $assignedPermissions = $authManager->getPermissionsByRole($role->name);
+
+        // Filter available roles and permissions
+        $availableRoles = array_diff_key($allRoles, $assignedRoles);
+        $availablePermissions = array_diff_key($allPermissions, $assignedPermissions);
+
+        return $this->payloadResponse([
+            'available' => [
+                'roles' => $availableRoles,
+                'permissions' => $availablePermissions,
+            ],
+            'assigned' => [
+                'roles' => $assignedRoles,
+                'permissions' => $assignedPermissions,
+            ],
+        ]);
+    }
+
 
     /**
      * Assigns a permission to a role
@@ -242,7 +289,7 @@ class AssignmentController extends \helpers\ApiController
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
-        $parentRoleName = $dataRequest['Assignment']['parent_role'];
+        $parentRoleName = $dataRequest['Assignment']['role'];
         $items = $dataRequest['Assignment']['items']; // Array of roles and permissions
 
         if (empty($parentRoleName) || empty($items)) {
@@ -294,5 +341,25 @@ class AssignmentController extends \helpers\ApiController
             'statusCode' => 500,
             'message' => implode(' ', $errors),
         ]);
+    }
+
+    protected function findModel($id)
+    {
+        // $auth = Yii::$app->authManager;
+        // $item =  $auth->getRole($id);
+
+        // if ($item) {
+        //     return new AuthItem($item);
+        // } else {
+        //     throw new \yii\web\NotFoundHttpException('Record not found.');
+        // }
+
+        $auth = Configs::authManager();
+        $item = $this->type === Item::TYPE_ROLE ? $auth->getRole($id) : $auth->getPermission($id);
+        if ($item) {
+            return new AuthItem($item);
+        } else {
+            throw new \yii\web\NotFoundHttpException('Record not found.');
+        }
     }
 }

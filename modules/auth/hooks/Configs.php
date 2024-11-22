@@ -9,36 +9,6 @@ use yii\di\Instance;
 use yii\helpers\ArrayHelper;
 use yii\rbac\ManagerInterface;
 
-/**
- * Configs
- * Used to configure some values. To set config you can use [[\yii\base\Application::$params]]
- *
- * ```
- * return [
- *
- *     'mdm.admin.configs' => [
- *         'db' => 'customDb',
- *         'menuTable' => '{{%admin_menu}}',
- *         'cache' => [
- *             'class' => 'yii\caching\DbCache',
- *             'db' => ['dsn' => 'sqlite:@runtime/admin-cache.db'],
- *         ],
- *     ]
- * ];
- * ```
- *
- * or use [[\Yii::$container]]
- *
- * ```
- * Yii::$container->set('mdm\admin\components\Configs',[
- *     'db' => 'customDb',
- *     'menuTable' => 'admin_menu',
- * ]);
- * ```
- *
- * @author Misbahul D Munir <misbahuldmunir@gmail.com>
- * @since 1.0
- */
 
 class Configs extends \yii\base\BaseObject
 {
