@@ -285,11 +285,11 @@ class AssignmentController extends \helpers\ApiController
      * Bulk assigns roles and permissions to a specific role
      * @return \yii\web\Response
      */
-    public function actionBulkAssign()
+    public function actionBulkAssign($role)
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
-        $parentRoleName = $dataRequest['Assignment']['role'];
+        // $parentRoleName = $dataRequest['Assignment']['role'];
         $items = $dataRequest['Assignment']['items']; // Array of roles and permissions
 
         if (empty($parentRoleName) || empty($items)) {
