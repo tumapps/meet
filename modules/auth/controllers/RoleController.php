@@ -21,12 +21,11 @@ class RoleController extends \helpers\ApiController
         return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
-    public function actionView()
+    public function actionView($name)
     {
         // Yii::$app->user->can('');
-        // return $this->payloadResponse($this->findModel($id));
-        $dataRequest['Role'] = Yii::$app->request->getBodyParams();
-        $name = $dataRequest['Role']['name'] ?? null;
+        // $dataRequest['Role'] = Yii::$app->request->getBodyParams();
+        // $name = $dataRequest['Role']['name'] ?? null;
 
         if (!$name) {
             return $this->errorResponse(['message' => ['Role name is required']]);

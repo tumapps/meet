@@ -110,7 +110,7 @@
      *   ),
      * )
      */
-    'POST role-view'     => 'role/view',
+    'GET role-view'     => 'role/view',
 
     /**
      * @OA\Get(path="/auth/role/{name}",
