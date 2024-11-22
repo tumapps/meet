@@ -18,15 +18,6 @@ use yii\base\InvalidArgumentException;
 class AuthController extends \helpers\ApiController
 {
 
-	// public function actionIndex()
-	// {
-	// 	// Yii::$app->user->can('schedulerAvailabilityList');
-	// 	$searchModel = new UserSearch();
-	// 	$search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
-	// 	$dataProvider = $searchModel->search($search);
-	// 	return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
-	// }
-
 	public function actionIndex()
 	{
 		$searchModel = new UserSearch();
@@ -38,24 +29,24 @@ class AuthController extends \helpers\ApiController
 		$authManager = Yii::$app->authManager;
 
 		foreach ($users as &$user) {
-			$userData = $user->toArray();
-			$roles = $authManager->getRolesByUser($user->id);
-			$roleNames = array_keys($roles);
+			// Only include necessary fields
+			$userData = [
+				'id' => $user->id,
+				'username' => $user->username,
+				'email' => $user->profile->email_address,
+				'fullname' => $user->profile->first_name . ' ' . $user->profile->last_name,
+				'mobile' => $user->profile->mobile_number,
+				'roles' => array_keys($authManager->getRolesByUser($user->id)),
+			];
 
-			$userData['id'] = $user->id;
-			$userData['username'] = $user->username;
-			$userData['email'] = $user->profile->email_address;
-			$userData['fullname'] = $user->profile->first_name . ' ' . $user->profile->last_name;
-			$userData['mobile'] = $user->profile->mobile_number;
-			$userData['roles'] = $roleNames;
-
-			$user = $userData;
+			$user = $userData; // Replace the user object with the filtered data
 		}
 
 		$dataProvider->setModels($users);
 
 		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
 	}
+
 
 
 	public function actionGetUsers()
