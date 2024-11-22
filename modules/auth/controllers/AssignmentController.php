@@ -297,10 +297,10 @@ class AssignmentController extends \helpers\ApiController
         }
 
         $auth = Yii::$app->authManager;
-        $parentRole = $auth->getRole($parentRoleName);
+        $parentRole = $auth->getRole($role);
 
         if (!$parentRole) {
-            return $this->errorResponse(['message' => ["Parent Role '{$parentRoleName}' not found."]]);
+            return $this->errorResponse(['message' => ["Parent Role '{$role}' not found."]]);
         }
 
         $errors = [];
@@ -313,16 +313,16 @@ class AssignmentController extends \helpers\ApiController
             if ($role) {
                 try {
                     $auth->addChild($parentRole, $role);
-                    $success[] = "Role '{$itemName}' assigned to '{$parentRoleName}'.";
+                    $success[] = "Role '{$itemName}' assigned to '{$role}'.";
                 } catch (\Exception $e) {
-                    $errors[] = "Failed to assign Role '{$itemName}' to '{$parentRoleName}': " . $e->getMessage();
+                    $errors[] = "Failed to assign Role '{$itemName}' to '{$role}': " . $e->getMessage();
                 }
             } elseif ($permission) {
                 try {
                     $auth->addChild($parentRole, $permission);
-                    $success[] = "Permission '{$itemName}' assigned to '{$parentRoleName}'.";
+                    $success[] = "Permission '{$itemName}' assigned to '{$role}'.";
                 } catch (\Exception $e) {
-                    $errors[] = "Failed to assign Permission '{$itemName}' to '{$parentRoleName}': " . $e->getMessage();
+                    $errors[] = "Failed to assign Permission '{$itemName}' to '{$role}': " . $e->getMessage();
                 }
             } else {
                 $errors[] = "Item '{$itemName}' not found as Role or Permission.";
