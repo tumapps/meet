@@ -55,6 +55,10 @@ class ConfigWrapper
                     ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'home'],
                     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'home'],
                     ['route' => 'availability', 'label' => 'Availability', 'icon' => 'home'],
+                    ['route' => 'pending.appointments', 'label' => 'Pending Appointments', 'icon' => 'home'],
+                    ['route' => 'spaces', 'label' => 'Spaces', 'icon' => 'home'],
+                    ['route' => 'events', 'label' => 'Events', 'icon' => 'home'],
+                    ['route' => 'levels', 'label' => 'Levels', 'icon' => 'home'],
             ],
             'mdm.admin.configs' => [
                 
