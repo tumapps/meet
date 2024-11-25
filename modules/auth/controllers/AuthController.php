@@ -104,7 +104,7 @@ class AuthController extends \helpers\ApiController
 
 		if (!$role === 'su') {
 			$menus = array_values(array_filter($menus, function ($menu) {
-				return $menu['route'] !== 'default.users';
+				return $menu['route'] !== 'default.users' && $menu['route']!== 'spaces' && $menu['route']!== 'levels' && $menu['route']!== 'events';
 			}));
 		}
 
