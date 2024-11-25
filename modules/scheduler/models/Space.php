@@ -135,7 +135,7 @@ class Space extends BaseModel
     public static function getSpaceNameDetails($spaceId)
     {
         return self::find()
-            ->select(['name', 'location'])
+            ->select(['name', 'location', 'id'])
             ->where(['id' => $spaceId])
             ->asArray()
             ->one();

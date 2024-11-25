@@ -25,18 +25,19 @@ use helpers\traits\AppointmentPolicy;
  *     description="Available endpoints for Appointments model"
  * )
  */
-class AppointmentsController extends \helpers\ApiController {
+class AppointmentsController extends \helpers\ApiController
+{
 
     use AppointmentPolicy;
 
     public $permissions = [
-        'schedulerAppointmentsList'=>'View Appointments List',
-        'schedulerAppointmentsCreate'=>'Add Appointments',
-        'schedulerAppointmentsUpdate'=>'Edit Appointments',
-        'schedulerAppointmentsDelete'=>'Delete Appointments',
-        'schedulerAppointmentsRestore'=>'Restore Appointments',
-        ];
-        
+        'schedulerAppointmentsList' => 'View Appointments List',
+        'schedulerAppointmentsCreate' => 'Add Appointments',
+        'schedulerAppointmentsUpdate' => 'Edit Appointments',
+        'schedulerAppointmentsDelete' => 'Delete Appointments',
+        'schedulerAppointmentsRestore' => 'Restore Appointments',
+    ];
+
     public function actionIndex()
     {
         // Yii::$app->user->can('schedulerAppointmentsList');
@@ -44,16 +45,16 @@ class AppointmentsController extends \helpers\ApiController {
         $canBeBooked = Yii::$app->user->identity->can_be_booked;
 
         $searchModel = new AppointmentsSearch();
-        $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentsSearch');
-        
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
+
 
         // $dataProvider = $searchModel->search($search);
-        
+
         // if($canBeBooked){
         //     $dataProvider->query->andWhere(['user_id' => $currentUserId]);
         // }
 
-         // Secretary (cannot be booked) can filter appointments by 'user_id'
+        // Secretary (cannot be booked) can filter appointments by 'user_id'
         if (!$canBeBooked && isset($search['user_id']) && !empty($search['user_id'])) {
             // Secretary is allowed to filter by user_id
             $dataProvider = $searchModel->search($search);
@@ -83,7 +84,7 @@ class AppointmentsController extends \helpers\ApiController {
                 $appointmentData['space'] = $spaceDetails;
             } else {
                 $appointmentData['space'] = null;
-            }   
+            }
 
             $attendees = AppointmentAttendees::find()
                 ->where(['appointment_id' => $appointment->id])
@@ -95,7 +96,7 @@ class AppointmentsController extends \helpers\ApiController {
 
         $dataProvider->setModels($appointments);
 
-        return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
+        return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
     public function actionPendingAppointments()
@@ -107,6 +108,8 @@ class AppointmentsController extends \helpers\ApiController {
         $dataProvider = $searchModel->search($search);
 
         $dataProvider->query->andWhere(['status' => Appointments::STATUS_PENDING]);
+        $dataProvider->query->andWhere(['!=', 'is_deleted', Appointments::STATUS_DELETED]);
+
 
         $appointments = $dataProvider->getModels();
 
@@ -127,7 +130,7 @@ class AppointmentsController extends \helpers\ApiController {
         $model = $this->findModel($id);
 
         if ($model->status !== Appointments::STATUS_PENDING) {
-            return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be approved. It may not exist or is not pending.']);
+            return $this->toastResponse(['statusCode' => 400, 'message' => 'Appointment cannot be approved. It may not exist or is not pending.']);
         }
 
         $model->status = Appointments::STATUS_ACTIVE;
@@ -136,18 +139,17 @@ class AppointmentsController extends \helpers\ApiController {
             $model->sendAppointmentCreatedEvent(
                 $model->id,
                 $model->email_address,
-                $model->contact_name, 
+                $model->contact_name,
                 $model->user_id,
-                $model->appointment_date, 
+                $model->appointment_date,
                 $model->start_time,
                 $model->end_time
             );
 
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been approved successfully.']);
-
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment has been approved successfully.']);
         }
 
-         return $this->toastResponse(['statusCode'=>500,'message'=>'Failed to approve appointment']);
+        return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to approve appointment']);
     }
 
     public function actionReject($id)
@@ -157,7 +159,7 @@ class AppointmentsController extends \helpers\ApiController {
         $model = $this->findModel($id);
 
         if ($model->status !== Appointments::STATUS_PENDING) {
-            return $this->toastResponse(['statusCode'=>400,'message'=>'Appointment cannot be rejected. It may not exist or is not pending.']);
+            return $this->toastResponse(['statusCode' => 400, 'message' => 'Appointment cannot be rejected. It may not exist or is not pending.']);
         }
 
         $model->scenario = Appointments::SCENARIO_REJECT;
@@ -184,24 +186,42 @@ class AppointmentsController extends \helpers\ApiController {
                 $model->start_time,
                 $model->end_time
             );
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointment has been rejected successfully.']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment has been rejected successfully.']);
         }
 
-        return $this->toastResponse(['statusCode'=>500,'message'=>'Failed to reject appointment.']);
+        return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to reject appointment.']);
     }
 
     public function actionView($id)
     {
         // Yii::$app->user->can('schedulerAppointmentsView');
+
         $appointment = $this->findModel($id);
 
         $statusLabel = Appointments::getStatusLabel($appointment->status);
-        $appoitmentData = $appointment->toArray();
-        $appoitmentData['statusLabel'] = $statusLabel; 
 
-        return $this->payloadResponse($appoitmentData);
+        $appointmentData = $appointment->toArray();
+        $appointmentData['statusLabel'] = $statusLabel;
 
-        // return $this->payloadResponse($this->findModel($id));
+        $space = SpaceAvailability::find()
+            ->where(['appointment_id' => $appointment->id])
+            ->asArray()
+            ->one();
+
+        if ($space && isset($space['space_id'])) {
+            $spaceDetails = Space::getSpaceNameDetails($space['space_id']);
+            $appointmentData['space'] = $spaceDetails;
+        } else {
+            $appointmentData['space'] = null;
+        }
+
+        $attendees = AppointmentAttendees::find()
+            ->where(['appointment_id' => $appointment->id])
+            ->asArray()
+            ->all();
+        $appointmentData['attendees'] = $attendees;
+
+        return $this->payloadResponse($appointmentData);
     }
 
     public function actionAppointmentsTypes()
@@ -210,7 +230,7 @@ class AppointmentsController extends \helpers\ApiController {
         $appointmentTypes = $model->getAppointmentTypes();
 
         $types = [];
-        foreach($appointmentTypes as $appointmentType){
+        foreach ($appointmentTypes as $appointmentType) {
             $types[] = $appointmentType->type;
         }
         return $this->payloadResponse(['types' => $types]);
@@ -236,13 +256,13 @@ class AppointmentsController extends \helpers\ApiController {
 
         if (!$checkinResponse['success']) {
             // return $this->errorResponse(['message' => $checkinResponse['message']]);
-            return $this->toastResponse(['statusCode'=>202,'message'=>$checkinResponse['message']]);
+            return $this->toastResponse(['statusCode' => 202, 'message' => $checkinResponse['message']]);
         }
 
         // $appointment = Appointments::findOne($id);
         // $message = $appointment->checked_in ? 'Appointment has been marked as Attended' : 'Appointment has been unchecked';
 
-        return $this->toastResponse(['statusCode'=>202,'message'=>$checkinResponse['message']]);
+        return $this->toastResponse(['statusCode' => 202, 'message' => $checkinResponse['message']]);
     }
 
     public function actionCreate($dataRequest = null)
@@ -251,14 +271,14 @@ class AppointmentsController extends \helpers\ApiController {
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        
+
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
 
-            if($model->load($dataRequest)) {
-                if(!$model->validate()) {
-                    return $this->errorResponse($model->getErrors()); 
+            if ($model->load($dataRequest)) {
+                if (!$model->validate()) {
+                    return $this->errorResponse($model->getErrors());
                 }
 
                 $uploadedFile = UploadedFile::getInstanceByName('file');
@@ -266,7 +286,7 @@ class AppointmentsController extends \helpers\ApiController {
                 $space = Space::findOne($dataRequest['Appointments']['space_id']);
 
                 if (!$space) {
-                  return $this->payloadResponse(['message' => 'The specified space does not exist']);
+                    return $this->payloadResponse(['message' => 'The specified space does not exist']);
                 }
 
                 $levelName = $space->level ? $space->level->name : null;
@@ -277,13 +297,13 @@ class AppointmentsController extends \helpers\ApiController {
                     $model->status = Appointments::STATUS_PENDING;
                 }
 
-                if ($model->save()){
+                if ($model->save()) {
 
                     $this->saveAttendees($dataRequest, $model->id);
                     $this->saveSpaceAvailability($dataRequest, $model->id);
                     $this->handleFileUpload($uploadedFile, $model->id);
 
-                   if ($model->status === Appointments::STATUS_ACTIVE) {
+                    if ($model->status === Appointments::STATUS_ACTIVE) {
                         $model->sendAppointmentCreatedEvent(
                             $model->id,
                             $model->email_address,
@@ -299,7 +319,7 @@ class AppointmentsController extends \helpers\ApiController {
 
                         $transaction->commit();
                         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment created successfully, Pending Approval']);
-                        }
+                    }
                 } else {
                     throw new \Exception('Failed to save appointment');
                 }
@@ -319,9 +339,9 @@ class AppointmentsController extends \helpers\ApiController {
         $attendees = AppointmentAttendees::findAll(['appointment_id' => $id]);
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
 
-        if($model->load($dataRequest)) {
-            if(!$model->validate()) {
-                return $this->errorResponse($model->getErrors()); 
+        if ($model->load($dataRequest)) {
+            if (!$model->validate()) {
+                return $this->errorResponse($model->getErrors());
             }
 
             if (($overlapResponse = $this->checkOverlappingEvents($dataRequest)) !== true) {
@@ -331,7 +351,7 @@ class AppointmentsController extends \helpers\ApiController {
             if (($spaceOverlapResponse = $this->checkOverlappingSpace($dataRequest)) !== true) {
                 return $spaceOverlapResponse;
             }
-        
+
             if (($advanceResponse = $this->checkAdvanceBooking($dataRequest)) !== true) {
                 return $advanceResponse;
             }
@@ -341,8 +361,8 @@ class AppointmentsController extends \helpers\ApiController {
             }
 
             $isAvailable = $this->checkAvailability(
-                $dataRequest['Appointments']['user_id'], 
-                $dataRequest['Appointments']['appointment_date'], 
+                $dataRequest['Appointments']['user_id'],
+                $dataRequest['Appointments']['appointment_date'],
                 $dataRequest['Appointments']['start_time'],
                 $dataRequest['Appointments']['end_time']
             );
@@ -350,11 +370,11 @@ class AppointmentsController extends \helpers\ApiController {
             if (!$isAvailable) {
                 return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
             }
-            
+
             // cheking if there is overlapping appoiment ie if the appoitment is already placed
             $appoitmentExists = $model::hasOverlappingAppointment(
-                $dataRequest['Appointments']['user_id'], 
-                $dataRequest['Appointments']['appointment_date'], 
+                $dataRequest['Appointments']['user_id'],
+                $dataRequest['Appointments']['appointment_date'],
                 $dataRequest['Appointments']['start_time'],
                 $dataRequest['Appointments']['end_time'],
                 $id
@@ -364,28 +384,31 @@ class AppointmentsController extends \helpers\ApiController {
                 return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
             }
 
-            if($model->status === Appointments::STATUS_RESCHEDULE){
+            if ($model->status === Appointments::STATUS_RESCHEDULE) {
                 $model->status = Appointments::STATUS_RESCHEDULED;
             }
-            
+
             $transaction = Yii::$app->db->beginTransaction();
 
             try {
-                if($model->save()) {
+                if ($model->save()) {
                     $this->updateAttendees($dataRequest, $attendees);
                     $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
 
-                    if($model->status === Appointments::STATUS_RESCHEDULED){
+                    if ($model->status === Appointments::STATUS_RESCHEDULED) {
                         $model->sendAppointmentRescheduledEvent(
                             $model->user_id,
-                            $model->email_address, $model->appointment_date, $model->start_time, $model->end_time, 
+                            $model->email_address,
+                            $model->appointment_date,
+                            $model->start_time,
+                            $model->end_time,
                             $model->contact_name
                         );
                     }
 
                     $transaction->commit();
 
-                    return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Appointments updated successfully']);
+                    return $this->payloadResponse($this->findModel($id), ['statusCode' => 202, 'message' => 'Appointments updated successfully']);
                 } else {
                     throw new \Exception('Failed to save appointment');
                 }
@@ -393,7 +416,7 @@ class AppointmentsController extends \helpers\ApiController {
                 $transaction->rollBack();
                 return $this->errorResponse(['message' => [$e->getMessage()]]);
             }
-        } 
+        }
     }
 
     public function actionDelete($id)
@@ -402,16 +425,16 @@ class AppointmentsController extends \helpers\ApiController {
         if ($model->is_deleted) {
             // Yii::$app->user->can('schedulerAppointmentsRestore');
             $isAvailable = $this->checkAvailability(
-                $model->user_id, 
-                $model->appointment_date, 
-                $model->start_time, 
+                $model->user_id,
+                $model->appointment_date,
+                $model->start_time,
                 $model->end_time
             );
 
             $appointmentExists = Appointments::hasOverlappingAppointment(
-                $model->user_id, 
-                $model->appointment_date, 
-                $model->start_time, 
+                $model->user_id,
+                $model->appointment_date,
+                $model->start_time,
                 $model->end_time,
                 $model->id // exclude current appointment from the check
             );
@@ -419,13 +442,13 @@ class AppointmentsController extends \helpers\ApiController {
                 return $this->errorResponse(['message' => ['The appointment cannot be restored because the time slot is no longer available.']]);
             }
             $model->restore();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments restored successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments restored successfully']);
         } else {
             // Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments deleted successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments deleted successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     public function actionCancel($id)
@@ -438,7 +461,7 @@ class AppointmentsController extends \helpers\ApiController {
         $date = $model->appointment_date;
         $starTime = $model->start_time;
         $endTime = $model->end_time;
-         
+
         $user = User::findOne($model->user_id);
 
         if ($user && $user->profile) {
@@ -469,12 +492,12 @@ class AppointmentsController extends \helpers\ApiController {
         $cancelledBy = $currentUser->username;
         $cancelledByRole = $currentUser->can_be_booked ? 'VC/DVC' : 'Secretary';
 
-        if($model->save(false)){
+        if ($model->save(false)) {
 
             $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $bookedUserEmail);
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Appointments CANCELLED successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments CANCELLED successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     protected function findModel($id)
@@ -487,10 +510,14 @@ class AppointmentsController extends \helpers\ApiController {
 
     private function checkAvailability($user_id, $appointment_date, $start_time, $end_time)
     {
-        $bookedSlots = Availability::getUnavailableSlots($user_id, $appointment_date, $start_time, 
-            $end_time);
+        $bookedSlots = Availability::getUnavailableSlots(
+            $user_id,
+            $appointment_date,
+            $start_time,
+            $end_time
+        );
 
-        if($bookedSlots){
+        if ($bookedSlots) {
             return false;
         }
         return true;
@@ -504,7 +531,7 @@ class AppointmentsController extends \helpers\ApiController {
         $priority = $dataRequest['Appointments']['priority'] ?? null;
 
 
-        if(empty($user_id) || empty($date)){
+        if (empty($user_id) || empty($date)) {
             return $this->errorResponse(['message' => ['user id and date is required']]);
         }
 
@@ -512,7 +539,7 @@ class AppointmentsController extends \helpers\ApiController {
         // if ($priority !== null && !is_int($priority)) {
         //     return $this->errorResponse(['message' => ['Priority must be an integer']]);
         // }
-        
+
         $slots = TimeHelper::getAvailableSlots($user_id, $date, $priority);
         return $this->payloadResponse(['slots' => $slots]);
     }
@@ -524,20 +551,20 @@ class AppointmentsController extends \helpers\ApiController {
         $rescheduledAppointmentId = $id;
 
 
-        if(empty($rescheduledAppointmentId)){
+        if (empty($rescheduledAppointmentId)) {
             return $this->errorResponse(['message' => ['Appointment ID is required']]);
         }
 
         $model = new Appointments();
         $appoitment = $model->getRescheduledAppointment($rescheduledAppointmentId);
 
-        if(!$appoitment){
+        if (!$appoitment) {
             $msg = 'Appointment with id {' . $rescheduledAppointmentId . '} not found';
-            return $this->payloadResponse(['message' => $msg ]);
+            return $this->payloadResponse(['message' => $msg]);
         }
 
         $suggestions = Ar::findNextAvailableSlot(
-            $appoitment->user_id, 
+            $appoitment->user_id,
             $appoitment->appointment_date,
             $appoitment->start_time,
             $appoitment->end_time
@@ -551,7 +578,7 @@ class AppointmentsController extends \helpers\ApiController {
         $space_id = $dataRequest['Appointments']['space_id'];
         $date = $dataRequest['Appointments']['date'];
 
-         if(empty($space_id) || empty($date)){
+        if (empty($space_id) || empty($date)) {
             return $this->errorResponse(['message' => ['space id and date is required']]);
         }
 
@@ -589,13 +616,13 @@ class AppointmentsController extends \helpers\ApiController {
         $attendees = $dataRequest['Appointments']['attendees'] ?? [];
         $date = $dataRequest['Appointments']['appointment_date'];
         $startTime = $dataRequest['Appointments']['start_time'];
-        $endTime =$dataRequest['Appointments']['end_time'];
+        $endTime = $dataRequest['Appointments']['end_time'];
 
         $addAttendees = new AppointmentAttendees();
 
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
-                $staffId = $attendeeId; 
+                $staffId = $attendeeId;
                 $addAttendees->addAttendee($id, $staffId, $date, $startTime, $endTime);
             }
         }
@@ -654,7 +681,7 @@ class AppointmentsController extends \helpers\ApiController {
         }
     }
 
-    protected function updateSpaceAvailability($dataRequest,$currentSpaceAvailability,$appointmentId)
+    protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
     {
         if (empty($dataRequest['Appointments']['space'])) {
             throw new \Exception('No space data provided');

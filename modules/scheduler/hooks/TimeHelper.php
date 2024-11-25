@@ -29,7 +29,7 @@ class TimeHelper
      * @param DateTime $endTime
      * @return bool
      */
-    public static function validateTimeRange(DateTime $startTime, DateTime $endTime)
+    public static function validateTimeRange(\DateTime $startTime, \DateTime $endTime)
     {
         return $endTime > $startTime;
     }
@@ -41,7 +41,8 @@ class TimeHelper
      * @param DateTime $date2
      * @return string
      */
-    public static function getDifferenceBetweenDates($date1, $date2){
+    public static function getDifferenceBetweenDates($date1, $date2)
+    {
         
         $days = date_diff($date1, $date2)->format("%R%a days");
         return $days;
@@ -216,8 +217,9 @@ class TimeHelper
                          ->select('booking_window')
                          ->where(['user_id' => $user_id])
                          ->scalar();
-
-        $bookingWindowMonths = $bookingWindow; //* 30; // 30 is number of days in a months
+        
+        $bookingWindowMonths = is_numeric($bookingWindow) ? (int)$bookingWindow : 12;  // default 12 month window
+        // $bookingWindowMonths = $bookingWindow;
 
         // maximum allowable appointment date
         $currentDate = new \DateTime();
@@ -278,7 +280,7 @@ class TimeHelper
         return false;
     }
 
-   public static function checkOveride($user_id, $date, $slot, $priority = 3)
+   public static function checkOveride($user_id, $date, $slot, $priority = 3, $appointment=null)
    {
         // If there's an overlapping appointment, check if it can be overridden
         if ($appointment) {
