@@ -18,7 +18,7 @@ class m240118_110956_default_user_presets extends Migration
         $tableOptions = null;
         $auth = Configs::authManager();
         //default roles
-        foreach (['su' => 'Super User', 'editor' => 'Editor', 'viewer' => 'Viewer', 'api' => 'API User', 'user' => 'User'] as $key => $value) {
+        foreach (['su' => 'Super User', 'editor' => 'Editor', 'viewer' => 'Viewer', 'api' => 'API User', 'user' => 'User', 'secretary' => 'Secretary'] as $key => $value) {
             $model = new AuthItem(null);
             $model->type = Item::TYPE_ROLE;
             $model->name = $key;
@@ -27,6 +27,7 @@ class m240118_110956_default_user_presets extends Migration
         }
         (new AuthItem($auth->getRole('su')))->addChildren(['editor', 'viewer']);
         (new AuthItem($auth->getRole('user')))->addChildren(['editor', 'viewer']);
+        (new AuthItem($auth->getRole('secretary')))->addChildren(['editor', 'viewer']);
         //default permissions
         foreach ((new AuthItem(null))->scanPermissions() as $key => $value) {
             $model = new AuthItem(null);
