@@ -42,6 +42,11 @@ class AppointmentsController extends \helpers\ApiController
     {
         // Yii::$app->user->can('schedulerAppointmentsList');
         $currentUserId = Yii::$app->user->id;
+
+        if (Yii::$app->user->identity->can_be_booked == null) {
+            return Yii::$app->response->setStatusCode(440, 'Not Authorized');
+        }
+
         $canBeBooked = Yii::$app->user->identity->can_be_booked;
 
         $searchModel = new AppointmentsSearch();
