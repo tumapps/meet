@@ -344,45 +344,45 @@ class AppointmentsController extends \helpers\ApiController
                 return $this->errorResponse($model->getErrors());
             }
 
-            if (($overlapResponse = $this->checkOverlappingEvents($dataRequest)) !== true) {
-                return $overlapResponse;
-            }
+            // if (($overlapResponse = $this->checkOverlappingEvents($dataRequest)) !== true) {
+            //     return $overlapResponse;
+            // }
 
-            if (($spaceOverlapResponse = $this->checkOverlappingSpace($dataRequest)) !== true) {
-                return $spaceOverlapResponse;
-            }
+            // if (($spaceOverlapResponse = $this->checkOverlappingSpace($dataRequest)) !== true) {
+            //     return $spaceOverlapResponse;
+            // }
 
-            if (($advanceResponse = $this->checkAdvanceBooking($dataRequest)) !== true) {
-                return $advanceResponse;
-            }
+            // if (($advanceResponse = $this->checkAdvanceBooking($dataRequest)) !== true) {
+            //     return $advanceResponse;
+            // }
 
-            if (($windowResponse = $this->checkBookingWindow($dataRequest)) !== true) {
-                return $windowResponse;
-            }
+            // if (($windowResponse = $this->checkBookingWindow($dataRequest)) !== true) {
+            //     return $windowResponse;
+            // }
 
-            $isAvailable = $this->checkAvailability(
-                $dataRequest['Appointments']['user_id'],
-                $dataRequest['Appointments']['appointment_date'],
-                $dataRequest['Appointments']['start_time'],
-                $dataRequest['Appointments']['end_time']
-            );
+            // $isAvailable = $this->checkAvailability(
+            //     $dataRequest['Appointments']['user_id'],
+            //     $dataRequest['Appointments']['appointment_date'],
+            //     $dataRequest['Appointments']['start_time'],
+            //     $dataRequest['Appointments']['end_time']
+            // );
 
-            if (!$isAvailable) {
-                return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
-            }
+            // if (!$isAvailable) {
+            //     return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
+            // }
 
-            // cheking if there is overlapping appoiment ie if the appoitment is already placed
-            $appoitmentExists = $model::hasOverlappingAppointment(
-                $dataRequest['Appointments']['user_id'],
-                $dataRequest['Appointments']['appointment_date'],
-                $dataRequest['Appointments']['start_time'],
-                $dataRequest['Appointments']['end_time'],
-                $id
-            );
+            // // cheking if there is overlapping appoiment ie if the appoitment is already placed
+            // $appoitmentExists = $model::hasOverlappingAppointment(
+            //     $dataRequest['Appointments']['user_id'],
+            //     $dataRequest['Appointments']['appointment_date'],
+            //     $dataRequest['Appointments']['start_time'],
+            //     $dataRequest['Appointments']['end_time'],
+            //     $id
+            // );
 
-            if ($appoitmentExists) {
-                return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
-            }
+            // if ($appoitmentExists) {
+            //     return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
+            // }
 
             if ($model->status === Appointments::STATUS_RESCHEDULE) {
                 $model->status = Appointments::STATUS_RESCHEDULED;
