@@ -40,43 +40,30 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerAppointmentsList');
+        $authManager = Yii::$app->authManager;
         $currentUserId = Yii::$app->user->id;
+        $userRoles = array_keys($authManager->getRolesByUser($currentUserId));
 
-        if (Yii::$app->user->identity->can_be_booked === null) {
-            return Yii::$app->response->setStatusCode(440, 'Not Authorized');
-        }
-
-        $canBeBooked = Yii::$app->user->identity->can_be_booked;
+        $isSuperAdmin = in_array('su', $userRoles);
+        $isSecretary = in_array('secretary', $userRoles);
 
         $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
 
 
-        // $dataProvider = $searchModel->search($search);
-
-        // if($canBeBooked){
-        //     $dataProvider->query->andWhere(['user_id' => $currentUserId]);
-        // }
-
-        // Secretary (cannot be booked) can filter appointments by 'user_id'
-        if (!$canBeBooked && isset($search['user_id']) && !empty($search['user_id'])) {
-            // Secretary is allowed to filter by user_id
+        if ($isSecretary && isset($search['user_id']) && !empty($search['user_id'])) {
             $dataProvider = $searchModel->search($search);
         } else {
-            // Non-secretary users can only see their own appointments
             $dataProvider = $searchModel->search($search);
-            if ($canBeBooked) {
+            if (!$isSuperAdmin) {
                 $dataProvider->query->andWhere(['user_id' => $currentUserId]);
             }
         }
 
         $appointments = $dataProvider->getModels();
 
-        // Add statusLabel to each appointment
         foreach ($appointments as &$appointment) {
             $appointmentData = $appointment->toArray();
-            // $appointmentData['statusLabel'] = Appointments::getStatusLabel($appointment->status);
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
 
             $space = SpaceAvailability::find()
