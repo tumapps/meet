@@ -82,14 +82,15 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
 			$canBeBooked = $user->can_be_booked;
+			$role = Yii::$app->authManager->getRolesByUser($user->user_id);
 			$this->generateRefreshToken($user);
 
 			return $this->payloadResponse(
 				[
 					'username' => $user->username,
 					'token' => $user->token,
-					'menus' => $this->filterMenus($canBeBooked),
-					'roles' => array_keys(Yii::$app->authManager->getRolesByUser($user->user_id))
+					'menus' => $this->filterMenus($role),
+					'roles' => array_keys($role)
 				],
 				['statusCode' => 200, 'message' => 'Access granted']
 			);
@@ -97,11 +98,11 @@ class AuthController extends \helpers\ApiController
 		return $this->errorResponse($model->getErrors());
 	}
 
-	public function filterMenus($can_be_booked)
+	public function filterMenus($role)
 	{
 		$menus = Yii::$app->params['menus'];
 
-		if (!$can_be_booked === false) {
+		if (!$role === 'su') {
 			$menus = array_values(array_filter($menus, function ($menu) {
 				return $menu['route'] !== 'default.users';
 			}));
