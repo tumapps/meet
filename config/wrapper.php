@@ -59,7 +59,6 @@ class ConfigWrapper
                     ['route' => 'venues', 'label' => 'venues', 'icon' => 'home'],
                     ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'],
                     ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
-                    ['route' => 'levels', 'label' => 'Level', 'icon' => 'home'],
                     ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'],
                     ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'],
                     ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location'],
