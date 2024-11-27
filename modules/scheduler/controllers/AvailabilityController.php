@@ -23,15 +23,16 @@ class AvailabilityController extends \helpers\ApiController{
     public function actionIndex()
     {
         // Yii::$app->user->can('schedulerAvailabilityList');
-        $currentUserId = Yii::$app->user->id;
-        $canBeBooked = Yii::$app->user->identity->can_be_booked;
+        $userId = Yii::$app->user->id;
+        $user = Yii::$app->user->identity;
+        $role = Yii::$app->authManager->getRolesByUser($user);
 
         $searchModel = new AvailabilitySearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AvailabilitySearch');
         $dataProvider = $searchModel->search($search);
         
-        if($canBeBooked){
-            $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        if($role === 'su'){
+            $dataProvider->query->andWhere(['user_id' => $userId]);
         }
 
         return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
