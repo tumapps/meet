@@ -82,15 +82,15 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
 			$canBeBooked = $user->can_be_booked;
-			$role = Yii::$app->authManager->getRolesByUser($user->user_id);
+		  $roles = Yii::$app->authManager->getRolesByUser($user->user_id);
 			$this->generateRefreshToken($user);
 
 			return $this->payloadResponse(
 				[
 					'username' => $user->username,
 					'token' => $user->token,
-					'menus' => $this->filterMenus($role),
-					'roles' => array_keys($role)
+					'menus' => $this->filterMenus($roles),
+					'roles' => array_keys($roles)
 				],
 				['statusCode' => 200, 'message' => 'Access granted']
 			);
@@ -98,17 +98,29 @@ class AuthController extends \helpers\ApiController
 		return $this->errorResponse($model->getErrors());
 	}
 
-	public function filterMenus($role)
+
+	public function filterMenus($roles)
 	{
-		$menus = Yii::$app->params['menus'];
+	    $menus = Yii::$app->params['menus'];
 
-		if (!$role === 'su') {
-			$menus = array_values(array_filter($menus, function ($menu) {
-				return $menu['route'] !== 'default.users' && $menu['route']!== 'spaces' && $menu['route']!== 'levels' && $menu['route']!== 'events';
-			}));
-		}
+	    $roleNames = array_keys($roles);
 
-		return $menus;
+	    if (in_array('su', $roleNames)) {
+	        return $menus;
+	    } elseif (in_array('secretary', $roleNames)) {
+	        // Secretary role - return specific menus
+	        $allowedRoutes = ['default.dashboard', 'appointments'];
+	    } elseif (in_array('user', $roleNames)) {
+	        $allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
+	    } else {
+	        $allowedRoutes = [];
+	    }
+
+	    $menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
+	        return in_array($menu['route'], $allowedRoutes);
+	    }));
+
+	    return $menus;
 	}
 
 
