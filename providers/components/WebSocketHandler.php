@@ -9,21 +9,41 @@ use Ratchet\Client\Connector;
 use React\EventLoop\Factory;
 use scheduler\models\Appointments;
 use React\EventLoop\Timer\Timer;
+use React\EventLoop\LoopInterface;
 
 class WebSocketHandler implements MessageComponentInterface
 {
-	protected $clients;
+    protected $clients;
+    protected $loop;
 
-    public function __construct()
+    // public function __construct()
+    // {
+    //     $this->clients = new \SplObjectStorage;
+    //     // $this->startAppointmentBroadcastTimer();
+    // }
+
+    public function __construct(LoopInterface $loop)
     {
-        $this->clients = new \SplObjectStorage;
+        $this->clients = new \SplObjectStorage();
+        $this->loop = $loop;
+
+        $this->loop->addPeriodicTimer(10, function () {
+            echo "Fetching upcoming appointments at " . date('Y-m-d H:i:s') . "\n";
+
+            $data = $this->fetchUpcomingAppointments();
+            echo "Fetched appointments: " . json_encode($data) . "\n";
+
+            $this->broadcast([
+                'event' => 'upcoming_appointments',
+                'data' => $data,
+            ]);
+        });
     }
 
     public function onOpen(ConnectionInterface $conn)
     {
         $this->clients->attach($conn);
-        echo("New connection!: {$conn->resourceId}\n");
-
+        echo ("New connection!: {$conn->resourceId}\n");
     }
 
     public function onMessage(ConnectionInterface $from, $msg)
@@ -40,32 +60,49 @@ class WebSocketHandler implements MessageComponentInterface
     public function onClose(ConnectionInterface $conn)
     {
         $this->clients->detach($conn);
-        echo("Connection {$conn->resourceId} has disconnected\n");
+        echo ("Connection {$conn->resourceId} has disconnected\n");
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-        echo("An error has occurred: {$e->getMessage()}\n");
+        echo ("An error has occurred: {$e->getMessage()}\n");
         $conn->close();
     }
 
-     
+    // public function broadcast($message)
+    // {
+    //     if (!self::isWebSocketServerRunning()) {
+    //         self::startWebSocketServer();
+    //         sleep(1);
+    //     }
+    //     foreach ($this->clients as $client) {
+    //         echo $message;
 
-   	public function broadcast($message)
+    //         \Yii::info('Broadcasting message:' . $message . 'WebSocket');
+    //         $client->send($message);
+    //     }
+    // }
+
+    public function broadcast($message)
     {
         if (!self::isWebSocketServerRunning()) {
             self::startWebSocketServer();
-            sleep(1); 
+            sleep(1);
         }
-        foreach ($this->clients as $client) {
-            echo $message;
 
-            \Yii::info('Broadcasting message:'.$message . 'WebSocket');
+        if (is_array($message) || is_object($message)) {
+            $message = json_encode($message, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }
+
+        foreach ($this->clients as $client) {
+            echo "Broadcasting message: " . $message . "\n";
+            \Yii::info('Broadcasting message: ' . $message, 'WebSocket');
+
             $client->send($message);
         }
     }
 
-    // Method to check if WebSocket server is running
+
     protected static function isWebSocketServerRunning()
     {
         $host = '127.0.0.1';
@@ -81,48 +118,76 @@ class WebSocketHandler implements MessageComponentInterface
         return false;
     }
 
-    // Method to start the WebSocket server
     protected static function startWebSocketServer()
     {
-        echo("Starting WebSocket server...\n");
+        echo ("Starting WebSocket server...\n");
         $command = "php yii ws/start > /dev/null 2>&1 &";
         exec($command);
+    }
+
+    protected function startAppointmentBroadcastTimer()
+    {
+        $loop = Factory::create();
+
+        $loop->addPeriodicTimer(10, function () {
+            echo "Fetching upcoming appointments at " . date('Y-m-d H:i:s') . "\n";
+            $appointments = $this->fetchUpcomingAppointments();
+            echo "Fetched appointments: " . json_encode($appointments) . "\n";
+            if (!empty($appointments)) {
+                $message = json_encode(['event' => 'upcoming_appointments', 'data' => $appointments]);
+                $this->broadcast($message);
+                echo "Broadcasted upcoming appointments.\n";
+            }
+        });
+
+        $loop->run();
+    }
+
+    protected function fetchUpcomingAppointments()
+    {
+        $model = new Appointments();
+        $upcomingAppointments =   $model->upComingAppointments();
+
+        $result = [];
+        foreach ($upcomingAppointments as $appointment) {
+            $result[] = [
+                'id' => $appointment->id,
+                'date' => $appointment->appointment_date,
+                'start_time' => $appointment->start_time,
+                'end_time' => $appointment->end_time,
+                'contact_name' => $appointment->contact_name,
+            ];
+        }
+
+        return $result;
     }
 
     public function broadcastAppointmentUpdate($data = 'hello msg')
     {
         $dataToSend = json_encode($data);
 
-        // Create event loop
         $loop = Factory::create();
 
-        // Create WebSocket connector
         $connector = new Connector($loop);
 
         $connector('ws://localhost:8080')
-            ->then(function($conn) use ($dataToSend, $loop) {
-                // Send the initial data
+            ->then(function ($conn) use ($dataToSend, $loop) {
                 $conn->send($dataToSend);
 
-                // Set up a periodic timer (5-second interval)
-                $loop->addPeriodicTimer(5, function() use ($conn) {
-                    // Ping to keep the connection alive, or send updated data
+                $loop->addPeriodicTimer(5, function () use ($conn) {
                     $conn->send("ping");
 
-                    // Optionally, send updated appointment data
                     // $updatedData = json_encode($newData);
                     // $conn->send($updatedData);
                 });
 
-                // Make sure we don't close the connection too early
-                $conn->on('close', function() {
+                $conn->on('close', function () {
                     echo "Connection closed by the server\n";
                 });
-            }, function($e) {
+            }, function ($e) {
                 echo "Could not connect to WebSocket: {$e->getMessage()}\n";
             });
 
-        // Run the event loop, this keeps the timers running
         $loop->run();
     }
 }
