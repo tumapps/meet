@@ -186,7 +186,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        // Yii::$app->user->can('schedulerAppointmentsView');
+        Yii::$app->user->can('schedulerAppointmentsView');
 
         $appointment = $this->findModel($id);
 
@@ -275,24 +275,51 @@ class AppointmentsController extends \helpers\ApiController
 
                 $uploadedFile = UploadedFile::getInstanceByName('file');
 
-                $space = Space::findOne($dataRequest['Appointments']['space_id']);
+                $space = null;
+                $levelName = null;
 
-                if (!$space) {
-                    return $this->payloadResponse(['message' => 'The specified space does not exist']);
+                if (!empty($dataRequest['Appointments']['space_id'])) {
+                    $space = Space::findOne($dataRequest['Appointments']['space_id']);
+
+                    if (!$space) {
+                        return $this->payloadResponse(['message' => 'The specified space does not exist']);
+                    }
+
+                    $levelName = $space->level ? $space->level->name : null;
                 }
 
-                $levelName = $space->level ? $space->level->name : null;
-
-                $model->status = Appointments::STATUS_ACTIVE;
-
-                if ($levelName !== 'Level 4') {
-                    $model->status = Appointments::STATUS_PENDING;
+                if ($space) {
+                    if ($levelName === 'Level 4') {
+                        $model->status = Appointments::STATUS_ACTIVE;
+                    } else {
+                        $model->status = Appointments::STATUS_PENDING;
+                    }
+                } else {
+                    $model->status = Appointments::STATUS_ACTIVE;
+                    // $model->space_name = 'Office';
                 }
+
+                // $space = Space::findOne($dataRequest['Appointments']['space_id']);
+
+                // if (!$space) {
+                //     return $this->payloadResponse(['message' => 'The specified space does not exist']);
+                // }
+
+                // $levelName = $space->level ? $space->level->name : null;
+
+                // $model->status = Appointments::STATUS_ACTIVE;
+
+                // if ($levelName !== 'Level 4') {
+                //     $model->status = Appointments::STATUS_PENDING;
+                // }
 
                 if ($model->save()) {
 
                     $this->saveAttendees($dataRequest, $model->id);
-                    $this->saveSpaceAvailability($dataRequest, $model->id);
+                    // $this->saveSpaceAvailability($dataRequest, $model->id);
+                    if (!empty($dataRequest['Appointments']['space_id'])) {
+                        $this->saveSpaceAvailability($dataRequest, $model->id);
+                    }
                     $this->handleFileUpload($uploadedFile, $model->id);
 
                     if ($model->status === Appointments::STATUS_ACTIVE) {
