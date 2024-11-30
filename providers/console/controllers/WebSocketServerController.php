@@ -1,45 +1,52 @@
-<?php 
+<?php
 
 namespace cmd\controllers;;
 
- 
+
 use yii\console\Controller;
 use yii\console\ExitCode;
 use helpers\WebSocketHandler;
 use Ratchet\Server\IoServer;
+use React\EventLoop\Factory;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use Ratchet\App;
 use Yii;
 
-class WebSocketServerController extends Controller 
+class WebSocketServerController extends Controller
 {
-    public function actionStart2()
-    {
-    	 
-        $server = IoServer::factory(
-        	new WebSocketServerController(),
-            8080
-        );
+    // public function actionStart()
+    // {
+    //     // Create the WebSocket server using the custom WebSocketHandler
+    //     $server = IoServer::factory(
+    //         new HttpServer(
+    //             new WsServer(
+    //                 new WebSocketHandler()
+    //             )
+    //         ),
+    //         8080 
+    //     );
 
-        // Start the server
-        $server->run();
-    }
+    //     echo "WebSocket server started on port 8080\n";
+    //     $server->run();
+    // }
 
     public function actionStart()
     {
-        // Create the WebSocket server using the custom WebSocketHandler
-        $server = IoServer::factory(
+        $loop = Factory::create();
+
+        $webSocketHandler = new WebSocketHandler($loop);  
+
+        $server = new IoServer(
             new HttpServer(
-                new WsServer(
-                    new WebSocketHandler()
-                )
+                new WsServer($webSocketHandler)
             ),
-            8080 
+            new \React\Socket\Server('127.0.0.1:8080', $loop),
+            $loop
         );
 
         echo "WebSocket server started on port 8080\n";
-        $server->run();
-    }
 
+        $loop->run();
+    }
 }
