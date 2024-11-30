@@ -82,7 +82,7 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
 			$canBeBooked = $user->can_be_booked;
-		  $roles = Yii::$app->authManager->getRolesByUser($user->user_id);
+		    $roles = Yii::$app->authManager->getRolesByUser($user->user_id);
 			$this->generateRefreshToken($user);
 
 			return $this->payloadResponse(
@@ -108,7 +108,6 @@ class AuthController extends \helpers\ApiController
 	    if (in_array('su', $roleNames)) {
 	        return $menus;
 	    } elseif (in_array('secretary', $roleNames)) {
-	        // Secretary role - return specific menus
 	        $allowedRoutes = ['default.dashboard', 'appointments'];
 	    } elseif (in_array('user', $roleNames)) {
 	        $allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
