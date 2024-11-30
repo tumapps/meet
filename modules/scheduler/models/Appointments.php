@@ -125,7 +125,7 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'space_id'], 'required'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
             
             // Custom inline validators as separate rules
@@ -416,7 +416,8 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
     }
 
-    public function sendAppointmentCreatedEvent($id, $email, $name, $user_id, $date, $startTime, $endTime){
+    public function sendAppointmentCreatedEvent($id, $email, $name, $user_id, $date, $startTime, $endTime)
+    {
 
         $event = new Event();
         $event->sender = $this;
@@ -644,7 +645,6 @@ class Appointments extends BaseModel
         return self::find()
         ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULE])
         ->one();
-        
     }
 
     public function getActiveAppointments()
