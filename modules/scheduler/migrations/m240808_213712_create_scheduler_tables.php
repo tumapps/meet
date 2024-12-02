@@ -138,6 +138,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'staff_id' => $this->integer()->notNull(),
             'date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
+            'status' => $this->integer()->notNull()->defaultValue(11), //pending status
             'end_time' => $this->time()->notNull(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
