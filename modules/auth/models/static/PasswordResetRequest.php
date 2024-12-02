@@ -46,7 +46,6 @@ class PasswordResetRequest extends Model
             return false;
         }
 
-        // get user email_address from profiles model
         $email = Profiles::findOne([
             'user_id' => $userId,
         ]);
@@ -55,7 +54,6 @@ class PasswordResetRequest extends Model
             return false;
         }
 
-        // get user token ie password reset token;
         $password_reset_token = Yii::$app->security->generateRandomString(7) . '_' . time();
 
         $tokens = new Tokens();
