@@ -25,13 +25,15 @@ class AvailabilityController extends \helpers\ApiController{
         // Yii::$app->user->can('schedulerAvailabilityList');
         $userId = Yii::$app->user->id;
         $user = Yii::$app->user->identity;
-        $role = Yii::$app->authManager->getRolesByUser($user);
+        // $role = Yii::$app->authManager->getRolesByUser($user);
+		$roles = Yii::$app->authManager->getRolesByUser($user->user_id);
+
 
         $searchModel = new AvailabilitySearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AvailabilitySearch');
         $dataProvider = $searchModel->search($search);
         
-        if($role === 'su'){
+        if(in_array('su', $roles)){
             $dataProvider->query->andWhere(['user_id' => $userId]);
         }
 
