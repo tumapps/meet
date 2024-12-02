@@ -73,6 +73,35 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
+	public function actionGetUser($id)
+	{
+		$user = User::findOne($id);
+		if (!$user) {
+			return $this->errorResponse(['message' => 'User not found']);
+		}
+	
+		$profile = Profiles::find()->where(['user_id' => $id])->one();
+		if (!$profile) {
+			return $this->errorResponse(['message' => 'Profile not found']);
+		}
+	
+		$roles = \Yii::$app->authManager->getRolesByUser($id);
+		$roleNames = array_keys($roles); // Extract role names as an array
+	
+		$formattedUser = [
+			'user_id' => $user->id,
+			'username' => $user->username,
+			'email' => $profile->email_address,
+			'name' => trim($profile->first_name . ' ' . $profile->last_name), // Full name
+			'middle_name' => $profile->middle_name,
+			'mobile_number' => $profile->mobile_number,
+			'roles' => $roleNames,
+		];
+	
+		return $this->payloadResponse(['user' => $formattedUser]);
+	}
+	
+
 	public function actionSearchUser() {}
 
 	public function actionLogin()
