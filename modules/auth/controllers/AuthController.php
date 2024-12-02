@@ -13,6 +13,7 @@ use auth\models\RefreshToken;
 use auth\models\User;
 use auth\models\searches\UserSearch;
 use auth\models\Profiles;
+use Google\Service\Analytics\Profile;
 use yii\base\InvalidArgumentException;
 
 class AuthController extends \helpers\ApiController
@@ -75,25 +76,31 @@ class AuthController extends \helpers\ApiController
 
 	public function actionGetUser($id)
 	{
+		if(!$id){
+			return $this->errorResponse(['message' => ['User ID is required']]);
+		}
 		$user = User::findOne($id);
 		if (!$user) {
-			return $this->errorResponse(['message' => 'User not found']);
+			return $this->errorResponse(['message' => ['User not found']]);
 		}
 	
 		$profile = Profiles::find()->where(['user_id' => $id])->one();
 		if (!$profile) {
-			return $this->errorResponse(['message' => 'Profile not found']);
+			return $this->errorResponse(['message' => ['Profile not found']]);
 		}
 	
 		$roles = \Yii::$app->authManager->getRolesByUser($id);
-		$roleNames = array_keys($roles); // Extract role names as an array
+		$roleNames = array_keys($roles);
 	
 		$formattedUser = [
 			'user_id' => $user->id,
+			'status' => $user->status,
 			'username' => $user->username,
 			'email' => $profile->email_address,
-			'name' => trim($profile->first_name . ' ' . $profile->last_name), // Full name
-			'middle_name' => $profile->middle_name,
+			'name' => trim($profile->first_name . ' ' . $profile->last_name),
+			'first_name' => $profile->first_name,
+			'first_last' => $profile->last_name,
+			// 'middle_name' => $profile->middle_name,
 			'mobile_number' => $profile->mobile_number,
 			'roles' => $roleNames,
 		];
