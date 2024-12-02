@@ -429,6 +429,7 @@ class Appointments extends BaseModel
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id);
 
         $eventData = [
+            'appointment_id' => $this->id,
             'email' => $email,
             'subject' => $subject,
             'contact_name' => $name,
@@ -678,7 +679,6 @@ class Appointments extends BaseModel
             $appointment_date = date('Y-m-d');
         }
 
-        // Fetch upcoming appointments on the given date, ordered by start time
         return self::find()
             ->where(['appointment_date' => $appointment_date])
             ->andWhere(['status' => self::STATUS_ACTIVE])
