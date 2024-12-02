@@ -9,6 +9,7 @@
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>New Appointment Created</title>
@@ -19,6 +20,7 @@
             padding: 0;
             font-family: Arial, sans-serif;
         }
+
         .email-container {
             background-color: #ffffff;
             margin: 20px auto;
@@ -28,36 +30,44 @@
             border: 1px solid #dddddd;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .email-header {
             text-align: center;
             padding-bottom: 20px;
         }
+
         .email-header h2 {
             margin: 0;
             color: #333333;
             font-size: 24px;
         }
+
         .email-body {
             font-size: 16px;
             color: #555555;
         }
+
         .email-body p {
             line-height: 1.5;
         }
+
         .appointment-details {
             margin: 20px 0;
             padding-left: 20px;
             border-left: 4px solid #5cb85c;
         }
+
         .appointment-details p {
             margin-bottom: 10px;
         }
+
         .email-footer {
             text-align: center;
             padding-top: 20px;
             font-size: 12px;
             color: #999999;
         }
+
         .button {
             display: inline-block;
             padding: 10px 20px;
@@ -67,9 +77,11 @@
             text-decoration: none;
             border-radius: 4px;
         }
+
         .button:hover {
             background-color: #4cae4c;
         }
+
         .contact-info {
             margin-top: 20px;
             font-size: 14px;
@@ -77,6 +89,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="email-container">
         <div class="email-header">
@@ -90,16 +103,22 @@
             <?php elseif ($recipientType === 'vc'): ?>
                 <p>Dear <?= htmlspecialchars($username) ?>,</p>
                 <p>A new appointment has been booked with you by <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
-             
+
             <?php elseif ($recipientType === 'attendee'): ?>
                 <p>Dear <?= htmlspecialchars($attendeeName) ?>,</p>
                 <p>You have been invited to attend a scheduled appointment with <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
+                <p>Please confirm your attendance by clicking the button below:</p>
+                <a href="<?= htmlspecialchars($confirmationLink) ?>" target="_blank"
+                    aria-label="Click to confirm your attendance"
+                    style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Confirm Attendance
+                </a>
+
             <?php endif; ?>
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
                 <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'user' ? $username : $contact_name) ?></p>
-
             </div>
         </div>
         <div class="contact-info">
@@ -110,4 +129,5 @@
         </div>
     </div>
 </body>
+
 </html>
