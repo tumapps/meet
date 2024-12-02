@@ -725,4 +725,34 @@ class AppointmentsController extends \helpers\ApiController
             }
         }
     }
+
+    public function actionConfirmAttendance($email, $appointmentId)
+    {
+        $email = Yii::$app->request->post('email');
+        $appointmentId = Yii::$app->request->post('appointmentId');
+
+        if (!$email || !$appointmentId) {
+            return $this->errorResponse(['message' => ['Invalid data submitted.']]);
+        }
+        $decodedEmail = base64_decode($email);
+
+        $attendee = AppointmentAttendees::findOne([
+            'email' => $decodedEmail,
+            'appointment_id' => $appointmentId
+        ]);
+
+        if (!$attendee) {
+            return $this->errorResponse(['message' => ['Invalid confirmation link.']]);
+        }
+
+        $attendee->status = AppointmentAttendees::STATUS_CONFIRMED;
+        if ($attendee->save()) {
+            return $this->toastResponse([
+                'statusCode' => 200,
+                'message' => 'Your attendance has been confirmed. Thank you!',
+            ]);
+        } else {
+            return $this->errorResponse(['message' => ['Unable to confirm your attendance. Please try again later.']]);
+        }
+    }
 }
