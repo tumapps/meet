@@ -100,7 +100,7 @@ class AppointmentsController extends \helpers\ApiController
         $dataProvider = $searchModel->search($search);
 
         $dataProvider->query->andWhere(['status' => Appointments::STATUS_PENDING]);
-        $dataProvider->query->andWhere(['!=', 'is_deleted', Appointments::STATUS_DELETED]);
+        $dataProvider->query->andWhere(['=', 'is_deleted', Appointments::STATUS_DELETED]);
 
 
         $appointments = $dataProvider->getModels();
