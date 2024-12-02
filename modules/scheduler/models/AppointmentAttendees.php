@@ -21,6 +21,11 @@ use auth\models\User;
 
 class AppointmentAttendees extends BaseModel
 {
+
+    const STATUS_DECLINED = 15;
+    const STATUS_CONFIRMED = 14;
+    const STATUS_PENDING = 11;
+
     /**
      * {@inheritdoc}
      */
