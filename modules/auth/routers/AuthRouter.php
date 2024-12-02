@@ -49,6 +49,7 @@
     // 'GET users'     => 'auth/get-users',
     'GET users'     => 'auth/index',
     'GET user' => 'auth/get-user',
+    'PUT lock-acount' => 'auth/toggle-account-status',
 
 
      /**
