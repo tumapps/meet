@@ -40,7 +40,7 @@ class AuthController extends \helpers\ApiController
 				'roles' => array_keys($authManager->getRolesByUser($user->id)),
 			];
 
-			$user = $userData; // Replace the user object with the filtered data
+			$user = $userData;
 		}
 
 		$dataProvider->setModels($users);
@@ -74,24 +74,51 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
+	public function actionToggleAccountStatus($id)
+	{
+		if (!$id) {
+			return $this->errorResponse(['message' => ['User ID is required']]);
+		}
+
+		$user = User::findOne($id);
+		if (!$user) {
+			return $this->errorResponse(['message' => ['User not found']]);
+		}
+
+		if ($user->status === User::STATUS_INACTIVE) {
+			$user->status = User::STATUS_ACTIVE;
+			$message = 'Account unlocked successfully';
+		} else {
+			$user->status = User::STATUS_INACTIVE;
+			$message = 'Account locked successfully';
+		}
+
+		if ($user->save(false)) {
+			return $this->payloadResponse(['message' => [$message]]);
+		} else {
+			return $this->errorResponse(['message' => ['Failed to update account status']]);
+		}
+	}
+
+
 	public function actionGetUser($id)
 	{
-		if(!$id){
+		if (!$id) {
 			return $this->errorResponse(['message' => ['User ID is required']]);
 		}
 		$user = User::findOne($id);
 		if (!$user) {
 			return $this->errorResponse(['message' => ['User not found']]);
 		}
-	
+
 		$profile = Profiles::find()->where(['user_id' => $id])->one();
 		if (!$profile) {
 			return $this->errorResponse(['message' => ['Profile not found']]);
 		}
-	
+
 		$roles = \Yii::$app->authManager->getRolesByUser($id);
 		$roleNames = array_keys($roles);
-	
+
 		$formattedUser = [
 			'user_id' => $user->id,
 			'status' => $user->status,
@@ -100,14 +127,13 @@ class AuthController extends \helpers\ApiController
 			'name' => trim($profile->first_name . ' ' . $profile->last_name),
 			'first_name' => $profile->first_name,
 			'first_last' => $profile->last_name,
-			// 'middle_name' => $profile->middle_name,
 			'mobile_number' => $profile->mobile_number,
 			'roles' => $roleNames,
 		];
-	
+
 		return $this->payloadResponse(['user' => $formattedUser]);
 	}
-	
+
 
 	public function actionSearchUser() {}
 
@@ -118,7 +144,7 @@ class AuthController extends \helpers\ApiController
 		if ($model->load($dataRequest) && $model->login()) {
 			$user = Yii::$app->user->identity;
 			$canBeBooked = $user->can_be_booked;
-		    $roles = Yii::$app->authManager->getRolesByUser($user->user_id);
+			$roles = Yii::$app->authManager->getRolesByUser($user->user_id);
 			$this->generateRefreshToken($user);
 
 			return $this->payloadResponse(
@@ -137,25 +163,25 @@ class AuthController extends \helpers\ApiController
 
 	public function filterMenus($roles)
 	{
-	    $menus = Yii::$app->params['menus'];
+		$menus = Yii::$app->params['menus'];
 
-	    $roleNames = array_keys($roles);
+		$roleNames = array_keys($roles);
 
-	    if (in_array('su', $roleNames)) {
-	        return $menus;
-	    } elseif (in_array('secretary', $roleNames)) {
-	        $allowedRoutes = ['default.dashboard', 'appointments'];
-	    } elseif (in_array('user', $roleNames)) {
-	        $allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
-	    } else {
-	        $allowedRoutes = [];
-	    }
+		if (in_array('su', $roleNames)) {
+			return $menus;
+		} elseif (in_array('secretary', $roleNames)) {
+			$allowedRoutes = ['default.dashboard', 'appointments'];
+		} elseif (in_array('user', $roleNames)) {
+			$allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
+		} else {
+			$allowedRoutes = [];
+		}
 
-	    $menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
-	        return in_array($menu['route'], $allowedRoutes);
-	    }));
+		$menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
+			return in_array($menu['route'], $allowedRoutes);
+		}));
 
-	    return $menus;
+		return $menus;
 	}
 
 
