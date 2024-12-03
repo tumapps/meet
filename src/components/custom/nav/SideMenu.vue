@@ -1,10 +1,10 @@
 <script>
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import IconComponent from '../../icons/IconComponent.vue';
+import IconComponent from '../../icons/IconComponent.vue'
 export default {
   components: {
-    IconComponent,
+    IconComponent
   },
   props: {
     staticItem: {
@@ -93,7 +93,6 @@ export default {
       } else {
         context.emit('onClick', props.route.to)
         // close sidebar after navigation
-
       }
     }
 

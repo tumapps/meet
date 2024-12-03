@@ -3,7 +3,6 @@
   <sidebar-component></sidebar-component>
   <!-- Sidebar Component End Here-->
   <main class="main-content">
-
     <div :class="`position-relative  ${isBanner ? 'iq-banner ' + bannerStyle : ''}`">
       <!-- Header Component Start Here -->
       <header-component></header-component>
@@ -16,7 +15,6 @@
     </div>
     <!-- Main Content Start Here -->
     <main-content-component>
-      <AutoLogout></AutoLogout>
       <!-- Router View For Pages -->
       <router-view></router-view>
     </main-content-component>
@@ -47,7 +45,6 @@ import SidebarComponent from '@/components/partials/SidebarComponent.vue'
 import MainContentComponent from '@/components/partials/MainContentComponent.vue'
 import FooterComponent from '@/components/partials/FooterComponent.vue'
 import SettingOffcanvas from '@/components/setting/SettingOffcanvas.vue'
-import AutoLogout from '@/components/AutoLogout.vue' 
 const route = useRoute()
 const store = useSetting()
 const isBanner = computed(() => route.meta.isBanner)

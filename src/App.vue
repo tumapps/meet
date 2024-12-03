@@ -7,16 +7,17 @@ import { onMounted, onUnmounted, computed } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAutoLogout } from '@/composables/useAutoLogout'
 
 // Import Pinia Store
 import { useSetting } from './store/pinia'
 
 import '@/plugins/styles'
 
+useAutoLogout(1200000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
 const route = useRoute()
-
 
 watch(
   () => route.meta.customMenus,

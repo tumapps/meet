@@ -1,31 +1,30 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance } from 'vue';
-import AxiosInstance from '@/api/axios';
-import { useRoute } from 'vue-router';
-import FlatPickr from 'vue-flatpickr-component';
-import { useAuthStore } from '@/store/auth.store.js';
+import { onMounted, ref, getCurrentInstance } from 'vue'
+import AxiosInstance from '@/api/axios'
+// import { useRoute } from 'vue-router';
+// import FlatPickr from 'vue-flatpickr-component';
+import { useAuthStore } from '@/store/auth.store.js'
+import { usePreferencesStore } from '../../../store/preferences'
 
-const authStore = useAuthStore();
+const authStore = useAuthStore()
+const preferences = usePreferencesStore()
 
-const axiosInstance = AxiosInstance();
-const { proxy } = getCurrentInstance();
-const route = useRoute();
+const axiosInstance = AxiosInstance()
+const { proxy } = getCurrentInstance()
+// const route = useRoute();
 
 onMounted(() => {
-  fetchSettings();
-});
-//errors 
-const errors = ref({ start_time: '', end_time: '', booking_window: '', slot_duration: '', advanced_booking: '' });
+  fetchSettings()
+})
+//errors
+const errors = ref({ start_time: '', end_time: '', booking_window: '', slot_duration: '', advanced_booking: '' })
 // Time options for select dropdown
-const timeOptions = ref([
-  '08:00 ', '09:00 ', '10:00 ', '11:00', '12:00', '13:00', '14:00',
-  '15:00', '16:00', '17:00', '18:00'
-]);
+const timeOptions = ref(['08:00 ', '09:00 ', '10:00 ', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'])
 
 //get user id from store
-const user_id = ref('');
-user_id.value = authStore.getUserId();
-const appointment_id = ref('');
+const user_id = ref('')
+user_id.value = authStore.getUserId()
+const appointment_id = ref('')
 // Initial settings data
 const settings = ref({
   user_id: user_id,
@@ -33,13 +32,18 @@ const settings = ref({
   end_time: '',
   booking_window: '',
   slot_duration: '',
-  advanced_booking: '',
-});
+  advanced_booking: ''
+})
+
+function toggleWeekend() {
+  const newWeekendState = !preferences.weekend
+  preferences.setWeekendPreference(newWeekendState)
+}
 
 //fetch user settings
 const fetchSettings = async () => {
   try {
-    const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`);
+    const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`)
     // console.log(response.data.dataPayload.data);
 
     settings.value = {
@@ -47,43 +51,42 @@ const fetchSettings = async () => {
       end_time: response.data.dataPayload.data.end_time,
       booking_window: response.data.dataPayload.data.booking_window,
       slot_duration: response.data.dataPayload.data.slot_duration,
-      advanced_booking: response.data.dataPayload.data.advanced_booking,
-    };
-    appointment_id.value = response.data.dataPayload.data.id;
-
+      advanced_booking: response.data.dataPayload.data.advanced_booking
+    }
+    appointment_id.value = response.data.dataPayload.data.id
   } catch (error) {
     proxy.$showToast({
       title: 'An error occurred ',
       text: 'an error has occured while getting your settings!',
-      icon: 'success',
-    });
+      icon: 'success'
+    })
   }
-};
+}
 
 // Flatpickr config
-const config = {
-  enableTime: false,
-  // noCalendar: true,
-  dateFormat: 'Y-m-d',
+// const config = {
+//   enableTime: false,
+//   // noCalendar: true,
+//   dateFormat: 'Y-m-d',
 
-};
+// };
 
-const config2 = {
-  enableTime: true,
-  noCalendar: true,
-  dateFormat: 'H:i',
-  time_24hr: true,
-  minuteIncrement: 10,
-};
+// const config2 = {
+//   enableTime: true,
+//   noCalendar: true,
+//   dateFormat: 'H:i',
+//   time_24hr: true,
+//   minuteIncrement: 10,
+// };
 
 // Selected date
-const start_date = ref('');
-const end_date = ref('');
+// const start_date = ref('');
+// const end_date = ref('');
 
 //selected time
-const start_Time = ref('');
-const end_Time = ref('');
-const description = ref('');
+// const start_Time = ref('');
+// const end_Time = ref('');
+// const description = ref('');
 
 // // Function to save settings (add API or local storage logic here)
 // const saveAvailability = async () => {
@@ -114,18 +117,20 @@ const description = ref('');
 // Function to save settings (add API or local storage logic here)
 const saveSettings = async () => {
   try {
-    const response = await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value);
+    await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value)
     proxy.$showToast({
       title: 'Updated',
       text: 'settings updated successfully!',
-      icon: 'success',
-    });
+      icon: 'success'
+    })
   } catch (error) {
+    const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+
     proxy.$showToast({
-      title: 'Failed',
-      text: 'failed to update your settings',
-      icon: 'error',
-    });
+      title: 'An error occurred',
+      text: errorMessage,
+      icon: 'error'
+    })
   }
 }
 </script>
@@ -140,16 +145,21 @@ const saveSettings = async () => {
           <b-row class="">
             <b-col md="12">
               <b-form-group label="Start Time" label-for="working-hours-start">
-                <b-form-input id="working-hours-start" v-model="settings.start_time" type="time"
-                  required></b-form-input>
+                <b-form-input id="working-hours-start" v-model="settings.start_time" type="time" required></b-form-input>
                 <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
               </b-form-group>
             </b-col>
-            <b-col md="6">
+            <b-col md="12">
               <b-form-group label="End Time" label-for="working-hours-end">
-                <b-form-input id="working-hours-end" v-model="settings.end_time" :options="timeOptions"
-                  required></b-form-input>
+                <b-form-input id="working-hours-end" v-model="settings.end_time" :options="timeOptions" required></b-form-input>
                 <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
+              </b-form-group>
+            </b-col>
+            <b-col md="12">
+              <b-form-group label="Enable Weekends" label-for="enable-weekends-toggle">
+                <b-form-checkbox id="enable-weekends-toggle" :checked="preferences.weekend" @change="toggleWeekend" switch>
+                  {{ preferences.weekend ? 'Enabled' : 'Disabled' }}
+                </b-form-checkbox>
               </b-form-group>
             </b-col>
           </b-row>
@@ -202,16 +212,14 @@ const saveSettings = async () => {
           <b-row>
             <b-col md="12" class="mb-4">
               <b-form-group label="Booking Window (in months)" label-for="booking-window">
-                <b-form-input id="booking-window" type="number" v-model="settings.booking_window" min="1" max="12"
-                  required></b-form-input>
+                <b-form-input id="booking-window" type="number" v-model="settings.booking_window" min="1" max="12" required></b-form-input>
                 <div v-if="errors.booking_window" class="error" aria-live="polite">{{ errors.booking_window }}</div>
               </b-form-group>
             </b-col>
 
             <b-col md="12">
               <b-form-group label="Slot Duration (in minutes)" label-for="slot-duration">
-                <b-form-input id="slot-duration" type="number" v-model="settings.slot_duration" min="15" max="60"
-                  required></b-form-input>
+                <b-form-input id="slot-duration" type="number" v-model="settings.slot_duration" min="15" max="60" required></b-form-input>
                 <div v-if="errors.slot_duration" class="error" aria-live="polite">{{ errors.slot_duration }}</div>
               </b-form-group>
             </b-col>
@@ -223,8 +231,7 @@ const saveSettings = async () => {
           <b-row>
             <b-col md="12">
               <b-form-group label="Buffer Time (in minutes)" label-for="buffer-time">
-                <b-form-input id="buffer-time" type="number" v-model="settings.advanced_booking" min="10"
-                  required></b-form-input>
+                <b-form-input id="buffer-time" type="number" v-model="settings.advanced_booking" min="10" required></b-form-input>
                 <div v-if="errors.advanced_booking" class="error" aria-live="polite">{{ errors.advanced_booking }}</div>
               </b-form-group>
             </b-col>
@@ -240,8 +247,4 @@ const saveSettings = async () => {
   </div>
 </template>
 
-
-
-<style scoped>
-
-</style>
+<style scoped></style>

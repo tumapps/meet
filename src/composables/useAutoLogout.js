@@ -1,53 +1,45 @@
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-export function useAutoLogout() {
-    const router = useRouter();
-    const warningZone = ref(false);
-    let warningTimer = null;
-    let logoutTimer = null;
+export function useAutoLogout(logoutAfter = 120000) {
+  const lastActivity = ref(Date.now())
+  const router = useRouter()
+  let timeout
 
-    const WARNING_TIMEOUT = 15 * 60 ; // 15 minutes
-    const LOGOUT_TIMEOUT = 20 * 60 ; // 16 minutes
-    const events = ['click', 'mousemove', 'mousedown', 'scroll', 'keypress'];
+  const resetTimer = () => {
+    lastActivity.value = Date.now()
+    clearTimeout(timeout)
+    timeout = setTimeout(handleLogout, logoutAfter)
+  }
 
-    const setTimers = () => {
-        warningTimer = setTimeout(() => {
-            warningZone.value = true;
-        }, WARNING_TIMEOUT - 1 * 60 * 1000); // Show warning 1 minute before logout
+  const handleLogout = () => {
+    // Clear tokens, notify the server, etc.
+    localStorage.removeItem('authToken') // Example for token removal
+    router.push('/lockscreen') // Redirect to login
+    alert('You have been logged out due to inactivity.')
+  }
 
-        logoutTimer = setTimeout(logoutUser, LOGOUT_TIMEOUT);
-        warningZone.value = false;
-    };
+  const activityEvents = ['mousemove', 'keydown', 'click']
 
-    const logoutUser = () => {
-        localStorage.removeItem('user.token');
-        router.push('/lockscreen');
-    };
+  const attachListeners = () => {
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, resetTimer)
+    })
+  }
 
-    const resetTimer = () => {
-        clearTimeout(warningTimer);
-        clearTimeout(logoutTimer);
-        setTimers();
-    };
+  const detachListeners = () => {
+    activityEvents.forEach((event) => {
+      window.removeEventListener(event, resetTimer)
+    })
+  }
 
-    onMounted(() => {
-        events.forEach(event => {
-            window.addEventListener(event, resetTimer);
-        });
-        setTimers();
-    });
+  onMounted(() => {
+    attachListeners()
+    timeout = setTimeout(handleLogout, logoutAfter)
+  })
 
-    onUnmounted(() => {
-        events.forEach(event => {
-            window.removeEventListener(event, resetTimer);
-        });
-        clearTimeout(warningTimer);
-        clearTimeout(logoutTimer);
-    });
-
-    return {
-        warningZone,
-        resetTimer // Include this to allow manual resetting
-    };
+  onUnmounted(() => {
+    detachListeners()
+    clearTimeout(timeout)
+  })
 }

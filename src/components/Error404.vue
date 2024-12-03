@@ -33,11 +33,7 @@ export default {
         <button class="more-link" @click="goBack"> Go Back</button>
 
     </div>
-    <div class="About">
 
-        <Dialog>hello</Dialog>
-
-    </div>
 </template>
 
 <style>
@@ -50,7 +46,8 @@ export default {
     font-family: 'Catamaran', sans-serif;
     font-weight: 800;
     margin: 70px 15px;
-    margin-top: 15%;
+    /* margin-top: 15%; */
+    max-height: 100vh !important;
 }
 
 .error-container>span {
@@ -65,7 +62,7 @@ export default {
     background:
         linear-gradient(140deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.07) 43%, transparent 44%, transparent 100%),
         linear-gradient(105deg, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.06) 41%, rgba(0, 0, 0, 0.07) 76%, transparent 77%, transparent 100%),
-        linear-gradient(to right, #5fc6e6, #409ae4);
+        linear-gradient(to right, #D89837, #097B3E);
 }
 
 .error-container>span.four:before,
@@ -84,7 +81,7 @@ export default {
     background:
         linear-gradient(128deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.07) 40%, transparent 41%, transparent 100%),
         linear-gradient(116deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.07) 50%, transparent 51%, transparent 100%),
-        linear-gradient(to top, #1d82c5, #1d82c5, #1d82c5, #1d82c5, #1d82c5);
+        linear-gradient(to top, #D89837, #D89837, #097B3E, #097B3E, #097B3E);
 }
 
 .error-container>span.four:after {
@@ -93,7 +90,7 @@ export default {
     transform: rotate(-49.5deg);
     left: -18px;
     bottom: 36px;
-    background: linear-gradient(to right, #41c9eb, #41c9eb, #41c9eb, #41c9eb, #41c9eb);
+    background: linear-gradient(to right, #097B3E, #097B3E, #097B3E, #097B3E, #097B3E);
 }
 
 .error-container>span.zero {
@@ -102,7 +99,7 @@ export default {
     height: 156px;
     border-radius: 999px;
     background: linear-gradient(-45deg, transparent 0%, rgba(0, 0, 0, 0.06) 50%, transparent 51%, transparent 100%),
-        linear-gradient(to top right, #0e9fe2, #0e9fe2, #0e9fe2, #0e9fe2, #0e9fe2, #0e9fe2, #0e9fe2);
+        linear-gradient(to top right, #D89837, #D89837, #D89837, #097B3E, #097B3E, #097B3E, #0e9fe2);
     overflow: hidden;
     animation: bgshadow 5s infinite;
 }
@@ -151,7 +148,7 @@ export default {
     }
 
     55% {
-        box-shadow: inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
+        box-shadow: inset 0px 0px 0px 0px rgba(216, 152, 55, 4.966);
     }
 
     100% {
@@ -159,17 +156,7 @@ export default {
     }
 }
 
-/* demo stuff */
-* {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
 
-body {
-    background-color: #FDFAF5;
-    margin-bottom: 50px;
-}
 
 html,
 button,
@@ -199,16 +186,17 @@ h1 {
 .more-link {
     text-transform: uppercase;
     font-size: 13px;
-    background-color: #0e9fe2;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    background-color: #097B3E;
     padding: 10px 15px;
-    border-radius: 0;
+    border-radius: 5px;
     color: #fff;
     display: inline-block;
     margin-right: 5px;
     margin-bottom: 5px;
     line-height: 1.5;
     text-decoration: none;
-    margin-top: 50px;
     letter-spacing: 1px;
 }
 </style>

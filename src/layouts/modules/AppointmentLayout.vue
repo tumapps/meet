@@ -4,14 +4,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 // Components
-import AutoLogout from '@/components/AutoLogout.vue'
 import HeaderComponent from '@/components/partials/HeaderComponent.vue'
 import SidebarComponent from '@/components/modules/appointment/partials/SidebarComponent.vue'
 import MainContentComponent from '@/components/partials/MainContentComponent.vue'
 import FooterComponent from '@/components/partials/FooterComponent.vue'
-import LoaderComponent from '@/components/custom/loader/LoaderComponent.vue'
+// import LoaderComponent from '@/components/custom/loader/LoaderComponent.vue'
 export default {
-  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent, LoaderComponent, AutoLogout },
+  components: { HeaderComponent, SidebarComponent, MainContentComponent, FooterComponent },
   setup() {
     const route = useRoute()
     const isBanner = computed(() => route.meta.isBanner)

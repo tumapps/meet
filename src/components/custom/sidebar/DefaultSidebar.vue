@@ -1,7 +1,7 @@
 <script>
-import { computed, onMounted } from 'vue'
-import BrandLogo from '@/components/custom/logo/BrandLogo.vue';
-import BrandName from '@/components/custom/logo/BrandName.vue';
+import { computed, onMounted, ref } from 'vue'
+import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
+import BrandName from '@/components/custom/logo/BrandName.vue'
 import Scrollbar from 'smooth-scrollbar'
 import { useSetting } from '@/store/pinia'
 
@@ -21,22 +21,33 @@ export default {
       document.getElementsByTagName('ASIDE')[0].classList.toggle('sidebar-mini')
     }
 
+    const isSidebarOpen = ref(false)
+    const openSidebarOnHover = () => {
+      isSidebarOpen.value = true
+      document.getElementsByTagName('ASIDE')[0].classList.remove('sidebar-mini')
+    }
+
+    const closeSidebarOnLeave = () => {
+      isSidebarOpen.value = false
+      document.getElementsByTagName('ASIDE')[0].classList.add('sidebar-mini')
+    }
+
     onMounted(() => {
       Scrollbar.init(document.querySelector('.data-scrollbar'), { continuousScrolling: false })
     })
 
-    return { toggleSidebar, sidebarMenuStyle, sidebarType, sidebarColor, sidebarShow }
+    return { toggleSidebar, sidebarMenuStyle, sidebarType, sidebarColor, sidebarShow, openSidebarOnHover, closeSidebarOnLeave }
   }
 }
 </script>
 
 <template>
-  <aside :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`" id="first-tour" data-toggle="main-sidebar" data-sidebar="responsive">
+  <aside :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`" id="first-tour" data-toggle="main-sidebar" data-sidebar="responsive" @mouseover="openSidebarOnHover" @mouseleave="closeSidebarOnLeave">
     <div class="sidebar-header d-flex align-items-center justify-content-start">
       <router-link :to="{ name: 'default.dashboard' }" class="navbar-brand">
-        <brand-logo/>
+        <brand-logo />
         <h4 class="logo-title" data-setting="app_name">
-          <brand-name/>
+          <brand-name />
         </h4>
       </router-link>
       <div class="sidebar-toggle" @click="toggleSidebar">
@@ -49,7 +60,7 @@ export default {
       </div>
     </div>
     <div class="sidebar-body pt-0 data-scrollbar">
-      <slot name="profile-card"></slot>
+      <!-- <slot name="profile-card"></slot> -->
       <div class="sidebar-list">
         <slot></slot>
       </div>

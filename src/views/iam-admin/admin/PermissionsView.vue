@@ -1,13 +1,10 @@
 <script setup>
 import { ref, getCurrentInstance, onMounted, computed } from 'vue'
 import AxiosInstance from '@/api/axios'
-// import { useRouter } from 'vue-router'
-import RolePermissions from '@/components/RolePermissions.vue'
 
-// const router = useRouter()
 const axiosInstance = AxiosInstance()
 const { proxy } = getCurrentInstance()
-const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc's
+const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc'
 const sortKey = ref('') // Active column being sorted
 const searchQuery = ref('')
 const isArray = ref(false)
@@ -15,18 +12,16 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100])
-const isModalVisible = ref(false)
-// const appointmentModal = ref(null)
 
-const AddRole = ref(null)
-const RoleDetails = ref({
+const AddPermission = ref(null)
+const PermissionDetails = ref({
   name: '',
   description: '',
   type: '1',
   data: '',
   ruleName: ''
 })
-// const ViewRole = ref(null)
+const ViewPermission = ref(null)
 
 const tableData = ref([])
 
@@ -34,8 +29,8 @@ const errors = ref({})
 const toastPayload = ref(null)
 
 const showModal = () => {
-  if (AddRole.value) {
-    AddRole.value.show()
+  if (AddPermission.value) {
+    AddPermission.value.show()
   }
 }
 
@@ -43,29 +38,29 @@ const showModal = () => {
 const goToPage = (page) => {
   if (page > 0 && page <= totalPages.value) {
     currentPage.value = page
-    getRoles(page)
+    getPermissions(page)
   }
 }
 
 // create a new role api
-const NewRole = async () => {
+const NewPermission = async () => {
   toastPayload.value = null
 
   try {
-    const response = await axiosInstance.post('v1/auth/role', RoleDetails.value)
+    const response = await axiosInstance.post('v1/auth/permission', PermissionDetails.value)
 
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
 
       //close the modal
-      AddRole.value.hide()
+      AddPermission.value.hide()
 
       //get the data
-      getRoles()
+      getPermissions()
       // Show toast notification using the response data
       proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
+        title: toastPayload.value.toastMessage || 'success',
         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
         icon: 'success'
       })
@@ -77,7 +72,7 @@ const NewRole = async () => {
       })
     }
   } catch (error) {
-    // console.error(error);
+    console.error(error)
     errors.value = error.response.data.errorPayload.errors
     const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
 
@@ -90,9 +85,9 @@ const NewRole = async () => {
 }
 
 //get roles
-const getRoles = async (page = currentPage.value) => {
+const getPermissions = async (page = currentPage.value) => {
   try {
-    const response = await axiosInstance.get(`/v1/auth/roles?page=${page}&per-page=${selectedPerPage.value}`)
+    const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
     console.log(tableData.value)
   } catch (error) {
@@ -100,13 +95,23 @@ const getRoles = async (page = currentPage.value) => {
   }
 }
 
-const roleModal = ref(null)
-const roleName = ref('')
-const showRoleModal = (role) => {
-  roleName.value = role
-  console.log('1', roleName.value)
-  roleModal.value.$refs.roleModal.show()
-  //pass the role name to the modal as value for roleName
+//edit roles
+
+// get single role
+const getPermission = async (name) => {
+  const names = name
+  try {
+    const response = await axiosInstance.post('v1/auth/permission', names.value)
+    PermissionDetails.value = response.data.dataPayload.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+const openModal = async (name) => {
+  if (ViewPermission.value) {
+    ViewPermission.value.show()
+  }
+  await getPermission(name)
 }
 
 // Format timestamp to a readable date
@@ -124,19 +129,19 @@ const sortedData = computed(() => {
 })
 
 const updatePerPage = async () => {
-  await getRoles(1)
+  await getPermissions(1)
 }
 
 //search
 const performSearch = async () => {
   try {
-    const response = await axiosInstance.get(`v1/auth/roles?_search=${searchQuery.value}`)
+    const response = await axiosInstance.get(`v1/auth/permission?_search=${searchQuery.value}`)
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
   } catch (error) {
     // console.error(error);
     errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.data.errorPayload.message || 'An unknown error occurred'
 
     proxy.$showToast({
       title: 'An error occurred',
@@ -147,19 +152,19 @@ const performSearch = async () => {
 }
 
 onMounted(() => {
-  getRoles()
+  getPermissions()
 })
 </script>
 <template>
   <b-col lg="12">
     <b-card>
       <div>
-        <h2>Roles</h2>
+        <h2>Permissions</h2>
       </div>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">
           <div class="d-flex justify-content-end">
-            <b-button variant="primary" @click="showModal"> New Role </b-button>
+            <b-button variant="primary" @click="showModal"> New Permission </b-button>
           </div>
         </b-col>
         <b-col lg="12">
@@ -190,9 +195,10 @@ onMounted(() => {
           <thead>
             <tr>
               <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('start_date')">Role Name <i class="fas fa-sort"></i></th>
+              <th @click="sortTable('start_date')">Name <i class="fas fa-sort"></i></th>
               <th>Description</th>
-              <th>Data</th>
+              <!-- <th>Data</th> -->
+              <!-- <th>RuleName</th> -->
               <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th>
               <th>Updated At<i class="fas fa-sort"></i></th>
               <th>Actions</th>
@@ -203,16 +209,18 @@ onMounted(() => {
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td>{{ index }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.description }}</td>
                 <td>{{ item.data }}</td>
+                <!-- <td>{{ item.description }}</td> -->
+
+                <!-- <td>{{ item.ruleName }}</td> -->
                 <td>{{ formatDate(item.createdAt) }}</td>
                 <td>{{ formatDate(item.updatedAt) }}</td>
                 <td>
-                  <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="showRoleModal(item.name)">
-                    <i class="fa-solid fa-shield" style="color: #076232"></i>
+                  <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.name)">
+                    <i class="fas fa-edit" title="edit entry"></i>
                   </button>
                   <button type="button" class="btn btn-outline-danger btn-sm" @click="confirmDelete(item.id)">
-                    <i class="fa-solid fa-trash"></i>
+                    <i class="fas fa-trash" title="delete entry"></i>
                   </button>
                 </td>
               </tr>
@@ -228,7 +236,6 @@ onMounted(() => {
       <!-- Pagination -->
       <b-col sm="12" lg="12" class="mt-5 d-flex justify-content-end mb-n5">
         <nav aria-label="Page navigation">
-          cd
           <ul class="pagination justify-content-end">
             <li class="page-item" :class="{ disabled: currentPage === 1 }">
               <button class="page-link" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
@@ -246,25 +253,25 @@ onMounted(() => {
   </b-col>
 
   <!-- //add new role modal -->
-  <b-modal v-if="isModalVisible" ref="AddRole" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
+  <b-modal ref="AddPermission" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
     <template #modal-header="{ close }">
       <!-- Custom header with title and close button -->
-      <h5 class="modal-title">Add Role</h5>
+      <h5 class="modal-title">Add Permission</h5>
       <b-button variant="light" @click="close" class="close"> &times; </b-button>
     </template>
 
     <b-row>
       <b-col md="12" lg="6">
         <div class="mb-3">
-          <label for="startDatePicker" class="form-label">Role Name</label>
-          <b-form-input v-model="RoleDetails.name" id="startDatePicker" type="text" placeholder="Enter Role Name"></b-form-input>
+          <label for="startDatePicker" class="form-label">Name</label>
+          <b-form-input v-model="PermissionDetails.name" id="startDatePicker" type="text" placeholder="Enter Role Name"></b-form-input>
         </div>
         <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
       </b-col>
       <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">Role Data</label>
-          <b-form-input v-model="RoleDetails.data" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
+          <b-form-input v-model="PermissionDetails.data" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
         <div v-if="errors.data" class="error" aria-live="polite">{{ errors.data }}</div>
       </b-col>
@@ -273,27 +280,29 @@ onMounted(() => {
       <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="roledescription" class="form-label">Description</label>
-          <b-form-input v-model="RoleDetails.description" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
+          <b-form-input v-model="PermissionDetails.description" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
         </div>
         <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
       </b-col>
       <b-col md="12" lg="6">
         <div class="mb-3">
-          <label for="rolerulename" class="form-label">Role Data</label>
-          <b-form-input v-model="RoleDetails.ruleName" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
+          <label for="rolerulename" class="form-label">Data</label>
+          <b-form-input v-model="PermissionDetails.ruleName" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
         <div v-if="errors.ruleName" class="error" aria-live="polite">{{ errors.ruleName }}</div>
       </b-col>
     </b-row>
 
     <div class="d-flex justify-content-end">
-      <b-button @click="NewRole" variant="primary">Save</b-button>
+      <b-button @click="NewPermission" variant="primary">Save</b-button>
     </div>
   </b-modal>
 
   <!-- //view role its Permissions and child roles -->
 
-  <RolePermissions ref="roleModal" :roleName="roleName" />
+  <b-modal ref="ViewPermission" title="Manage Details" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
+    <h1>hello</h1>
+  </b-modal>
 </template>
 <style>
 /* Custom CSS to increase modal height */

@@ -14,7 +14,7 @@ import BootstrapVueNext from 'bootstrap-vue-next'
 // fontawesome activation
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { fas, faFolder, faFolderOpen, faFile  } from '@fortawesome/free-solid-svg-icons'
+import { fas, faFolder, faFolderOpen, faFile } from '@fortawesome/free-solid-svg-icons'
 import '@fortawesome/fontawesome-free/css/all.css'
 library.add(fas, faFolder, faFolderOpen, faFile)
 // Custom Components & Directives
@@ -23,12 +23,14 @@ import globalDirective from './plugins/global-directive'
 import globalMixin from './plugins/global-mixin'
 import axiosPlugin from './plugins/axiosPlugin'
 import globalUtils from '@/utilities/globalUtils'
-import { showAlert, showToast } from '@/utilities/sweetAlert';
+import { showAlert, showToast } from '@/utilities/sweetAlert'
 import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
-import Vue3Autocounter from 'vue3-autocounter';
-import 'flatpickr/dist/flatpickr.css';
-import 'flatpickr/dist/themes/material_blue.css'; // Optional theme, pick one that fits
+import Vue3Autocounter from 'vue3-autocounter'
+import 'flatpickr/dist/flatpickr.css'
+import 'flatpickr/dist/themes/material_blue.css' // Optional theme, pick one that fits
 import { useMenuStore } from '@/store/menuStore'
+import { usePreferencesStore } from '@/store/preferences'
+import WebSocketPlugin from './plugins/websocket'
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
 
@@ -37,8 +39,10 @@ const pinia = createPinia()
 //fontawesome
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.component('vue3-autocounter', Vue3Autocounter)
+app.use(WebSocketPlugin, { url: 'ws://localhost:9002' })
 //router
-app.use(pinia).use(router)
+app.use(pinia)
+app.use(router)
 // Library Components
 app.use(VueSweetalert2)
 app.use(BootstrapVueNext)
@@ -51,10 +55,13 @@ app.use(sweetAlertPlugin)
 // Make functions globally accessible
 app.provide('showAlert', showAlert)
 app.provide('showToast', showToast)
-app.config.globalProperties.$utils = globalUtils;
+app.config.globalProperties.$utils = globalUtils
 app.mount('#app')
 
 // Load menus from session storage when the app starts
-const menuStore = useMenuStore();
-menuStore.loadMenusFromStorage();
+const menuStore = useMenuStore()
+menuStore.loadMenusFromStorage()
+const preferences = usePreferencesStore()
+preferences.loadPreferences()
+
 export default app
