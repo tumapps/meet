@@ -151,6 +151,26 @@ const performSearch = async () => {
   }
 }
 
+const SyncPermissions = async () => {
+  try {
+    const response = await axiosInstance.get('v1/auth/sync-permissions')
+    proxy.$showToast({
+      title: response.data.toastPayload.toastMessage || 'success',
+      icon: 'success'
+    })
+  } catch (error) {
+    console.error(error)
+    errors.value = error.response.data.errorPayload.errors
+    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.data.errorPayload.message || 'An unknown error occurred'
+
+    proxy.$showToast({
+      title: 'An error occurred',
+      text: errorMessage,
+      icon: 'error'
+    })
+  }
+}
+
 onMounted(() => {
   getPermissions()
 })
@@ -163,6 +183,8 @@ onMounted(() => {
       </div>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">
+          <button class="btn btn-primary" @click="SyncPermissions">Sync Permissions</button>
+
           <div class="d-flex justify-content-end">
             <b-button variant="primary" @click="showModal"> New Permission </b-button>
           </div>

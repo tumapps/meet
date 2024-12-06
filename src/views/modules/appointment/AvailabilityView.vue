@@ -260,19 +260,23 @@ const updateAvailabilityDetails = async (id) => {
       })
     }
   } catch (error) {
-    // Check if error.response exists to avoid TypeError
-    if (error.response && error.response.data && error.response.data.errorPayload) {
-      // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors
-    } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+    let errorMessage = 'An error occurred'
 
-      proxy.$showToast({
-        title: 'An error occurred',
-        text: errorMessage,
-        icon: 'error'
-      })
+    if (error.response && error.response.data.errorPayload) {
+      // Check if errorPayload exists and has errors
+      errors.value = error.response.data.errorPayload.errors
+      console.log(errors)
+      if (errors.value && errors.value.message) {
+        errorMessage = errors.value.message // Use specific error message
+      }
     }
+
+    // Show toast notification for error
+    proxy.$showToast({
+      title: errorMessage, // Change title to be more indicative of an error
+      text: errorMessage, // Show specific error message
+      icon: 'error'
+    })
   }
 }
 
@@ -473,7 +477,7 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="updateAvailabilityDetails" variant="primary">Update</b-button>
+      <b-button @click="updateAvailabilityDetails(availabilityDetails.id)" variant="primary">Update</b-button>
     </div>
   </b-modal>
 </template>

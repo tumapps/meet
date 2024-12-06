@@ -29,7 +29,7 @@ const perPage = ref(20) // Number of items per page (from API response)
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100])
 const searchQuery = ref('')
-
+const errors = ref({})
 const errorDetails = ref({})
 
 //get user_id from session storage
@@ -315,11 +315,21 @@ const getAppointments = async (page = 1) => {
     totalPages.value = response.data.dataPayload.totalPages
     perPage.value = response.data.dataPayload.perPage
   } catch (error) {
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+    let errorMessage = 'An error occurred'
 
+    if (error.response && error.response.data.errorPayload) {
+      // Check if errorPayload exists and has errors
+      errors.value = error.response.data.errorPayload.errors
+      console.log(errors)
+      if (errors.value && errors.value.message) {
+        errorMessage = errors.value.message // Use specific error message
+      }
+    }
+
+    // Show toast notification for error
     proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
+      title: errorMessage, // Change title to be more indicative of an error
+      text: errorMessage, // Show specific error message
       icon: 'error'
     })
   }
@@ -452,7 +462,6 @@ const performSearch = async () => {
 const suggestions = ref([])
 const suggestedDate = ref('')
 const timeSlots = ref([])
-;``
 
 // Function to fetch suggested slots
 const suggestSlots = async (id) => {
@@ -628,9 +637,13 @@ watch(
   }
 )
 
-const sendMessage = () => {
-  proxy.$sendWebSocketMessage({ action: 'test', message: 'Hello WebSocket!' })
-}
+watch(
+  () => appointmentModal.value,
+  (newValue, oldValue) => {
+    console.log('appointmentModal value changed:', oldValue, '->', newValue)
+    getAppointment(1)
+  }
+)
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -645,10 +658,6 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <div>
-    <h1>WebSocket Test</h1>
-    <button @click="sendMessage">Send Message</button>
-  </div>
   <b-col lg="12">
     <b-card>
       <div>
