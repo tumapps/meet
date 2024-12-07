@@ -151,6 +151,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'id' => $this->primaryKey(),
             'appointment_id' => $this->integer()->notNull(),
             'file_url' => $this->string()->notNull(),
+            'self_link' => $this->string()->notNull(),
             'file_name' => $this->string()->notNull(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
