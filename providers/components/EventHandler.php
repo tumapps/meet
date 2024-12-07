@@ -58,6 +58,8 @@ class EventHandler
 			'endTime' => $event->data['end_time'],
 			'username' => $event->data['username'],
 			'contact_name' => $event->data['contact_name'],
+			'attachment_file_name' => $event->data['attachment_file_name'],
+			'attachment_download_link' => $event->data['attachment_download_link'],
 		];
 
 		$userEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
