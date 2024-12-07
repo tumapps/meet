@@ -21,7 +21,7 @@ class LevelController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerLevelList');
+        Yii::$app->user->can('registrar');
         $searchModel = new LevelSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'LevelSearch');
         $dataProvider = $searchModel->search($search);
@@ -30,13 +30,13 @@ class LevelController extends \helpers\ApiController{
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerLevelView');
+        Yii::$app->user->can('registrar');
         return $this->payloadResponse($this->findModel($id));
     }
 
     public function actionCreate()
     {
-        Yii::$app->user->can('schedulerLevelCreate');
+        Yii::$app->user->can('registrar');
         $model = new Level();
         $model->loadDefaultValues();
         $dataRequest['Level'] = Yii::$app->request->getBodyParams();
@@ -48,7 +48,7 @@ class LevelController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        Yii::$app->user->can('schedulerLevelUpdate');
+        Yii::$app->user->can('registrar');
         $dataRequest['Level'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {

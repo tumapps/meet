@@ -21,7 +21,7 @@ class EventsController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerEventsList');
+        Yii::$app->user->can('schedulerEventsList');
         $searchModel = new EventsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'EventsSearch');
         $dataProvider = $searchModel->search($search);
@@ -36,6 +36,8 @@ class EventsController extends \helpers\ApiController{
 
     public function actionCancel($id)
     {
+        Yii::$app->user->can('registrar');
+        
         $request = Yii::$app->request;
 
         $model = $this->findModel($id);
@@ -65,7 +67,7 @@ class EventsController extends \helpers\ApiController{
 
     public function actionCreate()
     {
-        // Yii::$app->user->can('schedulerEventsCreate');
+        Yii::$app->user->can('registrar');
         $model = new Events();
         $model->loadDefaultValues();
         $dataRequest['Events'] = Yii::$app->request->getBodyParams();
@@ -77,7 +79,7 @@ class EventsController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        Yii::$app->user->can('schedulerEventsUpdate');
+        Yii::$app->user->can('registrar');
         $dataRequest['Events'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {
@@ -90,11 +92,11 @@ class EventsController extends \helpers\ApiController{
     {
         $model = $this->findModel($id);
         if ($model->is_deleted) {
-            Yii::$app->user->can('schedulerEventsRestore');
+            Yii::$app->user->can('registrar');
             $model->restore();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Events restored successfully']);
         } else {
-            Yii::$app->user->can('schedulerEventsDelete');
+            Yii::$app->user->can('registrar');
             $model->delete();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Events deleted successfully']);
         }

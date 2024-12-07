@@ -35,15 +35,15 @@ class AppointmentAttachments extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'appointment_id',
-            'file_url',
-            'file_name',
-            'is_deleted',
-            'created_at',
-            'updated_at',
+                'id',
+                'appointment_id',
+                'file_url',
+                'file_name',
+                'is_deleted',
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -53,7 +53,7 @@ class AppointmentAttachments extends BaseModel
     public function rules()
     {
         return [
-            [['appointment_id', 'file_url', 'file_name'], 'required'],
+            [['appointment_id', 'file_name', 'file_url', 'self_link'], 'required'],
             [['appointment_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['appointment_id', 'is_deleted'], 'integer'],
             [['file_url', 'file_name'], 'string', 'max' => 255],
@@ -89,34 +89,61 @@ class AppointmentAttachments extends BaseModel
     }
 
 
+    // public function fileUpload($uploadedFile, $appointmentId)
+    // {
+
+    //     $destination = 'playground/francis/appointments/' . $appointmentId . '/' . $uploadedFile->name;
+
+    //     $googleStorage = new GoogleStorageComponent();
+    //     $object = $googleStorage->uploadFile($uploadedFile->tempName, $destination, true);
+
+    //     // return $object;
+    //     $this->appointment_id = $appointmentId;
+    //     $this->file_name = $uploadedFile->name;
+    //     $this->file_url = $object->info()['mediaLink'];
+
+    //     if (!$this->validate()) {
+    //         return $this->getErrors();
+    //     }
+
+    //     if ($this->save()) {
+    //         return true;
+    //     }
+    //     // return false;
+    //     return $this->getErrors();
+    // }
+
     public function fileUpload($uploadedFile, $appointmentId)
     {
-        $this->appointment_id = $appointmentId;
-        $this->file_name = $uploadedFile->name;
-
-        if (!$this->validate()) {
-            return $this->getErrors();
-        }
-
         $destination = 'playground/francis/appointments/' . $appointmentId . '/' . $uploadedFile->name;
 
         $googleStorage = new GoogleStorageComponent();
         $object = $googleStorage->uploadFile($uploadedFile->tempName, $destination, true);
 
+        $this->appointment_id = $appointmentId;
+        $this->file_name = $uploadedFile->name;
         $this->file_url = $object->info()['mediaLink'];
+        $this->self_link = $object->info()['selfLink'];
 
-        if ($this->save()) {
-            return true;
+        if (!$this->validate()) {
+            Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
+            return $this->getErrors();
         }
-        // return false;
-        return $this->getErrors();
+
+        if (!$this->save()) {
+            Yii::error('Save failed: ' . json_encode($this->getErrors()), __METHOD__);
+            return $this->getErrors();
+        }
+
+        return true;
     }
 
-    public function getAppointmentAttachment($id)
+
+    public static function getAppointmentAttachment($id)
     {
         $attachment = self::find()
-            ->where(['appointment_id' => $id]) 
-            ->select(['file_name', 'file_url'])
+            ->where(['appointment_id' => $id])
+            ->select(['file_name', 'file_url', 'self_link'])
             ->one();
 
         if (!$attachment) {
@@ -124,9 +151,9 @@ class AppointmentAttachments extends BaseModel
         }
 
         return [
-            'file_name' => $attachment->file_name,
-            'file_url'  => $attachment->file_url,
+            'fileNname' => $attachment->file_name,
+            'downloadLink'  => $attachment->file_url,
+            'previewLink' => $attachment->self_link,
         ];
     }
-
 }

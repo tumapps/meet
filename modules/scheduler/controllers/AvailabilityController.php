@@ -22,7 +22,7 @@ class AvailabilityController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerAvailabilityList');
+        Yii::$app->user->can('schedulerAvailabilityList');
         $userId = Yii::$app->user->id;
         $user = Yii::$app->user->identity;
         // $role = Yii::$app->authManager->getRolesByUser($user);
@@ -42,13 +42,13 @@ class AvailabilityController extends \helpers\ApiController{
 
     public function actionView($id)
     {
-        // Yii::$app->user->can('schedulerAvailabilityView');
+        Yii::$app->user->can('schedulerAvailabilityView');
         return $this->payloadResponse($this->findModel($id));
     }
 
     public function actionCreate()
     {
-        // Yii::$app->user->can('schedulerAvailabilityCreate');
+        Yii::$app->user->can('schedulerAvailabilityCreate');
         $model = new Availability();
         $model->loadDefaultValues();
         $dataRequest['Availability'] = Yii::$app->request->getBodyParams();
@@ -76,7 +76,7 @@ class AvailabilityController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        // Yii::$app->user->can('schedulerAvailabilityUpdate');
+        Yii::$app->user->can('schedulerAvailabilityUpdate');
         $dataRequest['Availability'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {
@@ -107,11 +107,11 @@ class AvailabilityController extends \helpers\ApiController{
     {
         $model = $this->findModel($id);
         if ($model->is_deleted) {
-            // Yii::$app->user->can('schedulerAvailabilityRestore');
+            Yii::$app->user->can('schedulerAvailabilityRestore');
             $model->restore();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Availability restored successfully']);
         } else {
-            // Yii::$app->user->can('schedulerAvailabilityDelete');
+            Yii::$app->user->can('schedulerAvailabilityDelete');
             $model->delete();
             return $this->toastResponse(['statusCode'=>202,'message'=>'Availability deleted successfully']);
         }

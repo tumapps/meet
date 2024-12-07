@@ -40,6 +40,8 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionIndex()
     {
+        Yii::$app->user->can('schedulerAppointmentsList');
+
         $authManager = Yii::$app->authManager;
         $currentUserId = Yii::$app->user->id;
         $userRoles = array_keys($authManager->getRolesByUser($currentUserId));
@@ -82,7 +84,9 @@ class AppointmentsController extends \helpers\ApiController
                 ->where(['appointment_id' => $appointment->id])
                 ->asArray()
                 ->all();
+
             $appointmentData['attendees'] = $attendees;
+
             $appointment = $appointmentData;
         }
 
@@ -93,7 +97,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionPendingAppointments()
     {
-        // Yii::$app->user->can('superAdmin');
+        Yii::$app->user->can('registrar');
 
         $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
@@ -118,7 +122,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionApprove($id)
     {
-        // Yii::$app->user->can('superAdmin');
+        Yii::$app->user->can('registrar');
         $model = $this->findModel($id);
 
         if ($model->status !== Appointments::STATUS_PENDING) {
@@ -146,7 +150,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionReject($id)
     {
-        // Yii::$app->user->can('superAdmin');
+        Yii::$app->user->can('registrar');
         $request = Yii::$app->request;
         $model = $this->findModel($id);
 
@@ -186,7 +190,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerAppointmentsView');
+        Yii::$app->user->can('schedulerAppointmentsList');
 
         $appointment = $this->findModel($id);
 
@@ -211,6 +215,9 @@ class AppointmentsController extends \helpers\ApiController
             ->where(['appointment_id' => $appointment->id])
             ->asArray()
             ->all();
+
+        $file = AppointmentAttachments::getAppointmentAttachment($appointment->id);
+        $appointmentData['attachment'] = $file;
         $appointmentData['attendees'] = $attendees;
 
         return $this->payloadResponse($appointmentData);
@@ -259,7 +266,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionCreate($dataRequest = null)
     {
-        // Yii::$app->user->can('schedulerAppointmentsCreate');
+        Yii::$app->user->can('schedulerAppointmentsCreate');
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
@@ -320,6 +327,7 @@ class AppointmentsController extends \helpers\ApiController
                     if (!empty($dataRequest['Appointments']['space_id'])) {
                         $this->saveSpaceAvailability($dataRequest, $model->id);
                     }
+
                     $this->handleFileUpload($uploadedFile, $model->id);
 
                     if ($model->status === Appointments::STATUS_ACTIVE) {
@@ -351,7 +359,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionUpdate($id)
     {
-        // Yii::$app->user->can('schedulerAppointmentsUpdate');
+        Yii::$app->user->can('schedulerAppointmentsUpdate');
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
 
@@ -442,7 +450,7 @@ class AppointmentsController extends \helpers\ApiController
     {
         $model = $this->findModel($id);
         if ($model->is_deleted) {
-            // Yii::$app->user->can('schedulerAppointmentsRestore');
+            Yii::$app->user->can('schedulerAppointmentsRestore');
             $isAvailable = $this->checkAvailability(
                 $model->user_id,
                 $model->appointment_date,
@@ -463,7 +471,7 @@ class AppointmentsController extends \helpers\ApiController
             $model->restore();
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments restored successfully']);
         } else {
-            // Yii::$app->user->can('schedulerAppointmentsDelete');
+            Yii::$app->user->can('schedulerAppointmentsDelete');
             $model->delete();
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments deleted successfully']);
         }
@@ -506,7 +514,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $model->status = Appointments::STATUS_CANCELLED;
 
-        // Capture who canceled the appointment (VC or Secretary)
+        // Capture who canceled the appointment
         $currentUser = Yii::$app->user->identity;
         $cancelledBy = $currentUser->username;
         $cancelledByRole = $currentUser->can_be_booked ? 'VC/DVC' : 'Secretary';
@@ -620,12 +628,18 @@ class AppointmentsController extends \helpers\ApiController
 
     protected function handleFileUpload($uploadedFile, $modelId)
     {
+
         if ($uploadedFile) {
             $attachmentModel = new AppointmentAttachments();
+            // $uploadResult = $attachmentModel->fileUpload($uploadedFile, $modelId);
+
+            // if ($uploadResult !== true) {
+            //     throw new \Exception('File upload failed: ' . json_encode($uploadResult));
+            // }
             $uploadResult = $attachmentModel->fileUpload($uploadedFile, $modelId);
 
             if ($uploadResult !== true) {
-                return $this->errorResponse(['message' => 'File upload failed', 'errors' => $uploadResult]);
+                return $uploadResult;
             }
         }
     }

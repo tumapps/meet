@@ -22,7 +22,7 @@ class SettingsController extends \helpers\ApiController
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerSettingsList');
+        Yii::$app->user->can('schedulerSettingsList');
         $searchModel = new SettingsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'SettingsSearch');
         $dataProvider = $searchModel->search($search);
@@ -31,7 +31,7 @@ class SettingsController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        // Yii::$app->user->can('schedulerSettingsView');
+        Yii::$app->user->can('schedulerSettingsView');
         $setting_id = Settings::getSettingId($id);
 
         if(!$setting_id) {
@@ -43,7 +43,7 @@ class SettingsController extends \helpers\ApiController
 
     public function actionCreate()
     {
-        // Yii::$app->user->can('schedulerSettingsCreate');
+        Yii::$app->user->can('schedulerSettingsCreate');
         $model = new Settings();
         $model->loadDefaultValues();
         $dataRequest['Settings'] = Yii::$app->request->getBodyParams();
@@ -55,7 +55,7 @@ class SettingsController extends \helpers\ApiController
 
     public function actionUpdate($id)
     {
-        // Yii::$app->user->can('schedulerSettingsUpdate');
+        Yii::$app->user->can('schedulerSettingsUpdate');
         $dataRequest['Settings'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {

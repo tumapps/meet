@@ -21,7 +21,7 @@ class SpaceAvailabilityController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerSpace-availabilityList');
+        Yii::$app->user->can('schedulerSpace-availabilityList');
         $searchModel = new SpaceAvailabilitySearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'SpaceAvailabilitySearch');
         $dataProvider = $searchModel->search($search);

@@ -21,7 +21,7 @@ class SpaceController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerSpaceList');
+        Yii::$app->user->can('schedulerSpaceList');
         $searchModel = new SpaceSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'SpaceSearch');
         $dataProvider = $searchModel->search($search);
@@ -36,7 +36,7 @@ class SpaceController extends \helpers\ApiController{
 
     public function actionCreate()
     {
-        // Yii::$app->user->can('schedulerSpaceCreate');
+        Yii::$app->user->can('registrar');
         $model = new Space();
         $model->loadDefaultValues();
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
@@ -48,6 +48,8 @@ class SpaceController extends \helpers\ApiController{
 
     public function actionLockSpace($id)
     {
+        Yii::$app->user->can('registrar');
+
         $space = Space::findOne($id);
         
         if (!$space) {
@@ -66,7 +68,7 @@ class SpaceController extends \helpers\ApiController{
 
     public function actionUpdate($id)
     {
-        Yii::$app->user->can('schedulerSpaceUpdate');
+        Yii::$app->user->can('registrar');
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
         if($model->load($dataRequest) && $model->save()) {

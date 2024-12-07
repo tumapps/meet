@@ -21,7 +21,7 @@ class AppointmentTypeController extends \helpers\ApiController{
         ];
     public function actionIndex()
     {
-        // Yii::$app->user->can('schedulerAppointment-typeList');
+        Yii::$app->user->can('schedulerAppointment-typeList');
         $searchModel = new AppointmentTypeSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'AppointmentTypeSearch');
         $dataProvider = $searchModel->search($search);
@@ -36,7 +36,7 @@ class AppointmentTypeController extends \helpers\ApiController{
 
     public function actionCreate()
     {
-        // Yii::$app->user->can('schedulerAppointment-typeCreate');
+        Yii::$app->user->can('schedulerAppointment-typeCreate');
         $model = new AppointmentType();
         $model->loadDefaultValues();
         $dataRequest['AppointmentType'] = Yii::$app->request->getBodyParams();
