@@ -151,9 +151,9 @@ class AppointmentAttachments extends BaseModel
         }
 
         return [
-            'fileNname' => $attachment->file_name,
+            'fileName' => $attachment->file_name,
             'downloadLink'  => $attachment->file_url,
-            'previewLink' => $attachment->self_link,
+            // 'previewLink' => $attachment->self_link,
         ];
     }
 }
