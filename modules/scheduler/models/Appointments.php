@@ -247,11 +247,14 @@ class Appointments extends BaseModel
 
     public function validateOverlappingAppointment($attribute, $params)
     {
+        $appointmentId = $this->id;
+
         $appointmentExists = self::hasOverlappingAppointment(
             $this->user_id,
             $this->appointment_date,
             $this->start_time,
             $this->end_time,
+            $appointmentId,
             // $this->priority
         );
 
