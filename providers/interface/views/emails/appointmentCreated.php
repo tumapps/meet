@@ -1,12 +1,3 @@
-<?php
-/* @var $this yii\web\View */
-/* @var $username string */  // The user's name (e.g., VC)
-/* @var $appointmentDate string */  // Appointment date
-/* @var $startTime string */  // Appointment start time
-/* @var $endTime string */  // Appointment end time
-/* @var $vcName string */  // VC's name
-/* @var $appointmentLink string */  // Link for the appointment (e.g., for VC systems or Zoom link)
-?>
 <!DOCTYPE html>
 <html>
 
@@ -59,6 +50,16 @@
 
         .appointment-details p {
             margin-bottom: 10px;
+        }
+
+        .file-preview {
+            margin-top: 15px;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
         }
 
         .email-footer {
@@ -120,6 +121,16 @@
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
                 <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'user' ? $username : $contact_name) ?></p>
             </div>
+
+            <?php if (!empty($attachment_file_name) && !empty($attachment_download_link)): ?>
+                <div class="file-preview">
+                    <p><strong>Attached File:</strong> <?= htmlspecialchars($attachment_file_name) ?></p>
+                    <a href="<?= htmlspecialchars($attachment_download_link) ?>">
+                    </a>
+                    <p>Click the link below to download the file:</p>
+                    <a href="<?= htmlspecialchars($attachment_download_link) ?>" class="button" download>Download Agenda</a>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="contact-info">
             <p>If you have any questions, feel free to contact us.</p>
