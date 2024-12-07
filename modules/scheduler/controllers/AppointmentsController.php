@@ -285,7 +285,7 @@ class AppointmentsController extends \helpers\ApiController
                 $space = null;
                 $levelName = null;
 
-                if (!empty($dataRequest['Appointments']['space_id'])) {
+                if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
                     $space = Space::findOne($dataRequest['Appointments']['space_id']);
 
                     if (!$space) {
