@@ -5,6 +5,7 @@ namespace scheduler\models;
 use Yii;
 use auth\models\User;
 use scheduler\models\AppointmentAttendees;
+use scheduler\models\AppointmentAttachments;
 use scheduler\models\Events;
 use scheduler\hooks\TimeHelper;
 use scheduler\models\SpaceAvailability;
@@ -427,6 +428,13 @@ class Appointments extends BaseModel
         $bookedUserEmail = $user->profile->email_address;
 
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id);
+        $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
+
+        if ($attachementFile !== null){
+            $fileName = $attachementFile['fileName'];
+            $downloadLink = $attachementFile['downloadLink'];
+
+        }
 
         $eventData = [
             'appointment_id' => $this->id,
@@ -439,6 +447,8 @@ class Appointments extends BaseModel
             'username' => $this->getUserName($user_id),
             'user_email' => $bookedUserEmail,
             'attendees_emails' => $attendeesEmails,
+            'attachment_file_name' => $fileName,
+            'attachment_download_link' => $downloadLink,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_CREATED, [EventHandler::class, 'onCreatedAppointment'], $eventData);
