@@ -266,7 +266,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionCreate($dataRequest = null)
     {
-        Yii::$app->user->can('schedulerAppointmentsCreate');
+        // Yii::$app->user->can('schedulerAppointmentsCreate');
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
