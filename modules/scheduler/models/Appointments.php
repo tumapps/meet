@@ -76,7 +76,7 @@ class Appointments extends BaseModel
 
     public $attendees = [];
     public $space_id;
-    
+
 
     public function init()
     {
@@ -96,25 +96,25 @@ class Appointments extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'user_id',
-            'appointment_date',
-            'start_time',
-            'end_time',
-            'contact_name',
-            'email_address',
-            'mobile_number',
-            'cancellation_reason',
-            'subject',
-            'appointment_type',
-            'status',
-            'recordStatus' => function(){
-                return $this->recordStatus;
-            },
-            'created_at',
-            'updated_at',
+                'id',
+                'user_id',
+                'appointment_date',
+                'start_time',
+                'end_time',
+                'contact_name',
+                'email_address',
+                'mobile_number',
+                'cancellation_reason',
+                'subject',
+                'appointment_type',
+                'status',
+                'recordStatus' => function () {
+                    return $this->recordStatus;
+                },
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -128,7 +128,7 @@ class Appointments extends BaseModel
             [['user_id', 'status'], 'integer'],
             [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
-            
+
             // Custom inline validators as separate rules
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['start_time', 'end_time'], 'validateOverlappingEvents'],
@@ -142,7 +142,7 @@ class Appointments extends BaseModel
 
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
-            
+
             [['subject', 'description'], 'string'],
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
@@ -151,7 +151,7 @@ class Appointments extends BaseModel
             ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 13 digits.'],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
-            
+
             // Rules for cancellation and rejection scenarios
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
@@ -172,7 +172,7 @@ class Appointments extends BaseModel
     public function validateTimeRange($attribute, $params)
     {
         $currentTime = date('Y-m-d h:i:sa');
-        $dateTime = date($this->appointment_date.' '.$this->start_time);
+        $dateTime = date($this->appointment_date . ' ' . $this->start_time);
 
         if (strtotime($this->end_time) <= strtotime($this->start_time) || strtotime($dateTime) < strtotime($currentTime)) {
             $this->addError($attribute, 'invalid time range');
@@ -332,14 +332,13 @@ class Appointments extends BaseModel
     public static function getUserName($user_id)
     {
         return User::find()->select('username')->where(['user_id' => $user_id])->scalar();
-
     }
 
     public static function checkedInAppointemnt($id)
     {
         $appointment = self::findOne(['id' => $id]);
 
-        if(!$appointment) {
+        if (!$appointment) {
             // return false;
             return [
                 'success' => false,
@@ -348,7 +347,7 @@ class Appointments extends BaseModel
         }
 
         $currentTime = date('Y-m-d H:i:s');
-        $appointmentTime = date('Y-m-d H:i:s', strtotime($appointment->appointment_date.' '.$appointment->start_time));
+        $appointmentTime = date('Y-m-d H:i:s', strtotime($appointment->appointment_date . ' ' . $appointment->start_time));
 
         if ($currentTime < $appointmentTime) {
             return [
@@ -366,16 +365,16 @@ class Appointments extends BaseModel
 
         if ($appointment->save(false)) {
             // $message = $appointment->checked_in ? 'Appointment successfully checked in' : '';
-            if($appointment->checked_in) {
+            if ($appointment->checked_in) {
                 $message = 'Appointment successfully checked in';
             }
-            
+
             return [
                 'success' => true,
                 'message' => $message
             ];
         }
-        
+
         return [
             'success' => false,
             'message' => 'Failed to update appointment status.'
@@ -433,10 +432,12 @@ class Appointments extends BaseModel
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
 
-        if ($attachementFile !== null){
+        $fileName = null;
+        $downloadLink = null;
+
+        if ($attachementFile !== null) {
             $fileName = $attachementFile['fileName'];
             $downloadLink = $attachementFile['downloadLink'];
-
         }
 
         $eventData = [
@@ -476,7 +477,7 @@ class Appointments extends BaseModel
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $eventData);
-        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event); 
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event);
     }
 
     public function sendAppointmentRescheduledEvent($user_id, $email, $date, $startTime, $endTime, $name)
@@ -498,7 +499,7 @@ class Appointments extends BaseModel
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $eventData);
-        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED, $event); 
+        $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED, $event);
     }
 
     public static function updatePassedAppointments()
@@ -567,7 +568,7 @@ class Appointments extends BaseModel
 
     public function sendAppointmentsReminderEvent($id, $email, $contact_name, $date, $start_time, $end_time, $user_id)
     {
-        
+
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Reminder';
@@ -587,7 +588,6 @@ class Appointments extends BaseModel
 
         $this->on(self::EVENT_APPOINTMENT_REMINDER, [EventHandler::class, 'onAppointmentReminder'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event);
-
     }
 
     public function resetReminder()
@@ -623,7 +623,7 @@ class Appointments extends BaseModel
         ];
 
         $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $eventData);
-        $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event); 
+        $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event);
     }
 
     public function sendAppointmentRejectedEvent($email, $name, $user_id, $date, $startTime, $endTime)
@@ -657,8 +657,8 @@ class Appointments extends BaseModel
     public function getRescheduledAppointment($id)
     {
         return self::find()
-        ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULE])
-        ->one();
+            ->where(['id' => $id, 'status' => self::STATUS_RESCHEDULE])
+            ->one();
     }
 
     public function getActiveAppointments()
@@ -683,7 +683,7 @@ class Appointments extends BaseModel
 
     public function getAllAppointments()
     {
-       return self::find()->count();
+        return self::find()->count();
     }
 
     public function upComingAppointments($appointment_date = null, $limit = 10)
@@ -698,25 +698,25 @@ class Appointments extends BaseModel
             ->andWhere(['>', 'start_time', date('H:i:s')])
             ->orderBy(['start_time' => SORT_ASC])
             ->limit($limit)
-            ->all(); 
+            ->all();
     }
-    
+
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
     {
         return self::find()
-        ->where(['user_id' => $user_id])
-        ->andWhere([
-            'AND',
-            ['<=', 'start_date', $appointment_date],
-            ['>=', 'end_date', $appointment_date],
-        ])
-        ->andWhere([
-            'OR',
-            ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
-            ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-            ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-        ]);
+            ->where(['user_id' => $user_id])
+            ->andWhere([
+                'AND',
+                ['<=', 'start_date', $appointment_date],
+                ['>=', 'end_date', $appointment_date],
+            ])
+            ->andWhere([
+                'OR',
+                ['AND', ['<=', 'start_time', $start_time], ['>', 'end_time', $start_time]],
+                ['AND', ['<', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
+                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                ['AND', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+            ]);
     }
 
     public static function getBookedSlotsForRange($user_id, $start_date, $end_date)
@@ -733,7 +733,7 @@ class Appointments extends BaseModel
             ->all();
     }
 
-     /**
+    /**
      * Checks if the requested appointment time overlaps with any existing appointments.
      *
      * @param int $user The VC's ID
@@ -756,22 +756,22 @@ class Appointments extends BaseModel
             ->andWhere(['is_deleted' => 0])
             ->andWhere(['!=', 'status', self::STATUS_CANCELLED]);
 
-            if ($appointment_id !== null) {
-                $query->andWhere(['!=', 'id', $appointment_id]);
-            }
+        if ($appointment_id !== null) {
+            $query->andWhere(['!=', 'id', $appointment_id]);
+        }
 
-            $overlappingAppointment = $query->one();
+        $overlappingAppointment = $query->one();
 
-            if (!$overlappingAppointment) {
-                return false;
-            }
+        if (!$overlappingAppointment) {
+            return false;
+        }
 
-            if($priority !== null){
-                return self::checkPriority($overlappingAppointment, $priority);
-            }
-            // return true;
-            return $query->exists();
-    } 
+        if ($priority !== null) {
+            return self::checkPriority($overlappingAppointment, $priority);
+        }
+        // return true;
+        return $query->exists();
+    }
 
     private static function checkPriority($overlappingAppointment, $newPriority)
     {
@@ -798,31 +798,35 @@ class Appointments extends BaseModel
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
     {
         return self::find()
-        ->where(['user_id' => $user_id])
-        ->andWhere([
-            'AND',
-            ['>=', 'appointment_date', $start_date],
-            ['<=', 'appointment_date', $end_date],
-        ])
-        ->andWhere([
-            'OR',
-            ['AND', ['=', 'appointment_date', $start_date], ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-            ['AND', ['>=', 'start_time', $start_time], ['<', 'start_time', $end_time]],
-            ['AND', ['>', 'end_time', $start_time], ['<=', 'end_time', $end_time]],
-            ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
-            ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
-        ])
-        // ->andWhere(['!=', 'status', 'self'])
-        ->orderBy(['created_at' => SORT_ASC])
-        ->all();
+            ->where(['user_id' => $user_id])
+            ->andWhere([
+                'AND',
+                ['>=', 'appointment_date', $start_date],
+                ['<=', 'appointment_date', $end_date],
+            ])
+            ->andWhere([
+                'OR',
+                ['AND', ['=', 'appointment_date', $start_date], ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
+                ['AND', ['>=', 'start_time', $start_time], ['<', 'start_time', $end_time]],
+                ['AND', ['>', 'end_time', $start_time], ['<=', 'end_time', $end_time]],
+                ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+                ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
+            ])
+            // ->andWhere(['!=', 'status', 'self'])
+            ->orderBy(['created_at' => SORT_ASC])
+            ->all();
     }
 
     private function getAvailability($user_id, $appointment_date, $start_time, $end_time)
     {
-        $bookedSlots = Availability::getUnavailableSlots($user_id, $appointment_date, $start_time, 
-            $end_time);
+        $bookedSlots = Availability::getUnavailableSlots(
+            $user_id,
+            $appointment_date,
+            $start_time,
+            $end_time
+        );
 
-        if($bookedSlots){
+        if ($bookedSlots) {
             return false;
         }
         return true;
