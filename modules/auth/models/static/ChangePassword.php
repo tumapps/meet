@@ -77,11 +77,9 @@ class ChangePassword extends Model
         $user = Yii::$app->user->identity;
         $oldPasswordHash = md5($this->oldPassword);
 
-        // Update the user's password
         $user->password_hash = Yii::$app->security->generatePasswordHash($this->newPassword);
         
-        if ($user->save()) {
-            // Store the old password in the password history
+        if ($user) {
             $passwordHistory = new PasswordHistory();
             $passwordHistory->user_id = $user->id;
             $passwordHistory->old_password = $oldPasswordHash;
