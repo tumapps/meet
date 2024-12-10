@@ -330,7 +330,6 @@ class AssignmentController extends \helpers\ApiController
             }
         }
 
-        // Generate response
         if (empty($errors)) {
             return $this->toastResponse([
                 'statusCode' => 200,
@@ -339,7 +338,7 @@ class AssignmentController extends \helpers\ApiController
         }
 
         return $this->toastResponse([
-            'statusCode' => 500,
+            'statusCode' => 422,
             'message' => implode(' ', $errors),
         ]);
     }
