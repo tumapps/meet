@@ -303,34 +303,20 @@ class AppointmentsController extends \helpers\ApiController
                     }
                 } else {
                     $model->status = Appointments::STATUS_ACTIVE;
-                    // $model->space_name = 'Office';
                 }
-
-                // $space = Space::findOne($dataRequest['Appointments']['space_id']);
-
-                // if (!$space) {
-                //     return $this->payloadResponse(['message' => 'The specified space does not exist']);
-                // }
-
-                // $levelName = $space->level ? $space->level->name : null;
-
-                // $model->status = Appointments::STATUS_ACTIVE;
-
-                // if ($levelName !== 'Level 4') {
-                //     $model->status = Appointments::STATUS_PENDING;
-                // }
 
                 if ($model->save()) {
 
                     $this->saveAttendees($dataRequest, $model->id);
-                    // $this->saveSpaceAvailability($dataRequest, $model->id);
                     if (!empty($dataRequest['Appointments']['space_id'])) {
                         $this->saveSpaceAvailability($dataRequest, $model->id);
                     }
 
                     $this->handleFileUpload($uploadedFile, $model->id);
 
+
                     if ($model->status === Appointments::STATUS_ACTIVE) {
+
                         $model->sendAppointmentCreatedEvent(
                             $model->id,
                             $model->email_address,
@@ -340,10 +326,10 @@ class AppointmentsController extends \helpers\ApiController
                             $model->start_time,
                             $model->end_time
                         );
+
                         $transaction->commit();
                         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment added successfully']);
                     } else {
-
                         $transaction->commit();
                         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment created successfully, Pending Approval']);
                     }
@@ -370,46 +356,6 @@ class AppointmentsController extends \helpers\ApiController
             if (!$model->validate()) {
                 return $this->errorResponse($model->getErrors());
             }
-
-            // if (($overlapResponse = $this->checkOverlappingEvents($dataRequest)) !== true) {
-            //     return $overlapResponse;
-            // }
-
-            // if (($spaceOverlapResponse = $this->checkOverlappingSpace($dataRequest)) !== true) {
-            //     return $spaceOverlapResponse;
-            // }
-
-            // if (($advanceResponse = $this->checkAdvanceBooking($dataRequest)) !== true) {
-            //     return $advanceResponse;
-            // }
-
-            // if (($windowResponse = $this->checkBookingWindow($dataRequest)) !== true) {
-            //     return $windowResponse;
-            // }
-
-            // $isAvailable = $this->checkAvailability(
-            //     $dataRequest['Appointments']['user_id'],
-            //     $dataRequest['Appointments']['appointment_date'],
-            //     $dataRequest['Appointments']['start_time'],
-            //     $dataRequest['Appointments']['end_time']
-            // );
-
-            // if (!$isAvailable) {
-            //     return $this->payloadResponse(['message' => 'The requested time slot is blocked.',]);
-            // }
-
-            // // cheking if there is overlapping appoiment ie if the appoitment is already placed
-            // $appoitmentExists = $model::hasOverlappingAppointment(
-            //     $dataRequest['Appointments']['user_id'],
-            //     $dataRequest['Appointments']['appointment_date'],
-            //     $dataRequest['Appointments']['start_time'],
-            //     $dataRequest['Appointments']['end_time'],
-            //     $id
-            // );
-
-            // if ($appoitmentExists) {
-            //     return $this->payloadResponse(['message' => 'The requested time slot is already booked.',]);
-            // }
 
             if ($model->status === Appointments::STATUS_RESCHEDULE) {
                 $model->status = Appointments::STATUS_RESCHEDULED;
@@ -628,14 +574,8 @@ class AppointmentsController extends \helpers\ApiController
 
     protected function handleFileUpload($uploadedFile, $modelId)
     {
-
         if ($uploadedFile) {
             $attachmentModel = new AppointmentAttachments();
-            // $uploadResult = $attachmentModel->fileUpload($uploadedFile, $modelId);
-
-            // if ($uploadResult !== true) {
-            //     throw new \Exception('File upload failed: ' . json_encode($uploadResult));
-            // }
             $uploadResult = $attachmentModel->fileUpload($uploadedFile, $modelId);
 
             if ($uploadResult !== true) {
@@ -651,11 +591,15 @@ class AppointmentsController extends \helpers\ApiController
         $startTime = $dataRequest['Appointments']['start_time'];
         $endTime = $dataRequest['Appointments']['end_time'];
 
+        if (is_string($attendees)) {
+            $attendees = explode(',', $attendees);
+        }
+
         $addAttendees = new AppointmentAttendees();
 
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
-                $staffId = $attendeeId;
+                $staffId = trim($attendeeId);
                 $addAttendees->addAttendee($id, $staffId, $date, $startTime, $endTime);
             }
         }
