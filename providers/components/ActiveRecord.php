@@ -16,6 +16,7 @@ class ActiveRecord extends \yii\db\ActiveRecord
 			$behaviors = [
 				\helpers\behaviors\Delete::class,
 				\helpers\behaviors\Creator::class,
+				\helpers\behaviors\DateFormatter::class,
 			];
 
 			if ($this->hasAttribute('created_at') && $this->hasAttribute('updated_at')) {
