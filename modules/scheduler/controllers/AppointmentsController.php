@@ -18,6 +18,7 @@ use scheduler\hooks\AppointmentRescheduler as Ar;
 use auth\models\User;
 use auth\models\Profiles;
 use helpers\traits\AppointmentPolicy;
+// use helpers\CustomSerializer;
 
 /**
  * @OA\Tag(
@@ -27,7 +28,7 @@ use helpers\traits\AppointmentPolicy;
  */
 class AppointmentsController extends \helpers\ApiController
 {
-
+    // public $serializer = CustomSerializer::class;
     use AppointmentPolicy;
 
     public $permissions = [

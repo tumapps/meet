@@ -77,6 +77,7 @@ class Appointments extends BaseModel
     public $attendees = [];
     public $space_id;
 
+    
 
     public function init()
     {
@@ -168,6 +169,7 @@ class Appointments extends BaseModel
         $scenarios[self::SCENARIO_REJECT] = ['rejection_reason'];
         return $scenarios;
     }
+
 
     public function validateTimeRange($attribute, $params)
     {
