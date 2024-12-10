@@ -245,6 +245,7 @@ class AuthController extends \helpers\ApiController
 		$dataRequest['ChangePassword'] = Yii::$app->request->getBodyParams();
 
 		if ($model->load($dataRequest) && $model->updatePassword()) {
+			Yii::$app->response->statusCode = 440;
 			return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
 		}
 		return $this->errorResponse($model->getErrors());
