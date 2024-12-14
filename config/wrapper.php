@@ -51,6 +51,7 @@ class ConfigWrapper
             'allowedDomains' => 'http://localhost:9000',
             'passwordResetLink' => 'http://10.17.0.24/request-password-reset?token=',
             'confirmationLink' => 'http://10.17.0.24/meeting/',
+            'loginUrl' => 'http://10.17.0.24',
             'menus' => [
                     ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
                     ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'],
