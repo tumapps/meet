@@ -91,7 +91,7 @@
             </div>
 
             <p>To access your account, click the link below:</p>
-            <a href="<?= htmlspecialchars($loginUrl) ?>" class="button">Log In</a>
+            <a href="<?= htmlspecialchars($loginLink) ?>" class="button">Log In</a>
 
             <p>We strongly recommend updating your password after logging in to ensure your account remains secure.</p>
         </div>
