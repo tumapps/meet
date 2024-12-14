@@ -93,6 +93,23 @@ class EventHandler
 		}
 	}
 
+	public static function onAccountCreation(Event $event)
+	{
+		$email = $event->data['email'];
+		$subject = $event->data['subject'];
+		$username = $event->data['username'];
+		$loginLink = $event->data['loginLink'];
+		$contact_name = $event->data['contact_name'];
+
+		$body = Yii::$app->view->render('@ui/views/emails/accountCreated', [
+			'username' => $username,
+			'loginLink' => $loginLink,
+			'contact_name' => $contact_name,
+		]);
+
+		self::addEmailToQueue($email, $subject, $body);
+	}
+
 	public static function onAppointmentRejected(Event $event)
 	{
 		$email = $event->data['email'];
