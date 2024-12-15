@@ -19,61 +19,49 @@ const attendees = ref([]) // To store the attendees from the API
 const searchQuery = ref('') // Holds the current search query
 const searchResults = ref([]) // Holds the filtered search results
 const selectedItems = ref([]) // Holds the selected items
-attendees.value = selectedItems.value
-
-//fake attendees
-const fakeAttendees = [
-  { id: 1, name: 'John Doe' },
-  { id: 2, name: 'Jane Doe' },
-  { id: 3, name: 'Alice Johnson' },
-  { id: 4, name: 'Bob Smith' },
-  { id: 5, name: 'Charlie Brown' },
-  { id: 6, name: 'Diana Prince' },
-  { id: 7, name: 'Eve Adams' },
-  { id: 8, name: 'Frank Castle' },
-  { id: 9, name: 'Grace Hopper' },
-  { id: 10, name: 'Henry Ford' },
-  { id: 11, name: 'Ivy Green' },
-  { id: 12, name: 'Jack White' },
-  { id: 13, name: 'Kelly Clarkson' },
-  { id: 14, name: 'Leo King' },
-  { id: 15, name: 'Mona Lisa' },
-  { id: 16, name: 'Nathan Drake' },
-  { id: 17, name: 'Olivia Benson' },
-  { id: 18, name: 'Paul Allen' },
-  { id: 19, name: 'Quinn Howard' },
-  { id: 20, name: 'Rachel Green' },
-  { id: 21, name: 'Sam Wilson' },
-  { id: 22, name: 'Tina Fey' },
-  { id: 23, name: 'Uma Thurman' },
-  { id: 24, name: 'Victor Stone' },
-  { id: 25, name: 'Will Smith' },
-  { id: 26, name: 'Xena Warrior' },
-  { id: 27, name: 'Yvonne Strahovski' },
-  { id: 28, name: 'Zane Malik' },
-  { id: 29, name: 'Ava Gardner' },
-  { id: 30, name: 'Ben Wyatt' },
-  { id: 31, name: 'sean diddy' }
-]
+const uploadProgress = ref(0) // Holds the upload progress
+const uploading = ref(false) // Holds the upload status
+const availableUsers = ref([])
 
 // Function to handle local search
-const handleSearch = () => {
+const handleSearch = async () => {
   const query = searchQuery.value.trim().toLowerCase()
 
+  try {
+    const response = await axiosInstance.get('/v1/auth/users')
+
+    if (response.data && response.data.dataPayload) {
+      availableUsers.value = response.data.dataPayload.data
+      console.log(searchResults.value)
+    }
+  } catch (error) {
+    // console.error('Error fetching users:', error);
+  }
+
   // Filter fakeAttendees based on the search query
-  searchResults.value = fakeAttendees.filter((attendee) => attendee.name.toLowerCase().includes(query))
+  searchResults.value = availableUsers.value.filter((attendee) => attendee.username.toLowerCase().includes(query))
+
+  console.log('search results', searchResults.value)
 }
 
+// add the selecteditems id to the attendees array
+function addToAttendees() {
+  const ids = selectedItems.value.map((item) => item.id) // Extract IDs
+  appointmentData.value.attendees = [...attendees.value, ...ids] // Add to attendees
+  console.log('Updated attendees: ', appointmentData.value.attendees)
+}
 // Function to add a selected item
 const addSelectedItem = (item) => {
   // Avoid duplicates
   if (!selectedItems.value.find((selected) => selected.id === item.id)) {
     selectedItems.value.push(item)
   }
-
+  addToAttendees()
   // Clear the search field and results
   searchQuery.value = ''
   searchResults.value = []
+
+  console.log('added to list ', selectedItems.value)
 }
 
 // Function to remove a selected item
@@ -87,6 +75,8 @@ const removeSelectedItem = (index) => {
 const closeModal = () => {
   appointmentModal.value.hide() // Close the modal using the hide() method
   appointmentData.value = {} // Reset the form data
+  errors.value = {} // Reset the errors
+  attendees.value = [] // Reset the attendees
 }
 
 const toastPayload = ref('')
@@ -144,7 +134,8 @@ const appointmentData = ref({
   appointment_type: '',
   space_id: selectedSpaceName.value,
   priority: '1',
-  file: null
+  file: null,
+  attendees: attendees.value
 })
 
 const handleFileUpload = (event) => {
@@ -281,6 +272,8 @@ const getSlots = async () => {
 const submitAppointment = async () => {
   // Reset errors
   errors.value = {}
+  uploading.value = true
+  uploadProgress.value = 0
 
   // Prepare form data
   const formData = new FormData()
@@ -288,7 +281,7 @@ const submitAppointment = async () => {
 
   // Add other appointment fields to formData
   Object.keys(appointmentData.value).forEach((key) => {
-        console.log('key:', key, ":", appointmentData.value[key])
+    console.log('key:', key, ':', appointmentData.value[key])
 
     if (key !== 'file') {
       formData.append(key, appointmentData.value[key])
@@ -297,7 +290,12 @@ const submitAppointment = async () => {
 
   try {
     const response = await axiosInstance.post('/v1/scheduler/appointments', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+        }
+      }
     })
 
     appointmentModal.value.hide()
@@ -327,6 +325,10 @@ const submitAppointment = async () => {
     }
   }
 }
+
+watch(uploadProgress.value, (newValue) => {
+  console.log('Upload progress:', newValue)
+})
 
 const appointmentTypeOptions = ref([])
 const getAppointmentType = async () => {
@@ -540,29 +542,65 @@ onMounted(() => {
 
               <b-col cols="3">
                 <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-                <div v-if="uploading === 'true'" class="progress">
-                  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                <!-- <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
+                </div> -->
+              </b-col>
+            </b-row>
+            <!-- <b-row class="g-3 align-items-center form-group">
+              <b-col class="bg-primary" cols="2">
+                <label for="addphonenumber" class="col-form-label">cc:</label>
+              </b-col>
+              <b-col class="bg-warning" cols="10">
+                <div class="search-form">
+                  <!-- Selected Items --
+                  <div v-if="selectedItems.length" class="selected-items">
+                    <span v-for="(item, index) in selectedItems" :key="item.id" class="selected-item" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
+                  </div>
+
+                  <!-- Search Input --
+                  <input v-model="searchQuery" @input="handleSearch" type="text" class="search-input" placeholder="username..." />
+
+                  <!-- Search Results --
+                  <ul v-if="searchResults.length" class="search-results">
+                    <li v-for="result in searchResults" :key="result.id" @click="addSelectedItem(result)" class="search-result-item">
+                      {{ result.username }}
+                    </li>
+                  </ul>
+                </div>
+              </b-col>
+            </b-row> -->
+
+            <b-row class="g-3  align-items-center form-group">
+              <!-- Label Section -->
+              <b-col cols="2" class="d-flex align-items-center justify-content-start">
+                <label for="addphonenumber" class="col-form-label fw-bold">cc:</label>
+              </b-col>
+
+              <!-- Input and Search Section -->
+              <b-col cols="10">
+                <div class="search-form  shadow-sm">
+                  <!-- Selected Items -->
+                  <div v-if="selectedItems.length" class="mb-2">
+                    <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
+                  </div>
+
+                  <!-- Search Input -->
+                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
+
+                  <!-- Search Results -->
+                  <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
+                    <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
+                      {{ result.username }}
+                    </li>
+                  </ul>
+
+                  <!-- No Results Message -->
+                  <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
                 </div>
               </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group">
-              <div class="search-form">
-                <!-- Selected Items -->
-                <div v-if="selectedItems.length" class="selected-items">
-                  <span v-for="(item, index) in selectedItems" :key="item.id" class="selected-item" @click="removeSelectedItem(index)"> {{ item.name }} ✖ </span>
-                </div>
 
-                <!-- Search Input -->
-                <input v-model="searchQuery" @input="handleSearch" type="text" class="search-input" placeholder="Search..." />
-
-                <!-- Search Results -->
-                <ul v-if="searchResults.length" class="search-results">
-                  <li v-for="result in searchResults" :key="result.id" @click="addSelectedItem(result)" class="search-result-item">
-                    {{ result.name }}
-                  </li>
-                </ul>
-              </div>
-            </b-row>
             <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <label for="addappointmenttype" class="col-form-label">
@@ -617,5 +655,9 @@ onMounted(() => {
 .modal-fullscreen .modal-content {
   border-radius: 5px !important;
   /* You can adjust the radius value */
+}
+
+.progress-bar {
+  transition: width 0.2s ease;
 }
 </style>

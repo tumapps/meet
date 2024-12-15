@@ -15,7 +15,6 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100])
-const isModalVisible = ref(false)
 // const appointmentModal = ref(null)
 
 const AddRole = ref(null)
@@ -228,7 +227,6 @@ onMounted(() => {
       <!-- Pagination -->
       <b-col sm="12" lg="12" class="mt-5 d-flex justify-content-end mb-n5">
         <nav aria-label="Page navigation">
-          cd
           <ul class="pagination justify-content-end">
             <li class="page-item" :class="{ disabled: currentPage === 1 }">
               <button class="page-link" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
@@ -246,7 +244,7 @@ onMounted(() => {
   </b-col>
 
   <!-- //add new role modal -->
-  <b-modal v-if="isModalVisible" ref="AddRole" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
+  <b-modal ref="AddRole" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
     <template #modal-header="{ close }">
       <!-- Custom header with title and close button -->
       <h5 class="modal-title">Add Role</h5>
@@ -279,7 +277,7 @@ onMounted(() => {
       </b-col>
       <b-col md="12" lg="6">
         <div class="mb-3">
-          <label for="rolerulename" class="form-label">Role Data</label>
+          <label for="rolerulename" class="form-label">Rule name</label>
           <b-form-input v-model="RoleDetails.ruleName" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
         <div v-if="errors.ruleName" class="error" aria-live="polite">{{ errors.ruleName }}</div>

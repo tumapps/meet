@@ -152,7 +152,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <b-modal ref="roleModal" @show="onModalShow" title="Manage Role" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="roleModal" @show="onModalShow" title="Manage `${item.name}`" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
     <!-- Page Content -->
     <div class="row" style="max-height: 70vh; display: flex; overflow: hidden">
       <!-- Available Items Column -->

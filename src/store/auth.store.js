@@ -11,7 +11,8 @@ export const useAuthStore = defineStore('userAuth', {
       userPreferences: null,
       ipAddr: null, // Added to store IP
       user_id: null, // Added to store user_id
-      role: null // Added to store booking status
+      role: null, // Added to store booking status
+      loggedIn: false
     }
   }),
 
@@ -34,6 +35,7 @@ export const useAuthStore = defineStore('userAuth', {
 
       localStorage.setItem('user.token', token)
       localStorage.setItem('user.username', username)
+      localStorage.setItem('loggedIn', true)
     },
 
     async removeToken() {

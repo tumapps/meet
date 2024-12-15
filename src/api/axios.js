@@ -69,7 +69,9 @@ const AxiosInstance = () => {
           return newToken
         } catch (refreshError) {
           if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
-            router.push({ path: `/auth/login` })
+            //call logout function\
+            logout()
+            // router.push({ path: `/auth/login` })
           } else {
             console.error('Failed to refresh access token', refreshError)
           }
@@ -83,7 +85,8 @@ const AxiosInstance = () => {
         if (statusCode === TOKEN_EXPIRED_CODE) {
           // Handle session expiration
           localStorage.removeItem('user.token')
-          router.push({ path: `/auth/login` })
+          logout()
+          // router.push({ path: `/auth/login` })
           return Promise.reject(error)
         }
 
@@ -130,10 +133,12 @@ const AxiosInstance = () => {
 
   const logout = async () => {
     authStore.removeToken() // Update the store
+    localStorage.setItem('loggedIn', false)
     try {
       await axiosInstance.delete('/v1/auth/refresh')
       // Optionally, redirect after logout
       router.push({ path: '/auth/login' })
+      console.log('Successfully logged out')
     } catch (error) {
       // console.error('Error during logout:', error);
     }

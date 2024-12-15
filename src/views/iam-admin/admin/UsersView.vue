@@ -229,12 +229,11 @@ onMounted(() => {
   <!-- modal to view and edit user details -->
 
   <!-- //add new role modal -->
-  <b-modal ref="AddPermission" title="" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="l" hide-footer centered hide-header-close="false">
-    <template #modal-header="{ close }">
-      <!-- Custom header with title and close button -->
+  <b-modal ref="AddPermission" :title="`${userData.first_name}`" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="l" hide-footer centered hide-header-close="false">
+    <!-- <template #modal-header="{ close }">
       <h5 class="modal-title">User Details</h5>
       <b-button variant="light" @click="close" class="close"> &times; </b-button>
-    </template>
+    </template> -->
 
     <b-row>
       <b-col md="12" lg="4">

@@ -2,9 +2,10 @@
 import { onMounted, ref, getCurrentInstance, computed, watch, onUnmounted } from 'vue'
 import AxiosInstance from '@/api/axios'
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue'
-import globalUtils from '@/utilities/globalUtils'
+// import globalUtils from '@/utilities/globalUtils'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'
 import { useAuthStore } from '@/store/auth.store.js'
+import UppyDashboard from '@/components/custom/uppy/UppyDashboard.vue'
 
 const authStore = useAuthStore()
 
@@ -15,7 +16,7 @@ const appointmentModal = ref(null)
 const showModal = () => {
   appointmentModal.value.$refs.appointmentModal.show()
 }
-
+const downloadLink = ref(null)
 const toastPayload = ref('')
 const { proxy } = getCurrentInstance()
 const axiosInstance = AxiosInstance()
@@ -31,6 +32,7 @@ const perPageOptions = ref([10, 20, 50, 100])
 const searchQuery = ref('')
 const errors = ref({})
 const errorDetails = ref({})
+const recordStatus = ref('')
 
 //get user_id from session storage
 // const userId = authStore.getUserId();
@@ -86,21 +88,6 @@ const sortTable = (key) => {
   }
 }
 
-const getBadgeVariant = (statusLabel) => {
-  switch (statusLabel) {
-    case 'Reschedule':
-      return 'warning'
-    case 'Active':
-      return 'success'
-    case 'Cancelled':
-      return 'warning'
-    case 'Deleted':
-      return 'danger'
-    default:
-      return 'secondary'
-  }
-}
-
 // Sort the data based on the current sort key and order
 const sortedData = computed(() => {
   return [...tableData.value].sort((a, b) => {
@@ -120,8 +107,8 @@ const confirmDelete = (id) => {
       text: 'You are about to Delete this appointment. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Delete it!',
-      cancelButtonText: 'No, keep it',
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'cancel',
       confirmButtonColor: '#d33',
       cancelButtonColor: '#076232'
     })
@@ -359,14 +346,16 @@ const getAppointment = async (id) => {
     if (response.data.dataPayload && !response.data.errorPayload) {
       appointmentDetails.value = response.data.dataPayload.data
       //convert start created at to yyyy-mm-dd
-      appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
+      //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
       appointmentDetails.value.space_id = response.data.dataPayload.data.space.id
       console.log('space_id', appointmentDetails.value.space_id)
+      recordStatus.value = appointmentDetails.value.recordStatus
       selectedAppointmentId.value = id
 
       //set user id depending on the user role
       setUserId()
       // console.log("user_id", slotsData.value.user_id);
+      downloadLink.value = appointmentDetails.value.attachment.downloadLink
     }
   } catch (error) {
     // Check if error.response is defined before accessing it
@@ -393,55 +382,55 @@ const openModal = (id) => {
 
 const updateAppointment = async () => {
   console.log(appointmentDetails.value.checked_in)
-  if (appointmentDetails.value.checked_in) {
-    //show toast
-    proxy.$showToast({
-      title: 'Cannot update: Appointment is already checked in',
-      // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-      icon: 'info'
-    })
-  } else {
-    // Call the update function if checked_in is false
-    try {
-      errorDetails.value = {}
+  // if (appointmentDetails.value.checked_in) {
+  //   //show toast
+  //   proxy.$showToast({
+  //     title: 'Cannot update: Appointment is already checked in',
+  //     // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+  //     icon: 'info'
+  //   })
+  // } else {
+  // Call the update function if checked_in is false
+  try {
+    errorDetails.value = {}
 
-      const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
+    const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
 
-      // Check if toastPayload exists in the response and update it
-      if (response.data.toastPayload) {
-        toastPayload.value = response.data.toastPayload
+    // Check if toastPayload exists in the response and update it
+    if (response.data.toastPayload) {
+      toastPayload.value = response.data.toastPayload
 
-        getAppointments()
-        // console.log("toastPayload", toastPayload.value); // Log for debugging
+      getAppointments()
+      // console.log("toastPayload", toastPayload.value); // Log for debugging
 
-        // Show toast notification using the response data
-        proxy.$showToast({
-          title: toastPayload.value.toastMessage || 'success',
-          // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-          icon: 'success'
-        })
-      } else {
-        // Fallback if toastPayload is not provided in the response
-        proxy.$showToast({
-          title: 'Appointment Updated successfully',
-          icon: 'success'
-        })
-      }
-    } catch (error) {
-      if (error.response && error.response.data.errorPayload) {
-        errorDetails.value = error.response.data.errorPayload.errors
-      } else {
-        const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+      // Show toast notification using the response data
+      proxy.$showToast({
+        title: toastPayload.value.toastMessage || 'success',
+        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+        icon: 'success'
+      })
+    } else {
+      // Fallback if toastPayload is not provided in the response
+      proxy.$showToast({
+        title: 'Appointment Updated successfully',
+        icon: 'success'
+      })
+    }
+  } catch (error) {
+    if (error.response && error.response.data.errorPayload) {
+      errorDetails.value = error.response.data.errorPayload.errors
+    } else {
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
 
-        proxy.$showToast({
-          title: 'An error occurred',
-          text: errorMessage,
-          icon: 'error'
-        })
-      }
+      proxy.$showToast({
+        title: 'An error occurred',
+        text: errorMessage,
+        icon: 'error'
+      })
     }
   }
 }
+// }
 
 const performSearch = async () => {
   try {
@@ -510,69 +499,133 @@ const suggestSlots = async (id) => {
   }
 }
 
+// const toggleCheckIn = async (id) => {
+//   try {
+//     const response = await axiosInstance.put(`/v1/scheduler/checkin/${id}`)
+//     getAppointment(id)
+//     getAppointments(1)
+
+//     // Check if toastPayload exists in the response and update it
+//     if (response.data.toastPayload) {
+//       toastPayload.value = response.data.toastPayload
+//       // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+//       // Show toast notification using the response data
+//       proxy.$showAlert({
+//         // title: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
+//         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+//         icon: toastPayload.value.toastTheme || 'success',
+//         showCancelButton: false,
+//         showConfirmButton: false,
+//         text: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
+//         timer: 3000,
+//         timerProgressBar: true
+//       })
+//     } else {
+//       // Fallback if toastPayload is not provided in the response
+//       proxy.$showAlert({
+//         title: 'Appointment Checked In successfully',
+//         icon: 'success',
+//         showCancelButton: false,
+//         showConfirmButton: false,
+//         timer: 1500,
+//         timerProgressBar: true
+
+//       })
+//     }
+//   } catch (error) {
+//     // console.error(error);
+//     let errorMessage = 'An error occurred'
+
+//     if (error.response && error.response.data.errorPayload) {
+//       // Check if errorPayload exists and has errors
+//       const errors = error.response.data.errorPayload.errors
+//       if (errors && errors.message) {
+//         errorMessage = errors.message // Use specific error message
+//       }
+//     }
+
+//     // Show toast notification for error
+//     proxy.$showToast({
+//       title: errorMessage, // Change title to be more indicative of an error
+//       text: errorMessage, // Show specific error message
+//       icon: 'error'
+//     })
+//   }
+// }
+
 const toggleCheckIn = async (id) => {
   try {
     const response = await axiosInstance.put(`/v1/scheduler/checkin/${id}`)
     getAppointment(id)
     getAppointments(1)
 
-    // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-      // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+      proxy.$showAlert({
+        icon: toastPayload.value.toastTheme || 'success',
+        text: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
+        timer: 3000,
+        timerProgressBar: true
       })
     } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
+      proxy.$showAlert({
         title: 'Appointment Checked In successfully',
-        icon: 'success'
+        icon: 'success',
+        timer: 1500,
+        timerProgressBar: true
       })
     }
   } catch (error) {
-    // console.error(error);
     let errorMessage = 'An error occurred'
 
-    if (error.response && error.response.data.errorPayload) {
-      // Check if errorPayload exists and has errors
-      const errors = error.response.data.errorPayload.errors
-      if (errors && errors.message) {
-        errorMessage = errors.message // Use specific error message
-      }
+    if (error.response?.data.errorPayload?.errors?.message) {
+      errorMessage = error.response.data.errorPayload.errors.message
     }
 
-    // Show toast notification for error
     proxy.$showToast({
-      title: errorMessage, // Change title to be more indicative of an error
-      text: errorMessage, // Show specific error message
+      title: errorMessage,
+      text: errorMessage,
       icon: 'error'
     })
+
+    throw error // Re-throw the error so `onToggleCheckIn` can handle it
   }
 }
 
-const confirmCheckIn = (id) => {
-  selectedAppointmentId.value = id
+const onToggleCheckIn = async (item) => {
+  selectedAppointmentId.value = item.id
+
+  const originalState = item.checked_in // Preserve the original state
+  item.checked_in = !item.checked_in // Temporarily toggle the state
+
+  try {
+    await toggleCheckIn(item.id) // Call your backend function
+  } catch (error) {
+    item.checked_in = originalState // Revert state if the request fails
+  }
+}
+
+const confirmCheckIn = (item) => {
+  const originalState = item.checked_in // Preserve the original state
+  item.checked_in = !item.checked_in // Temporarily toggle the state
+
   proxy
     .$showAlert({
       title: 'Are you sure?',
       text: 'You are about to Check In this appointment. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Check In!',
-      cancelButtonText: 'close',
-      confirmButtonColor: '#076232',
-      cancelButtonColor: '#d33'
+      confirmButtonText: 'Check In',
+      cancelButtonText: 'cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#076232'
     })
     .then((result) => {
       if (result.isConfirmed) {
-        toggleCheckIn(id)
-        getAppointments(1)
+        onToggleCheckIn(item)
       }
+      item.checked_in = originalState
     })
 }
 
@@ -637,13 +690,13 @@ watch(
   }
 )
 
-watch(
-  () => appointmentModal.value,
-  (newValue, oldValue) => {
-    console.log('appointmentModal value changed:', oldValue, '->', newValue)
-    getAppointment(1)
-  }
-)
+// watch(
+//   () => appointmentModal.value,
+//   (newValue, oldValue) => {
+//     console.log('appointmentModal value changed:', oldValue, '->', newValue)
+//     getAppointment(1)
+//   }
+// )
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -660,32 +713,40 @@ onUnmounted(() => {
 <template>
   <b-col lg="12">
     <b-card>
-      <div>
-        <h2>Appointments</h2>
-      </div>
-      <b-row class="mb-3">
-        <b-col lg="12" md="12" sm="12" class="mb-3">
+      <b-row class="mb-4">
+        <b-col lg="6">
+          <div>
+            <h2>Appointments</h2>
+          </div>
+        </b-col>
+        <b-col lg="6" md="12" sm="12" class="mb-3">
           <div class="d-flex justify-content-end">
             <b-button variant="primary" @click="showModal"> New Appointment </b-button>
           </div>
         </b-col>
+      </b-row>
+      <b-row class="mb-3">
         <b-col lg="12" md="12" sm="12">
-          <div class="d-flex justify-content-between">
+          <div class="d-flex justify-content-between align-items-stretch">
+            <!-- Left Section: Items Per Page -->
             <div class="d-flex align-items-center">
-              <!-- <label for="itemsPerPage" class="me-2">Items per page:</label> -->
-              <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage" class="form-select form-select-sm" style="width: auto">
+              <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage" class="form-select form-select-sm h-100" style="width: auto">
                 <option v-for="option in perPageOptions" :key="option" :value="option">
                   {{ option }}
                 </option>
               </select>
             </div>
-            <div class="d-flex align-items-center">
-              <b-input-group>
+
+            <!-- Right Section: Search -->
+            <div class="d-flex align-items-center" style="width: 180px">
+              <b-input-group class="h-100">
                 <!-- Search Input -->
-                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
+                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" class="h-100" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch"> Search </b-button>
+                  <b-button variant="primary" @click="performSearch" class="h-100">
+                    <i class="fas fa-search"></i>
+                  </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>
@@ -742,7 +803,7 @@ onUnmounted(() => {
 
                 <td>
                   <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item.id)" />
+                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item)" />
                     <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
                       {{ item.checked_in ? 'Checked In' : 'Check In' }}
                     </label>
@@ -797,6 +858,18 @@ onUnmounted(() => {
     </b-card>
   </b-col>
   <BookAppointment ref="appointmentModal" @close="handleModalClose" />
+  <b-modal id="uppyModal" size="m" hide-header>
+    <b-row>
+      <b-col lg="12">
+        <b-card no-body>
+          <!-- Fixed Short Height -->
+          <b-card no-body class="text-center">
+            <uppy-dashboard id="drag-drop-area" />
+          </b-card>
+        </b-card>
+      </b-col>
+    </b-row>
+  </b-modal>
 
   <b-modal ref="myModal" hide-footer title="Appointment Details" size="xl">
     <b-row class="justify-content-center">
@@ -805,11 +878,80 @@ onUnmounted(() => {
           <b-form>
             <b-form-group>
               <b-row>
-                <b-col lg="12" md="12" class="mb-3">
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Name</label>
+                  <b-form-input v-model="appointmentDetails.contact_name" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.contact_name" class="error">
+                    {{ errorDetails.contact_name }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Date</label>
                   <b-form-input v-model="appointmentDetails.appointment_date" id="input-107" type="date"></b-form-input>
                   <div v-if="errorDetails.appointment_date" class="error">
                     {{ errorDetails.appointment_date }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Time</label>
+                  <div class="d-flex">
+                    <b-form-input v-model="appointmentDetails.start_time" id="input-107" type="time" class="me-2"></b-form-input>
+                    <span class="align-self-center">to</span>
+                    <b-form-input v-model="appointmentDetails.end_time" id="input-108" type="time" class="ms-2"></b-form-input>
+                  </div>
+                  <div v-if="errorDetails.start_time" class="error">
+                    {{ errorDetails.start_time }}
+                  </div>
+                  <div v-if="errorDetails.end_time" class="error">
+                    {{ errorDetails.end_time }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Phone Number</label>
+                  <b-form-input v-model="appointmentDetails.mobile_number" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.mobile_number" class="error">
+                    {{ errorDetails.mobile_number }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Email</label>
+                  <b-form-input v-model="appointmentDetails.email_address" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.email_address" class="error">
+                    {{ errorDetails.email_address }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Subject</label>
+                  <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.subject" class="error">
+                    {{ errorDetails.subject }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Appointment Type</label>
+                  <b-form-input v-model="appointmentDetails.appointment_type" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.appointment_type" class="error">
+                    {{ errorDetails.appointment_type }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Booked on</label>
+                  <b-form-input v-model="appointmentDetails.created_at" id="input-107" disabled></b-form-input>
+                  <div v-if="errorDetails.created_at" class="error">
+                    {{ errorDetails.created_at }}
+                  </div>
+                </b-col>
+                <!-- preview the pdf file using the pdf viewer -->
+                <b-col lg="4" md="12" class="mb-5">
+                  <label for="input-107" class="form-label">Attachment</label>
+                  <div v-if="downloadLink" class="d-flex align-items-center">
+                    <div class="card-body position-relative d-flex align-items-center">
+                      <img src="@/assets/modules/file-manager/images/pdf.svg" alt="PDF Icon" class="card-img-left" style="width: 50px; height: 40px; object-fit: contain" />
+                      <a :href="downloadLink" target="_blank" class="btn btn-primary btn-sm">View Attachment</a>
+                    </div>
+                  </div>
+                  <div v-else>
+                    <p>No attachment</p>
                   </div>
                 </b-col>
 
@@ -817,40 +959,28 @@ onUnmounted(() => {
                   <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
                 </b-col>
 
-                <b-col lg="12" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Subject</label>
-                  <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.subject" class="error">
-                    {{ errorDetails.subject }}
-                  </div>
-                </b-col>
+                <b-row>
+                  <!-- //preview for the pdf file -->
+                  <b-col lg="6" md="4" class="mb-3">
+                    <label for="status-badge" class="form-label">Status</label>
+                    <div id="status-badge" class="d-flex align-items-center">
+                      <b-badge :variant="recordStatus.theme" class="me-3">
+                        {{ recordStatus.label }}
+                      </b-badge>
 
-                <b-col lg="12" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Appointment Type</label>
-                  <b-form-input v-model="appointmentDetails.appointment_type" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.appointment_type" class="error">
-                    {{ errorDetails.appointment_type }}
+                      <b-button v-if="recordStatus.label === 'RESCHEDULE'" :variant="recordStatus.theme" @click="suggestSlots">Suggest Open slots</b-button>
+                    </div>
+                  </b-col>
+                </b-row>
+                <!-- <b-button variant="primary" v-b-modal.uppyModal>
+                  <div class="d-flex justify-content-center">
+                    <svg width="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path opacity="0.4" d="M16.191 2H7.81C4.77 2 3 3.78 3 6.83V17.16C3 20.26 4.77 22 7.81 22H16.191C19.28 22 21 20.26 21 17.16V6.83C21 3.78 19.28 2 16.191 2Z" fill="currentColor"></path>
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M8.07996 6.6499V6.6599C7.64896 6.6599 7.29996 7.0099 7.29996 7.4399C7.29996 7.8699 7.64896 8.2199 8.07996 8.2199H11.069C11.5 8.2199 11.85 7.8699 11.85 7.4289C11.85 6.9999 11.5 6.6499 11.069 6.6499H8.07996ZM15.92 12.7399H8.07996C7.64896 12.7399 7.29996 12.3899 7.29996 11.9599C7.29996 11.5299 7.64896 11.1789 8.07996 11.1789H15.92C16.35 11.1789 16.7 11.5299 16.7 11.9599C16.7 12.3899 16.35 12.7399 15.92 12.7399ZM15.92 17.3099H8.07996C7.77996 17.3499 7.48996 17.1999 7.32996 16.9499C7.16996 16.6899 7.16996 16.3599 7.32996 16.1099C7.48996 15.8499 7.77996 15.7099 8.07996 15.7399H15.92C16.319 15.7799 16.62 16.1199 16.62 16.5299C16.62 16.9289 16.319 17.2699 15.92 17.3099Z" fill="currentColor"></path>
+                    </svg>
+                    <p class="ms-3 mb-0">Add Document</p>
                   </div>
-                </b-col>
-
-                <b-col lg="12" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Booked on</label>
-                  <b-form-input v-model="appointmentDetails.created_at" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.created_at" class="error">
-                    {{ errorDetails.created_at }}
-                  </div>
-                </b-col>
-
-                <b-col lg="8" md="8" class="mb-3">
-                  <label for="status-badge" class="form-label">Status</label>
-                  <div id="status-badge" class="d-flex align-items-center">
-                    <b-badge :variant="getBadgeVariant(appointmentDetails.statusLabel)" class="me-3">
-                      {{ appointmentDetails.statusLabel }}
-                    </b-badge>
-
-                    <b-button v-if="appointmentDetails.status === 3" variant="success" @click="suggestSlots">Suggest Open slots</b-button>
-                  </div>
-                </b-col>
+                </b-button> -->
 
                 <b-col lg="5" class="mb-3">
                   <div v-if="appointmentDetails.status === 3">

@@ -8,6 +8,7 @@ import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue'
 import { usePreferencesStore } from '../../../store/preferences'
+import { parse, format } from 'date-fns'
 
 const preferences = usePreferencesStore()
 const authStore = useAuthStore()
@@ -63,11 +64,18 @@ function handleEventClick(info) {
   isModalOpen.value = true
 }
 // Fetch events from API
-// Fetch events from API
+
+// array to store the fetched data
 const apiData = ref([])
+// const apiData = ref()
 
 const isLoading = ref(false)
 const fetchError = ref(null)
+
+function parseCustomDate(dateString) {
+  // Parse the new format "14 Dec 2024"
+  return parse(dateString, 'dd MMM yyyy', new Date())
+}
 
 async function fetchEvents() {
   isLoading.value = true
@@ -75,49 +83,123 @@ async function fetchEvents() {
   try {
     const response = await axiosInstance.get('/v1/scheduler/appointments')
     apiData.value = response.data.dataPayload.data
-    events.value = apiData.value.map((item) => {
-      let backgroundColor
-      switch (item.recordStatus.label) {
-        case 'ACTIVE':
-          backgroundColor = '#86deb7'
-          break
-        case 'CANCELLED':
-          backgroundColor = '#E05263'
-          break
-        case 'DELETED':
-          backgroundColor = '#dc3545'
-          break
-        case 'PENDING':
-          backgroundColor = '#b8e1ff'
-          break
-        case 'RESCHEDULE':
-          backgroundColor = '#FFCAB1'
-          break
-        default:
-          backgroundColor = '#FFB2E6'
-      }
-      return {
-        title: item.subject,
-        start: `${item.appointment_date}T${item.start_time}`,
-        end: `${item.appointment_date}T${item.end_time}`,
-        backgroundColor: backgroundColor,
-        display: 'block',
-        borderColor: 'transparent',
-        extendedProps: {
-          start_time: item.start_time,
-          end_time: item.end_time,
-          description: item.description,
-          contact_name: item.contact_name,
-          status: item.recordStatus.label
+    events.value = apiData.value
+      .filter((item) => item.recordStatus.label === 'ACTIVE')
+      .map((item) => {
+        console.log('Item:', item)
+        const parsedDate = parseCustomDate(item.appointment_date)
+        const formattedDate = format(parsedDate, 'yyyy-MM-dd')
+        let backgroundColor
+
+        //this was used when i was displaying all events including cancelled now strictly showing active once
+        // instead give diffrent colors to diffrent user id in secretary calendar view
+        // switch (item.recordStatus.label) {
+        //   case 'ACTIVE':
+        //     backgroundColor = '#86deb7'
+        //     break
+        //   case 'CANCELLED':
+        //     backgroundColor = '#E05263'
+        //     break
+        //   case 'DELETED':
+        //     backgroundColor = '#dc3545'
+        //     break
+        //   case 'PENDING':
+        //     backgroundColor = '#b8e1ff'
+        //     break
+        //   case 'RESCHEDULE':
+        //     backgroundColor = '#FFCAB1'
+        //     break
+        //   default:
+        //     backgroundColor = '#FFB2E6'
+        // }
+        return {
+          title: item.subject,
+          start: `${formattedDate}T${item.start_time}`,
+          end: `${formattedDate}T${item.end_time}`,
+          backgroundColor: item.recordStatus.themeColor || backgroundColor,
+          display: 'block',
+          borderColor: 'transparent',
+          extendedProps: {
+            start_time: item.start_time,
+            end_time: item.end_time,
+            description: item.description,
+            contact_name: item.contact_name,
+            status: item.recordStatus.label
+          }
         }
-      }
-    })
+      })
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
   } finally {
     isLoading.value = false
   }
 }
+
+// this was replaced by the above function very slight changes to it on the date format handling
+// async function fetchEvents() {
+//   isLoading.value = true
+//   fetchError.value = null
+
+//   try {
+//     const response = await axiosInstance.get('/v1/scheduler/appointments')
+//     apiData.value = response.data.dataPayload.data
+//     console.log('API Data:', apiData.value)
+//     // apiData.value = dummyEvents
+
+//     // Ensure events are set after apiData is updated
+//     events.value = apiData.value.map((item) => {
+//       console.log('Item:', item)
+//       // Extract and format the date
+//       // const appointmentDate = format(parseISO(item.appointment_date.split(',')[0]), 'yyyy-MM-dd')
+
+//       // Determine background color
+//       let backgroundColor
+//       switch (item.recordStatus.label) {
+//         case 'ACTIVE':
+//           backgroundColor = '#86deb7'
+//           break
+//         case 'CANCELLED':
+//           backgroundColor = '#E05263'
+//           break
+//         case 'DELETED':
+//           backgroundColor = '#dc3545'
+//           break
+//         case 'PENDING':
+//           backgroundColor = '#b8e1ff'
+//           break
+//         case 'RESCHEDULE':
+//           backgroundColor = '#FFCAB1'
+//           break
+//         default:
+//           backgroundColor = '#FFB2E6'
+//       }
+//       console.log('Appointment Date:', appointmentDate)
+
+//       return {
+//         title: item.subject || 'No Subject', // Fallback if subject is missing
+//         start: `${appointmentDate}T${item.start_time}`, // Start date-time
+//         end: `${appointmentDate}T${item.end_time}`,   // End date-time
+//         backgroundColor: item.recordStatus.theme || backgroundColor,
+//         display: 'block',
+//         borderColor: 'transparent', // No border
+//         extendedProps: {
+//           start_time: item.start_time,
+//           end_time: item.end_time,
+//           description: item.description,
+//           contact_name: item.contact_name,
+//           status: item.recordStatus.label
+//         }
+//       }
+//     })
+
+//     // Log after assignment to ensure events have been updated
+//     console.log('Events:', events.value)
+//   } catch (error) {
+//     fetchError.value = 'Failed to load events. Please try again later.'
+//   } finally {
+//     isLoading.value = false
+//   }
+// }
 
 // Add class to grey out past dates
 function handleDayCellClassNames(arg) {
@@ -128,23 +210,34 @@ function handleDayCellClassNames(arg) {
   return []
 }
 
+watch(
+  () => preferences.weekend,
+  (newWeekend) => {
+    calendarOptions.value.weekends = newWeekend
+  }
+)
+
 // FullCalendar options
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: 'timeGridWeek',
   height: 'auto',
   events: events.value,
-  weekends: preferences.weekend,
+  // weekends: preferences.weekend,
   dayMaxEvents: 3,
+  slotDuration: '00:30:00', // Set time slot intervals to 30 minutes
   slotMinTime: '08:00:00', // Start time of the day view
   slotMaxTime: '18:00:00', // End time of the day view
   dateClick: handleDateClick,
   eventClick: handleEventClick,
   dayCellClassNames: handleDayCellClassNames,
-  // dayHeaderFormat: window.innerWidth < 768 ? { weekday : 'narrow' } : { weekday: 'short', month: 'numeric', day: 'numeric' },
+  dayHeaderFormat: window.innerWidth < 768 ? { weekday: 'narrow' } : { weekday: 'short', month: 'numeric', day: 'numeric' },
   views: {
-    timeGridWeek: {
-      dayHeaderFormat: { weekday: 'narrow' } // Narrow format only for timeGridWeek
+    dayGridMonth: {
+      dayHeaderFormat: { weekday: 'short', month: 'numeric', day: 'numeric' }
+    },
+    timeGridDay: {
+      dayHeaderFormat: { weekday: 'narrow' }
     }
   },
   headerToolbar: {
@@ -154,27 +247,32 @@ const calendarOptions = ref({
   },
 
   eventClassNames: (event) => {
-    return event.extendedProps?.status === 'Active' ? 'event-active' : 'event-cancelled'
-  },
-
-  windowResize: function () {
-    let resizeTimeout
-    calendarOptions.value.windowResize = function () {
-      clearTimeout(resizeTimeout)
-      resizeTimeout = setTimeout(() => {
-        if (window.innerWidth < 768) {
-          calendarOptions.value.initialView = 'timeGridDay'
-          calendarOptions.value.dayMaxEvents = 2
-        } else {
-          calendarOptions.value.initialView = 'dayGridMonth'
-          calendarOptions.value.dayMaxEvents = 3
-        }
-      }, 300)
-    }
+    return `event-${event.extendedProps?.status?.toLowerCase()}`
   }
+
+  // windowResize: function () {
+  //   let resizeTimeout
+  //   calendarOptions.value.windowResize = function () {
+  //     clearTimeout(resizeTimeout)
+  //     resizeTimeout = setTimeout(() => {
+  //       if (window.innerWidth < 768) {
+  //         calendarOptions.value.initialView = 'timeGridDay'
+  //         calendarOptions.value.dayMaxEvents = 2
+  //       } else {
+  //         calendarOptions.value.initialView = 'dayGridMonth'
+  //         calendarOptions.value.dayMaxEvents = 3
+  //       }
+  //     }, 300)
+  //   }
+  // }
 })
 
 // Watch for changes in events and update the calendar
+
+// watch(events, (newEvents) => {
+//   calendarOptions.value.events = [...newEvents]
+// })
+
 watch(events, (newEvents) => {
   // console.log("Events updated:", newEvents)  // Log the updated events
   calendarOptions.value.events = [...newEvents]
@@ -192,14 +290,31 @@ watch(events, (newEvents) => {
   }
 })
 
-// Load events when the component is mounted
-onMounted(() => {
-  fetchEvents() // Fetch events from the API
+// // Load events when the component is mounted
+// onMounted(() => {
+//   fetchEvents() // Fetch events from the API
+//   console.log('events ata mount:', events.value)
+// })
+
+onMounted(async () => {
+  await fetchEvents() // Wait for fetchEvents to complete
+  console.log('events at mount:', apiData.value) // Log the events after the fetch is done
+  console.log('events at mount:', events.value) // Log the events after the fetch is done
 })
 </script>
 <template>
   <BookAppointment ref="appointmentModal" :selectedDate="selectedDate" />
-  <FullCalendar :options="calendarOptions" class="main-cont" />
+
+  <!-- Skeleton Loader or Spinner -->
+  <div v-if="isLoading" class="loading-spinner">
+    <div class="skeleton-calendar">
+      <div class="skeleton-header"></div>
+      <div class="skeleton-day" v-for="n in 35" :key="n"></div>
+    </div>
+  </div>
+
+  <!-- FullCalendar -->
+  <FullCalendar v-else :options="calendarOptions" class="main-cont" />
   <!-- Modal for event details -->
   <b-modal v-model="isModalOpen" title="Event Details" dialog-class="centered-modal">
     <p><strong>Title:</strong> {{ selectedEvent.title }}</p>
@@ -213,9 +328,38 @@ onMounted(() => {
     </template>
   </b-modal>
 
-  <div v-if="isLoading" class="loading-spinner">Loading events...</div>
-
   <!-- Modal for booking -->
   <!-- <Booking -->
 </template>
-<style scoped></style>
+<style scoped>
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-size: 1.2em;
+  color: #777;
+}
+
+/* Example skeleton styles */
+.skeleton-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  max-width: 500px;
+  margin: auto;
+}
+
+.skeleton-header {
+  grid-column: span 7;
+  height: 20px;
+  background: #ddd;
+  border-radius: 4px;
+}
+
+.skeleton-day {
+  height: 50px;
+  background: #eee;
+  border-radius: 4px;
+}
+</style>

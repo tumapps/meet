@@ -5,6 +5,7 @@ import authRoutes from './auth'
 const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
+import MeetingConfirmationView from '@/views/modules/appointment/MeetingConfirmationView.vue'
 
 // Default routes
 export const defaultChildRoutes = (prefix) => [
@@ -155,6 +156,11 @@ const routes = [
       requiresAuth: true // Add meta field to indicate protected route
     }
   },
+  {
+    path: '/meeting/:meetingId', // Dynamic parameter `meetingId`
+    name: 'MeetingConfirmation',
+    component: MeetingConfirmationView
+  },
 
   ...authRoutes
 ]
@@ -167,43 +173,48 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
-  // Check if route requires authentication
+  const user = localStorage.getItem('user.username')
+
+  // Handle authenticated routes
   if (to.meta.requiresAuth) {
     if (token) {
-      // User is authenticated, proceed to the route
+      // User is authenticated, proceed
       return next()
+    } else if (!token && user) {
+      // Session locked, redirect to lockscreen
+      if (to.path !== '/lockscreen') return next('/lockscreen')
     } else {
-      // User is not authenticated, redirect to login
-      return next('/auth/login')
+      // Not authenticated, redirect to login
+      if (to.path !== '/auth/login') return next('/auth/login')
     }
   }
 
-  // Handle specific routes that shouldn't be accessed by authenticated users
+  // Handle routes for unauthenticated users
   const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed']
 
   if (unauthenticatedRoutes.includes(to.path)) {
     if (token) {
-      // User is already authenticated, redirect to home/dashboard
+      // Authenticated user, redirect to dashboard
       return next('/')
-    } else {
-      // User is not authenticated, proceed to the route
-      return next()
+    } else if (!token && user) {
+      // Session locked, redirect to lockscreen
+      if (to.path !== '/lockscreen') return next('/lockscreen')
     }
   }
 
-  // Handle special case for lockscreen route
+  // Special handling for lockscreen route
   if (to.path === '/lockscreen') {
     if (token) {
-      // Authenticated user, redirect to the previous page or dashboard
-      return next(from.fullPath || '/')
+      // Authenticated user, redirect back or to dashboard
+      return next(from.fullPath !== '/lockscreen' ? from.fullPath : '/')
     }
-    // Unauthenticated user, proceed to lockscreen
+    // Otherwise, proceed to lockscreen
     return next()
   }
 
-  // For non-protected routes, allow access
+  // Allow access to all other routes
   return next()
 })
 

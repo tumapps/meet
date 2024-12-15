@@ -11,28 +11,29 @@ const isArray = ref(false)
 const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
+const perPage = ref(20)
 const perPageOptions = ref([10, 20, 50, 100])
 
-const AddPermission = ref(null)
-const PermissionDetails = ref({
-  name: '',
-  description: '',
-  type: '1',
-  data: '',
-  ruleName: ''
-})
-const ViewPermission = ref(null)
+// const AddPermission = ref(null)
+// const PermissionDetails = ref({
+//   name: '',
+//   description: '',
+//   type: '1',
+//   data: '',
+//   ruleName: ''
+// })
+// const ViewPermission = ref(null)
 
 const tableData = ref([])
 
 const errors = ref({})
-const toastPayload = ref(null)
+// const toastPayload = ref(null)
 
-const showModal = () => {
-  if (AddPermission.value) {
-    AddPermission.value.show()
-  }
-}
+// const showModal = () => {
+//   if (AddPermission.value) {
+//     AddPermission.value.show()
+//   }
+// }
 
 //pagination navigation
 const goToPage = (page) => {
@@ -43,46 +44,46 @@ const goToPage = (page) => {
 }
 
 // create a new role api
-const NewPermission = async () => {
-  toastPayload.value = null
+// const NewPermission = async () => {
+//   toastPayload.value = null
 
-  try {
-    const response = await axiosInstance.post('v1/auth/permission', PermissionDetails.value)
+//   try {
+//     const response = await axiosInstance.post('v1/auth/permission', PermissionDetails.value)
 
-    // Check if toastPayload exists in the response and update it
-    if (response.data.toastPayload) {
-      toastPayload.value = response.data.toastPayload
+//     // Check if toastPayload exists in the response and update it
+//     if (response.data.toastPayload) {
+//       toastPayload.value = response.data.toastPayload
 
-      //close the modal
-      AddPermission.value.hide()
+//       //close the modal
+//       AddPermission.value.hide()
 
-      //get the data
-      getPermissions()
-      // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'success',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
-      })
-    } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
-        title: 'Appointment Deleted successfully',
-        icon: 'success'
-      })
-    }
-  } catch (error) {
-    console.error(error)
-    errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+//       //get the data
+//       getPermissions()
+//       // Show toast notification using the response data
+//       proxy.$showToast({
+//         title: toastPayload.value.toastMessage || 'success',
+//         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+//         icon: 'success'
+//       })
+//     } else {
+//       // Fallback if toastPayload is not provided in the response
+//       proxy.$showToast({
+//         title: 'Appointment Deleted successfully',
+//         icon: 'success'
+//       })
+//     }
+//   } catch (error) {
+//     console.error(error)
+//     errors.value = error.response.data.errorPayload.errors
+//     const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
+//     proxy.$showToast({
+//       title: 'An error occurred',
+//       text: errorMessage,
+//       icon: 'error'
+//     })
+//   }
+// }
 
 //get roles
 const getPermissions = async (page = currentPage.value) => {
@@ -90,6 +91,10 @@ const getPermissions = async (page = currentPage.value) => {
     const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
     console.log(tableData.value)
+
+    currentPage.value = response.data.dataPayload.currentPage
+    totalPages.value = response.data.dataPayload.totalPages
+    perPage.value = response.data.dataPayload.perPage
   } catch (error) {
     console.error(error)
   }
@@ -98,21 +103,21 @@ const getPermissions = async (page = currentPage.value) => {
 //edit roles
 
 // get single role
-const getPermission = async (name) => {
-  const names = name
-  try {
-    const response = await axiosInstance.post('v1/auth/permission', names.value)
-    PermissionDetails.value = response.data.dataPayload.data
-  } catch (error) {
-    console.error(error)
-  }
-}
-const openModal = async (name) => {
-  if (ViewPermission.value) {
-    ViewPermission.value.show()
-  }
-  await getPermission(name)
-}
+// const getPermission = async (name) => {
+//   const names = name
+//   try {
+//     const response = await axiosInstance.get('v1/auth/permission', names.value)
+//     PermissionDetails.value = response.data.dataPayload.data
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
+// const openModal = async (name) => {
+//   if (ViewPermission.value) {
+//     ViewPermission.value.show()
+//   }
+//   await getPermission(name)
+// }
 
 // Format timestamp to a readable date
 function formatDate(timestamp) {
@@ -183,10 +188,8 @@ onMounted(() => {
       </div>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">
-          <button class="btn btn-primary" @click="SyncPermissions">Sync Permissions</button>
-
           <div class="d-flex justify-content-end">
-            <b-button variant="primary" @click="showModal"> New Permission </b-button>
+            <button class="btn btn-primary" @click="SyncPermissions">Sync Permissions</button>
           </div>
         </b-col>
         <b-col lg="12">
@@ -223,7 +226,7 @@ onMounted(() => {
               <!-- <th>RuleName</th> -->
               <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th>
               <th>Updated At<i class="fas fa-sort"></i></th>
-              <th>Actions</th>
+              <!-- <th>Actions</th> -->
             </tr>
           </thead>
           <tbody>
@@ -237,14 +240,14 @@ onMounted(() => {
                 <!-- <td>{{ item.ruleName }}</td> -->
                 <td>{{ formatDate(item.createdAt) }}</td>
                 <td>{{ formatDate(item.updatedAt) }}</td>
-                <td>
+                <!-- <td>
                   <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.name)">
                     <i class="fas fa-edit" title="edit entry"></i>
-                  </button>
+                  </button> 
                   <button type="button" class="btn btn-outline-danger btn-sm" @click="confirmDelete(item.id)">
                     <i class="fas fa-trash" title="delete entry"></i>
                   </button>
-                </td>
+                </td> -->
               </tr>
             </template>
             <template v-else>
@@ -273,58 +276,6 @@ onMounted(() => {
       </b-col>
     </b-card>
   </b-col>
-
-  <!-- //add new role modal -->
-  <b-modal ref="AddPermission" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
-    <template #modal-header="{ close }">
-      <!-- Custom header with title and close button -->
-      <h5 class="modal-title">Add Permission</h5>
-      <b-button variant="light" @click="close" class="close"> &times; </b-button>
-    </template>
-
-    <b-row>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="startDatePicker" class="form-label">Name</label>
-          <b-form-input v-model="PermissionDetails.name" id="startDatePicker" type="text" placeholder="Enter Role Name"></b-form-input>
-        </div>
-        <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
-      </b-col>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="startDatePicker" class="form-label">Role Data</label>
-          <b-form-input v-model="PermissionDetails.data" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
-        </div>
-        <div v-if="errors.data" class="error" aria-live="polite">{{ errors.data }}</div>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="roledescription" class="form-label">Description</label>
-          <b-form-input v-model="PermissionDetails.description" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
-        </div>
-        <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
-      </b-col>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="rolerulename" class="form-label">Data</label>
-          <b-form-input v-model="PermissionDetails.ruleName" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
-        </div>
-        <div v-if="errors.ruleName" class="error" aria-live="polite">{{ errors.ruleName }}</div>
-      </b-col>
-    </b-row>
-
-    <div class="d-flex justify-content-end">
-      <b-button @click="NewPermission" variant="primary">Save</b-button>
-    </div>
-  </b-modal>
-
-  <!-- //view role its Permissions and child roles -->
-
-  <b-modal ref="ViewPermission" title="Manage Details" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
-    <h1>hello</h1>
-  </b-modal>
 </template>
 <style>
 /* Custom CSS to increase modal height */

@@ -14,7 +14,7 @@ import { useSetting } from './store/pinia'
 
 import '@/plugins/styles'
 
-useAutoLogout(1200000) // Set 2 minutes (120000 ms) for inactivity
+useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
 const route = useRoute()
