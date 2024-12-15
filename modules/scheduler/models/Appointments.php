@@ -431,7 +431,7 @@ class Appointments extends BaseModel
         $user = User::findOne($user_id);
         $bookedUserEmail = $user->profile->email_address;
 
-        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id);
+        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
 
         $fileName = null;
@@ -452,7 +452,7 @@ class Appointments extends BaseModel
             'end_time' => $endTime,
             'username' => $this->getUserName($user_id),
             'user_email' => $bookedUserEmail,
-            'attendees_emails' => $attendeesEmails,
+            'attendees_details' => $attendeesDetails,
             'attachment_file_name' => $fileName,
             'attachment_download_link' => $downloadLink,
         ];
