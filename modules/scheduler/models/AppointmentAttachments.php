@@ -88,55 +88,63 @@ class AppointmentAttachments extends BaseModel
         return $this->hasOne(Appointments::class, ['id' => 'appointment_id']);
     }
 
+ 
 
     // public function fileUpload($uploadedFile, $appointmentId)
     // {
-
     //     $destination = 'playground/francis/appointments/' . $appointmentId . '/' . $uploadedFile->name;
 
     //     $googleStorage = new GoogleStorageComponent();
     //     $object = $googleStorage->uploadFile($uploadedFile->tempName, $destination, true);
 
-    //     // return $object;
     //     $this->appointment_id = $appointmentId;
     //     $this->file_name = $uploadedFile->name;
     //     $this->file_url = $object->info()['mediaLink'];
+    //     $this->self_link = $object->info()['selfLink'];
 
     //     if (!$this->validate()) {
+    //         Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
     //         return $this->getErrors();
     //     }
 
-    //     if ($this->save()) {
-    //         return true;
+    //     if (!$this->save()) {
+    //         Yii::error('Save failed: ' . json_encode($this->getErrors()), __METHOD__);
+    //         return $this->getErrors();
     //     }
-    //     // return false;
-    //     return $this->getErrors();
+
+    //     return true;
     // }
 
     public function fileUpload($uploadedFile, $appointmentId)
     {
-        $destination = 'playground/francis/appointments/' . $appointmentId . '/' . $uploadedFile->name;
+        try {
+            $destination = 'playground/francis/appointments/' . $appointmentId . '/' . $uploadedFile->name;
 
-        $googleStorage = new GoogleStorageComponent();
-        $object = $googleStorage->uploadFile($uploadedFile->tempName, $destination, true);
+            $googleStorage = new GoogleStorageComponent();
+            $object = $googleStorage->uploadFile($uploadedFile->tempName, $destination, true);
 
-        $this->appointment_id = $appointmentId;
-        $this->file_name = $uploadedFile->name;
-        $this->file_url = $object->info()['mediaLink'];
-        $this->self_link = $object->info()['selfLink'];
+            $this->appointment_id = $appointmentId;
+            $this->file_name = $uploadedFile->name;
+            $this->file_url = $object->info()['mediaLink'];
+            $this->self_link = $object->info()['selfLink'];
 
-        if (!$this->validate()) {
-            Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
-            return $this->getErrors();
+            if (!$this->validate()) {
+                Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
+                return ['status' => 'error', 'message' => $this->getErrors()];
+            }
+
+            if (!$this->save()) {
+                Yii::error('Save failed: ' . json_encode($this->getErrors()), __METHOD__);
+                return ['status' => 'error', 'message' => $this->getErrors()];
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Yii::error('Google Cloud upload failed: ' . $e->getMessage(), __METHOD__);
+            return ['status' => 'error', 'message' => 'Failed to upload file to Google Cloud.'];
         }
-
-        if (!$this->save()) {
-            Yii::error('Save failed: ' . json_encode($this->getErrors()), __METHOD__);
-            return $this->getErrors();
-        }
-
-        return true;
     }
+
 
 
     public static function getAppointmentAttachment($id)
