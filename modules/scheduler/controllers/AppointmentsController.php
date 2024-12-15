@@ -8,7 +8,6 @@ use scheduler\models\Appointments;
 use scheduler\models\AppointmentType;
 use scheduler\models\searches\AppointmentsSearch;
 use scheduler\models\Availability;
-use scheduler\models\Events;
 use scheduler\models\SpaceAvailability;
 use scheduler\models\Space;
 use scheduler\models\AppointmentAttendees;
@@ -16,9 +15,7 @@ use scheduler\models\AppointmentAttachments;
 use scheduler\hooks\TimeHelper;
 use scheduler\hooks\AppointmentRescheduler as Ar;
 use auth\models\User;
-use auth\models\Profiles;
 use helpers\traits\AppointmentPolicy;
-// use helpers\CustomSerializer;
 
 /**
  * @OA\Tag(
@@ -272,6 +269,10 @@ class AppointmentsController extends \helpers\ApiController
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
+        if ($dataRequest['Appointments']['space_id'] === 'null') {
+            $dataRequest['Appointments']['space_id'] = null;
+        }
+
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
@@ -313,7 +314,11 @@ class AppointmentsController extends \helpers\ApiController
                         $this->saveSpaceAvailability($dataRequest, $model->id);
                     }
 
-                    $this->handleFileUpload($uploadedFile, $model->id);
+                    $uploadResult = $this->handleFileUpload($uploadedFile, $model->id);
+
+                    if ($uploadResult !== true) {
+                        return $this->errorResponse(['message' => $uploadResult['message']]);
+                    }
 
 
                     if ($model->status === Appointments::STATUS_ACTIVE) {
@@ -583,6 +588,8 @@ class AppointmentsController extends \helpers\ApiController
                 return $uploadResult;
             }
         }
+
+        return true;
     }
 
     protected function saveAttendees($dataRequest, $id)
@@ -685,33 +692,40 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    public function actionConfirmAttendance($email, $appointmentId)
+    public function actionConfirmAttendance()
     {
-        $email = Yii::$app->request->post('email');
         $appointmentId = Yii::$app->request->post('appointmentId');
+        $staffId = Yii::$app->request->post('staff_id');
+        $confirmationAnswer = Yii::$app->request->post('confirmation_answer'); // Accept/Decline as boolean
 
-        if (!$email || !$appointmentId) {
+        if (!$appointmentId || !$staffId || !isset($confirmationAnswer)) {
             return $this->errorResponse(['message' => ['Invalid data submitted.']]);
         }
-        $decodedEmail = base64_decode($email);
 
         $attendee = AppointmentAttendees::findOne([
-            'email' => $decodedEmail,
-            'appointment_id' => $appointmentId
+            'appointment_id' => $appointmentId,
+            'staff_id' => $staffId,
         ]);
 
         if (!$attendee) {
             return $this->errorResponse(['message' => ['Invalid confirmation link.']]);
         }
 
-        $attendee->status = AppointmentAttendees::STATUS_CONFIRMED;
+        if ($confirmationAnswer === true) {
+            $attendee->status = AppointmentAttendees::STATUS_CONFIRMED;
+            $statusMessage = 'Your attendance has been confirmed. Thank you!';
+        } else {
+            $attendee->status = AppointmentAttendees::STATUS_DECLINED;
+            $statusMessage = 'Your attendance has been declined. Thank you for your response!';
+        }
+
         if ($attendee->save()) {
             return $this->toastResponse([
                 'statusCode' => 200,
-                'message' => 'Your attendance has been confirmed. Thank you!',
+                'message' => $statusMessage,
             ]);
         } else {
-            return $this->errorResponse(['message' => ['Unable to confirm your attendance. Please try again later.']]);
+            return $this->errorResponse(['message' => ['Unable to process your response. Please try again later.']]);
         }
     }
 }
