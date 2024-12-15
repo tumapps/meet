@@ -65,11 +65,11 @@ class Events extends BaseModel
     public function rules()
     {
         return [
-            [['title', 'event_date', 'start_time', 'end_time', 'description'], 'required'],
+            [['title', 'start_date', 'end_date', 'start_time', 'end_time', 'description'], 'required'],
             [['description'], 'string'],
             [['start_date', 'end_date', 'start_time', 'end_time'], 'safe'],
             ['end_date', 'validateEndDate'],
-            [['start_date', 'end_date'], 'date', 'format', 'php:Y-m-d'],
+            [['start_date', 'end_date'], 'date', 'format' => 'php:Y-m-d'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['is_deleted', 'created_at', 'updated_at'], 'integer'],
