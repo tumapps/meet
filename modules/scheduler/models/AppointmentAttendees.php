@@ -4,6 +4,7 @@ namespace scheduler\models;
 
 use Yii;
 use auth\models\User;
+
 /**
  *@OA\Schema(
  *  schema="AppointmentAttendees",
@@ -39,17 +40,17 @@ class AppointmentAttendees extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'appointment_id',
-            'staff_id',
-            'date',
-            'start_time',
-            'end_time',
-            'is_deleted',
-            'created_at',
-            'updated_at',
+                'id',
+                'appointment_id',
+                'staff_id',
+                'date',
+                'start_time',
+                'end_time',
+                'is_deleted',
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -59,7 +60,7 @@ class AppointmentAttendees extends BaseModel
     public function rules()
     {
         return [
-            [['appointment_id', 'staff_id', 'date', 'start_time', 'end_time', 'created_at', 'updated_at'], 'required'],
+            [['appointment_id', 'staff_id', 'date', 'start_time', 'end_time'], 'required'],
             [['appointment_id', 'staff_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['appointment_id', 'staff_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
@@ -101,7 +102,7 @@ class AppointmentAttendees extends BaseModel
             ->where(['staff_id' => $staffId, 'date' => $date])
             ->andWhere([
                 'or',
-                ['between', 'start_time', $startTime, $endTime], 
+                ['between', 'start_time', $startTime, $endTime],
                 ['between', 'end_time', $startTime, $endTime],
                 [
                     'and',
@@ -112,7 +113,7 @@ class AppointmentAttendees extends BaseModel
             ->andWhere(['is_deleted' => 0])
             ->exists();
 
-            return $overlap;
+        return $overlap;
     }
 
     public function addAttendee($id, $staffId, $date, $startTime, $endTime)
@@ -131,22 +132,48 @@ class AppointmentAttendees extends BaseModel
         // return false;
     }
 
-    public static function getAttendeesEmailsByAppointmentId($appointmentId)
+    // public static function getAttendeesEmailsByAppointmentId($appointmentId)
+    // {
+    //     $attendees = self::find()
+    //         ->where(['appointment_id' => $appointmentId])
+    //         ->all();
+
+    //     $emails = [];
+
+    //     foreach ($attendees as $attendee) {
+    //         $user = User::find()->where(['username' => $attendee->staff_id])->one();
+
+    //         if ($user && $user->profile->email_address) {
+    //             $emails[] = $user->profile->email_address;
+    //         }
+    //     }
+
+    //     return $emails;
+    // }
+
+    public static function getAttendeesEmailsByAppointmentId($appointmentId, $includeStaffId = false)
     {
         $attendees = self::find()
             ->where(['appointment_id' => $appointmentId])
             ->all();
 
-        $emails = [];
+        $results = [];
 
         foreach ($attendees as $attendee) {
             $user = User::find()->where(['username' => $attendee->staff_id])->one();
 
             if ($user && $user->profile->email_address) {
-                $emails[] = $user->profile->email_address;
+                if ($includeStaffId) {
+                    $results[] = [
+                        'staff_id' => $attendee->staff_id,
+                        'email' => $user->profile->email_address,
+                    ];
+                } else {
+                    $results[] = $user->profile->email_address;
+                }
             }
         }
 
-        return $emails;
+        return $results;
     }
 }
