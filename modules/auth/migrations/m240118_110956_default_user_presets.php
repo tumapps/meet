@@ -25,7 +25,7 @@ class m240118_110956_default_user_presets extends Migration
             $model->data = $value;
             $model->save(false);
         }
-        (new AuthItem($auth->getRole('su')))->addChildren(['editor', 'viewer', 'api']);
+        (new AuthItem($auth->getRole('su')))->addChildren(['editor', 'viewer', 'api', 'registrar']);
         (new AuthItem($auth->getRole('user')))->addChildren(['editor', 'viewer', 'api']);
         (new AuthItem($auth->getRole('secretary')))->addChildren(['editor', 'viewer', 'api']);
         (new AuthItem($auth->getRole('registrar')))->addChildren(['editor', 'viewer', 'api']);
