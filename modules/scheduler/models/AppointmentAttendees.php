@@ -151,11 +151,15 @@ class AppointmentAttendees extends BaseModel
     //     return $emails;
     // }
 
-    public static function getAttendeesEmailsByAppointmentId($appointmentId, $includeStaffId = false)
+    public static function getAttendeesEmailsByAppointmentId($appointmentId, $includeStaffId = false, $confirmedOnly = false)
     {
-        $attendees = self::find()
-            ->where(['appointment_id' => $appointmentId])
-            ->all();
+        $query = self::find()->where(['appointment_id' => $appointmentId]);
+
+        if ($confirmedOnly) {
+            $query->andWhere(['status' => self::STATUS_CONFIRMED]);
+        }
+
+        $attendees = $query->all();
 
         $results = [];
 

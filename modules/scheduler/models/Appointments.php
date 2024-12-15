@@ -431,7 +431,7 @@ class Appointments extends BaseModel
         $user = User::findOne($user_id);
         $bookedUserEmail = $user->profile->email_address;
 
-        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true);
+        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true, false);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
 
         $fileName = null;
@@ -574,7 +574,7 @@ class Appointments extends BaseModel
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Reminder';
-        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id, false, true);
 
         $eventData = [
             'email' => $email,
