@@ -161,6 +161,7 @@ return [
 'GET slot-suggestion/{id}'	   => 'appointments/suggest-available-slots',
 
 
+
 'POST self-booking'		=> 'appointments/self-book',
 'GET types'  => 'appointments/appointments-types',
 
@@ -237,6 +238,46 @@ return [
  *),
  */
 'POST appointments'         => 'appointments/create',
+
+
+/**
+ * @OA\Post(
+ * path="/scheduler/appointments",
+ * summary="Confirm meeting attendance ",
+ * tags={"Appointments"},
+ * @OA\RequestBody(
+ *    required=true,
+ *    description="Fill in appointments data",
+ *    @OA\JsonContent(
+ *       required={"id","date","email_address",},
+ *       ref="#/components/schemas/Appointments",
+ *    ),
+ * ),
+ * @OA\Response(
+ *    response=201,
+ *    description="Data payload",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="dataPayload", type="object",
+ *          @OA\Property(property="data", type="object",ref="#/components/schemas/Appointments"),
+ *          @OA\Property(property="toastMessage", type="string", example="appointments created succefully"),
+ *          @OA\Property(property="toastTheme", type="string",example="success"),
+ *       )
+ *    )
+ * ),
+ * @OA\Response(
+ *    response=422,
+ *    description="Data Validation Error",
+ *    @OA\JsonContent(
+ *       @OA\Property(property="errorPayload", type="object",
+ *          @OA\Property(property="errors", type="object", ref="#/components/schemas/Appointments"),
+ *          @OA\Property(property="toastMessage", type="string", example="Some data could not be validated"),
+ *          @OA\Property(property="toastTheme", type="string",example="danger"),
+ *       )
+ *    )
+ * )
+ *),
+ */
+'POST attendance-confirmation' => 'appointments/confirm-attendance',
 
 
 /**
