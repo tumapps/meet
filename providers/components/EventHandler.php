@@ -49,7 +49,7 @@ class EventHandler
 		$email = $event->data['email'];
 		$subject = $event->data['subject'];
 		$bookedUserEmail = $event->data['user_email'];
-		$attendeesEmails = $event->data['attendees_emails'];
+		$attendeesDetails = $event->data['attendees_details'];
 		$appointmentId = $event->data['appointment_id'];
 
 		$commonData = [
@@ -74,13 +74,16 @@ class EventHandler
 
 		self::addEmailToQueue($bookedUserEmail, $subject, $vcEmailBody);
 
-		if (!empty($attendeesEmails)) {
-			foreach ($attendeesEmails as $attendeeEmail) {
+		if (!empty($attendeesDetails)) {
+			foreach ($attendeesDetails as $attendeeDetail) {
+				$attendeeEmail = $attendeeDetail['email'];
+				$staffId = $attendeeDetail['staff_id'];
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
 				$confirmationBase = Yii::$app->params['confirmationLink'];
 				$confirmationLink = $confirmationBase . '?' . http_build_query([
-					'email' => base64_encode($attendeeEmail),
+					// 'email' => base64_encode($attendeeEmail),
 					'appointmentId' => $appointmentId,
+					'staff_id' => $staffId
 				]);
 
 				$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
