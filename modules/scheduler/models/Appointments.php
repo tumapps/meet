@@ -77,7 +77,7 @@ class Appointments extends BaseModel
     public $attendees = [];
     public $space_id;
 
-    
+
 
     public function init()
     {
@@ -183,6 +183,11 @@ class Appointments extends BaseModel
 
     public function validateOverlappingEvents($attribute, $params)
     {
+        if (!$this->isValidDate($this->appointment_date)) {
+            $this->addError($attribute, 'The provided date is not valid.');
+            return;
+        }
+
         $hasOverlappingEvents = Events::getOverlappingEvents(
             $this->appointment_date,
             $this->start_time,
@@ -192,6 +197,12 @@ class Appointments extends BaseModel
         if ($hasOverlappingEvents) {
             $this->addError($attribute, 'The selected time overlaps with another event.');
         }
+    }
+
+    protected function isValidDate($date)
+    {
+        $timestamp = strtotime($date);
+        return $timestamp && date('Y-m-d', $timestamp) === $date;
     }
 
     public function validateOverlappingSpace($attribute, $params)
