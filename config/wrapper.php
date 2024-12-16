@@ -53,17 +53,17 @@ class ConfigWrapper
             'confirmationLink' => 'http://10.17.0.24/meeting/',
             'loginUrl' => 'http://10.17.0.24',
             'menus' => [
-                    ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
-                    ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'],
-                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'],
-                    ['route' => 'availability', 'label' => 'Availability', 'icon' => 'calendar'],
-                    ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'home'],
-                    ['route' => 'venues', 'label' => 'venues', 'icon' => 'home'],
-                    ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'],
-                    ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'],
-                    ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'],
-                    ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'],
-                    ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location'],
+                    ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
+                    ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
+                    ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
+                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
+                    ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock'], // user,
+                    ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox'], // registra
+                    ['route' => 'venues', 'label' => 'venues', 'icon' => 'location-dot'], // registra
+                    ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'], // regitra
+                    ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'], // admin
+                    ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
+                    ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'], // registra
             ],
             'mdm.admin.configs' => [
                 
