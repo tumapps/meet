@@ -51,7 +51,7 @@ class Register extends Model
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
             [['mobile_number'], 'string', 'max' => 13],
-            ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 15 digits.'],
+            // ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 15 digits.'],
             ['mobile_number', 'validateMobileNumber'],
             // [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
