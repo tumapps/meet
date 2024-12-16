@@ -66,6 +66,7 @@ class AuthController extends \helpers\ApiController
 				'user_id' => $profile->user_id,
 				'email' => $profile->email_address,
 				'status' => $profile->user->status,
+				'last_activity' => $profile->user->last_login_at,
 				'name' => $profile->first_name . ' ' . $profile->last_name,
 				'middle_name' => $profile->middle_name,
 				'mobile_number' => $profile->mobile_number
@@ -294,7 +295,9 @@ class AuthController extends \helpers\ApiController
 
 		if ($model->load($dataRequest) && $model->updatePassword()) {
 			Yii::$app->response->statusCode = 440;
-			return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
+			Yii::$app->response->statusCode = 440;
+			return ['errorResponse' => ['errors' => ['message' => 'Your Password has been updated successfully']]];
+			// return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
 		}
 		return $this->errorResponse($model->getErrors());
 	}
