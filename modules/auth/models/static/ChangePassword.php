@@ -25,7 +25,7 @@ class ChangePassword extends Model
     public function rules()
     {
         return [
-         
+
             ['oldPassword', 'required', 'message' => 'This field can not be blank'],
             // ['newPassword', 'required', 'message' => 'Please choose a password you can remember'],
             ['newPassword', 'required', 'message' => 'This field can not be blank'],
@@ -68,6 +68,30 @@ class ChangePassword extends Model
      * @return bool whether the password is updated successfully
      */
 
+    // public function updatePassword()
+    // {
+    //     if (!$this->validate()) {
+    //         return false;
+    //     }
+
+    //     $user = Yii::$app->user->identity;
+    //     $oldPasswordHash = md5($this->oldPassword);
+
+    //     $user->password_hash = Yii::$app->security->generatePasswordHash($this->newPassword);
+
+    //     if ($user) {
+    //         $passwordHistory = new PasswordHistory();
+    //         $passwordHistory->user_id = $user->id;
+    //         $passwordHistory->old_password = $oldPasswordHash;
+    //         $passwordHistory->save();
+
+    //         return true;
+    //     }
+
+    //     return false;
+
+    // }
+
     public function updatePassword()
     {
         if (!$this->validate()) {
@@ -75,20 +99,32 @@ class ChangePassword extends Model
         }
 
         $user = Yii::$app->user->identity;
-        $oldPasswordHash = md5($this->oldPassword);
 
-        $user->password_hash = Yii::$app->security->generatePasswordHash($this->newPassword);
-        
-        if ($user) {
+        if (!$user instanceof \auth\models\User) {
+            $this->addError('newPassword', 'Unable to retrieve user record.');
+            return false;
+        }
+
+        if (!Yii::$app->security->validatePassword($this->oldPassword, $user->password_hash)) {
+            $this->addError('oldPassword', 'The current password is incorrect.');
+            return false;
+        }
+
+        $newPasswordHash = Yii::$app->security->generatePasswordHash($this->newPassword);
+        $user->password_hash = $newPasswordHash;
+
+        if ($user->save()) {
             $passwordHistory = new PasswordHistory();
             $passwordHistory->user_id = $user->id;
-            $passwordHistory->old_password = $oldPasswordHash;
-            $passwordHistory->save();
+            $passwordHistory->old_password = md5($this->oldPassword);
+            if (!$passwordHistory->save()) {
+                Yii::error('Failed to save password history: ' . json_encode($passwordHistory->getErrors()), __METHOD__);
+            }
 
             return true;
         }
 
+        $this->addError('newPassword', 'Failed to update the password.');
         return false;
-
     }
 }
