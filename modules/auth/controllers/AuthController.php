@@ -34,6 +34,7 @@ class AuthController extends \helpers\ApiController
 			$userData = [
 				'id' => $user->id,
 				'username' => $user->username,
+				'status' => $user->status,
 				'email' => $user->profile->email_address,
 				'fullname' => $user->profile->first_name . ' ' . $user->profile->last_name,
 				'mobile' => $user->profile->mobile_number,
@@ -48,8 +49,6 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
 	}
 
-
-
 	public function actionGetUsers()
 	{
 		// $profiles = Profiles::find()->all();
@@ -59,13 +58,14 @@ class AuthController extends \helpers\ApiController
 			->all();
 
 		if (empty($profiles)) {
-			return $this->errorResponse(['message' => 'No profiles found']);
+			return $this->errorResponse(['message' => ['No profiles found']]);
 		}
 		$formattedProfiles = [];
 		foreach ($profiles as $profile) {
 			$formattedProfiles[] = [
 				'user_id' => $profile->user_id,
 				'email' => $profile->email_address,
+				'status' => $profile->user->status,
 				'name' => $profile->first_name . ' ' . $profile->last_name,
 				'middle_name' => $profile->middle_name,
 				'mobile_number' => $profile->mobile_number
@@ -100,7 +100,6 @@ class AuthController extends \helpers\ApiController
 		}
 	}
 
-
 	public function actionGetUser($id)
 	{
 		if (!$id) {
@@ -134,6 +133,53 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['user' => $formattedUser]);
 	}
 
+	public function actionUpdateUser($id)
+	{
+		Yii::$app->user->can('su');
+
+		$user = User::findOne($id);
+		if (!$user) {
+			return $this->errorResponse(['message' => ['User not found']]);
+		}
+
+		$profile = $user->profile; 
+		if (!$profile) {
+			return $this->errorResponse(['message' => ['User Profile not found']]);
+		}
+
+		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
+
+		try {
+			$user->load($dataRequest['UpdateUser'], '');
+			if (!$user->validate() || !$user->save(false)) {
+				return $this->errorResponse($user->getErrors());
+			}
+
+			if (!empty($dataRequest['UpdateUser']['role'])) {
+				$authManager = Yii::$app->authManager;
+
+				$currentRoles = $authManager->getRolesByUser($id);
+				foreach ($currentRoles as $role) {
+					$authManager->revoke($role, $id);
+				}
+
+				$newRole = $authManager->getRole($dataRequest['UpdateUser']['role']);
+				if (!$newRole) {
+					return $this->errorResponse(['message' => ['Invalid role specified']]);
+				}
+				$authManager->assign($newRole, $id);
+			}
+
+			$profile->load($dataRequest['UpdateUser'], '');
+			if (!$profile->validate() || !$profile->save(false)) {
+				return $this->errorResponse($profile->getErrors());
+			}
+			return $this->payloadResponse(['message' => 'User updated successfully']);
+
+		} catch (\Exception $e) {
+			return $this->errorResponse(['message' => $e->getMessage()]);
+		}
+	}
 
 	public function actionSearchUser() {}
 
@@ -168,12 +214,16 @@ class AuthController extends \helpers\ApiController
 		$roleNames = array_keys($roles);
 
 		if (in_array('su', $roleNames)) {
-			return $menus;
+			// return $menus;
+			$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events','venue-management'];
 		} elseif (in_array('secretary', $roleNames)) {
 			$allowedRoutes = ['default.dashboard', 'appointments'];
 		} elseif (in_array('user', $roleNames)) {
 			$allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
-		} else {
+		} elseif(in_array('registrar', $roleNames)){
+			$allowedRoutes = ['meetings-approval', 'venues', 'events','venue-management'];
+		}
+		else {
 			$allowedRoutes = [];
 		}
 
@@ -183,8 +233,6 @@ class AuthController extends \helpers\ApiController
 
 		return $menus;
 	}
-
-
 
 	public function actionRegister()
 	{
