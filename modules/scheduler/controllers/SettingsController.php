@@ -31,7 +31,7 @@ class SettingsController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerSettingsView');
+        Yii::$app->user->can('schedulerSettingsList');
         $setting_id = Settings::getSettingId($id);
 
         if(!$setting_id) {
