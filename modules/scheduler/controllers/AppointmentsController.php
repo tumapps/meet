@@ -268,6 +268,9 @@ class AppointmentsController extends \helpers\ApiController
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+    //    $dataRequest['Appointments'] = $this->convertNullStringsToNull($dataRequest['Appointments']);
+
+        // return $dataRequest['Appointments'];
 
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
@@ -727,5 +730,24 @@ class AppointmentsController extends \helpers\ApiController
         } else {
             return $this->errorResponse(['message' => ['Unable to process your response. Please try again later.']]);
         }
+    }
+
+    /**
+     * Recursively convert all values equal to 'null' (string) to null in an array.
+     *
+     * @param array $data The input array to process.
+     * @return array The processed array with 'null' values converted to null.
+     */
+    protected function convertNullStringsToNull(array $data)
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = $this->convertNullStringsToNull($value);
+            } elseif ($value === 'null') {
+                $data[$key] = null;
+            }
+        }
+
+        return $data;
     }
 }
