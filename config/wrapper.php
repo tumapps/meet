@@ -50,7 +50,7 @@ class ConfigWrapper
             'user.passwordResetTokenExpire' => 900,
             'allowedDomains' => 'http://localhost:9000',
             'passwordResetLink' => 'http://10.17.0.24/request-password-reset?token=',
-            'confirmationLink' => 'http://10.17.0.24/meeting/',
+            'confirmationLink' => 'http://10.17.0.247/attendance-confirmation/',
             'loginUrl' => 'http://10.17.0.24',
             'menus' => [
                     ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
