@@ -49,7 +49,7 @@
     // 'GET users'     => 'auth/get-users',
     'GET users'     => 'auth/index',
     'GET user' => 'auth/get-user',
-    'PUT lock-acount' => 'auth/toggle-account-status',
+    'PUT lock-account/{id}' => 'auth/toggle-account-status',
 
 
      /**
@@ -65,7 +65,7 @@
      *       required={"username","password"},
      *              @OA\Property(property="username", type="string",title="Username", example="admin"),
      *              @OA\Property(property="password", type="string",title="Password", example="admin"),
-     *          
+     *
      *    ),
      * ),
      * @OA\Response(
@@ -114,8 +114,8 @@
      *              @OA\Property(property="username", type="string",title="Username", example="admin"),
      *              @OA\Property(property="password", type="string",title="Password", example="admin"),
      *              @OA\Property(property="confirm_password", type="string",title="confirm password", example="admin"),
-     *              
-     *          
+     *
+     *
      *    ),
      * ),
      * @OA\Response(
