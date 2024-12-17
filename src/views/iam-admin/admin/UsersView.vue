@@ -17,7 +17,7 @@ const totalPages = ref(1)
 const isArray = ref(false)
 const userData = ref({
   roles: [''],
-  user_id: '',
+  user_id: ''
 })
 
 // Fetch users from API with pagination
@@ -133,13 +133,12 @@ onMounted(() => {
 const toastPayload = ref('')
 
 const toggleStatus = async (id) => {
-
   console.log('id', id)
   try {
     const response = await axiosInstance.put(`/v1/auth/lock-account/${id}`)
 
-    if (response.data.toastPayload) {
-      toastPayload.value = response.data.toastPayload
+    if (response.data.dataPayload) {
+      toastPayload.value = response.data.dataPayload.data.message
       proxy.$showAlert({
         icon: toastPayload.value.toastTheme || 'success',
         text: toastPayload.value.toastMessage || 'Status updated',
@@ -150,7 +149,7 @@ const toggleStatus = async (id) => {
       })
     } else {
       proxy.$showAlert({
-        title: 'Appointment Checked In successfully',
+        title: 'success',
         icon: 'success',
         showCancelButton: false,
         showConfirmButton: false,
@@ -158,6 +157,10 @@ const toggleStatus = async (id) => {
         timerProgressBar: true
       })
     }
+
+    getUsers(1)
+    //close modal
+    ViewUser.value.hide()
   } catch (error) {
     let errorMessage = 'An error occurred'
 
@@ -176,6 +179,7 @@ const toggleStatus = async (id) => {
 }
 const originalState = ref(userData.value.status)
 const confirmStatusChange = (id) => {
+  console.log('id', id)
   // Preserve the original state
 
   // Temporarily toggle the state
@@ -262,7 +266,7 @@ const confirmStatusChange = (id) => {
                 <td>{{ item.roles[0] }}</td>
                 <td>{{ item.last_Activity }}</td>
                 <td>
-                  <span :class="item.status === 10 ? 'badge bg-success' : 'badge bg-primary'">
+                  <span :class="item.status === 10 ? 'badge bg-success' : 'badge bg-warning'">
                     {{ item.status === 10 ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
@@ -329,7 +333,7 @@ const confirmStatusChange = (id) => {
       </b-col>
       <b-col md="12" lg="6">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" :checked="userData.status === 10" :disabled="userData.status === 9" @change="confirmStatusChange(userData.value.user_id)" />
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" :checked="userData.status === 10" @change="confirmStatusChange(userData.user_id)" />
           <label class="form-check-label" :for="'statusSwitch'">
             {{ userData.status === 10 ? 'Active' : 'Inactive' }}
           </label>

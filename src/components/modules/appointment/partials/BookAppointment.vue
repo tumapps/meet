@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/auth.store.js'
 
 const authStore = useAuthStore()
 const axiosInstance = createAxiosInstance()
-const { proxy } = getCurrentInstance()
+const { proxy, emit } = getCurrentInstance()
 //get can be booked status from store
 const role = ref('')
 role.value = authStore.getRole()
@@ -22,6 +22,11 @@ const selectedItems = ref([]) // Holds the selected items
 const uploadProgress = ref(0) // Holds the upload progress
 const uploading = ref(false) // Holds the upload status
 const availableUsers = ref([])
+
+// /mergeProps
+// defineProps({
+//   name: String
+// })
 
 // Function to handle local search
 const handleSearch = async () => {
@@ -71,15 +76,6 @@ const removeSelectedItem = (index) => {
 // const openModal = () => {
 //   appointmentModal.value.show() // Open the modal using the show() method
 // }
-
-const closeModal = () => {
-  //clear errors
-  errors.value = {}
-  appointmentModal.value.hide() // Close the modal using the hide() method
-  appointmentData.value = {} // Reset the form data
-  errors.value = {} // Reset the errors
-  attendees.value = [] // Reset the attendees
-}
 
 const toastPayload = ref('')
 
@@ -147,6 +143,14 @@ const handleFileUpload = (event) => {
   }
 }
 
+const closeModal = () => {
+  //clear errors
+  errors.value = {}
+  appointmentModal.value.hide() // Close the modal using the hide() method
+  appointmentData.value = {} // Reset the form data
+  errors.value = {} // Reset the errors
+  attendees.value = [] // Reset the attendees
+}
 //handle date change
 const handleDateChange = (newValue) => {
   appointmentData.value.appointment_date = newValue
@@ -186,7 +190,7 @@ const getSpaces = async () => {
       // Extract and handle errors from server response
       errors.value = error.response.data.errorPayload.errors
     } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
 
       proxy.$showToast({
         title: errorMessage,
@@ -325,6 +329,25 @@ const submitAppointment = async () => {
       console.error('Error:', error)
       proxy.$showToast({ title: 'An error occurred', icon: 'error' })
     }
+  } finally {
+    uploading.value = false
+    emit('appointment-created')
+    appointmentData = ref({
+  user_id: userId,
+  appointment_date: selectedDate.value,
+  start_time: '',
+  end_time: '',
+  contact_name: '',
+  email_address: '',
+  mobile_number: '',
+  subject: '',
+  description: '',
+  appointment_type: '',
+  space_id: selectedSpaceName.value,
+  priority: '1',
+  file: null,
+  attendees: attendees.value
+})
   }
 }
 
@@ -492,11 +515,16 @@ onMounted(() => {
                 </label>
               </b-col>
               <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" required>
-                  <option value="" disabled selected>Choose Space</option>
-                  <!-- Loop through spaces array and bind the option value to space.id -->
+                <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0" required>
+                  <!-- Default option -->
+                  <option value="" disabled selected>
+                    {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
+                  </option>
+
+                  <!-- Loop through spaces array if available -->
                   <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
                 </select>
+
                 <!-- Display errors if there are any -->
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
@@ -642,8 +670,12 @@ onMounted(() => {
       </div>
     </form>
     <div class="modal-footer border-0">
-      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="submitAppointment">Save</button>
-      <button type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
+      <button v-if="uploading === false" type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="submitAppointment">Submit</button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        Loading...
+      </button>
+      <button v-if="uploading === false" type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
     </div>
   </b-modal>
 </template>

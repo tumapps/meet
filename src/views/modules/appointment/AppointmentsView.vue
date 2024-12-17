@@ -173,10 +173,13 @@ const cancelAppointment = async (id, reason) => {
     getAppointment(id)
     getAppointments(1)
     toastPayload.value = response.data.toastPayload
-    proxy.$showToast({
-      title: toastPayload.value.toastMessage || 'Appointment Deleted successfully2',
-      // icon: toastPayload.value.toastTheme || 'success',
-      icon: 'success'
+    proxy.$showAlert({
+      title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
+      icon: toastPayload.value.toastTheme || 'success',
+      timer: 3000,
+      timerProgressBar: true,
+      showCancelButton: false,
+      showConfirmButton: false
     })
   } catch (error) {
     // console.error(error);
@@ -202,10 +205,13 @@ const deleteAppointment = async (id) => {
       // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
-      proxy.$showToast({
+      proxy.$showAlert({
         title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+        icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+        timer: 3000,
+        timerProgressBar: true,
+        showCancelButton: false,
+        showConfirmButton: false
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -247,10 +253,13 @@ const restoreAppointment = async (id) => {
       // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
-      proxy.$showToast({
+      proxy.$showAlert({
         title: toastPayload.value.toastMessage || 'Appointment Restored successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+        icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
+        timer: 3000,
+        timerProgressBar: true,
+        showCancelButton: false,
+        showConfirmButton: false
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -281,7 +290,7 @@ const confirmRestore = (id) => {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'RESTORE',
-      cancelButtonText: 'No, keep it',
+      cancelButtonText: 'cancel',
       confirmButtonColor: '#d33',
       cancelButtonColor: '#076232'
     })
@@ -813,7 +822,7 @@ onUnmounted(() => {
                     <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item)" />
                     <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
                       {{ item.checked_in ? 'Checked In' : 'Check In' }}
-                    </label>  
+                    </label>
                   </div>
 
                   <div v-else class="form-check form-switch">
@@ -822,20 +831,33 @@ onUnmounted(() => {
                 </td>
 
                 <td>
-                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                  <!-- Edit Button -->
+                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
+                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" disabled>
+                    <i class="fas fa-edit" title="Edit (Disabled)"></i>
+                  </button>
+
+                  <!-- Cancel Button -->
                   <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-cancel" title="Cancel"></i>
                   </button>
-                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-danger btn-sm me-3" @click="confirmDelete(item.id)">
+                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
+                    <i class="fas fa-cancel" title="Cancel (Disabled)"></i>
+                  </button>
+
+                  <!-- Delete Button -->
+                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-danger btn-sm me-3" @click="confirmDelete(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-trash" title="Delete"></i>
                   </button>
+                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-danger btn-sm me-3" disabled>
+                    <i class="fas fa-trash" title="Delete (Disabled)"></i>
+                  </button>
+
+                  <!-- Restore Button -->
                   <button v-if="item.recordStatus.label === 'DELETED'" class="btn btn-outline-danger btn-sm" @click="confirmRestore(item.id)">
                     <i class="fas fa-undo" title="Restore"></i>
-                  </button>
-                  <button v-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-exclamation-circle btn-sm">
-                    <i class="fas fa-undo" title="appointment has been cancelled no further action can be done"></i>
                   </button>
                 </td>
               </tr>
@@ -864,7 +886,7 @@ onUnmounted(() => {
       </b-col>
     </b-card>
   </b-col>
-  <BookAppointment ref="appointmentModal" @close="handleModalClose" />
+  <BookAppointment ref="appointmentModal" @close="handleModalClose" @appointment-created="getAppointments(1)" />
   <b-modal id="uppyModal" size="m" hide-header>
     <b-row>
       <b-col lg="12">
