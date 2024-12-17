@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed } from 'vue'
+import { onMounted, ref, getCurrentInstance, computed, watchEffect, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
@@ -38,6 +38,10 @@ const showModal = () => {
     newSpace.value.show()
   }
 }
+
+// watch(newSpace, (newSpace, old) =>{
+//   if(newSpace !== )
+// })
 
 const openModal = (id) => {
   if (editSpace.value) {
@@ -182,7 +186,10 @@ const saveSpace = async () => {
       proxy.$showToast({
         title: toastPayload.value.toastMessage || 'created successfully',
         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+        icon: 'success',
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500
       })
 
       // Clear the form fields after successful submission
@@ -192,6 +199,8 @@ const saveSpace = async () => {
         opening_time: '',
         closing_time: ''
       }
+
+      errors.value = {}
     } else {
       // Fallback if toastPayload is not provided in the response
       proxy.$showToast({
@@ -238,9 +247,12 @@ const updateSpaceDetails = async (id) => {
       })
     } else {
       // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
+      proxy.$showAlert({
         title: 'Updated successfully',
-        icon: 'success'
+        icon: 'success',
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500
       })
     }
   } catch (error) {

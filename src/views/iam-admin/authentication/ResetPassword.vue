@@ -33,6 +33,11 @@ const resetPassword = async () => {
                 title: 'success',
                 text: 'Password reset successfully!',
                 icon: 'success',
+                timer: 5000,
+                showConfirmButton: false,
+                showCancelButton: false,
+
+
             });
             router.push('/auth/login');
         }
@@ -51,6 +56,9 @@ const resetPassword = async () => {
                 title: 'An error occurred ',
                 text: 'Ooops! an error has occured while resetting your password!',
                 icon: 'error',
+                showConfirmButton: false,
+                showCancelButton: false,
+                timer: 4000,
             });
         }
     } finally {

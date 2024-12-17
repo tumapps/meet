@@ -73,6 +73,8 @@ const removeSelectedItem = (index) => {
 // }
 
 const closeModal = () => {
+  //clear errors
+  errors.value = {}
   appointmentModal.value.hide() // Close the modal using the hide() method
   appointmentData.value = {} // Reset the form data
   errors.value = {} // Reset the errors
@@ -553,15 +555,15 @@ onMounted(() => {
               </b-col>
               <b-col class="bg-warning" cols="10">
                 <div class="search-form">
-                  <!-- Selected Items --
+                   Selected Items --
                   <div v-if="selectedItems.length" class="selected-items">
                     <span v-for="(item, index) in selectedItems" :key="item.id" class="selected-item" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
                   </div>
 
-                  <!-- Search Input --
+                   Search Input --
                   <input v-model="searchQuery" @input="handleSearch" type="text" class="search-input" placeholder="username..." />
 
-                  <!-- Search Results --
+                   Search Results --
                   <ul v-if="searchResults.length" class="search-results">
                     <li v-for="result in searchResults" :key="result.id" @click="addSelectedItem(result)" class="search-result-item">
                       {{ result.username }}
@@ -571,7 +573,7 @@ onMounted(() => {
               </b-col>
             </b-row> -->
 
-            <b-row class="g-3  align-items-center form-group">
+            <b-row class="g-3 align-items-center form-group">
               <!-- Label Section -->
               <b-col cols="2" class="d-flex align-items-center justify-content-start">
                 <label for="addphonenumber" class="col-form-label fw-bold">cc:</label>
@@ -579,7 +581,7 @@ onMounted(() => {
 
               <!-- Input and Search Section -->
               <b-col cols="10">
-                <div class="search-form  shadow-sm">
+                <div class="search-form shadow-sm">
                   <!-- Selected Items -->
                   <div v-if="selectedItems.length" class="mb-2">
                     <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, getCurrentInstance, onUnmounted } from 'vue'
 import AxiosInstance from '@/api/axios'
 // import { useRoute } from 'vue-router';
 
@@ -11,11 +11,13 @@ const isSubmitting = ref(false)
 const responseMessage = ref('')
 // const route = useRoute();
 
-const fetchMeetingDetails = async () => {
-  const meetingId = route.params.meetingId
+//get meeting id from route
+// const meetingId = route.params.meetingId
+
+const fetchMeetingDetails = async (id) => {
   try {
-    const { data } = await axiosInstance.get(`/api/meeting/${meetingId}`)
-    meetingDetails.value = data
+    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`)
+    meetingDetails.value = response.data.dataPayload.data
   } catch (error) {
     console.error('Error fetching meeting details:', error)
     responseMessage.value = 'Failed to load meeting details.'
@@ -47,8 +49,9 @@ const handleResponse = async (responseType) => {
 }
 
 // Fetch meeting details on page load
-// onMounted(fetchMeetingDetails)
-
+onMounted(() => {
+  fetchMeetingDetails(1)
+})
 // Utility function for formatting dates
 const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString()
 
@@ -57,11 +60,11 @@ const confirmResponse = (id) => {
   proxy
     .$showAlert({
       title: 'Are you sure?',
-      text: 'You are about to Delete this appointment. Do you want to proceed?',
+      text: 'You are about to confirm your attendance to this meeting. This action cannot be undone.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Delete it!',
-      cancelButtonText: 'No, keep it',
+      confirmButtonText: 'Yes, confirm',
+      cancelButtonText: 'Cancel',
       confirmButtonColor: '#d33',
       cancelButtonColor: '#076232'
     })
@@ -71,11 +74,21 @@ const confirmResponse = (id) => {
       }
     })
 }
+
+// on close clear the data from the meetingDetails when the component is unmounted
+onUnmounted(() => {
+  meetingDetails.value = {}
+})
+onMounted(() => {
+  // get meetig id from the route
+  const id = proxy.$route.params.id
+  fetchMeetingDetails(id)
+})
 </script>
 <template>
   <section
     :style="{
-      backgroundImage: `url(${require('@/assets/images/tum.jpg')})`,
+      // backgroundImage: `url(${require('@/assets/images/tum.jpg')})`,
       backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center'
@@ -85,8 +98,8 @@ const confirmResponse = (id) => {
       <div class="card shadow-lg p-5" style="max-width: 600px; width: 100%; min-height: 500px">
         <div class="text-center">
           <!-- Logo -->
-          <img src="@/assets/images/logo.png" alt="Logo" class="mb-4" style="max-width: 150px" />
-          <h3 class="mb-4 bg-primary" style="font-family: 'arial', sans-serif; color: #fff">Meeting Confirmation</h3>
+          <img src="/logo.ico" alt="Logo" class="mb-4" style="max-width: 150px" />
+          <h3 class="mb-4 bg-primary" style="font-family: 'arial', sans-serif; color: #fff">Attendance Confirmation</h3>
         </div>
 
         <!-- Inner Card for Meeting Details -->
@@ -96,9 +109,10 @@ const confirmResponse = (id) => {
         </div>
         <div class="card-body d-flex flex-column">
           <div>
-            <p><strong>Date:</strong> {{ formatDate(meetingDetails.date) }}</p>
-            <p><strong>Time:</strong> {{ meetingDetails.time }}</p>
+            <p><strong>Date:</strong> {{ formatDate(meetingDetails.appointment_date) }}</p>
+            <p><strong>Time:</strong> {{ meetingDetails.start_time }} to {{ meetingDetails.end_time }}</p>
             <p><strong>Description:</strong> {{ meetingDetails.description }}</p>
+            <p><strong>Location:</strong> {{ meetingDetails.space }}</p>
           </div>
           <div class="mt-auto text-center pt-3">
             <button class="btn btn-success mx-5" :disabled="isSubmitting" @click="confirmResponse(1)">Confirm</button>

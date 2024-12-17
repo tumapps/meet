@@ -47,7 +47,11 @@ const onSubmit = async () => {
     proxy.$showAlert({
       title: 'Oops!',
       text: 'An error occurred while sending the password reset email!',
-      icon: 'error'
+      icon: 'error',
+      showCancelButton: false,
+      showConfirmButton: false,
+      timer: 5000,
+
     })
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {

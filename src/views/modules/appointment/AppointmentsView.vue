@@ -144,7 +144,10 @@ const confirmCancel = (id) => {
           proxy.$showAlert({
             title: 'Ooops!',
             text: 'You need to provide a reason for cancellation.',
-            icon: 'info'
+            icon: 'info',
+            showConfirmButton: false,
+            showCancelButton: false,
+            timer: 4000
             // background: '#d33',
           })
           return false // Prevents closing the alert
@@ -348,7 +351,7 @@ const getAppointment = async (id) => {
       //convert start created at to yyyy-mm-dd
       //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
       appointmentDetails.value.space_id = response.data.dataPayload.data.space.id
-      console.log('space_id', appointmentDetails.value.space_id)
+      // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
       selectedAppointmentId.value = id
 
@@ -566,13 +569,17 @@ const toggleCheckIn = async (id) => {
         icon: toastPayload.value.toastTheme || 'success',
         text: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
         timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
         timerProgressBar: true
       })
     } else {
       proxy.$showAlert({
         title: 'Appointment Checked In successfully',
         icon: 'success',
-        timer: 1500,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 3000,
         timerProgressBar: true
       })
     }
@@ -806,7 +813,7 @@ onUnmounted(() => {
                     <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item)" />
                     <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
                       {{ item.checked_in ? 'Checked In' : 'Check In' }}
-                    </label>
+                    </label>  
                   </div>
 
                   <div v-else class="form-check form-switch">

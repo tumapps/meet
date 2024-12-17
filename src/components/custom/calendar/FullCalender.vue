@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, getCurrentInstance } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -10,6 +10,7 @@ import BookAppointment from '@/components/modules/appointment/partials/BookAppoi
 import { usePreferencesStore } from '../../../store/preferences'
 import { parse, format } from 'date-fns'
 
+const { proxy } = getCurrentInstance()
 const preferences = usePreferencesStore()
 const authStore = useAuthStore()
 const axiosInstance = AxiosInstance()
@@ -36,7 +37,17 @@ const selectedDate = ref('')
 function handleDateClick(info) {
   const clickedDate = info.dateStr
   if (clickedDate < today) {
-    alert('You cannot select a past date.')
+    // proxyR
+    proxy.$showAlert({
+      title: 'Info',
+      text: 'Please Click Today or a later Date',
+      icon: 'info',
+      timer: 5000,
+      showConfirmButton: false,
+      showCancelButton: false,
+      timerProgressBar: true
+      // confirmButton:false,
+    })
   } else {
     //show booking modal
     //pass clicked date to selecedDate
@@ -82,9 +93,15 @@ async function fetchEvents() {
   fetchError.value = null
   try {
     const response = await axiosInstance.get('/v1/scheduler/appointments')
+
     apiData.value = response.data.dataPayload.data
     events.value = apiData.value
-      .filter((item) => item.recordStatus.label === 'ACTIVE')
+      .filter((item) => {
+        // Ensure the event is ACTIVE and its date is today
+        // const parsedDate = parse(item.appointment_date, 'yyyy-MM-dd', new Date())
+
+        return item.recordStatus.label === 'ACTIVE'
+      })
       .map((item) => {
         console.log('Item:', item)
         const parsedDate = parseCustomDate(item.appointment_date)
@@ -93,25 +110,25 @@ async function fetchEvents() {
 
         //this was used when i was displaying all events including cancelled now strictly showing active once
         // instead give diffrent colors to diffrent user id in secretary calendar view
-        // switch (item.recordStatus.label) {
-        //   case 'ACTIVE':
-        //     backgroundColor = '#86deb7'
-        //     break
-        //   case 'CANCELLED':
-        //     backgroundColor = '#E05263'
-        //     break
-        //   case 'DELETED':
-        //     backgroundColor = '#dc3545'
-        //     break
-        //   case 'PENDING':
-        //     backgroundColor = '#b8e1ff'
-        //     break
-        //   case 'RESCHEDULE':
-        //     backgroundColor = '#FFCAB1'
-        //     break
-        //   default:
-        //     backgroundColor = '#FFB2E6'
-        // }
+        switch (item.recordStatus.label) {
+          case 'ACTIVE':
+            backgroundColor = '#86deb7'
+            break
+          case 'CANCELLED':
+            backgroundColor = '#E05263'
+            break
+          case 'DELETED':
+            backgroundColor = '#dc3545'
+            break
+          case 'PENDING':
+            backgroundColor = '#b8e1ff'
+            break
+          case 'RESCHEDULE':
+            backgroundColor = '#FFCAB1'
+            break
+          default:
+            backgroundColor = '#FFB2E6'
+        }
         return {
           title: item.subject,
           start: `${formattedDate}T${item.start_time}`,
@@ -223,7 +240,7 @@ const calendarOptions = ref({
   initialView: 'timeGridWeek',
   height: 'auto',
   events: events.value,
-  // weekends: preferences.weekend,
+  weekends: preferences.weekend,
   dayMaxEvents: 3,
   slotDuration: '00:30:00', // Set time slot intervals to 30 minutes
   slotMinTime: '08:00:00', // Start time of the day view
@@ -316,10 +333,10 @@ onMounted(async () => {
   <!-- FullCalendar -->
   <FullCalendar v-else :options="calendarOptions" class="main-cont" />
   <!-- Modal for event details -->
-  <b-modal v-model="isModalOpen" title="Event Details" dialog-class="centered-modal">
+  <b-modal v-model="isModalOpen" title="Appointment Details" dialog-class="centered-modal">
     <p><strong>Title:</strong> {{ selectedEvent.title }}</p>
-    <p><strong>Start:</strong> {{ selectedEvent.start }} ({{ selectedEvent.start_time }})</p>
-    <p><strong>End:</strong> {{ selectedEvent.end }} ({{ selectedEvent.end_time }})</p>
+    <p><strong>Start:</strong> {{ selectedEvent.start_time }}</p>
+    <p><strong>End:</strong> {{ selectedEvent.end_time }}</p>
     <p><strong>Description:</strong> {{ selectedEvent.description }}</p>
     <p><strong>Contact Name:</strong> {{ selectedEvent.contact_name }}</p>
     <p><strong>Status:</strong> {{ selectedEvent.status }}</p>

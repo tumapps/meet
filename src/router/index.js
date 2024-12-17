@@ -5,7 +5,7 @@ import authRoutes from './auth'
 const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
-import MeetingConfirmationView from '@/views/modules/appointment/MeetingConfirmationView.vue'
+import MeetingConfirmationView from '@/views/modules/appointment/AttendanceConfirmationView.vue'
 
 // Default routes
 export const defaultChildRoutes = (prefix) => [
@@ -157,8 +157,8 @@ const routes = [
     }
   },
   {
-    path: '/meeting/:meetingId', // Dynamic parameter `meetingId`
-    name: 'MeetingConfirmation',
+    path: '/attendance-confirmation/:meetingId', // Dynamic parameter `meetingId`
+    name: 'AttendanceConfirmation',
     component: MeetingConfirmationView
   },
 

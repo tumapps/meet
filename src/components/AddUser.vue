@@ -12,6 +12,8 @@ const errors = ref({})
 // modal close and open
 const showModal = ref(false)
 
+//watch modal close and clear data
+
 // Toggle modal visibility function
 const toggleModal = () => {
   showModal.value = !showModal.value
@@ -39,11 +41,14 @@ const toastPayload = ref(null) // Define toastPayload ref
 const submitted = ref(false)
 
 const submitForm = async () => {
+  //clear errors
+  errors.value = {}
   submitted.value = true
   try {
     // Start loader if needed
     const response = await axiosInstance.post('/v1/auth/register', formData.value)
 
+    toggleModal()
     // Toast notification handling
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
@@ -58,7 +63,14 @@ const submitForm = async () => {
       })
 
       // Close modal after successful submission
-      toggleModal()
+      showModal.value = false
+      // Reset errors
+      errors.value = {}
+      // Reset form data
+      formData.value =ref('')
+
+      // close the modal
+
     }
   } catch (error) {
     // console.error(error);
@@ -109,9 +121,8 @@ const submitForm = async () => {
             </b-form-group>
           </b-col>
         </b-row>
-
+        <!-- 
         <b-row>
-          <!-- Password -->
           <b-col md="12" lg="6">
             <b-form-group label="Password*" label-class="mb-2">
               <b-form-input type="password" placeholder="Password" v-model="formData.password" required class="mb-3" />
@@ -119,14 +130,13 @@ const submitForm = async () => {
             </b-form-group>
           </b-col>
 
-          <!-- Confirm Password -->
           <b-col md="12" lg="6">
             <b-form-group label="Confirm Password*" label-class="mb-2">
               <b-form-input type="password" placeholder="Confirm Password" v-model="formData.confirm_password" required class="mb-4" />
               <div v-if="errors.confirm_password" class="errors">{{ errors.confirm_password }}</div>
             </b-form-group>
           </b-col>
-        </b-row>
+        </b-row> -->
 
         <h3 class="mb-4">Personal Information</h3>
 

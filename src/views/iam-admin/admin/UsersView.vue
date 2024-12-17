@@ -16,7 +16,8 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const isArray = ref(false)
 const userData = ref({
-  roles: []
+  roles: [''],
+  user_id: '',
 })
 
 // Fetch users from API with pagination
@@ -98,12 +99,12 @@ const getUser = async (id) => {
     })
   }
 }
-const AddPermission = ref(null)
+const ViewUser = ref(null)
 
 // Function to open modal
 const openModal = (id) => {
-  if (AddPermission.value) {
-    AddPermission.value.show() // Ensure you are calling the correct modal method
+  if (ViewUser.value) {
+    ViewUser.value.show() // Ensure you are calling the correct modal method
   }
   getUser(id)
 }
@@ -128,6 +129,80 @@ onMounted(() => {
   getUsers(1)
   getRoles()
 })
+
+const toastPayload = ref('')
+
+const toggleStatus = async (id) => {
+
+  console.log('id', id)
+  try {
+    const response = await axiosInstance.put(`/v1/auth/lock-account/${id}`)
+
+    if (response.data.toastPayload) {
+      toastPayload.value = response.data.toastPayload
+      proxy.$showAlert({
+        icon: toastPayload.value.toastTheme || 'success',
+        text: toastPayload.value.toastMessage || 'Status updated',
+        timer: 3000,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timerProgressBar: true
+      })
+    } else {
+      proxy.$showAlert({
+        title: 'Appointment Checked In successfully',
+        icon: 'success',
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      })
+    }
+  } catch (error) {
+    let errorMessage = 'An error occurred'
+
+    if (error.response?.data.errorPayload?.errors?.message) {
+      errorMessage = error.response.data.errorPayload.errors.message
+    }
+
+    proxy.$showToast({
+      title: errorMessage,
+      text: errorMessage,
+      icon: 'error'
+    })
+
+    throw error // Re-throw the error so `onToggleCheckIn` can handle it
+  }
+}
+const originalState = ref(userData.value.status)
+const confirmStatusChange = (id) => {
+  // Preserve the original state
+
+  // Temporarily toggle the state
+  if (userData.value.status === 10) {
+    userData.value.status = 9
+  } else {
+    userData.value.status = 10
+  }
+
+  proxy
+    .$showAlert({
+      title: 'Are you sure?',
+      text: 'You are about to change the status of this user. Do you want to proceed?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'yes',
+      cancelButtonText: 'cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#076232'
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        toggleStatus(id)
+      }
+      userData.value.status = originalState
+    })
+}
 </script>
 <template>
   <b-col lg="12">
@@ -186,7 +261,12 @@ onMounted(() => {
                 <td>{{ item.email }}</td>
                 <td>{{ item.roles[0] }}</td>
                 <td>{{ item.last_Activity }}</td>
-                <td>{{ status }}</td>
+                <td>
+                  <span :class="item.status === 10 ? 'badge bg-success' : 'badge bg-primary'">
+                    {{ item.status === 10 ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+
                 <td>
                   <b-dropdown right variant="link" toggle-class="text-dark" no-caret menu-class="custom-dropdown-menu">
                     <template #button-content>
@@ -228,14 +308,35 @@ onMounted(() => {
 
   <!-- modal to view and edit user details -->
 
-  <!-- //add new role modal -->
-  <b-modal ref="AddPermission" :title="`${userData.first_name}`" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="l" hide-footer centered hide-header-close="false">
-    <!-- <template #modal-header="{ close }">
+  <!-- - //add new role modal -->
+  <b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user" hide-footer>
+    <template #modal-header="{ close }">
       <h5 class="modal-title">User Details</h5>
       <b-button variant="light" @click="close" class="close"> &times; </b-button>
-    </template> -->
+    </template>
 
     <b-row>
+      <b-col cols="6" class="">
+        <div class="profile-picture">
+          <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center align-items-center text-center">
+            <img id="blah2" class="avatar circular-img" src="@/assets/images/avatars/01.png" alt="profile-img" />
+          </div>
+
+          <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center align-items-center text-center">
+            <!-- <span>Profile-pic.jpg</span> -->
+          </div>
+        </div>
+      </b-col>
+      <b-col md="12" lg="6">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" :checked="userData.status === 10" :disabled="userData.status === 9" @change="confirmStatusChange(userData.value.user_id)" />
+          <label class="form-check-label" :for="'statusSwitch'">
+            {{ userData.status === 10 ? 'Active' : 'Inactive' }}
+          </label>
+        </div>
+        <div v-if="errors.status" class="error" aria-live="polite">{{ errors.status }}</div>
+      </b-col>
+
       <b-col md="12" lg="4">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">First Name</label>
@@ -283,20 +384,84 @@ onMounted(() => {
         </div>
       </b-col>
     </b-row>
-    <b-row>
-      <b-col md="12" lg="4">
-        <div class="mb-3">
-          <label for="roledescription" class="form-label">Status</label>
-          <b-form-input v-model="userData.status" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
-        </div>
-        <div v-if="errors.status" class="error" aria-live="polite">{{ errors.status }}</div>
-      </b-col>
-    </b-row>
 
     <div class="d-flex justify-content-end">
       <b-button @click="UpdateUser" variant="primary">Save</b-button>
     </div>
   </b-modal>
+  <!--<b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <form action="users.html#">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card-body">
+                <div class="form-groups-item">
+                  Profile Picture Section
+                  <div class="profile-picture m-4">
+                    <div class="profile-img">
+                      <img id="blah2" class="avatar circular-img" src="@/assets/images/avatars/01.png" alt="profile-img" />
+                    </div>
+                    <div class="add-profile">
+                      <span>Profile-pic.jpg</span>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="input-block mb-3">
+                        <label>First Name</label>
+                        <input type="text" v-model="userData.first_name" class="form-control" placeholder="Enter First Name" />
+                        <div v-if="errors.first_name" class="error" aria-live="polite">{{ errors.first_name }}</div>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="input-block mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" v-model="userData.first_last" placeholder="Enter Last Name" />
+                        <div v-if="errors.first_last" class="error" aria-live="polite">{{ errors.first_last }}</div>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="input-block mb-3">
+                        <label>User Name</label>
+                        <input type="text" class="form-control" v-model="userData.username" placeholder="Enter User Name" />
+                        <div v-if="errors.username" class="error" aria-live="polite">{{ errors.username }}</div>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="input-block mb-3">
+                        <label>Email</label>
+                        <input type="email" class="form-control" v-model="userData.email" placeholder="Enter Email Address" />
+                        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email }}</div>
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="input-block mb-3">
+                        <label>Phone Number</label>
+                        <input type="text" class="form-control" v-model="userData.mobile_number" placeholder="Enter Phone Number" />
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                      <div class="mb-3">
+                        <label for="roledescription" class="form-label">Role</label>
+                        <b-form-select v-model="userData.roles[0]" :options="roles" id="roledescription" placeholder="Select a role" />
+                      </div>
+                      <div v-if="errors.role" class="error" aria-live="polite">
+                        {{ errors.role }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </b-modal> -->
+
+  <!-- Add User -->
 </template>
 <style>
 /* Adjust the dropdown to fit items without scrolling */
@@ -311,5 +476,14 @@ onMounted(() => {
 .custom-dropdown-menu i {
   margin-right: 8px;
   /* Space between icon and text */
+}
+
+.circular-img {
+  border-radius: 50%; /* Make the image circular */
+  max-width: 60px; /* Adjust the size as needed */
+  max-height: 60px; /* Maintain proportions */
+  width: 100%; /* Ensure responsiveness */
+  height: auto; /* Maintain aspect ratio */
+  object-fit: contain; /* Ensure the image fills the circular frame */
 }
 </style>
