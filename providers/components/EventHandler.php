@@ -80,7 +80,7 @@ class EventHandler
 				$staffId = $attendeeDetail['staff_id'];
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
 				$confirmationBase = Yii::$app->params['confirmationLink'];
-				$confirmationLink = $confirmationBase . '?' . http_build_query([
+				$confirmationLink = $confirmationBase. $appointmentId . '?' . http_build_query([
 					// 'email' => base64_encode($attendeeEmail),
 					'appointmentId' => $appointmentId,
 					'staff_id' => $staffId
