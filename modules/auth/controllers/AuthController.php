@@ -143,7 +143,7 @@ class AuthController extends \helpers\ApiController
 			return $this->errorResponse(['message' => ['User not found']]);
 		}
 
-		$profile = $user->profile; 
+		$profile = $user->profile;
 		if (!$profile) {
 			return $this->errorResponse(['message' => ['User Profile not found']]);
 		}
@@ -176,7 +176,6 @@ class AuthController extends \helpers\ApiController
 				return $this->errorResponse($profile->getErrors());
 			}
 			return $this->payloadResponse(['message' => 'User updated successfully']);
-
 		} catch (\Exception $e) {
 			return $this->errorResponse(['message' => $e->getMessage()]);
 		}
@@ -216,15 +215,14 @@ class AuthController extends \helpers\ApiController
 
 		if (in_array('su', $roleNames)) {
 			// return $menus;
-			$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events','venue-management'];
+			$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
 		} elseif (in_array('secretary', $roleNames)) {
 			$allowedRoutes = ['default.dashboard', 'appointments'];
 		} elseif (in_array('user', $roleNames)) {
 			$allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
-		} elseif(in_array('registrar', $roleNames)){
-			$allowedRoutes = ['meetings-approval', 'venues', 'events','venue-management'];
-		}
-		else {
+		} elseif (in_array('registrar', $roleNames)) {
+			$allowedRoutes = ['meetings-approval', 'venues', 'events', 'venue-management'];
+		} else {
 			$allowedRoutes = [];
 		}
 
