@@ -38,9 +38,9 @@ tests/_support/_generated
 /.vagrant
 
 .phpintel
+reports.txt
 
 prev.json
 prev.php
 prev-user.php
 RabbitMQ.md
-
