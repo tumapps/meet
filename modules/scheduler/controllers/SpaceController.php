@@ -30,7 +30,7 @@ class SpaceController extends \helpers\ApiController{
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerSpaceView');
+        Yii::$app->user->can('schedulerSpaceList');
         return $this->payloadResponse($this->findModel($id));
     }
 
