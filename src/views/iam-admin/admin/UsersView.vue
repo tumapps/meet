@@ -371,7 +371,7 @@ const UpdateUser = async () => {
           <!-- Badge -->
           <div class="ms-3 d-flex align-items-center">
             <!-- label for status -->
-             <label class="px-3">Status:</label>
+            <label class="px-3">Status:</label>
             <span :class="userData.status === 10 ? 'badge bg-success' : 'badge bg-warning'">
               {{ userData.status === 10 ? 'Active' : 'Deactivated' }}
             </span>
