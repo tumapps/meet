@@ -209,6 +209,43 @@ const confirmStatusChange = (id) => {
       }
     })
 }
+
+//update user details
+const UpdateUser = async () => {
+  try {
+    const response = await axiosInstance.put(`/v1/auth/update-user/${userData.value.user_id}`, userData.value)
+
+    if (response.data.dataPayload) {
+      proxy.$showAlert({
+        title: response.data.dataPayload.data.toastTheme || 'success',
+        text: response.data.dataPayload.data.Message || 'User updated',
+        icon: response.data.dataPayload.data.toastTheme || 'success',
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      })
+    }
+
+    getUsers(1)
+    //close modal
+    ViewUser.value.hide()
+  } catch (error) {
+    let errorMessage = 'An error occurred'
+
+    if (error.response?.data.errorPayload?.errors?.message) {
+      errorMessage = error.response.data.errorPayload.errors.message
+    }
+
+    proxy.$showToast({
+      title: errorMessage,
+      text: errorMessage,
+      icon: 'error'
+    })
+
+    throw error // Re-throw the error so `onToggleCheckIn` can handle it
+  }
+}
 </script>
 <template>
   <b-col lg="12">
@@ -251,6 +288,7 @@ const confirmStatusChange = (id) => {
           <thead>
             <tr>
               <th @click="sortTable('fullname')">FirstName <i class="fas fa-sort"></i></th>
+              <th @click="sortTable('username')">Username <i class="fas fa-sort"></i></th>
               <th @click="sortTable('mobile_number')">Mobile Number <i class="fas fa-sort"></i></th>
               <th @click="sortTable('email')">Email <i class="fas fa-sort"></i></th>
               <th @click="sortTable('role')">Role <i class="fas fa-sort"></i></th>
@@ -263,13 +301,14 @@ const confirmStatusChange = (id) => {
             <template v-if="isArray && sortedData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td>{{ item.fullname }}</td>
+                <td>{{ item.username }}</td>
                 <td>{{ item.mobile }}</td>
                 <td>{{ item.email }}</td>
                 <td>{{ item.roles[0] }}</td>
                 <td>{{ item.last_Activity }}</td>
                 <td>
                   <span :class="item.status === 10 ? 'badge bg-success' : 'badge bg-warning'">
-                    {{ item.status === 10 ? 'Active' : 'Inactive' }}
+                    {{ item.status === 10 ? 'Active' : 'Deactivated' }}
                   </span>
                 </td>
 
@@ -282,8 +321,8 @@ const confirmStatusChange = (id) => {
 
                     <!-- Dropdown menu items with icons -->
                     <b-dropdown-item @click="openModal(item.id)"> <i class="fas fa-eye mr-2"></i> View </b-dropdown-item>
-                    <b-dropdown-item> <i class="fas fa-pen mr-2"></i> Edit </b-dropdown-item>
-                    <b-dropdown-item> <i class="fas fa-trash mr-2"></i> Delete </b-dropdown-item>
+                    <!-- <b-dropdown-item> <i class="fas fa-pen mr-2"></i> Edit </b-dropdown-item>
+                    <b-dropdown-item> <i class="fas fa-trash mr-2"></i> Delete </b-dropdown-item> -->
                   </b-dropdown>
                 </td>
               </tr>
@@ -321,26 +360,37 @@ const confirmStatusChange = (id) => {
       <b-button variant="light" @click="close" class="close"> &times; </b-button>
     </template>
 
-    <b-row>
-      <b-col cols="6" class="">
-        <div class="profile-picture">
-          <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center align-items-center text-center">
+    <b-row class="mb-5">
+      <b-col cols="6" class="mb-5">
+        <div class="profile-picture d-flex align-items-center">
+          <!-- Profile Image -->
+          <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center text-center">
             <img id="blah2" class="avatar circular-img" src="@/assets/images/avatars/01.png" alt="profile-img" />
           </div>
 
-          <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center align-items-center text-center">
-            <!-- <span>Profile-pic.jpg</span> -->
+          <!-- Badge -->
+          <div class="ms-3 d-flex align-items-center">
+            <!-- label for status -->
+             <label class="px-3">Status:</label>
+            <span :class="userData.status === 10 ? 'badge bg-success' : 'badge bg-warning'">
+              {{ userData.status === 10 ? 'Active' : 'Deactivated' }}
+            </span>
           </div>
         </div>
       </b-col>
-      <b-col md="12" lg="6">
+      <b-col md="12" lg="6" class="mb-5 d-flex align-items-center">
+        <!-- Form Switch -->
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" :checked="userData.status === 10" @change="confirmStatusChange(userData.user_id)" />
           <label class="form-check-label" :for="'statusSwitch'">
-            {{ userData.status === 10 ? 'Active' : 'Inactive' }}
+            {{ userData.status === 10 ? 'Lock Account' : 'Unlock Account' }}
           </label>
         </div>
-        <div v-if="errors.status" class="error" aria-live="polite">{{ errors.status }}</div>
+
+        <!-- Error Message -->
+        <div v-if="errors.status" class="error ms-3" aria-live="polite">
+          {{ errors.status }}
+        </div>
       </b-col>
 
       <b-col md="12" lg="4">

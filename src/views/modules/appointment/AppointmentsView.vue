@@ -359,7 +359,7 @@ const getAppointment = async (id) => {
       appointmentDetails.value = response.data.dataPayload.data
       //convert start created at to yyyy-mm-dd
       //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
-      appointmentDetails.value.space_id = response.data.dataPayload.data.space.id
+      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id || null
       // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
       selectedAppointmentId.value = id
@@ -367,14 +367,36 @@ const getAppointment = async (id) => {
       //set user id depending on the user role
       setUserId()
       // console.log("user_id", slotsData.value.user_id);
-      downloadLink.value = appointmentDetails.value.attachment.downloadLink
+      downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
+      const formattedAppointmentDate = computed({
+        get() {
+          if (!appointmentDetails.value.appointment_date) return null
+          const date = new Date(appointmentDetails.value.appointment_date)
+          if (isNaN(date)) return null // Handle invalid dates
+          return date.toISOString().split('T')[0] // Returns 'YYYY-MM-DD'
+        },
+        set(value) {
+          appointmentDetails.value.appointment_date = value // Set the input value
+          console.log('formattedAppointmentDate', appointmentDetails.value.appointment_date)
+        }
+      })
+
+      appointmentDetails.value.appointment_date = formattedAppointmentDate.value
+
+      console.log('new date ', appointmentDetails.value.appointment_date)
+
+      // Convert the date to 'YYYY-MM-DD' format
     }
   } catch (error) {
+    console.log('error', error)
     // Check if error.response is defined before accessing it
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+    const errorMessage =
+      error.response?.data?.errorPayload?.errors?.message ||
+      error.message || // Fallback to generic error message from the error object
+      'An unknown error occurred there'
 
     proxy.$showToast({
-      title: 'An error occurred',
+      title: 'An error occurred 23',
       text: errorMessage,
       icon: 'error'
     })
@@ -691,7 +713,7 @@ const handleDateChange = (newValue) => {
   slotsData.value.date = newValue
   console.log('date changed:', newValue)
 
-  // console.log('date changed:', newValue);
+  console.log('date changed:', newValue)
   getSlots()
   searchQuery
 }

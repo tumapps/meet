@@ -573,7 +573,7 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="updateSpaceDetails" variant="primary">Update</b-button>
+      <b-button @click="updateSpaceDetails(SpaceDetails.id)" variant="primary">Update</b-button>
     </div>
   </b-modal>
 </template>
