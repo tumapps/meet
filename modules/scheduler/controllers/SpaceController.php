@@ -58,7 +58,7 @@ class SpaceController extends \helpers\ApiController{
 
         $space->is_locked = !$space->is_locked;
 
-        if ($space->save()) {
+        if ($space->save(false)) {
              return $this->toastResponse(['statusCode'=>200,'message'=> $space->is_locked ? 'Space has been locked.' : 'Space has been unlocked.']);
         } else {
             return $this->errorResponse($space->getErrors()); 
