@@ -416,6 +416,7 @@ class Appointments extends BaseModel
 
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
 
+
         $eventData = [
             'contactEmail' => $email,
             'contact_name' => $name,
