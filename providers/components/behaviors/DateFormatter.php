@@ -27,5 +27,14 @@ class DateFormatter extends Behavior
         if ($this->owner->hasAttribute('appointment_date')) {
             $this->owner->appointment_date = Yii::$app->formatter->asDatetime($this->owner->appointment_date, 'php:d M Y');
         }
+
+        if ($this->owner->hasAttribute('start_time')) {
+            $this->owner->start_time = Yii::$app->formatter->asDatetime($this->owner->start_time, 'php:H:i');
+        }
+        
+        if ($this->owner->hasAttribute('end_time')) {
+            $this->owner->end_time = Yii::$app->formatter->asDatetime($this->owner->end_time, 'php:H:i');
+        }
+        
     }
 }
