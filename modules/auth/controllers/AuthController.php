@@ -18,40 +18,69 @@ use yii\base\InvalidArgumentException;
 
 class AuthController extends \helpers\ApiController
 {
-
 	public function actionIndex()
 	{
 		$searchModel = new UserSearch();
 		$search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
 		$dataProvider = $searchModel->search($search);
 
-		// Fetch data
 		$users = $dataProvider->getModels();
 		$authManager = Yii::$app->authManager;
 
-		foreach ($users as &$user) {
-			// Only include necessary fields
-			$userData = [
+		$filteredUsers = [];
+		foreach ($users as $user) {
+			$roles = array_keys($authManager->getRolesByUser($user->id));
+
+			if (in_array('su', $roles)) {
+				continue;
+			}
+
+			$filteredUsers[] = [
 				'id' => $user->id,
 				'username' => $user->username,
 				'status' => $user->status,
+				'last_activity' => $user->last_login_at,
 				'email' => $user->profile->email_address,
 				'fullname' => $user->profile->first_name . ' ' . $user->profile->last_name,
 				'mobile' => $user->profile->mobile_number,
-				'roles' => array_keys($authManager->getRolesByUser($user->id)),
+				'roles' => $roles,
 			];
-
-			$user = $userData;
 		}
 
-		$dataProvider->setModels($users);
+		$dataProvider->setModels($filteredUsers);
 
 		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
 	}
 
+
+	// public function actionGetUsers()
+	// {
+	// 	// $profiles = Profiles::find()->all();
+	// 	$profiles = Profiles::find()
+	// 		->joinWith('user')
+	// 		->where(['users.can_be_booked' => true])
+	// 		->all();
+
+	// 	if (empty($profiles)) {
+	// 		return $this->errorResponse(['message' => ['No profiles found']]);
+	// 	}
+	// 	$formattedProfiles = [];
+	// 	foreach ($profiles as $profile) {
+	// 		$formattedProfiles[] = [
+	// 			'user_id' => $profile->user_id,
+	// 			'email' => $profile->email_address,
+	// 			'status' => $profile->user->status,
+	// 			'last_activity' => $profile->user->last_login_at,
+	// 			'name' => $profile->first_name . ' ' . $profile->last_name,
+	// 			'middle_name' => $profile->middle_name,
+	// 			'mobile_number' => $profile->mobile_number
+	// 		];
+	// 	}
+	// 	return $this->payloadResponse(['profiles' => $formattedProfiles]);
+	// }
+
 	public function actionGetUsers()
 	{
-		// $profiles = Profiles::find()->all();
 		$profiles = Profiles::find()
 			->joinWith('user')
 			->where(['users.can_be_booked' => true])
@@ -60,20 +89,32 @@ class AuthController extends \helpers\ApiController
 		if (empty($profiles)) {
 			return $this->errorResponse(['message' => ['No profiles found']]);
 		}
+
+		$authManager = Yii::$app->authManager;
 		$formattedProfiles = [];
+
 		foreach ($profiles as $profile) {
+			$roles = array_keys($authManager->getRolesByUser($profile->user_id));
+			if (!in_array('user', $roles)) {
+				continue;
+			}
+
 			$formattedProfiles[] = [
 				'user_id' => $profile->user_id,
-				'email' => $profile->email_address,
-				'status' => $profile->user->status,
-				'last_activity' => $profile->user->last_login_at,
-				'name' => $profile->first_name . ' ' . $profile->last_name,
-				'middle_name' => $profile->middle_name,
-				'mobile_number' => $profile->mobile_number
+				'username' => $profile->user->username,
+				// 'email' => $profile->email_address,
+				// 'status' => $profile->user->status,
+				// 'last_activity' => $profile->user->last_login_at,
+				// 'name' => $profile->first_name . ' ' . $profile->last_name,
+				// 'middle_name' => $profile->middle_name,
+				// 'mobile_number' => $profile->mobile_number,
+				// 'roles' => $roles,
 			];
 		}
+
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
+
 
 	public function actionToggleAccountStatus($id)
 	{
@@ -254,7 +295,7 @@ class AuthController extends \helpers\ApiController
 			if ($model->sendEmail()) {
 				return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
 			} else {
-				return $this->errorResponse(['message' => 'Unable to send password reset email. Please try again later.']);
+				return $this->errorResponse(['message' => ['Unable to send password reset email. Please try again later.']]);
 			}
 		}
 
