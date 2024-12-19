@@ -46,8 +46,8 @@
      *   ),
      * )
      */
-    'GET users'     => 'auth/get-users',
-    // 'GET users'     => 'auth/index',
+    // 'GET users'     => 'auth/get-users',
+    'GET users'     => 'auth/index',
     'GET user' => 'auth/get-user',
     'PUT lock-account/{id}' => 'auth/toggle-account-status',
 
