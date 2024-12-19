@@ -177,9 +177,9 @@ const toggleStatus = async (id) => {
     throw error // Re-throw the error so `onToggleCheckIn` can handle it
   }
 }
-const originalState = ref(userData.value.status)
 const confirmStatusChange = (id) => {
-  console.log('id', id)
+  const originalState = userData.value.status
+
   // Preserve the original state
 
   // Temporarily toggle the state
@@ -197,14 +197,16 @@ const confirmStatusChange = (id) => {
       showCancelButton: true,
       confirmButtonText: 'yes',
       cancelButtonText: 'cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#076232'
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {
         toggleStatus(id)
+      } else {
+        userData.value.status = originalState
+        console.log('userData.value.status ori', userData.value.status)
       }
-      userData.value.status = originalState
     })
 }
 </script>

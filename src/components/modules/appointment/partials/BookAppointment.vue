@@ -309,9 +309,14 @@ const submitAppointment = async () => {
     // Show toast notification
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Success',
-        icon: toastPayload.value.toastTheme || 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme || 'Success',
+        icon: toastPayload.value.toastTheme || 'success',
+        text: toastPayload.value.toastMessage || 'Appointment created successfully',
+        timer: 3000,
+        showConfirmButton: false,
+        showCancelButton: false,
+        showprogressBar: true
       })
     } else {
       proxy.$showToast({
@@ -332,22 +337,22 @@ const submitAppointment = async () => {
   } finally {
     uploading.value = false
     emit('appointment-created')
-    appointmentData = ref({
-  user_id: userId,
-  appointment_date: selectedDate.value,
-  start_time: '',
-  end_time: '',
-  contact_name: '',
-  email_address: '',
-  mobile_number: '',
-  subject: '',
-  description: '',
-  appointment_type: '',
-  space_id: selectedSpaceName.value,
-  priority: '1',
-  file: null,
-  attendees: attendees.value
-})
+    appointmentData.value = ref({
+      user_id: userId,
+      appointment_date: selectedDate.value,
+      start_time: '',
+      end_time: '',
+      contact_name: '',
+      email_address: '',
+      mobile_number: '',
+      subject: '',
+      description: '',
+      appointment_type: '',
+      space_id: selectedSpaceName.value,
+      priority: '1',
+      file: null,
+      attendees: attendees.value
+    })
   }
 }
 
