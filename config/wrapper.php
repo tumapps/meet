@@ -65,6 +65,8 @@ class ConfigWrapper
                     ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
                     ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'], // registra
             ],
+            'africasTalkingApi' => $_SERVER['AT_API_KEY'],
+            'africasTalkingUserName' => $_SERVER['AT_USERNAME'],
             'mdm.admin.configs' => [
                 
             ],
