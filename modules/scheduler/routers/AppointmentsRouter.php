@@ -133,6 +133,7 @@ return [
  *),
  */
 'POST get-slots'       => 'appointments/get-slots',
+'POST sms' => 'appointments/send-sms',
 
 
 /**
