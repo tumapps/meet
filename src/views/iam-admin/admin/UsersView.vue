@@ -308,7 +308,7 @@ const UpdateUser = async () => {
                 <td>{{ item.last_Activity }}</td>
                 <td>
                   <span :class="item.status === 10 ? 'badge bg-success' : 'badge bg-warning'">
-                    {{ item.status === 10 ? 'Active' : 'Deactivated' }}
+                    {{ item.status === 10 ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
 
