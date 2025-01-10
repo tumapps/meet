@@ -349,7 +349,7 @@ const UpdateUser = async () => {
       </nav>
     </b-card>
   </b-col>
-  <Adduser ref="addUserModal" />
+  <Adduser ref="addUserModal" @user-created="getUsers(1)" />
 
   <!-- modal to view and edit user details -->
 

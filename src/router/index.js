@@ -1,5 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth'
+// import { useMenuStore } from '@/store/menuStore'
+
+// const menuStore = useMenuStore()
+
+// //got to the first menu
+// function goToFirstMenu() {
+//   menuStore.navigateToFirstMenu();
+// }
 
 // Lazy load components
 const Error404 = () => import('@/components/Error404.vue')
@@ -80,6 +88,17 @@ export const defaultChildRoutes = (prefix) => [
       requiresAuth: true
     }
   },
+  {
+    path: '/:catchAll(.*)', // Update the wildcard route
+    name: 'Error404',
+    component: Error404
+  },
+  {
+    path: '/error/:code',
+    name: 'ErrorPage',
+    component: ErrorPage,
+    props: true
+  },
 
   //admin routes
   // {
@@ -138,17 +157,6 @@ const routes = [
     component: () => import('@/views/iam-admin/authentication/EmailConfirmed.vue')
   },
   {
-    path: '/:catchAll(.*)', // Update the wildcard route
-    name: 'Error404',
-    component: Error404
-  },
-  {
-    path: '/error/:code',
-    name: 'ErrorPage',
-    component: ErrorPage,
-    props: true
-  },
-  {
     path: '/lockscreen',
     name: 'locked',
     component: Lockscreen,
@@ -176,45 +184,53 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
   const user = localStorage.getItem('user.username')
+  const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
 
-  // Handle authenticated routes
+  console.log('Fallback Route:', fallbackRoute)
+  console.log('to path:', to.path)
+
+  // 1. Special handling for the `/lockscreen` route
+  if (to.path === '/lockscreen') {
+    if (token) {
+      console.log('Token fu kind hd:', token)
+      // Redirect authenticated users away from lockscreen
+      return next(`/${fallbackRoute}`)
+    }
+    console.log('kung fu hustle:', token)
+    // Allow unauthenticated users to proceed
+    return next()
+  }
+
+  // 2. Handle authenticated routes
   if (to.meta.requiresAuth) {
     if (token) {
       // User is authenticated, proceed
       return next()
     } else if (!token && user) {
       // Session locked, redirect to lockscreen
-      if (to.path !== '/lockscreen') return next('/lockscreen')
+      return next('/lockscreen')
     } else {
       // Not authenticated, redirect to login
-      if (to.path !== '/auth/login') return next('/auth/login')
+      return next('/auth/login')
     }
   }
 
-  // Handle routes for unauthenticated users
-  const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed']
+  // 3. Handle unauthenticated routes
+  const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen']
 
   if (unauthenticatedRoutes.includes(to.path)) {
-    if (token) {
-      // Authenticated user, redirect to dashboard
-      return next('/')
+    if (token && user) {
+      // Authenticated user, redirect to fallback route
+      return next(`/${fallbackRoute}`)
     } else if (!token && user) {
       // Session locked, redirect to lockscreen
-      if (to.path !== '/lockscreen') return next('/lockscreen')
+      return next('/lockscreen')
     }
-  }
-
-  // Special handling for lockscreen route
-  if (to.path === '/lockscreen') {
-    if (token) {
-      // Authenticated user, redirect back or to dashboard
-      return next(from.fullPath !== '/lockscreen' ? from.fullPath : '/')
-    }
-    // Otherwise, proceed to lockscreen
+    // Allow unauthenticated users to proceed
     return next()
   }
 
-  // Allow access to all other routes
+  // 4. Default case: allow access to other routes
   return next()
 })
 

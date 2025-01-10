@@ -150,6 +150,7 @@ const closeModal = () => {
   appointmentData.value = {} // Reset the form data
   errors.value = {} // Reset the errors
   attendees.value = [] // Reset the attendees
+  appointmentData.value = ref('')
 }
 //handle date change
 const handleDateChange = (newValue) => {
@@ -318,6 +319,7 @@ const submitAppointment = async () => {
         showCancelButton: false,
         showprogressBar: true
       })
+      emit('appointment-created')
     } else {
       proxy.$showToast({
         title: 'Success',
@@ -336,23 +338,9 @@ const submitAppointment = async () => {
     }
   } finally {
     uploading.value = false
-    emit('appointment-created')
-    appointmentData.value = ref({
-      user_id: userId,
-      appointment_date: selectedDate.value,
-      start_time: '',
-      end_time: '',
-      contact_name: '',
-      email_address: '',
-      mobile_number: '',
-      subject: '',
-      description: '',
-      appointment_type: '',
-      space_id: selectedSpaceName.value,
-      priority: '1',
-      file: null,
-      attendees: attendees.value
-    })
+
+    // appointmentData.value = ref('')
+    // should now clear the form data
   }
 }
 

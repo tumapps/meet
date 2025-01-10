@@ -1,147 +1,66 @@
-<script>
-
-</script>
 <template>
-  <section class="body">
-    <div class="ghost">
-      <div class="ghost--navbar"></div>
-      <div class="ghost--columns">
-        <div class="ghost--column">
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-        </div>
-        <div class="ghost--column">
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-        </div>
-        <div class="ghost--column">
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-          <div class="code"></div>
-        </div>
-      </div>
-      <div class="ghost--main">
-        <div class="code"></div>
-        <div class="code"></div>
-      </div>
+  <div class="error-container">
+    <div class="error-message">
+      <h1>Error 403</h1>
+      <p>Access Forbidden. You do not have permission to access this resource.</p>
     </div>
-
-    <h1 class="police-tape police-tape--1">&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Error: 403</h1>
-    <h1 class="police-tape police-tape--2">Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forbidden&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h1>
-  </section>
+    <div class="error-actions">
+      <button @click="$router.go(-1)" class="back-button">Go Back</button>
+      <p>Contact the administrator if the issue persists.</p>
+    </div>
+  </div>
 </template>
-<style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed:700');
 
-$dark-grey: #111111;
-$lighter-grey: #27292d;
-$yellow: #e2bb2d;
-$yellow2: #b79a2f;
-
-html {
-  height: 100%;
-}
-
-.body {
-  min-height: 100%;
-  background-color: $dark-grey;
-  font-family: 'Roboto Condensed';
-  text-transform: uppercase;
-  overflow: hidden;
-}
-
-.police-tape {
-  background-color: $yellow;
-  background: linear-gradient(180deg, lighten($yellow, 20%) 0%, $yellow 5%, $yellow 90%, lighten($yellow, 5%) 95%, darken($yellow, 50%) 100%);
-  padding: 0.125em;
-  font-size: 3em;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.police-tape--1 {
-  transform: rotate(10deg);
-  position: absolute;
-  top: 40%;
-  left: -5%;
-  right: -5%;
-  z-index: 2;
-  margin-top: 0;
-}
-
-.police-tape--2 {
-  transform: rotate(-8deg);
-  position: absolute;
-  top: 50%;
-  left: -5%;
-  right: -5%;
-}
-
-.ghost {
+<style scoped>
+.error-container {
   display: flex;
-  justify-content: stretch;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100vh;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Gradient background */
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
 }
 
-.ghost--columns {
-  display: flex;
-  flex-grow: 1;
-  flex-basis: 200px;
-  align-content: stretch;
+.error-message h1 {
+  font-size: 5rem;
+  margin: 0;
+  color: #fff;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-.ghost--navbar {
-  flex: 0 0 60px;
-  background: linear-gradient(0deg, $lighter-grey 0px, $lighter-grey 10px, transparent 10px);
-  border-bottom: 2px solid $dark-grey;
+.error-message p {
+  font-size: 1.5rem;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
-.ghost--column {
-  flex: 1 0 30%;
-  border-width: 0px;
-  border-style: solid;
-  border-color: $lighter-grey;
-  border-left-width: 10px;
-  background-color: darken($lighter-grey, 6%);
-
-  @for $i from 1 through 3 {
-    &:nth-child(#{$i}) {
-      .code {
-        @for $j from 1 through 4 {
-          &:nth-child(#{$j}) {
-            // $rotation: (5 - random(10)) + deg;
-            // transform: translateY(0px) rotate($rotation);
-            $spacing: (random(9), 2) + 1em;
-            margin-left: $spacing;
-          }
-        }
-      }
-    }
-  }
+.error-actions {
+  margin-top: 20px;
 }
 
-.ghost--main {
-  background-color: $dark-grey;
-  border-top: 15px solid lighten($lighter-grey, 4%);
-  flex: 1 0 100px;
+.back-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #ffffff;
+  color: #ff7e5f;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.code {
-  display: block;
-  width: 100px;
-  background-color: $lighter-grey;
-  height: 1em;
-  margin: 1em;
+.back-button:hover {
+  background-color: #ffeedf;
+  transform: scale(1.05);
 }
 
-.ghost--main .code {
-  height: 2em;
-  width: 200px;
+.error-actions p {
+  margin-top: 10px;
+  font-size: 1rem;
+  opacity: 0.8;
 }
 </style>

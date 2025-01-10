@@ -8,6 +8,7 @@ import { useMenuStore } from '@/store/menuStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
+import { useAuthStore } from '@/store/auth.store.js'
 
 // Import Pinia Store
 import { useSetting } from './store/pinia'
@@ -18,6 +19,7 @@ useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
 const route = useRoute()
+const authStore = useAuthStore()
 
 watch(
   () => route.meta.customMenus,
@@ -61,6 +63,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', resizePlugin)
+  authStore.initStore()
 })
 </script>
 

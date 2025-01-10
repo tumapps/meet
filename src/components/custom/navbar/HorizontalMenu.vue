@@ -15,6 +15,6 @@
   <!-- Sidebar Menu End -->
 </template>
 <script setup>
-import BrandLogo from '@/components/custom/logo/BrandLogo.vue';
+import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
 </script>
 <style lang="scss" scoped></style>

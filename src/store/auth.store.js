@@ -23,8 +23,34 @@ export const useAuthStore = defineStore('userAuth', {
 
       if (storedToken && storedUsername) {
         this.setToken(storedToken, storedUsername)
+        console.log('Store initialized')
       }
+
+      console.log('Store initialized')
     },
+
+    // initStore() {
+    //   const storedToken = localStorage.getItem('user.token');
+    //   const storedUsername = localStorage.getItem('user.username');
+
+    //   if (storedToken && storedUsername) {
+    //     // Validate the stored token by calling the refresh token endpoint
+    //     const axiosInstance = AxiosInstance(); // Create an instance of Axios
+    //     axiosInstance
+    //       .post('/v1/auth/refresh', { token: storedToken })
+    //       .then((response) => {
+    //         // If the token is valid, update the store
+    //         const newToken = response.data?.dataPayload.data.token;
+    //         this.setToken(newToken, storedUsername);
+    //         console.log('Token refreshed successfully.');
+    //       })
+    //       .catch((error) => {
+    //         console.error('Error refreshing token:', error);
+    //         // Remove invalid token and clear the session
+    //         this.removeToken();
+    //       });
+    //   }
+    // },
 
     setToken(token, username) {
       // console.log('Setting token:', token, username);

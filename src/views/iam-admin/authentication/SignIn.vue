@@ -14,6 +14,10 @@ const authStore = useAuthStore()
 const router = useRouter()
 const { proxy } = getCurrentInstance()
 
+function goToFirstMenu() {
+  menuStore.navigateToFirstMenu(router)
+}
+
 const onSubmit = async () => {
   errors.value = { username: '', password: '', general: '' }
 
@@ -45,7 +49,7 @@ const onSubmit = async () => {
         text: 'You have successfully logged in!',
         icon: 'success'
       })
-      router.push('/')
+      goToFirstMenu()
     } else {
       // errors.value.general = 'An unexpected error occurred.';
     }

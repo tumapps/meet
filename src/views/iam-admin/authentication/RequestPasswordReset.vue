@@ -10,6 +10,7 @@ const email = ref('')
 const username = ref('')
 const axiosInstance = createAxiosInstance()
 const errors = ref({ email: '', username: '' })
+const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
 
 const onSubmit = async () => {
   errors.value = { email: '', username: '' } // Reset errors
@@ -50,8 +51,7 @@ const onSubmit = async () => {
       icon: 'error',
       showCancelButton: false,
       showConfirmButton: false,
-      timer: 5000,
-
+      timer: 5000
     })
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
@@ -74,7 +74,7 @@ const onSubmit = async () => {
       <div class="col-md-6 p-0">
         <div class="card card-transparent auth-card shadow-none d-flex justify-content-center mb-0">
           <div class="card-body">
-            <router-link :to="{ name: 'default.dashboard' }" class="navbar-brand d-flex align-items-center mb-3">
+            <router-link :to="{ name: fallbackRoute }" class="navbar-brand d-flex align-items-center mb-3">
               <BrandLogo />
               <h4 class="logo-title ms-3 mb-0"><brand-name></brand-name></h4>
             </router-link>

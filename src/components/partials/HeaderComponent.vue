@@ -36,9 +36,9 @@ const onscroll = () => {
   }
 }
 
-// const toggleSidebar = () => {
-//   document.getElementsByTagName('ASIDE')[0].classList.toggle('sidebar-mini')
-// }
+const toggleSidebar = () => {
+  document.getElementsByTagName('ASIDE')[0].classList.toggle('sidebar-mini')
+}
 
 onMounted(() => {
   window.addEventListener('scroll', onscroll())
@@ -47,15 +47,15 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', onscroll())
 })
-//i removed this to prevent sidebar open on mouse enter since the toggle button was listening for the event ..the sidebar was opening and closing on mouse enter and leave is restricted to the aside .sidebar-body element only change at will 
+//i removed this to prevent sidebar open on mouse enter since the toggle button was listening for the event ..the sidebar was opening and closing on mouse enter and leave is restricted to the aside .sidebar-body element only change at will
 // the default behavior of the sidebar is to open on mouse enter and close on mouse leave was on the whole <aside> element
 // Select the first ASIDE element
 // const asideElement = document.getElementsByTagName('ASIDE')[0]
 
 // Function to add the 'sidebar-mini' class when hovering
 // asideElement.addEventListener('mouseleave', () => {
-//   asideElement.classList.add('sidebar-mini');
-// });
+//   asideElement.classList.add('sidebar-mini')
+// })
 
 // Function to remove the 'sidebar-mini' class when mouse leaves
 // asideElement.addEventListener('mouseenter', () => {

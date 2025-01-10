@@ -3,7 +3,9 @@ import { ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth.store.js'
 import createAxiosInstance from '@/api/axios'
+import { useMenuStore } from '@/store/menuStore'
 
+const menuStore = useMenuStore()
 const isLoading = ref(false)
 const password = ref('')
 const errors = ref({ password: '', general: '' })
@@ -12,6 +14,12 @@ const router = useRouter()
 const axiosInstance = createAxiosInstance(router, authStore)
 const { proxy } = getCurrentInstance()
 const username = localStorage.getItem('user.username')
+
+//function to go to first page
+
+function goToFirstMenu() {
+  menuStore.navigateToFirstMenu(router)
+}
 
 const onSubmit = async () => {
   errors.value = { username: '', password: '', general: '' }
@@ -39,7 +47,8 @@ const onSubmit = async () => {
 
       authStore.setToken(response.data.dataPayload.data.token, response.data.dataPayload.data.username)
 
-      router.back()
+      // router.push({ name: 'dashboard' })
+      goToFirstMenu()
     } else {
       proxy.$showToast({
         title: 'An error occurred ',
@@ -48,6 +57,7 @@ const onSubmit = async () => {
       })
     }
   } catch (error) {
+    console.log('Error:', error)
     proxy.$showToast({
       title: 'An error occurred ',
       text: 'Ooops! an error has occured while logging in!',

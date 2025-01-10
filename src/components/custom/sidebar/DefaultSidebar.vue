@@ -82,6 +82,8 @@ export default {
     BrandName
   },
   setup() {
+    const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
+
     const store = useSetting()
     const sidebarType = computed(() => store.sidebar_type_value)
     const sidebarShow = computed(() => [store.sidebar_show_value])
@@ -132,7 +134,8 @@ export default {
       sidebarColor,
       sidebarShow,
       openSidebarOnHover,
-      closeSidebarOnLeave
+      closeSidebarOnLeave,
+      fallbackRoute
     }
   }
 }
@@ -141,7 +144,7 @@ export default {
 <template>
   <aside :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`" id="first-tour" data-toggle="main-sidebar" data-sidebar="responsive">
     <div class="sidebar-header d-flex align-items-center justify-content-start">
-      <router-link :to="{ name: 'default.dashboard' }" class="navbar-brand">
+      <router-link :to="{ name: fallbackRoute }" class="navbar-brand">
         <brand-logo />
         <h4 class="logo-title" data-setting="app_name">
           <brand-name />

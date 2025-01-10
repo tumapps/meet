@@ -4,7 +4,7 @@ import AxiosInstance from '@/api/axios'
 
 // Define reactive state for account and personal information
 const axiosInstance = AxiosInstance()
-const { proxy } = getCurrentInstance()
+const { proxy, emit } = getCurrentInstance()
 const errors = ref({})
 
 // modal close and open
@@ -54,24 +54,20 @@ const submitForm = async () => {
       toastPayload.value = response.data.toastPayload
       proxy.$showToast({
         title: toastPayload.value.toastMessage || 'Created successfully',
-        icon: 'success'
+        icon:  toastPayload.value.toastTheme || 'success'
       })
-    } else {
-      proxy.$showToast({
-        title: 'Created successfully',
-        icon: 'success'
-      })
-
-      // Close modal after successful submission
-      showModal.value = false
-      // Reset errors
-      errors.value = {}
-      // Reset form data
-      formData.value =ref('')
-
-      // close the modal
-
+      emit('user-created')
+      console.log('emits emitted')
     }
+
+    // Close modal after successful submission
+    showModal.value = false
+    // Reset errors
+    errors.value = {}
+    // Reset form data
+    formData.value = ref('')
+
+    // close the modal
   } catch (error) {
     // console.error(error);
     errors.value = error.response?.data?.errorPayload?.errors || {}
