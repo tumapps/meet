@@ -58,8 +58,8 @@ class Space extends BaseModel
     {
         return [
             [['level_id', 'name', 'opening_time', 'closing_time'], 'required'],
-            [['level_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['level_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
+            [['level_id', 'is_deleted'], 'default', 'value' => null],
+            [['level_id', 'is_deleted'], 'integer'],
             [['opening_time', 'closing_time'], 'safe'],
             [['opening_time', 'closing_time'], 'validateTimeRange'],
             [['is_locked'], 'boolean'],
