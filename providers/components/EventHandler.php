@@ -28,20 +28,13 @@ class EventHandler
 
 	public static function handlePasswordResetRequest(Event $event)
 	{
-		$data = $event->data;
-		$queueMail = new MailQueueManager();
+		// $data = $event->data;
+		$email = $event->data['email'];
+		$subject = $event->data['subject'];
+		$body = $event->data['body'];
 
-		$emailData = [
-			'email' => $data['email'],
-			'subject' => $data['subject'],
-			'body' => $data['body']
-		];
-
-		if ($queueMail->addToQueue($emailData)) {
-			$event->handled = true;
-		} else {
-			$event->handled = false;
-		}
+		self::addEmailToQueue($email, $subject, $body);
+		$event->handled = true;
 	}
 
 	public static function onCreatedAppointment(Event $event)
@@ -80,7 +73,7 @@ class EventHandler
 				$staffId = $attendeeDetail['staff_id'];
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
 				$confirmationBase = Yii::$app->params['confirmationLink'];
-				$confirmationLink = $confirmationBase. $appointmentId . '?' . http_build_query([
+				$confirmationLink = $confirmationBase . $appointmentId . '?' . http_build_query([
 					// 'email' => base64_encode($attendeeEmail),
 					'appointmentId' => $appointmentId,
 					'staff_id' => $staffId
