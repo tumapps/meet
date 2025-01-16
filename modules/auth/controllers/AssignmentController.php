@@ -127,38 +127,67 @@ class AssignmentController extends \helpers\ApiController
      * @param string $roleName
      * @return \yii\web\Response
      */
-    public function actionRoleToUser()
+
+
+    public function actionRoleToUser($id)
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
-        $userId = $dataRequest['Assignment']['user_id'];
-        $roleName = $dataRequest['Assignment']['role_name'];
+        $roles = $dataRequest['Assignment']['roles'] ?? [''];
 
-        if (empty($userId) || empty($roleName)) {
-            return $this->errorResponse(['message' => ['User Id and Role is required']]);
+        if (empty($roles) || !is_array($roles)) {
+            return $this->errorResponse(['message' => ['Roles are required']]);
         }
 
-        if (!is_numeric($userId)) {
+        if (!is_numeric($id)) {
             return $this->errorResponse(['message' => ['User id must be an integer']]);
         }
 
         $auth = Yii::$app->authManager;
 
-        $role = $auth->getRole($roleName);
+        $user = User::findOne(['user_id' => (int)$id]);
 
-        if (!$role) {
-            return $this->errorResponse(['message' => ['Role not found.']]);
+        if (!$user) {
+            return $this->errorResponse(['message' => ['Provided user id does not exist']]);
         }
 
-        $id = User::findOne(['user_id' => (int)$userId]);
+        $assignedRoles = [];
+        $notFoundRoles = [];
+        foreach ($roles as $roleName) {
+            $role = $auth->getRole($roleName);
 
-        if (!$id) {
-            return $this->errorResponse(['message' => ['Provided user id does not exists']]);
+            if ($role) {
+                try {
+                    $auth->assign($role, $id);
+                    $assignedRoles[] = $roleName;
+                } catch (\Exception $e) {
+                    Yii::error("Error assigning role '{$roleName}' to user ID '{id}': " . $e->getMessage(), __METHOD__);
+                }
+            } else {
+                $notFoundRoles[] = $roleName;
+            }
         }
 
-        $auth->assign($role, $userId);
-        return $this->toastResponse(['statusCode' => 202, 'message' => "Role '{$roleName}' assigned to user with ID '{$userId}'."]);
+        $rolelabel = count($roles) > 1 ? 'roles' : 'role';
+        $notFoundLabel = count($notFoundRoles) > 1 ? 'roles' : 'role';
+
+        if (!empty($notFoundRoles)) {
+            return $this->errorResponse([
+                'message' => [
+                    'Some ' . $notFoundLabel . ' could not be assigned because they do not exist.',
+                    'not_found_roles' => $notFoundRoles,
+                    'assigned_roles' => $assignedRoles,
+                ]
+            ]);
+        }
+
+        return $this->toastResponse([
+            'statusCode' => 202,
+            'message' => ucfirst($rolelabel) . "successfully assigned to user with ID '{$id}'.",
+            'assigned_roles' => $assignedRoles,
+        ]);
     }
+
 
     public function actionRemove($id)
     {
@@ -342,7 +371,6 @@ class AssignmentController extends \helpers\ApiController
             'message' => implode(' ', $errors),
         ]);
     }
-
 
     protected function findModel($id)
     {
