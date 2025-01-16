@@ -25,6 +25,13 @@ class SpaceController extends \helpers\ApiController{
         $searchModel = new SpaceSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams,'SpaceSearch');
         $dataProvider = $searchModel->search($search);
+
+        $spaceDetails = $dataProvider->getModels();
+
+        foreach ($spaceDetails as $spaceDetail) {
+            $spaceDetail->level_id = $spaceDetail->level ? $spaceDetail->level->name : 'Unknown Level';
+        }
+
         return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
     }
 
