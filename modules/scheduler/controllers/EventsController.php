@@ -32,7 +32,7 @@ class EventsController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerEventsView');
+        Yii::$app->user->can('schedulerEventsList');
         return $this->payloadResponse($this->findModel($id));
     }
 
