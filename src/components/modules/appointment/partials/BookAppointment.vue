@@ -10,6 +10,9 @@ const authStore = useAuthStore()
 const axiosInstance = createAxiosInstance()
 const { proxy, emit } = getCurrentInstance()
 //get can be booked status from store
+
+// Problem: Many ref initializations are single-purpose and can be grouped.
+// Solution: Use a single object for related states.
 const role = ref('')
 role.value = authStore.getRole()
 const userId = ref('')
@@ -27,6 +30,12 @@ const availableUsers = ref([])
 // defineProps({
 //   name: String
 // })
+//CLEAR ERRORS
+
+const resetErrors = () => {
+  errors.value = {}
+  //clear form data
+}
 
 // Function to handle local search
 const handleSearch = async () => {
@@ -69,13 +78,15 @@ const addSelectedItem = (item) => {
   console.log('added to list ', selectedItems.value)
 }
 
+// Computed property to format selectedItems as a comma-separated string
+// const selectedItemsText = computed(() => {
+//   return selectedItems.value.map((item) => item.username).join(', ')
+// })
+
 // Function to remove a selected item
 const removeSelectedItem = (index) => {
   selectedItems.value.splice(index, 1)
 }
-// const openModal = () => {
-//   appointmentModal.value.show() // Open the modal using the show() method
-// }
 
 const toastPayload = ref('')
 
@@ -97,7 +108,7 @@ const timeSlots = ref([])
 const apiResponse = ref([])
 const selectedDate = ref(null)
 
-const config = {
+const flatPickrConfig = {
   dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'F j, Y',
@@ -119,8 +130,8 @@ const slotsData = ref({
 })
 
 // Define your form data
-const appointmentData = ref({
-  user_id: userId,
+const initialAppointmentData = {
+  user_id: userId.value,
   appointment_date: selectedDate.value,
   start_time: '',
   end_time: '',
@@ -134,7 +145,13 @@ const appointmentData = ref({
   priority: '1',
   file: null,
   attendees: attendees.value
-})
+}
+
+const appointmentData = ref({ ...initialAppointmentData })
+
+function resetAppointmentData() {
+  appointmentData.value = { ...initialAppointmentData }
+}
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
@@ -145,12 +162,9 @@ const handleFileUpload = (event) => {
 
 const closeModal = () => {
   //clear errors
-  errors.value = {}
+  resetErrors()
   appointmentModal.value.hide() // Close the modal using the hide() method
-  appointmentData.value = {} // Reset the form data
-  errors.value = {} // Reset the errors
-  attendees.value = [] // Reset the attendees
-  appointmentData.value = ref('')
+  resetAppointmentData()
 }
 //handle date change
 const handleDateChange = (newValue) => {
@@ -161,10 +175,11 @@ const handleDateChange = (newValue) => {
 }
 
 //watcher for date change
-watch(selectedDate, (newValue, oldValue) => {
-  // console.log("new date??", newValue)
-
-  handleDateChange(newValue, oldValue)
+watch(selectedDate, (newValue) => {
+  if (newValue) {
+    console.log('Date changed:', newValue)
+    handleDateChange(newValue)
+  }
 })
 
 // Method to update time slots
@@ -206,7 +221,7 @@ const getSpaces = async () => {
 const getSlots = async () => {
   try {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value)
-    // console.log("user_id", userId.value)
+    console.log('user_id', userId.value)
     // Update the `apiResponse` ref with the response data
     apiResponse.value = response.data.dataPayload.data.slots
     // Set all slots to `selected: false`
@@ -232,57 +247,15 @@ const getSlots = async () => {
   }
 }
 
-// Function to send the POST request
-// const submitAppointment = async () => {
-//   //reset errors
-//   errors.value = {}
-//   // Prepare form data
-//   const formData = new FormData()
-//   formData.append('file', appointmentData.value.file)
-
-//   // Add other appointment fields to formData
-//   Object.keys(appointmentData.value).forEach((key) => {
-//     if (key !== 'file') {
-//       formData.append(key, appointmentData.value[key])
-//     }
-//   })
-
-//   try {
-//     const response = await axiosInstance.post('/v1/scheduler/appointments', appointmentData.value)
-//     appointmentModal.value.hide()
-//     if (response.data.toastPayload) {
-//       toastPayload.value = response.data.toastPayload
-//       // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-//       // Show toast notification using the response data
-//       proxy.$showToast({
-//         title: toastPayload.value.toastMessage || ' success',
-//         icon: toastPayload.value.toastTheme || 'success' // You can switch this back to use the theme from the response
-//         // icon: 'success',
-//       })
-//     } else {
-//       // Fallback if toastPayload is not provided in the response
-//       proxy.$showToast({
-//         title: 'success',
-//         icon: 'success'
-//       })
-//     }
-//     // Reset the form
-//     appointmentData.value = {}
-//   } catch (error) {
-//     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
-//       errors.value = error.response.data.errorPayload.errors
-//     }
-//   }
-// }
+//clear the data in formData
 
 const submitAppointment = async () => {
   // Reset errors
-  errors.value = {}
+  resetErrors()
   uploading.value = true
   uploadProgress.value = 0
+  console.log('appointmentData: 100s', appointmentData.value)
 
-  // Prepare form data
   const formData = new FormData()
   formData.append('file', appointmentData.value.file)
 
@@ -294,6 +267,8 @@ const submitAppointment = async () => {
       formData.append(key, appointmentData.value[key])
     }
   })
+
+  console.log('Form data:', formData)
 
   try {
     const response = await axiosInstance.post('/v1/scheduler/appointments', formData, {
@@ -338,15 +313,8 @@ const submitAppointment = async () => {
     }
   } finally {
     uploading.value = false
-
-    // appointmentData.value = ref('')
-    // should now clear the form data
   }
 }
-
-watch(uploadProgress.value, (newValue) => {
-  console.log('Upload progress:', newValue)
-})
 
 const appointmentTypeOptions = ref([])
 const getAppointmentType = async () => {
@@ -448,7 +416,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="resetErrors">
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
@@ -514,7 +482,8 @@ onMounted(() => {
                     {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
                   </option>
 
-                  <!-- Loop through spaces array if available -->
+                  <!-- Loop through spaces array if available else show no spaces available -->
+                  <option v-if="!spaces || spaces.length === 0" disabled>No spaces available</option>
                   <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
                 </select>
 
@@ -526,16 +495,23 @@ onMounted(() => {
             </b-row>
             <b-row v-if="role !== 'su'" class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <option value="" disabled selected>Choose Recipient</option>
+
                 <label for="space" class="col-form-label">
                   <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
                 </label>
               </b-col>
               <b-col cols="10" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" required>
+                <!-- Only render the select element if spaces is not null or an empty array -->
+                <select v-if="spaces && spaces.length > 0" v-model="appointmentData.space_id" name="space" class="form-select" id="space" required>
                   <option value="" disabled selected>Choose Space</option>
                   <!-- Loop through spaces array and bind the option value to space.id -->
                   <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
                 </select>
+
+                <!-- Show a message if spaces is null or empty -->
+                <p v-else>No spaces available</p>
+
                 <!-- Display errors if there are any -->
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
@@ -552,24 +528,7 @@ onMounted(() => {
                 <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
               </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="addphonenumber" class="col-form-label">Notes</label>
-              </b-col>
-              <b-col cols="7">
-                <input type="text" id="addphonenumber" v-model="appointmentData.description" class="form-control" />
-                <!-- //upload progress bar -->
 
-                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
-              </b-col>
-
-              <b-col cols="3">
-                <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-                <!-- <div class="progress">
-                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
-                </div> -->
-              </b-col>
-            </b-row>
             <!-- <b-row class="g-3 align-items-center form-group">
               <b-col class="bg-primary" cols="2">
                 <label for="addphonenumber" class="col-form-label">cc:</label>
@@ -594,36 +553,6 @@ onMounted(() => {
               </b-col>
             </b-row> -->
 
-            <b-row class="g-3 align-items-center form-group">
-              <!-- Label Section -->
-              <b-col cols="2" class="d-flex align-items-center justify-content-start">
-                <label for="addphonenumber" class="col-form-label fw-bold">cc:</label>
-              </b-col>
-
-              <!-- Input and Search Section -->
-              <b-col cols="10">
-                <div class="search-form shadow-sm">
-                  <!-- Selected Items -->
-                  <div v-if="selectedItems.length" class="mb-2">
-                    <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
-                  </div>
-
-                  <!-- Search Input -->
-                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
-
-                  <!-- Search Results -->
-                  <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
-                    <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
-                      {{ result.username }}
-                    </li>
-                  </ul>
-
-                  <!-- No Results Message -->
-                  <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
-                </div>
-              </b-col>
-            </b-row>
-
             <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <label for="addappointmenttype" class="col-form-label">
@@ -647,16 +576,80 @@ onMounted(() => {
                 </label>
               </b-col>
               <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <flat-pickr v-model="selectedDate" class="form-control" :config="config" id="datePicker" />
+                <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" />
               </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group mt-3 mb-5 p-2">
+            <b-row class="g-3 align-items-center form-group mt-3 p-2">
               <b-row>
                 <b-col md="12" lg="12" sm="12">
                   <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
                 </b-col>
               </b-row>
               <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
+            </b-row>
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <label for="addsubject" class="col-form-label">Agenda</label>
+              </b-col>
+              <b-col cols="10">
+                <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
+                <!-- <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
+                </div> -->
+              </b-col>
+            </b-row>
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2">
+                <label for="description" class="col-form-label">Notes</label>
+              </b-col>
+              <b-col cols="10">
+                <textarea type="text" id="adddescription" v-model="appointmentData.description" class="form-control" rows="3" />
+                <!-- //upload progress bar -->
+
+                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
+              </b-col>
+            </b-row>
+            <b-row class="g-3 align-items-center form-group">
+              <!-- Label Section -->
+              <b-col cols="2" class="d-flex align-items-center justify-content-start">
+                <label for="addphonenumber" class="col-form-label fw-bold">cc:</label>
+              </b-col>
+
+              <!-- Input and Search Section -->
+              <b-col cols="10">
+                <div class="search-form shadow-sm">
+                  <!-- Selected Items -- -->
+                  <div v-if="selectedItems.length" class="mb-2">
+                    <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
+                  </div>
+
+                  <!-- Search Input -- -->
+                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
+
+                  <!-- Search Results  -->
+                  <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
+                    <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
+                      {{ result.username }}
+                    </li>
+                  </ul>
+
+                  <!-- No Results Message  -->
+                  <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
+                </div>
+              </b-col>
+              <!-- <b-col cols="10">
+                <div class="search-form shadow-sm">
+                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
+                  <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
+                    <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
+                      {{ result.username }}
+                    </li>
+                  </ul>
+
+                  <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
+                  <textarea :value="selectedItemsText" class="form-control mb-2" placeholder="Selected usernames will appear here..." readonly rows="2"></textarea>
+                </div>
+              </b-col> -->
             </b-row>
           </div>
         </div>

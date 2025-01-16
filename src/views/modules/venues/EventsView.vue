@@ -20,7 +20,7 @@ const errors = ref('')
 const newSpace = ref(null)
 const editevent = ref(null)
 
-const eventDetails = ref({
+const InitialeventDetails = ref({
   title: '',
   description: '',
   start_date: '',
@@ -29,6 +29,20 @@ const eventDetails = ref({
   end_time: ''
 })
 
+const eventDetails = ref({ ...InitialeventDetails.value })
+
+const resetFormData = () => {
+  eventDetails.value = { ...InitialeventDetails.value }
+}
+
+const resetErrors = () => {
+  errors.value = {}
+}
+
+function handleClose() {
+  resetErrors()
+  resetFormData()
+}
 const config = {
   dateFormat: 'Y-m-d',
   altInput: true,
@@ -125,15 +139,20 @@ const AddEvent = async () => {
 
     //get events
     getEvents(1)
+    //close the modal
+    newSpace.value.hide()
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastMessage,
+        icon: toastPayload.value.toastTheme , // You can switch this back to use the theme from the response
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -403,7 +422,7 @@ onMounted(async () => {
     </b-card>
   </b-col>
 
-  <b-modal ref="newSpace" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="newSpace" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
@@ -457,7 +476,7 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="AddEvent" variant="primary">Save</b-button>
+      <b-button @click="AddEvent" variant="primary">Create</b-button>
     </div>
   </b-modal>
 

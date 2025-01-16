@@ -16,6 +16,8 @@ const showModal = ref(false)
 
 // Toggle modal visibility function
 const toggleModal = () => {
+  resetformData()
+
   showModal.value = !showModal.value
 }
 
@@ -24,7 +26,7 @@ defineExpose({
   toggleModal
 })
 
-const formData = ref({
+const InitialformData = {
   username: '',
   password: '',
   confirm_password: '',
@@ -33,7 +35,18 @@ const formData = ref({
   last_name: '',
   mobile_number: '',
   email_address: ''
-})
+}
+
+const formData = ref({ ...InitialformData })
+
+function resetformData() {
+  formData.value = { ...InitialformData }
+}
+
+const resetErrors = () => {
+  errors.value = {}
+  //clear form data
+}
 
 const toastPayload = ref(null) // Define toastPayload ref
 
@@ -54,7 +67,7 @@ const submitForm = async () => {
       toastPayload.value = response.data.toastPayload
       proxy.$showToast({
         title: toastPayload.value.toastMessage || 'Created successfully',
-        icon:  toastPayload.value.toastTheme || 'success'
+        icon: toastPayload.value.toastTheme || 'success'
       })
       emit('user-created')
       console.log('emits emitted')
@@ -70,7 +83,7 @@ const submitForm = async () => {
     // close the modal
   } catch (error) {
     // console.error(error);
-    errors.value = error.response?.data?.errorPayload?.errors || {}
+    errors.value = error.response?.data?.errorPayload?.errors
 
     //if errors are empty then check error message
     if (Object.keys(errors.value).length === 0) {
@@ -81,21 +94,13 @@ const submitForm = async () => {
         icon: 'error'
       })
     }
-    //if empty error message then display generic error message
-    else {
-      proxy.$showToast({
-        title: 'An error occurred',
-        text: 'An error occurred',
-        icon: 'error'
-      })
-    }
   } finally {
     submitted.value = false
   }
 }
 </script>
 <template>
-  <b-modal v-model="showModal" no-close-on-backdrop id="addUserModal" title="Add User" hide-footer size="xl" centered body-class="p-4 custom-modal-body">
+  <b-modal v-model="showModal" no-close-on-backdrop id="addUserModal" title="Add User" hide-footer size="xl" centered body-class="p-4 custom-modal-body" @hide="resetErrors">
     <b-container class="p-3">
       <!-- Container with padding -->
       <h3 class="mb-4">Account Information</h3>
@@ -104,7 +109,7 @@ const submitForm = async () => {
           <!-- Email -->
           <b-col md="12" lg="6">
             <b-form-group label="Email*" label-class="mb-2">
-              <b-form-input type="email" placeholder="Email address" v-model="formData.email_address" required class="mb-3" />
+              <b-form-input type="email" placeholder="Email address" v-model="formData.email_address"  class="mb-3" />
               <div v-if="errors.email_address" class="errors">{{ errors.email_address }}</div>
             </b-form-group>
           </b-col>
@@ -112,7 +117,7 @@ const submitForm = async () => {
           <!-- Username -->
           <b-col md="12" lg="6">
             <b-form-group label="Username*" label-class="mb-2">
-              <b-form-input type="text" placeholder="Username" v-model="formData.username" required class="mb-3" />
+              <b-form-input type="text" placeholder="Username" v-model="formData.username"  class="mb-3" />
               <div v-if="errors.username" class="errors">{{ errors.username }}</div>
             </b-form-group>
           </b-col>
@@ -140,7 +145,7 @@ const submitForm = async () => {
           <!-- First Name -->
           <b-col md="12" lg="6">
             <b-form-group label="First Name*" label-class="mb-2">
-              <b-form-input type="text" placeholder="First Name" v-model="formData.first_name" required class="mb-3" />
+              <b-form-input type="text" placeholder="First Name" v-model="formData.first_name"  class="mb-3" />
               <div v-if="errors.first_name" class="errors">{{ errors.first_name }}</div>
             </b-form-group>
           </b-col>
@@ -158,7 +163,7 @@ const submitForm = async () => {
           <!-- Last Name -->
           <b-col md="12" lg="6">
             <b-form-group label="Last Name*" label-class="mb-2">
-              <b-form-input type="text" placeholder="Last Name" v-model="formData.last_name" required class="mb-3" />
+              <b-form-input type="text" placeholder="Last Name" v-model="formData.last_name" class="mb-3" />
               <div v-if="errors.last_name" class="errors">{{ errors.last_name }}</div>
             </b-form-group>
           </b-col>
@@ -166,7 +171,7 @@ const submitForm = async () => {
           <!-- Contact Number -->
           <b-col md="12" lg="6">
             <b-form-group label="Contact Number*" label-class="mb-2">
-              <b-form-input type="text" placeholder="Contact Number" v-model="formData.mobile_number" required class="mb-4" />
+              <b-form-input type="text" placeholder="Contact Number" v-model="formData.mobile_number" class="mb-4" />
               <div v-if="errors.mobile_number" class="errors">{{ errors.mobile_number }}</div>
             </b-form-group>
           </b-col>

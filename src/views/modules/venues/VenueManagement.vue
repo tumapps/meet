@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed, watchEffect, watch } from 'vue'
+import { onMounted, ref, getCurrentInstance, computed } from 'vue'
 import AxiosInstance from '@/api/axios'
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
@@ -10,6 +10,20 @@ const newSpace = ref(null)
 const editSpace = ref(null)
 const toastPayload = ref({})
 
+const { proxy } = getCurrentInstance()
+const axiosInstance = AxiosInstance()
+const tableData = ref([])
+const sortKey = ref('') // Active column being sorted
+const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc'
+const isArray = ref(false)
+const currentPage = ref(1) // The current page being viewed
+const totalPages = ref(1) // Total number of pages from the API
+const selectedPerPage = ref(20) // Number of items per page (from dropdown)
+const perPageOptions = ref([10, 20, 50, 100])
+const searchQuery = ref('')
+const selectedAvailability = ref('')
+const errors = ref({})
+
 //get user id from session storage
 
 const user_id = ref('')
@@ -17,12 +31,23 @@ user_id.value = authStore.getUserId()
 const perPage = ref(50) // Number of items per page (from API response)
 
 // Selected date
-const SpaceDetails = ref({
+const InitialSpaceDetails = {
   name: '',
   level_id: '',
   opening_time: '',
   closing_time: ''
-})
+}
+
+const SpaceDetails = ref({ ...InitialSpaceDetails })
+
+const resetFormData = () => {
+  SpaceDetails.value = { ...InitialSpaceDetails }
+}
+
+const handleClose = () => {
+  resetFormData()
+  errors.value = {}
+}
 
 const config2 = {
   enableTime: true,
@@ -49,20 +74,6 @@ const openModal = (id) => {
     editSpace.value.show()
   }
 }
-
-const { proxy } = getCurrentInstance()
-const axiosInstance = AxiosInstance()
-const tableData = ref([])
-const sortKey = ref('') // Active column being sorted
-const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc'
-const isArray = ref(false)
-const currentPage = ref(1) // The current page being viewed
-const totalPages = ref(1) // Total number of pages from the API
-const selectedPerPage = ref(20) // Number of items per page (from dropdown)
-const perPageOptions = ref([10, 20, 50, 100])
-const searchQuery = ref('')
-const selectedAvailability = ref('')
-const errors = ref({})
 
 const sortTable = (key) => {
   if (sortKey.value === key) {
@@ -183,10 +194,12 @@ const saveSpace = async () => {
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'created successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success',
+      //close modal
+      newSpace.value.hide()
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        text: toastPayload.value.toastMessage,
         showCancelButton: false,
         showConfirmButton: false,
         timer: 1500
@@ -456,6 +469,10 @@ onMounted(async () => {
                   </button>
                 </td>
                 <td>
+                  <!-- //info button -->
+                  <button v-if="item.is_deleted !== '1'" class="btn btn-outline-info btn-sm me-3" @click="viewDeatils(item.id)">
+                    <i class="fas fa-info" title="View"></i>
+                  </button>
                   <button v-if="item.is_deleted !== '1'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
@@ -496,7 +513,7 @@ onMounted(async () => {
   </b-col>
 
   <!-- //modal -->
-  <b-modal ref="newSpace" title="New Space" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="newSpace" title="New Space" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">

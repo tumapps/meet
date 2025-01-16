@@ -18,19 +18,34 @@ const perPageOptions = ref([10, 20, 50, 100])
 // const appointmentModal = ref(null)
 
 const AddRole = ref(null)
-const RoleDetails = ref({
+const InitialRoleDetails = {
   name: '',
   description: '',
   type: '1',
   data: '',
   ruleName: ''
-})
+}
+
+const RoleDetails = ref({ ...InitialRoleDetails })
+
+const resetFormData = () => {
+  RoleDetails.value = { ...InitialRoleDetails.value }
+}
 // const ViewRole = ref(null)
 
 const tableData = ref([])
 
 const errors = ref({})
+
+const resetErrors = () => {
+  errors.value = {}
+}
 const toastPayload = ref(null)
+
+const handleClose = () => {
+  resetErrors()
+  resetFormData()
+}
 
 const showModal = () => {
   if (AddRole.value) {
@@ -63,10 +78,13 @@ const NewRole = async () => {
       //get the data
       getRoles()
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Appointment Deleted successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        text: toastPayload.value.toastMessage,
+        timer: 2000,
+        showConfirmButton: false,
+        showCancelButton: false
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -244,7 +262,7 @@ onMounted(() => {
   </b-col>
 
   <!-- //add new role modal -->
-  <b-modal ref="AddRole" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false">
+  <b-modal ref="AddRole" title="Add Role" class="my-modal taller-modal modal-fullscreen" no-close-on-esc size="xl" hide-footer centered hide-header-close="false" @hide="handleClose">
     <template #modal-header="{ close }">
       <!-- Custom header with title and close button -->
       <h5 class="modal-title">Add Role</h5>
