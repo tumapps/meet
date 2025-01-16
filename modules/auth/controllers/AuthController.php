@@ -3,7 +3,6 @@
 namespace auth\controllers;
 
 use Yii;
-use yii\web\Response;
 use auth\models\static\Login;
 use auth\models\static\Register;
 use auth\models\static\PasswordReset;
@@ -13,8 +12,10 @@ use auth\models\RefreshToken;
 use auth\models\User;
 use auth\models\searches\UserSearch;
 use auth\models\Profiles;
-use Google\Service\Analytics\Profile;
 use yii\base\InvalidArgumentException;
+use auth\hooks\Configs;
+use auth\models\AuthItem;
+use auth\models\Assignment;
 
 class AuthController extends \helpers\ApiController
 {
@@ -115,7 +116,6 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
 
-
 	public function actionToggleAccountStatus($id)
 	{
 		if (!$id) {
@@ -175,6 +175,58 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['user' => $formattedUser]);
 	}
 
+	// public function actionUpdateUser($id)
+	// {
+	// 	Yii::$app->user->can('su');
+
+	// 	$user = User::findOne($id);
+	// 	if (!$user) {
+	// 		return $this->errorResponse(['message' => ['User not found']]);
+	// 	}
+
+	// 	$profile = $user->profile;
+	// 	if (!$profile) {
+	// 		return $this->errorResponse(['message' => ['User Profile not found']]);
+	// 	}
+
+	// 	$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
+
+
+	// 	try {
+	// 		$user->load($dataRequest['UpdateUser'], '');
+	// 		if (!$user->validate() || !$user->save(false)) {
+	// 			return $this->errorResponse($user->getErrors());
+	// 		}
+
+	// 		if (!empty($dataRequest['UpdateUser']['roles'])) {
+	// 			$authManager = Yii::$app->authManager;
+
+	// 			$currentRoles = $authManager->getRolesByUser($id);
+	// 			return $currentRoles;
+
+	// 			foreach ($currentRoles as $role) {
+	// 				$authManager->revoke($role['name'], $id);
+	// 			}
+
+
+
+	// 			$newRole = $authManager->getRole($dataRequest['UpdateUser']['roles']);
+	// 			if (!$newRole) {
+	// 				return $this->errorResponse(['message' => ['Invalid role specified']]);
+	// 			}
+	// 			$authManager->assign($newRole, $id);
+	// 		}
+
+	// 		$profile->load($dataRequest['UpdateUser'], '');
+	// 		if (!$profile->validate() || !$profile->save(false)) {
+	// 			return $this->errorResponse($profile->getErrors());
+	// 		}
+	// 		return $this->payloadResponse(['message' => 'User updated successfully']);
+	// 	} catch (\Exception $e) {
+	// 		return $this->errorResponse(['message' => $e->getMessage()]);
+	// 	}
+	// }
+
 	public function actionUpdateUser($id)
 	{
 		Yii::$app->user->can('su');
@@ -190,6 +242,10 @@ class AuthController extends \helpers\ApiController
 		}
 
 		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
+		
+		$authManager = Yii::$app->authManager;
+
+		$transaction = Yii::$app->db->beginTransaction();
 
 		try {
 			$user->load($dataRequest['UpdateUser'], '');
@@ -197,27 +253,48 @@ class AuthController extends \helpers\ApiController
 				return $this->errorResponse($user->getErrors());
 			}
 
-			if (!empty($dataRequest['UpdateUser']['role'])) {
-				$authManager = Yii::$app->authManager;
-
+			if (!empty($dataRequest['UpdateUser']['roles'])) {
+				$auth = Configs::authManager();
+				$newRoleName = $dataRequest['UpdateUser']['roles'];
 				$currentRoles = $authManager->getRolesByUser($id);
-				foreach ($currentRoles as $role) {
-					$authManager->revoke($role, $id);
+
+				$currentRole = reset($currentRoles);
+				$previousRoleName = $currentRole ? $currentRole->name : null;
+
+
+				if ($currentRole) {
+					$authManager->revoke($currentRole, $id);
 				}
 
-				$newRole = $authManager->getRole($dataRequest['UpdateUser']['role']);
+				$newRole = $authManager->getRole($newRoleName);
 				if (!$newRole) {
-					return $this->errorResponse(['message' => ['Invalid role specified']]);
+					throw new \Exception('Invalid role specified');
 				}
-				$authManager->assign($newRole, $id);
+
+
+				if (!(new Assignment($id))->assign([$newRole->name])) {
+					if ($previousRoleName) {
+						$previousRole = $authManager->getRole($previousRoleName);
+						if ($previousRole) {
+							if (!(new Assignment($id))->assign([$previousRole->name])) {
+								return $this->errorResponse(['message' => ['Failed to revert to the previous role after new role assignment failure.']]);
+							}
+						}
+					}
+					return $this->errorResponse(['message' => ['Failed to assign new role']]);
+				}
 			}
 
 			$profile->load($dataRequest['UpdateUser'], '');
 			if (!$profile->validate() || !$profile->save(false)) {
 				return $this->errorResponse($profile->getErrors());
 			}
+
+			$transaction->commit();
+
 			return $this->payloadResponse(['message' => 'User updated successfully']);
 		} catch (\Exception $e) {
+			$transaction->rollBack();
 			return $this->errorResponse(['message' => $e->getMessage()]);
 		}
 	}
@@ -246,7 +323,6 @@ class AuthController extends \helpers\ApiController
 		}
 		return $this->errorResponse($model->getErrors());
 	}
-
 
 	public function filterMenus($roles)
 	{
@@ -404,8 +480,6 @@ class AuthController extends \helpers\ApiController
 		}
 		return $this->errorResponse(500);
 	}
-
-
 	private function generateRefreshToken(User $user)
 	{
 		$refreshToken = Yii::$app->security->generateRandomString(200);

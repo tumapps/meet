@@ -3,8 +3,8 @@
 require_once __DIR__ . '/wrapper.php';
 $wrapper = new ConfigWrapper();
 $config = [
-    'id' => $_ENV['APP_CODE'],
-    'name' => $_ENV['APP_NAME'],
+    'id' => $_SERVER['APP_CODE'],
+    'name' => $_SERVER['APP_NAME'],
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
         'log',
@@ -43,18 +43,18 @@ $config = [
         ],
         'rabbitmq' => [
             'class' => \helpers\RabbitMqComponent::class,
-            'host' => $_ENV['_HOST'],
-            'port' => $_ENV['_PORT'],
-            'user' => $_ENV['_USER'],
-            'password' => $_ENV['_PASSWORD'],
-            'vhost' => $_ENV['V_HOST'],
+            'host' => $_SERVER['_HOST'],
+            'port' => $_SERVER['_PORT'],
+            'user' => $_SERVER['_USER'],
+            'password' => $_SERVER['_PASSWORD'],
+            'vhost' => $_SERVER['V_HOST'],
             'logFile' => '@app/providers/bin/logs/worker.log'
         ],
         'redis' => [
             'class' => 'yii\redis\Connection',
-            'hostname' => $_ENV['HOST_NAME'],
-            'port' => $_ENV['REDIS_PORT'],
-            'database' => $_ENV['DATABASE'],
+            'hostname' => $_SERVER['HOST_NAME'],
+            'port' => $_SERVER['REDIS_PORT'],
+            'database' => $_SERVER['DATABASE'],
             'on afterOpen' => function ($event) {
                 Yii::info('Connected to Redis', __METHOD__);
             },
@@ -93,7 +93,7 @@ $config = [
             'identityClass' => 'auth\models\User',
             'enableAutoLogin' => false,
             'loginUrl' => ['dashboard/iam/login'],
-            'identityCookie' => ['name' => '_identity-' . $_ENV['APP_CODE'], 'httpOnly' => true]
+            'identityCookie' => ['name' => '_identity-' . $_SERVER['APP_CODE'], 'httpOnly' => true]
         ],
         'authManager' => [
             'class' => \helpers\auth\AuthManager::class,
@@ -112,12 +112,12 @@ $config = [
             'viewPath' => '@app/mail',
             'useFileTransport' => false,
             'transport' => [
-                'scheme' => $_ENV['SCHEME'],
-                'host' => $_ENV['HOST'],
-                'username' => $_ENV['USERNAME'],
-                'password' => $_ENV['PASSWORD'],
-                'port' => $_ENV['MAIL_PORT'],
-                'encryption' => $_ENV['ENCRYPTION'],
+                'scheme' => $_SERVER['SCHEME'],
+                'host' => $_SERVER['HOST'],
+                'username' => $_SERVER['USERNAME'],
+                'password' => $_SERVER['PASSWORD'],
+                'port' => $_SERVER['MAIL_PORT'],
+                'encryption' => $_SERVER['ENCRYPTION'],
             ],
         ],
         'log' => [
@@ -151,16 +151,16 @@ $config = [
             'enableStrictParsing' => false,
             'showScriptName' => false,
             'rules' => [
-                $_ENV['APP_VERSION'] . '/about' => 'site/about',
+                $_SERVER['APP_VERSION'] . '/about' => 'site/about',
                 [
-                    'pattern' => $_ENV['APP_VERSION'] . '/docs/openapi-json-resource',
+                    'pattern' => $_SERVER['APP_VERSION'] . '/docs/openapi-json-resource',
                     'route' => 'site/json-docs',
                     'suffix' => '.json'
                 ],
                 [
                     'class' => 'yii\rest\UrlRule',
                     'pluralize' => false,
-                    'prefix' =>  $_ENV['APP_VERSION'],
+                    'prefix' =>  $_SERVER['APP_VERSION'],
                     'controller' => $wrapper->load('controllers'),
                     'extraPatterns' => $wrapper->load('routes'),
                     'tokens' =>  $wrapper->load('tokens'),

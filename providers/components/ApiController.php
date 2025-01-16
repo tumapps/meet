@@ -43,7 +43,6 @@ class ApiController extends \yii\rest\Controller
     {
         Yii::$app->response->statusCode = 422;
 
-        // Convert string error message to an array if necessary
         if (is_string($errors)) {
             $errors = ['error' => $errors];
         } elseif (is_array($errors)) {

@@ -11,9 +11,9 @@ class MailQueueManager extends Component
 {
 	use Mail;
 
-	public function __construct()
+	public function init()
 	{
-		//
+		// parent::init();
 	}
 
 	public function addToQueue($emailData)

@@ -32,6 +32,10 @@ class ActiveRecord extends \yii\db\ActiveRecord
 			$status = ($this->is_deleted == 1) ? $this->is_deleted : $this->status;
 			$this->recordStatus = self::badge($status);
 		}
+
+		if ($this->owner->hasAttribute('created_at')) {
+			$this->owner->created_at = Date('d M Y, H:i', $this->owner->created_at);
+		}
 		return parent::afterFind();
 	}
 	public function attributeLabels()

@@ -149,7 +149,7 @@ class Appointments extends BaseModel
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
             ['mobile_number', 'string', 'max' => 13, 'tooLong' => 'Phone number must not exceed 13 digits.'],
-            ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 13 digits.'],
+            ['mobile_number', 'validateMobileNumber'],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
@@ -178,6 +178,15 @@ class Appointments extends BaseModel
 
         if (strtotime($this->end_time) <= strtotime($this->start_time) || strtotime($dateTime) < strtotime($currentTime)) {
             $this->addError($attribute, 'invalid time range');
+        }
+    }
+
+    public function validateMobileNumber($attribute, $params)
+    {
+        $pattern = '/^(07|01|\+254)[0-9]{8}$/';
+
+        if (!preg_match($pattern, $this->$attribute)) {
+            $this->addError($attribute, 'Invalid phone number. It should start with 07, 01, or +254');
         }
     }
 
@@ -267,7 +276,7 @@ class Appointments extends BaseModel
             $this->appointment_date,
             $this->start_time,
             $this->end_time,
-            $appointmentId,
+            $this->id,
             // $this->priority
         );
 
@@ -372,6 +381,7 @@ class Appointments extends BaseModel
         // $appointment->checked_in = !$appointment->checked_in;
 
         $appointment->checked_in = true;
+        // $appointment->appointment_date = date('Y-m-d', strtotime($appointment->appointment_date));
         $appointment->status = self::STATUS_ATTENDED;
 
         // $appointment->save(false);

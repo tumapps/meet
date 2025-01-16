@@ -172,6 +172,8 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse($model->getErrors());
         }
 
+        $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
+        
         $model->status = Appointments::STATUS_REJECTED;
 
         if ($model->save(false)) {
@@ -245,7 +247,6 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionCheckin($id)
     {
-        // Call the model method to toggle the checked_in status
         // $isToggled = Appointments::toggleCheckedInAppointment($id);
 
         // if (!$isToggled) {
@@ -863,7 +864,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionSendSms()
     {
-        $to = '+254742306250';
+        $to = '+254768810076';
         $message = 'Hello,Your appointment has been rescheduled to 12:00 PM on 2023-01-15. Please check your calendar for more details.';
 
         $sms = new SmsComponent();
