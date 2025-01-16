@@ -16,6 +16,7 @@ use scheduler\hooks\TimeHelper;
 use scheduler\hooks\AppointmentRescheduler as Ar;
 use auth\models\User;
 use helpers\traits\AppointmentPolicy;
+use app\providers\components\SmsComponent;
 
 /**
  * @OA\Tag(
@@ -51,7 +52,7 @@ class AppointmentsController extends \helpers\ApiController
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
 
 
-        if ($isSecretary && isset($search['user_id']) && !empty($search['user_id'])) {
+        if ($isSecretary ||  $isSuperAdmin && isset($search['user_id']) && !empty($search['user_id'])) {
             $dataProvider = $searchModel->search($search);
         } else {
             $dataProvider = $searchModel->search($search);
@@ -126,6 +127,8 @@ class AppointmentsController extends \helpers\ApiController
         if ($model->status !== Appointments::STATUS_PENDING) {
             return $this->toastResponse(['statusCode' => 400, 'message' => 'Appointment cannot be approved. It may not exist or is not pending.']);
         }
+
+        $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
 
         $model->status = Appointments::STATUS_ACTIVE;
 
@@ -268,9 +271,7 @@ class AppointmentsController extends \helpers\ApiController
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-    //    $dataRequest['Appointments'] = $this->convertNullStringsToNull($dataRequest['Appointments']);
-
-        // return $dataRequest['Appointments'];
+        //    $dataRequest['Appointments'] = $this->convertNullStringsToNull($dataRequest['Appointments']);
 
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
@@ -356,15 +357,19 @@ class AppointmentsController extends \helpers\ApiController
     {
         Yii::$app->user->can('schedulerAppointmentsUpdate');
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+
         $model = $this->findModel($id);
 
         $attendees = AppointmentAttendees::findAll(['appointment_id' => $id]);
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
 
+
         if ($model->load($dataRequest)) {
             if (!$model->validate()) {
                 return $this->errorResponse($model->getErrors());
             }
+
+
 
             if ($model->status === Appointments::STATUS_RESCHEDULE) {
                 $model->status = Appointments::STATUS_RESCHEDULED;
@@ -633,11 +638,14 @@ class AppointmentsController extends \helpers\ApiController
 
     protected function updateAttendees($dataRequest, $currentAttendees)
     {
-        if (empty($dataRequest['Appointments']['attendees'])) {
-            return;
+        if ($dataRequest['Appointments']['attendees'] === 'null') {
+            $dataRequest['Appointments']['attendees'] = null;
         }
 
         $newAttendeesData = $dataRequest['Appointments']['attendees'];
+        if (empty($newAttendeesData) || $newAttendeesData === null) {
+            return;
+        }
         $existingAttendeesIds = array_column($currentAttendees, 'id');
         $newAttendeeIds = array_column($newAttendeesData, 'id');
 
@@ -652,37 +660,104 @@ class AppointmentsController extends \helpers\ApiController
                 $attendee = AppointmentAttendees::findOne($attendeeData['id']);
                 $attendee->attributes = $attendeeData;
 
+                return $attendee;
+
                 //Ensure that appointment_id is not modified in updates
                 unset($attendee->appointment_id);
 
                 if (!$attendee->validate() || !$attendee->save()) {
-                    throw new \Exception('Failed to update attendee');
+                    // throw new \Exception('Failed to update attendee');
+                    return $this->errorResponse($attendee->getErrors());
                 }
             } else {
                 $newAttendee = new AppointmentAttendees();
                 $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
                 $newAttendee->attributes = $attendeeData;
                 if (!$newAttendee->validate() || !$newAttendee->save()) {
-                    throw new \Exception('Failed to add new attendee');
+                    return $this->errorResponse($newAttendee->getErrors());
+                    // throw new \Exception('Failed to add new attendee');
                 }
             }
         }
     }
 
+    // protected function updateAttendees($dataRequest, $currentAttendees)
+    // {
+    //     $errors = [];
+
+    //     if ($dataRequest['Appointments']['attendees'] === 'null') {
+    //         $dataRequest['Appointments']['attendees'] = null;
+    //     }
+
+    //     $newAttendeesData = $dataRequest['Appointments']['attendees'];
+    //     if (empty($newAttendeesData)) {
+    //         return true;
+    //     }
+
+    //     $existingAttendeesIds = array_column($currentAttendees, 'id');
+    //     $newAttendeeIds = array_column($newAttendeesData, 'id');
+
+    //     foreach ($currentAttendees as $attendee) {
+    //         if (!in_array($attendee->id, $newAttendeeIds)) {
+    //             if (!$attendee->delete()) {
+    //                 $errors[] = "Failed to delete attendee ID: {$attendee->id}";
+    //             }
+    //         }
+    //     }
+
+    //     foreach ($newAttendeesData as $attendeeData) {
+    //         if (in_array($attendeeData['id'], $existingAttendeesIds)) {
+    //             $attendee = AppointmentAttendees::findOne($attendeeData['id']);
+    //             $attendee->attributes = $attendeeData;
+
+    //             unset($attendee->appointment_id);
+
+    //             if (!$attendee->validate()) {
+    //                 $errors[] = "Validation failed for attendee ID: {$attendeeData['id']}, Errors: " . json_encode($attendee->getErrors());
+    //             } elseif (!$attendee->save()) {
+    //                 $errors[] = "Failed to update attendee ID: {$attendeeData['id']}";
+    //             }
+    //         } else {
+    //             $newAttendee = new AppointmentAttendees();
+    //             $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
+    //             $newAttendee->attributes = $attendeeData;
+
+    //             if (!$newAttendee->validate()) {
+    //                 $errors[] = "Validation failed for new attendee, Errors: " . json_encode($newAttendee->getErrors());
+    //             } elseif (!$newAttendee->save()) {
+    //                 $errors[] = "Failed to add new attendee";
+    //             }
+    //         }
+    //     }
+
+    //     if (!empty($errors)) {
+    //         throw new \Exception('Attendee update errors: ' . implode('; ', $errors));
+    //     }
+
+    //     return true;
+    // }
+
+
     protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
     {
-        if (empty($dataRequest['Appointments']['space'])) {
-            throw new \Exception('No space data provided');
+        if (empty($dataRequest['Appointments']['space'] === 'null')) {
+            // throw new \Exception('No space data provided');
+            $dataRequest['Appointments']['space'] === null;
         }
 
         $spaceData = $dataRequest['Appointments']['space'];
+
+        if (empty($spaceData) || $spaceData === null) {
+            return;
+        }
 
         if ($currentSpaceAvailability) {
             $currentSpaceAvailability->attributes = $spaceData;
             $currentSpaceAvailability->appointment_id = $appointmentId;
 
             if (!$currentSpaceAvailability->validate() || !$currentSpaceAvailability->save()) {
-                throw new \Exception('Failed to update space availability');
+                return $this->errorResponse($currentSpaceAvailability->getErrors());
+                // throw new \Exception('Failed to update space availability');
             }
         } else {
             $newSpaceAvailability = new SpaceAvailability();
@@ -690,10 +765,45 @@ class AppointmentsController extends \helpers\ApiController
             $newSpaceAvailability->appointment_id = $appointmentId;
 
             if (!$newSpaceAvailability->validate() || !$newSpaceAvailability->save()) {
-                throw new \Exception('Failed to create space availability');
+                // throw new \Exception('Failed to create space availability');
+                return $this->errorResponse($currentSpaceAvailability->getErrors());
             }
         }
     }
+
+    // protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
+    // {
+    //     $spaceData = $dataRequest['Appointments']['space'];
+    //     if($spaceData === 'null') {
+    //         $spaceData = null;
+    //     }
+
+    //     if ($spaceData) {
+    //         if ($currentSpaceAvailability) {
+    //             $currentSpaceAvailability->attributes = $spaceData;
+    //             $currentSpaceAvailability->appointment_id = $appointmentId;
+
+    //             if (!$currentSpaceAvailability->validate() || !$currentSpaceAvailability->save()) {
+    //                 throw new \Exception('Failed to update space availability');
+    //             }
+    //         } else {
+    //             $newSpaceAvailability = new SpaceAvailability();
+    //             $newSpaceAvailability->attributes = $spaceData;
+    //             $newSpaceAvailability->appointment_id = $appointmentId;
+
+    //             if (!$newSpaceAvailability->validate() || !$newSpaceAvailability->save()) {
+    //                 throw new \Exception('Failed to create space availability');
+    //             }
+    //         }
+    //     } else {
+    //         if ($currentSpaceAvailability) {
+    //             if (!$currentSpaceAvailability->delete()) {
+    //                 throw new \Exception('Failed to remove existing space availability');
+    //             }
+    //         }
+    //     }
+    // }
+
 
     public function actionConfirmAttendance()
     {
@@ -749,5 +859,16 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         return $data;
+    }
+
+    public function actionSendSms()
+    {
+        $to = '+254742306250';
+        $message = 'Hello,Your appointment has been rescheduled to 12:00 PM on 2023-01-15. Please check your calendar for more details.';
+
+        $sms = new SmsComponent();
+        $response = $sms->send($to, $message);
+
+        return $this->payloadResponse($response, ['statusCode' => 202, 'message' => 'Message sent successfully']);
     }
 }
