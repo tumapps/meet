@@ -12,7 +12,7 @@ trait Status
                 $status = ['label' => 'DELETED', 'theme' => 'danger',];
                 break;
             case 2:
-                $status = ['label' => 'REJECTED', 'theme' => 'primary',];
+                $status = ['label' => 'REJECTED', 'theme' => 'danger',];
                 break;
             case 3:
                 $status = ['label' => 'RESCHEDULE', 'theme' => 'light',];
