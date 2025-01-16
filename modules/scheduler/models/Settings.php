@@ -4,6 +4,7 @@ namespace scheduler\models;
 
 use Yii;
 use auth\models\User;
+
 /**
  *@OA\Schema(
  *  schema="Settings",
@@ -33,18 +34,18 @@ class Settings extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'user_id',
-            'start_time',
-            'end_time',
-            'slot_duration',
-            'booking_window',
-            'advanced_booking',
-            'reminder_time',
-            'created_at',
-            'updated_at',
+                'id',
+                'user_id',
+                'start_time',
+                'end_time',
+                'slot_duration',
+                'booking_window',
+                'advanced_booking',
+                'reminder_time',
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -54,13 +55,13 @@ class Settings extends BaseModel
     public function rules()
     {
         return [
-            [['user_id', 'slot_duration', 'booking_window', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['user_id', 'slot_duration', 'booking_window', 'advanced_booking', 'created_at', 'updated_at'], 'integer'],
+            [['user_id', 'slot_duration', 'booking_window'], 'default', 'value' => null],
+            [['user_id', 'slot_duration', 'booking_window', 'advanced_booking'], 'integer'],
             [['start_time', 'end_time', 'user_id'], 'required'],
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
-             [['user_id'], 'validateSingleSetting'],
+            [['user_id'], 'validateSingleSetting'],
         ];
     }
 
@@ -131,15 +132,15 @@ class Settings extends BaseModel
     public static function getWorkingHours($user_id)
     {
         $hours = self::find()
-        ->select(['start_time', 'end_time'])
-        ->where(['user_id' => $user_id])
-        ->asArray()
-        ->one();
+            ->select(['start_time', 'end_time'])
+            ->where(['user_id' => $user_id])
+            ->asArray()
+            ->one();
 
         if ($hours) {
-        return [
-            'start_time' => $hours['start_time'],
-            'end_time' => $hours['end_time']
+            return [
+                'start_time' => $hours['start_time'],
+                'end_time' => $hours['end_time']
             ];
         } else {
             // If no hours are found, return default working hours (e.g., 08:00:00 to 17:00:00)
@@ -148,15 +149,14 @@ class Settings extends BaseModel
                 'end_time' => '17:00:00'
             ];
         }
-
     }
 
     public static function getAdvanceBookingDuration($user_id)
     {
         $duration = self::find()
-                    ->select(['advanced_booking'])
-                    ->where(['user_id' => $user_id])
-                    ->scalar();
+            ->select(['advanced_booking'])
+            ->where(['user_id' => $user_id])
+            ->scalar();
 
         return $duration;
     }
