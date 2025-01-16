@@ -163,7 +163,7 @@
      *   ),
      * )
      */
-    'POST assign-role-user'     => 'assignment/role-to-user',
+    'POST assign-role-user/{id}'     => 'assignment/role-to-user',
 
      /**
      * @OA\Get(path="/auth/assignment",
