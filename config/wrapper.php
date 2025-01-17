@@ -53,7 +53,7 @@ class ConfigWrapper
             'confirmationLink' => 'http://10.17.0.247/attendance-confirmation/',
             'loginUrl' => 'http://10.17.0.24',
             'menus' => [
-                    ['route' => 'default.dashboard', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
+                    ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
                     ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
                     ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
                     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
