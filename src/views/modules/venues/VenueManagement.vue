@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed } from 'vue'
+import { onMounted, ref, getCurrentInstance, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
@@ -84,20 +84,20 @@ const sortTable = (key) => {
   }
 }
 
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/scheduler/availabilities?_search=${searchQuery.value}`)
-    isArray.value = Array.isArray(response.data)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: 'Ooops! an error occured',
-      icon: 'error'
-    })
-  }
-}
+// const performSearch = async () => {
+//   try {
+//     const response = await axiosInstance.get(`v1/scheduler/availabilities?_search=${searchQuery.value}`)
+//     isArray.value = Array.isArray(response.data)
+//     tableData.value = response.data.dataPayload.data
+//   } catch (error) {
+//     // console.error(error);
+//     proxy.$showToast({
+//       title: 'An error occurred',
+//       text: 'Ooops! an error occured',
+//       icon: 'error'
+//     })
+//   }
+// }
 
 // const confirmCancel = (id) => {
 //     selectedAvailability.value = id;
@@ -138,10 +138,10 @@ const getLevels = async () => {
   }
 }
 
-const getSpaces = async (page = 1) => {
+const getSpaces = async (page) => {
   try {
     console.log(selectedPerPage.value)
-    const response = await axiosInstance.get(`v1/scheduler/spaces?page=${page}&per-page=${selectedPerPage.value}`)
+    const response = await axiosInstance.get(`v1/scheduler/spaces?page=${page}&per-page=${selectedPerPage.value}&search=${searchQuery.value}`)
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
     console.log(response.data.dataPayload.data)
@@ -160,6 +160,9 @@ const getSpaces = async (page = 1) => {
     })
   }
 }
+watch(searchQuery, () => {
+  getSpaces(1)
+})
 
 const getSpace = async (id) => {
   try {

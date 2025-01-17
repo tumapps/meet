@@ -251,7 +251,7 @@ onMounted(async () => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="getEvents"> Search </b-button>
+                  <b-button variant="primary" @click="getEvents(1)"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>

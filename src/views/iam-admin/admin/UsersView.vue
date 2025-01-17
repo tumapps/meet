@@ -132,7 +132,7 @@ const roleName = ref('')
 const showRoleModal = () => {
   roleName.value = userData.value.username
   propUser_id.value = userData.value.user_id
-  console.log('1', roleName.value)
+  console.log('hello', roleName.value)
   roleModal.value.$refs.roleModal.show()
   //pass the role name to the modal as value for roleName
 }

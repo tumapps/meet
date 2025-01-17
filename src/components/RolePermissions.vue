@@ -13,7 +13,6 @@ const availablePermissions = ref([])
 const assignedRoles = ref([])
 const assignedPermissions = ref([])
 //get the role name from the last part of the url
-// const roleName = ref()
 const props = defineProps({
   roleName: {
     type: String,
@@ -26,24 +25,37 @@ const props = defineProps({
 })
 
 const custompath = ref('')
-const rolename = ref('')
+
+const rolename = ref(props.roleName || '')
+
 if (props.user_id && props.roleName) {
   custompath.value = `role-to-user/${props.user_id}`
 } else if (props.roleName) {
   custompath.value = `/v1/auth/assign?role=${props.roleName}`
 }
 
+const onModalShow = () => {
+  console.log('RolePermissions mounted heree', props.roleName)
+}
 //selected items
 const selectedItems = ref({
   items: []
 })
 const roleModal = ref(null) // Reference for <b-modal>
 
-//close modal
-// const closeModal = () => {
-//   roleModal.value.hide()
-// }
-//get the role details
+watch(
+  () => props.roleName,
+  (newRoleName, oldRoleName) => {
+    rolename.value = newRoleName
+    console.log('RoleName changed:', rolename.value)
+
+    if (newRoleName !== oldRoleName && !props.user_id) {
+      console.log('RoleName changed:', newRoleName)
+      getRoleDetails()
+    }
+  }
+)
+
 const getRoleDetails = async () => {
   const response = await axiosInstance.get(`/v1/auth/manage-role?id=${props.roleName}`)
   availableRoles.value = response.data.dataPayload.data.available.roles
@@ -143,18 +155,8 @@ const stripRolePermissions = async () => {
   }
 }
 
-watch(
-  () => props.roleName,
-  (newRoleName, oldRoleName) => {
-    if (newRoleName !== oldRoleName && !props.user_id) {
-      console.log('RoleName changed:', newRoleName)
-      rolename.value = newRoleName
-      getRoleDetails()
-    }
-  }
-)
-
 onMounted(() => {
+  console.log('RolePermissions mounted', props.roleName)
   if (!props.user_id) {
     getRoleDetails()
   }
