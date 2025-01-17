@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, getCurrentInstance, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import Adduser from '@/components/AddUser.vue'
+import RolePermissions from '@/components/RolePermissions.vue'
 
 const axiosInstance = AxiosInstance()
 const { proxy } = getCurrentInstance()
@@ -59,21 +60,6 @@ watch(searchQuery, () => {
 const updatePerPage = () => {
   getUsers(1) // Fetch data for the first page with the new perPage value
 }
-
-// Perform search (if search query is used)
-// const performSearch = async () => {
-//   try {
-//     const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-//     tableData.value = response.data.dataPayload.data
-//   } catch (error) {
-//     // console.error(error);
-//     proxy.$showToast({
-//       title: 'An error occurred ',
-//       text: 'Ooops! an error occured',
-//       icon: 'error'
-//     })
-//   }
-// }
 
 // Pagination logic
 const goToPage = (page) => {
@@ -138,6 +124,17 @@ const getRoles = async () => {
   } catch (error) {
     console.error(error)
   }
+}
+
+const roleModal = ref(null)
+const propUser_id = ref('')
+const roleName = ref('')
+const showRoleModal = () => {
+  roleName.value = userData.value.username
+  propUser_id.value = userData.value.user_id
+  console.log('1', roleName.value)
+  roleModal.value.$refs.roleModal.show()
+  //pass the role name to the modal as value for roleName
 }
 
 // Fetch users on mount
@@ -368,8 +365,7 @@ const UpdateUser = async () => {
   <Adduser ref="addUserModal" @user-created="getUsers(1)" />
 
   <!-- modal to view and edit user details -->
-
-  <!-- - //add new role modal -->
+  <RolePermissions ref="roleModal" :roleName="roleName" :user_id="propUser_id" />
   <b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user" hide-footer>
     <template #modal-header="{ close }">
       <h5 class="modal-title">User Details</h5>
@@ -449,7 +445,7 @@ const UpdateUser = async () => {
       <b-col md="12" lg="4">
         <div class="mb-3">
           <label for="roledescription" class="form-label">Role</label>
-          <b-form-select v-model="userData.roles[0]" id="roledescription" :options="roles" placeholder="Select a role"></b-form-select>
+          <b-button @click="showRoleModal" variant="primary" class="w-100"> Role Details </b-button>
         </div>
         <div v-if="errors.role" class="error" aria-live="polite">
           {{ errors.role }}

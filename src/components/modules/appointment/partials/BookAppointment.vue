@@ -151,6 +151,8 @@ const appointmentData = ref({ ...initialAppointmentData })
 
 function resetAppointmentData() {
   appointmentData.value = { ...initialAppointmentData }
+  attendees.value = []
+  UsersOptions.value = []
 }
 
 const handleFileUpload = (event) => {
@@ -246,8 +248,6 @@ const getSlots = async () => {
     }
   }
 }
-
-//clear the data in formData
 
 const submitAppointment = async () => {
   // Reset errors
@@ -393,10 +393,11 @@ watch(selectedUsername, (newUsername) => {
   selectedUser_id.value = selectedUser ? selectedUser.id : null
   userId.value = newUsername || authStore.getUserId()
   appointmentData.value.user_id = userId.value
-  getSlots()
-  console.log('selectedUser_id:', userId.value)
-  console.log('real id ', appointmentData.value.user_id)
-  console.log(selectedUser)
+
+  if (appointmentData.value.appointment_date) {
+    getSlots()
+  }
+  // getSlots()
 })
 
 watch(selectedPriority, (newPriority) => {

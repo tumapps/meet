@@ -17,14 +17,22 @@ const assignedPermissions = ref([])
 const props = defineProps({
   roleName: {
     type: String,
-    required: true
+    required: false
+  },
+  user_id: {
+    type: Number,
+    required: false
   }
 })
-const rolename = ref('')
 
-const onModalShow = () => {
-  getRoleDetails()
+const custompath = ref('')
+const rolename = ref('')
+if (props.user_id && props.roleName) {
+  custompath.value = `role-to-user/${props.user_id}`
+} else if (props.roleName) {
+  custompath.value = `/v1/auth/assign?role=${props.roleName}`
 }
+
 //selected items
 const selectedItems = ref({
   items: []
@@ -62,7 +70,8 @@ const isSelected = (item) => {
 //send the selected items to the backend
 const updateRolePermissions = async () => {
   try {
-    const response = await axiosInstance.post(`/v1/auth/assign?role=${props.roleName}`, selectedItems.value)
+    // const response = await axiosInstance.post(`/v1/auth/assign?role=${props.roleName}`, selectedItems.value)
+    const response = await axiosInstance.post(custompath.value, selectedItems.value)
     getRoleDetails()
     //clear the selected items
     selectedItems.value.items = []
@@ -137,7 +146,7 @@ const stripRolePermissions = async () => {
 watch(
   () => props.roleName,
   (newRoleName, oldRoleName) => {
-    if (newRoleName !== oldRoleName) {
+    if (newRoleName !== oldRoleName && !props.user_id) {
       console.log('RoleName changed:', newRoleName)
       rolename.value = newRoleName
       getRoleDetails()
@@ -146,10 +155,9 @@ watch(
 )
 
 onMounted(() => {
-  console.log('hello', props.roleName)
-  //get the role details
-  getRoleDetails()
-  console.log('Role Permissions View Mounted', props.roleName)
+  if (!props.user_id) {
+    getRoleDetails()
+  }
 })
 </script>
 <template>

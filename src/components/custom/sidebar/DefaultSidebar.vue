@@ -44,7 +44,7 @@ export default {
 <!-- <template>
   <aside :class="`sidebar-base ${sidebarColor} ${sidebarMenuStyle} ${sidebarType.join(' ')} ${sidebarShow}`" id="first-tour" data-toggle="main-sidebar" data-sidebar="responsive" @mouseover="openSidebarOnHover" @mouseleave="closeSidebarOnLeave">
     <div class="sidebar-header d-flex align-items-center justify-content-start">
-      <router-link :to="{ name: 'default.dashboard' }" class="navbar-brand">
+      <router-link :to="{ name: 'board' }" class="navbar-brand">
         <brand-logo />
         <h4 class="logo-title" data-setting="app_name">
           <brand-name />

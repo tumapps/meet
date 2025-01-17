@@ -18,8 +18,8 @@ import MeetingConfirmationView from '@/views/modules/appointment/AttendanceConfi
 // Default routes
 export const defaultChildRoutes = (prefix) => [
   {
-    path: '',
-    name: prefix + '.dashboard', // Now it will become appointment.dashboard
+    path: '/home',
+    name: 'home', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'Home', isBanner: false },
     component: () => import('@/views/modules/appointment/DashboardPageView.vue')
   },

@@ -957,10 +957,10 @@ onUnmounted(() => {
     <template #title>
       <div class="custom-modal-title">
         <!-- <span class="contact-name">{{ appointmentDetails.contact_name }}</span> -->
-        <span class="subject">{{ appointmentDetails.subject }}</span>
-        <span class="date">{{ appointmentDetails.appointment_date }}</span>
-        <span class="time">{{ appointmentDetails.start_time }} - {{ appointmentDetails.end_time }}</span>
-        <span class="status">
+        <span class="subject">RE: {{ appointmentDetails.subject }}</span>
+        <span class="date"> Date: {{ appointmentDetails.appointment_date }}</span>
+        <span class="time"> Time:{{ appointmentDetails.start_time }} - {{ appointmentDetails.end_time }}</span>
+        <span class="status">Status:
           <b-badge :variant="recordStatus.theme" class="me-3">
             {{ recordStatus.label }}
           </b-badge>

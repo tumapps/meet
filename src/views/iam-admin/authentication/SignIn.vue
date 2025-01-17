@@ -76,7 +76,7 @@ const onSubmit = async () => {
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100">
       <div class="col-md-4 col-lg-3">
         <b-card class="h-100 py-5 d-flex flex-column justify-content-between" style="background: white !important">
-          <img :src="require(`@/assets/images/logo.png`)" class="h-12 w-25 d-block mx-auto" alt="logo" />
+          <img :src="require(`@/assets/images/logo.png`)" class="d-block mx-auto logo-img" alt="logo" />
           <h5 class="text-center mt-3 mb-4 fw-bold text-primary">Sign In | TUMMEET</h5>
           <form @submit.prevent="onSubmit">
             <div class="form-group">
@@ -113,6 +113,13 @@ const onSubmit = async () => {
 .error {
   color: red;
   font-size: 0.9em;
+}
+
+.logo-img {
+  height: 8rem; /* Equivalent to 48px */
+  width: auto; /* Maintain aspect ratio */ /* Prevent it from overflowing its container */
+  display: block;
+  margin: 0 auto;
 }
 
 .iq-auth-page {
