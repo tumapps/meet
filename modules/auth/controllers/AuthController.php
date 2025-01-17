@@ -53,33 +53,6 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
 	}
 
-
-	// public function actionGetUsers()
-	// {
-	// 	// $profiles = Profiles::find()->all();
-	// 	$profiles = Profiles::find()
-	// 		->joinWith('user')
-	// 		->where(['users.can_be_booked' => true])
-	// 		->all();
-
-	// 	if (empty($profiles)) {
-	// 		return $this->errorResponse(['message' => ['No profiles found']]);
-	// 	}
-	// 	$formattedProfiles = [];
-	// 	foreach ($profiles as $profile) {
-	// 		$formattedProfiles[] = [
-	// 			'user_id' => $profile->user_id,
-	// 			'email' => $profile->email_address,
-	// 			'status' => $profile->user->status,
-	// 			'last_activity' => $profile->user->last_login_at,
-	// 			'name' => $profile->first_name . ' ' . $profile->last_name,
-	// 			'middle_name' => $profile->middle_name,
-	// 			'mobile_number' => $profile->mobile_number
-	// 		];
-	// 	}
-	// 	return $this->payloadResponse(['profiles' => $formattedProfiles]);
-	// }
-
 	public function actionGetUsers()
 	{
 		$profiles = Profiles::find()
@@ -175,58 +148,6 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse(['user' => $formattedUser]);
 	}
 
-	// public function actionUpdateUser($id)
-	// {
-	// 	Yii::$app->user->can('su');
-
-	// 	$user = User::findOne($id);
-	// 	if (!$user) {
-	// 		return $this->errorResponse(['message' => ['User not found']]);
-	// 	}
-
-	// 	$profile = $user->profile;
-	// 	if (!$profile) {
-	// 		return $this->errorResponse(['message' => ['User Profile not found']]);
-	// 	}
-
-	// 	$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
-
-
-	// 	try {
-	// 		$user->load($dataRequest['UpdateUser'], '');
-	// 		if (!$user->validate() || !$user->save(false)) {
-	// 			return $this->errorResponse($user->getErrors());
-	// 		}
-
-	// 		if (!empty($dataRequest['UpdateUser']['roles'])) {
-	// 			$authManager = Yii::$app->authManager;
-
-	// 			$currentRoles = $authManager->getRolesByUser($id);
-	// 			return $currentRoles;
-
-	// 			foreach ($currentRoles as $role) {
-	// 				$authManager->revoke($role['name'], $id);
-	// 			}
-
-
-
-	// 			$newRole = $authManager->getRole($dataRequest['UpdateUser']['roles']);
-	// 			if (!$newRole) {
-	// 				return $this->errorResponse(['message' => ['Invalid role specified']]);
-	// 			}
-	// 			$authManager->assign($newRole, $id);
-	// 		}
-
-	// 		$profile->load($dataRequest['UpdateUser'], '');
-	// 		if (!$profile->validate() || !$profile->save(false)) {
-	// 			return $this->errorResponse($profile->getErrors());
-	// 		}
-	// 		return $this->payloadResponse(['message' => 'User updated successfully']);
-	// 	} catch (\Exception $e) {
-	// 		return $this->errorResponse(['message' => $e->getMessage()]);
-	// 	}
-	// }
-
 	public function actionUpdateUser($id)
 	{
 		Yii::$app->user->can('su');
@@ -242,8 +163,6 @@ class AuthController extends \helpers\ApiController
 		}
 
 		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
-		
-		$authManager = Yii::$app->authManager;
 
 		$transaction = Yii::$app->db->beginTransaction();
 
@@ -251,38 +170,6 @@ class AuthController extends \helpers\ApiController
 			$user->load($dataRequest['UpdateUser'], '');
 			if (!$user->validate() || !$user->save(false)) {
 				return $this->errorResponse($user->getErrors());
-			}
-
-			if (!empty($dataRequest['UpdateUser']['roles'])) {
-				$auth = Configs::authManager();
-				$newRoleName = $dataRequest['UpdateUser']['roles'];
-				$currentRoles = $authManager->getRolesByUser($id);
-
-				$currentRole = reset($currentRoles);
-				$previousRoleName = $currentRole ? $currentRole->name : null;
-
-
-				if ($currentRole) {
-					$authManager->revoke($currentRole, $id);
-				}
-
-				$newRole = $authManager->getRole($newRoleName);
-				if (!$newRole) {
-					throw new \Exception('Invalid role specified');
-				}
-
-
-				if (!(new Assignment($id))->assign([$newRole->name])) {
-					if ($previousRoleName) {
-						$previousRole = $authManager->getRole($previousRoleName);
-						if ($previousRole) {
-							if (!(new Assignment($id))->assign([$previousRole->name])) {
-								return $this->errorResponse(['message' => ['Failed to revert to the previous role after new role assignment failure.']]);
-							}
-						}
-					}
-					return $this->errorResponse(['message' => ['Failed to assign new role']]);
-				}
 			}
 
 			$profile->load($dataRequest['UpdateUser'], '');
@@ -334,9 +221,9 @@ class AuthController extends \helpers\ApiController
 			// return $menus;
 			$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
 		} elseif (in_array('secretary', $roleNames)) {
-			$allowedRoutes = ['default.dashboard', 'appointments'];
+			$allowedRoutes = ['home', 'appointments'];
 		} elseif (in_array('user', $roleNames)) {
-			$allowedRoutes = ['default.dashboard', 'appointments', 'availability'];
+			$allowedRoutes = ['home', 'appointments', 'availability'];
 		} elseif (in_array('registrar', $roleNames)) {
 			$allowedRoutes = ['meetings-approval', 'venues', 'events', 'venue-management'];
 		} else {
