@@ -85,7 +85,19 @@ class AppointmentsController extends \helpers\ApiController
                 ->asArray()
                 ->all();
 
-            $appointmentData['attendees'] = $attendees;
+            $attendeeDetails = [];
+            foreach ($attendees as $attendee) {
+                if (isset($attendee['staff_id'])) {
+                    $user = User::findOne($attendee['staff_id']);
+                    $attendeeDetails[] = [
+                        'staff_id' => $attendee['staff_id'],
+                        'email' => $user ? $user->profile->email_address : '',
+                        'name' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
+                    ];
+                }
+            }
+
+            $appointmentData['attendees'] = $attendeeDetails;
 
             $appointment = $appointmentData;
         }
@@ -144,7 +156,7 @@ class AppointmentsController extends \helpers\ApiController
                 $model->end_time
             );
 
-            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment has been approved successfully.']);
+            return $this->toastResponse(['message' => 'Appointment has been approved successfully.']);
         }
 
         return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to approve appointment']);
@@ -160,21 +172,19 @@ class AppointmentsController extends \helpers\ApiController
             return $this->toastResponse(['statusCode' => 400, 'message' => 'Appointment cannot be rejected. It may not exist or is not pending.']);
         }
 
-        $model->scenario = Appointments::SCENARIO_REJECT;
-
         if ($request->isPut) {
             $putParams = $request->getBodyParams();
             $reason = isset($putParams['rejection_reason']) ? $putParams['rejection_reason'] : null;
+            $model->rejection_reason = $reason;
         }
 
-        $model->rejection_reason = $reason;
+        $model->scenario = Appointments::SCENARIO_REJECT;
 
         if (!$model->validate()) {
             return $this->errorResponse($model->getErrors());
         }
 
         $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
-
         $model->status = Appointments::STATUS_REJECTED;
 
         if ($model->save(false)) {
@@ -269,11 +279,10 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionCreate($dataRequest = null)
     {
-        // Yii::$app->user->can('schedulerAppointmentsCreate');
+        Yii::$app->user->can('schedulerAppointmentsCreate');
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        //    $dataRequest['Appointments'] = $this->convertNullStringsToNull($dataRequest['Appointments']);
 
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
@@ -359,6 +368,7 @@ class AppointmentsController extends \helpers\ApiController
     {
         Yii::$app->user->can('schedulerAppointmentsUpdate');
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+        $dataRequest['Appointments']['appointment_date'] = date('Y-m-d', strtotime($dataRequest['Appointments']['appointment_date']));
 
         $model = $this->findModel($id);
 
@@ -370,8 +380,6 @@ class AppointmentsController extends \helpers\ApiController
             if (!$model->validate()) {
                 return $this->errorResponse($model->getErrors());
             }
-
-
 
             if ($model->status === Appointments::STATUS_RESCHEDULE) {
                 $model->status = Appointments::STATUS_RESCHEDULED;
@@ -613,13 +621,47 @@ class AppointmentsController extends \helpers\ApiController
             $attendees = explode(',', $attendees);
         }
 
-        $addAttendees = new AppointmentAttendees();
-
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
                 $staffId = trim($attendeeId);
-                $addAttendees->addAttendee($id, $staffId, $date, $startTime, $endTime);
+                $addAttendee = new AppointmentAttendees();
+                $addAttendee->addAttendee($id, $staffId, $date, $startTime, $endTime);
             }
+        }
+    }
+
+    public function actionRemoveAttendee($id)
+    {
+        $dataRequest['Attendees'] = Yii::$app->request->getBodyParams();
+        $model = new AppointmentAttendees();
+        $model->scenario = AppointmentAttendees::SCENARIO_REMOVE;
+
+        if (!$model->load($dataRequest, 'Attendees') || !$model->validate()) {
+            return $this->errorResponse($model->getErrors());
+        }
+
+        $appointment = Appointments::findOne($id);
+        if (!$appointment) {
+            return $this->errorResponse(['message' => ['Appointment not found']]);
+        }
+
+        $attendee = AppointmentAttendees::findOne([
+            'appointment_id' => $id,
+            'staff_id' => $model->staff_id,
+        ]);
+
+        if (!$attendee) {
+            return $this->errorResponse(['message' => ['Attendee not found for this appointment']]);
+        }
+
+        $attendee->removal_reason = $model->removal_reason;
+        $attendee->is_removed = true;
+        if ($attendee->save(false)) {
+
+            $model->sendAttendeeUpdateEvent($attendee->appointment_id, $attendee->id, $model->removal_reason, true);
+            return $this->toastResponse(['message' => ['Attendee removed successfully.']]);
+        } else {
+            return $this->errorResponse(['message' => ['Failed to remove attendee']]);
         }
     }
 
@@ -645,20 +687,12 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $newAttendeesData = $dataRequest['Appointments']['attendees'];
+
         if (empty($newAttendeesData) || $newAttendeesData === null) {
             return;
         }
-        $existingAttendeesIds = array_column($currentAttendees, 'id');
-        $newAttendeeIds = array_column($newAttendeesData, 'id');
 
-        foreach ($currentAttendees as $attendee) {
-            if (!in_array($attendee->id, $newAttendeeIds)) {
-                // Notify removed attendee via email
-                // $this->sendEmailNotification($attendee->email, 'You have been removed from the appointment', $attendee);
-                $attendee->delete();
-                // send email notification
-            }
-        }
+        $existingAttendeesIds = array_column($currentAttendees, 'id');
 
         foreach ($newAttendeesData as $attendeeData) {
             if (in_array($attendeeData['id'], $existingAttendeesIds)) {
@@ -667,21 +701,20 @@ class AppointmentsController extends \helpers\ApiController
 
                 return $attendee;
 
-                //Ensure that appointment_id is not modified in updates
                 unset($attendee->appointment_id);
 
                 if (!$attendee->validate() || !$attendee->save()) {
                     return $this->errorResponse($attendee->getErrors());
                 }
             } else {
-                // Notify new attendee via email
-                // $this->sendEmailNotification($attendeeData['email'], 'You have been invited to an appointment', $attendeeData);
                 $newAttendee = new AppointmentAttendees();
                 $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
                 $newAttendee->attributes = $attendeeData;
                 if (!$newAttendee->validate() || !$newAttendee->save()) {
                     return $this->errorResponse($newAttendee->getErrors());
                 }
+
+                $newAttendee->sendAttendeeUpdateEvent($newAttendee->appointment_id, $newAttendee->id);
             }
         }
     }
