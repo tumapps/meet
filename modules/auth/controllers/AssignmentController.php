@@ -15,27 +15,16 @@ class AssignmentController extends \helpers\ApiController
 {
     protected $type = Item::TYPE_ROLE;
 
-    public function actionAssing() {}
-
-    public function actionManageRole2($id)
-    {
-        // Yii::$app->user->can('manage-roles');
-        $model = $this->findModel($id);
-        return $model;
-    }
-
     public function actionManageRole($id)
     {
         $authManager = Yii::$app->authManager;
 
-        // Find the role by ID or name
         $role =  $authManager->getRole($id);
 
         if (!$role) {
             return $this->errorResponse('Role not found', 404);
         }
 
-        // Fetch all roles and permissions
         $allRoles = $authManager->getRoles();
         $allPermissions = $authManager->getPermissions();
 
@@ -55,6 +44,31 @@ class AssignmentController extends \helpers\ApiController
             'assigned' => [
                 'roles' => $assignedRoles,
                 'permissions' => $assignedPermissions,
+            ],
+        ]);
+    }
+
+    public function actionManageUserRoles($id)
+    {
+        $authManager = Yii::$app->authManager;
+
+        $user = User::findOne($id);
+
+        if (!$user) {
+            return $this->errorResponse(['message' => ['User does not exist']]);
+        }
+
+        $allRoles = $authManager->getRoles();
+        $assignedRoles = $authManager->getRolesByUser($user->id);
+
+        $availableRoles = array_diff_key($allRoles, $assignedRoles);
+
+        return $this->payloadResponse([
+            'available' => [
+                'roles' => $availableRoles,
+            ],
+            'assigned' => [
+                'roles' => $assignedRoles,
             ],
         ]);
     }
