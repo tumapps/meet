@@ -23,10 +23,6 @@ class DateFormatter extends Behavior
 
         // }
 
-        // if ($this->owner->hasAttribute('updated_at')) {
-        //     $this->owner->updated_at = Date('M Y, H:i', $this->owner->updated_at);
-        // }
-
         if ($this->owner->hasAttribute('appointment_date')) {
             $this->owner->appointment_date = Date('d M Y', strtotime($this->owner->appointment_date));
         }
