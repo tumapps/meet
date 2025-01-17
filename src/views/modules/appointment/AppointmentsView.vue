@@ -450,7 +450,7 @@ const updateAppointment = async () => {
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
 
-      getAppointments()
+      getAppointments(1)
       // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
@@ -811,7 +811,7 @@ onUnmounted(() => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" class="h-100" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="getAppointments" class="h-100">
+                  <b-button variant="primary" @click="getAppointments()" class="h-100">
                     <i class="fas fa-search"></i>
                   </b-button>
                 </b-input-group-append>
@@ -960,7 +960,8 @@ onUnmounted(() => {
         <span class="subject">RE: {{ appointmentDetails.subject }}</span>
         <span class="date"> Date: {{ appointmentDetails.appointment_date }}</span>
         <span class="time"> Time:{{ appointmentDetails.start_time }} - {{ appointmentDetails.end_time }}</span>
-        <span class="status">Status:
+        <span class="status"
+          >Status:
           <b-badge :variant="recordStatus.theme" class="me-3">
             {{ recordStatus.label }}
           </b-badge>

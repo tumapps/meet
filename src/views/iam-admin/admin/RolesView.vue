@@ -1,5 +1,5 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted, computed } from 'vue'
+import { ref, getCurrentInstance, onMounted, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 // import { useRouter } from 'vue-router'
 import RolePermissions from '@/components/RolePermissions.vue'
@@ -10,7 +10,7 @@ const { proxy } = getCurrentInstance()
 const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc's
 const sortKey = ref('') // Active column being sorted
 const searchQuery = ref('')
-const isArray = ref(false)
+// const isArray = ref(false)
 const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
@@ -109,13 +109,16 @@ const NewRole = async () => {
 //get roles
 const getRoles = async (page = currentPage.value) => {
   try {
-    const response = await axiosInstance.get(`/v1/auth/roles?page=${page}&per-page=${selectedPerPage.value}`)
+    const response = await axiosInstance.get(`/v1/auth/roles?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
     console.log(tableData.value)
   } catch (error) {
     console.error(error)
   }
 }
+watch(searchQuery, () => {
+  getRoles(1)
+})
 
 const roleModal = ref(null)
 const roleName = ref('')
@@ -145,23 +148,23 @@ const updatePerPage = async () => {
 }
 
 //search
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/auth/roles?_search=${searchQuery.value}`)
-    isArray.value = Array.isArray(response.data)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+// const performSearch = async () => {
+//   try {
+//     const response = await axiosInstance.get(`v1/auth/roles?_search=${searchQuery.value}`)
+//     isArray.value = Array.isArray(response.data)
+//     tableData.value = response.data.dataPayload.data
+//   } catch (error) {
+//     // console.error(error);
+//     errors.value = error.response.data.errorPayload.errors
+//     const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
+//     proxy.$showToast({
+//       title: 'An error occurred',
+//       text: errorMessage,
+//       icon: 'error'
+//     })
+//   }
+// }
 
 onMounted(() => {
   getRoles()
@@ -194,7 +197,7 @@ onMounted(() => {
               <b-input-group>
                 <b-form-input placeholder="Search..." v-model="searchQuery" />
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch">Search</b-button>
+                  <b-button variant="primary" @click="getRoles(1)">Search</b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>

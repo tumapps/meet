@@ -1,5 +1,5 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted, computed } from 'vue'
+import { ref, getCurrentInstance, onMounted, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 
 const axiosInstance = AxiosInstance()
@@ -7,7 +7,7 @@ const { proxy } = getCurrentInstance()
 const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc'
 const sortKey = ref('') // Active column being sorted
 const searchQuery = ref('')
-const isArray = ref(false)
+// const isArray = ref(false)
 const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
@@ -88,7 +88,7 @@ const goToPage = (page) => {
 //get roles
 const getPermissions = async (page = currentPage.value) => {
   try {
-    const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}`)
+    const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}&search=${searchQuery.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
     console.log(tableData.value)
 
@@ -99,6 +99,10 @@ const getPermissions = async (page = currentPage.value) => {
     console.error(error)
   }
 }
+
+watch(searchQuery, () => {
+  getPermissions(1)
+})
 
 //edit roles
 
@@ -138,23 +142,23 @@ const updatePerPage = async () => {
 }
 
 //search
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/auth/permission?_search=${searchQuery.value}`)
-    isArray.value = Array.isArray(response.data)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.data.errorPayload.message || 'An unknown error occurred'
+// const performSearch = async () => {
+//   try {
+//     const response = await axiosInstance.get(`v1/auth/permission?_search=${searchQuery.value}`)
+//     isArray.value = Array.isArray(response.data)
+//     tableData.value = response.data.dataPayload.data
+//   } catch (error) {
+//     // console.error(error);
+//     errors.value = error.response.data.errorPayload.errors
+//     const errorMessage = error.response.data.errorPayload.errors?.message || error.response.data.errorPayload.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
+//     proxy.$showToast({
+//       title: 'An error occurred',
+//       text: errorMessage,
+//       icon: 'error'
+//     })
+//   }
+// }
 
 const SyncPermissions = async () => {
   try {
@@ -207,7 +211,7 @@ onMounted(() => {
               <b-input-group>
                 <b-form-input placeholder="Search..." v-model="searchQuery" />
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch">Search</b-button>
+                  <b-button variant="primary" @click="getPermissions(1)">Search</b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>
@@ -219,7 +223,7 @@ onMounted(() => {
         <table class="table table-hover">
           <thead>
             <tr>
-              <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th>
+              <!-- <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th> -->
               <th @click="sortTable('start_date')">Name <i class="fas fa-sort"></i></th>
               <th>Description</th>
               <!-- <th>Data</th> -->
@@ -232,7 +236,7 @@ onMounted(() => {
           <tbody>
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
-                <td>{{ index }}</td>
+                <!-- <td>{{ index }}</td> -->
                 <td>{{ item.name }}</td>
                 <td>{{ item.data }}</td>
                 <!-- <td>{{ item.description }}</td> -->

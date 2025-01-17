@@ -44,7 +44,17 @@ const sortedData = computed(() => {
 
 const getPendingApprovals = async (page) => {
   try {
-    const response = await axiosInstance.get(`v1/scheduler/pending-appointments?page=${page}&perPage=${selectedPerPage.value}&search=${searchQuery.value}`)
+    const params = {
+      page: page, // Current page number
+      'per-page': selectedPerPage.value // Items per page
+    }
+
+    // Include search query if it's not empty
+    if (searchQuery.value) {
+      params._search = searchQuery.value
+    }
+
+    const response = await axiosInstance.get('v1/scheduler/pending-appointments', { params })
 
     tableData.value = response.data.dataPayload.data
     console.log(response.data.dataPayload.data)

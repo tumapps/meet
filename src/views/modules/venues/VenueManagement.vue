@@ -438,7 +438,7 @@ onMounted(async () => {
               <b-input-group>
                 <b-form-input placeholder="Search..." v-model="searchQuery" />
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch">
+                  <b-button variant="primary" @click="getSpaces()">
                     <i class="fas fa-search"></i>
                   </b-button>
                 </b-input-group-append>

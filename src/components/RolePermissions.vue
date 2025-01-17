@@ -26,16 +26,31 @@ const props = defineProps({
 
 const custompath = ref('')
 
-const rolename = ref(props.roleName || '')
+const rolename = ref('')
 
-if (props.user_id && props.roleName) {
-  custompath.value = `role-to-user/${props.user_id}`
-} else if (props.roleName) {
-  custompath.value = `/v1/auth/assign?role=${props.roleName}`
-}
+// if (props.user_id && props.roleName) {
+//   custompath.value = `role-to-user/${props.user_id}`
+// } else if (props.roleName) {
+//   custompath.value = `/v1/auth/assign?role=${props.roleName}`
+// }
 
 const onModalShow = () => {
   console.log('RolePermissions mounted heree', props.roleName)
+  rolename.value = ref(props.roleName)
+
+  if (props.user_id && props.roleName) {
+    custompath.value = `role-to-user/${props.user_id}`
+  } else if (props.roleName) {
+    custompath.value = `/v1/auth/assign?role=${props.roleName}`
+  }
+}
+
+const handleclose = () => {
+  console.log('RolePermissions closed')
+  //reset the selected items
+  selectedItems.value.items = []
+  //reset props
+  rolename.value = ''
 }
 //selected items
 const selectedItems = ref({
@@ -72,6 +87,7 @@ const moveToSelected = (name) => {
     return
   }
   selectedItems.value.items.push(name)
+  console.log(selectedItems.value.items)
 }
 
 //check if the item is in the  selected items
@@ -82,38 +98,41 @@ const isSelected = (item) => {
 //send the selected items to the backend
 const updateRolePermissions = async () => {
   try {
-    // const response = await axiosInstance.post(`/v1/auth/assign?role=${props.roleName}`, selectedItems.value)
+    // Send the selected items to the backend
     const response = await axiosInstance.post(custompath.value, selectedItems.value)
+
+    // Refresh the role details
     getRoleDetails()
-    //clear the selected items
+
+    // Clear the selected items
     selectedItems.value.items = []
 
+    // Check if a toast payload exists in the response
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
 
-      //get the data
-      // Show toast notification using the response data
+      // Show a toast notification with the provided data
       proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'success',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+        title: toastPayload.value.toastMessage || 'Success',
+        icon: toastPayload.value.toastTheme || 'success'
       })
     } else {
-      // Fallback if toastPayload is not provided in the response
+      // Fallback: show a default success notification
       proxy.$showToast({
-        title: 'success',
+        title: 'Success',
         icon: 'success'
       })
     }
   } catch (error) {
-    // console.error(error);
-    errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+    // Handle errors
+    const errorMessage = error?.response?.data?.errorPayload?.errors?.message || error?.response?.data?.toastPayload?.toastMessage
+    const theme = error?.response?.data?.toastPayload?.toastTheme || 'error'
 
+    // Show a toast notification for the error
     proxy.$showToast({
       title: errorMessage,
       text: errorMessage,
-      icon: 'info'
+      icon: theme
     })
   }
 }
@@ -127,9 +146,6 @@ const stripRolePermissions = async () => {
 
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-
-      //get the data
-      // Show toast notification using the response data
       proxy.$showToast({
         title: toastPayload.value.toastMessage || 'success',
         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
@@ -145,12 +161,11 @@ const stripRolePermissions = async () => {
   } catch (error) {
     // console.error(error);
     errors.value = error.response.data.errorPayload.errors
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: errorMessage,
-      text: errorMessage,
-      icon: 'error'
+    proxy.$showAlert({
+      title: error.response.data.toastPayload.toastTheme,
+      text: error.response.data.toastPayload.toastMessage,
+      icon: error.response.data.toastPayload.toastTheme
     })
   }
 }
@@ -163,7 +178,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <b-modal ref="roleModal" @show="onModalShow" :title="rolename" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="roleModal" @show="onModalShow" :title="rolename" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleclose">
     <!-- Page Content -->
     <div class="row" style="max-height: 70vh; display: flex; overflow: hidden">
       <!-- Available Items Column -->
@@ -176,7 +191,7 @@ onMounted(() => {
         <div>
           <button class="btn btn-link text-decoration-none">Roles</button>
           <ul class="list-group">
-            <li v-for="item in availableRoles" :key="item.name" class="list-group-item" @click="moveToSelected(item.name)">
+            <li v-for="item in availableRoles" :key="item.name" :class="['list-group-item', isSelected(item, 'role', 'available') ? 'active-item' : '']"  @click="moveToSelected(item.name)">
               {{ item.name }}
             </li>
           </ul>

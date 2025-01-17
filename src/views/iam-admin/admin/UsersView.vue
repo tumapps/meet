@@ -22,7 +22,7 @@ const userData = ref({
 })
 
 // Fetch users from API with pagination
-const getUsers = async (page = 1) => {
+const getUsers = async (page) => {
   try {
     // const response = await axiosInstance.get(`/v1/auth/users?page=${page}&per-page=${selectedPerPage.value}`)
     const params = {
@@ -53,12 +53,12 @@ const getUsers = async (page = 1) => {
 
 // watch searchQuery
 watch(searchQuery, () => {
-  getUsers(1)
+  getUsers()
 })
 
 // Handle items per page change
 const updatePerPage = () => {
-  getUsers(1) // Fetch data for the first page with the new perPage value
+  getUsers() // Fetch data for the first page with the new perPage value
 }
 
 // Pagination logic
@@ -139,7 +139,7 @@ const showRoleModal = () => {
 
 // Fetch users on mount
 onMounted(() => {
-  getUsers(1)
+  getUsers()
   getRoles()
 })
 
@@ -171,7 +171,7 @@ const toggleStatus = async (id) => {
       })
     }
 
-    getUsers(1)
+    getUsers()
     //close modal
     ViewUser.value.hide()
   } catch (error) {
@@ -288,7 +288,7 @@ const UpdateUser = async () => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="getUsers"> Search </b-button>
+                  <b-button variant="primary" @click="getUsers()"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>
