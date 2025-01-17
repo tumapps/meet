@@ -11,6 +11,7 @@ use scheduler\models\Events;
  */
 class EventsSearch extends Events
 {
+    public $search;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +19,7 @@ class EventsSearch extends Events
     {
         return [
             [['id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['title', 'description', 'start_date', 'end_date', 'start_time', 'end_time'], 'safe'],
+            [['title', 'description', 'start_date', 'end_date', 'start_time', 'end_time', 'search'], 'safe'],
         ];
     }
 
@@ -68,8 +69,8 @@ class EventsSearch extends Events
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'title', $this->title])
-            ->andFilterWhere(['ilike', 'description', $this->description]);
+        $query->orFilterWhere(['ilike', 'title', $this->search])
+            ->orFilterWhere(['ilike', 'description', $this->search]);
 
         return $dataProvider;
     }

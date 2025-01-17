@@ -11,6 +11,7 @@ use scheduler\models\Space;
  */
 class SpaceSearch extends Space
 {
+    public $search;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +19,7 @@ class SpaceSearch extends Space
     {
         return [
             [['id', 'level_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
-            [['name', 'opening_time', 'closing', 'location', 'description'], 'safe'],
+            [['name', 'opening_time', 'closing', 'location', 'description','search'], 'safe'],
             [['is_locked'], 'boolean'],
         ];
     }
@@ -42,6 +43,7 @@ class SpaceSearch extends Space
     public function search($params)
     {
         $query = Space::find();
+        //$query->with('level'); // eager loading
 
         // add conditions that should always apply here
 
@@ -69,9 +71,9 @@ class SpaceSearch extends Space
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'name', $this->name])
-            ->andFilterWhere(['ilike', 'location', $this->location])
-            ->andFilterWhere(['ilike', 'description', $this->description]);
+        $query->orFilterWhere(['ilike', 'name', $this->search])
+            ->orFilterWhere(['ilike', 'location', $this->search])
+            ->orFilterWhere(['ilike', 'description', $this->search]);
 
         return $dataProvider;
     }

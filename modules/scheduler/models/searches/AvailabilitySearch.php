@@ -11,6 +11,7 @@ use scheduler\models\Availability;
  */
 class AvailabilitySearch extends Availability
 {
+    public $search;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +19,7 @@ class AvailabilitySearch extends Availability
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['start_date', 'end_date', 'is_deleted','start_time', 'end_time', 'description', 'created_at', 'updated_at'], 'safe'],
+            [['start_date', 'end_date', 'is_deleted','start_time', 'end_time', 'description', 'created_at', 'updated_at', 'search'], 'safe'],
             [['is_full_day'], 'boolean'],
         ];
     }
@@ -72,7 +73,7 @@ class AvailabilitySearch extends Availability
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'description', $this->description]);
+        $query->orFilterWhere(['ilike', 'description', $this->search]);
 
         return $dataProvider;
     }
