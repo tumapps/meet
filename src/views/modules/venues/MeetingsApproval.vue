@@ -93,9 +93,14 @@ const ApproveBooking = async (id) => {
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'operation successful',
-        icon: toastPayload.value.toastTheme || 'success' // You can switch this back to use the theme from the response
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        text: toastPayload.value.toastMessage,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 15000,
+        timerProgressBar: true
         // icon: 'success',
       })
     } else {
@@ -118,17 +123,40 @@ const ApproveBooking = async (id) => {
   }
 }
 
-const RejectBooking = async (id) => {
+const confirmApprove = async (id) => {
+  proxy
+    .$showAlert({
+      title: 'APPROVE',
+      text: 'Do you want to proceed?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Proceed',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        ApproveBooking(id)
+      }
+    })
+}
+
+const RejectBooking = async (id, rejection_reason) => {
   try {
-    const response = await axiosInstance.put(`v1/scheduler/reject/${id}`)
+    const response = await axiosInstance.put(`v1/scheduler/reject/${id}`, { rejection_reason })
 
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'operation successful',
-        icon: toastPayload.value.toastTheme || 'success' // You can switch this back to use the theme from the response
-        // icon: 'success',
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        text: toastPayload.value.toastMessage,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -155,12 +183,10 @@ const RejectBooking = async (id) => {
 }
 
 const confirmReject = (id) => {
-  // selectedAvailability.value = id
-
   proxy
     .$showAlert({
       title: 'REJECT',
-      text: 'By rejecting the meeting will not take place unless they get another space. Do you want to proceed?',
+      text: 'By rejecting to grant permission the meeting will be CANCELLED. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Proceed',
@@ -170,8 +196,49 @@ const confirmReject = (id) => {
     })
     .then((result) => {
       if (result.isConfirmed) {
-        RejectBooking(id)
-        getPendingApprovals(1)
+        // Ask for reason
+        const askForReason = () => {
+          proxy
+            .$showAlert({
+              title: 'REJECT',
+              text: 'Please provide a reason for rejecting the request',
+              input: 'text',
+              inputPlaceholder: 'reason',
+              inputAttributes: {
+                maxlength: 100
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Reject',
+              cancelButtonText: 'Cancel',
+              confirmButtonColor: '#076232',
+              cancelButtonColor: '#d33'
+            })
+            .then((reasonResult) => {
+              if (reasonResult.isConfirmed) {
+                // Check if the reason is valid
+                if (!reasonResult.value || reasonResult.value.trim() === '') {
+                  proxy
+                    .$showAlert({
+                      title: 'Invalid Input',
+                      text: 'Reason cannot be empty. Please provide a valid reason.',
+                      icon: 'error',
+                      confirmButtonText: 'OK',
+                      confirmButtonColor: '#d33',
+                      showCancelButton: false
+                    })
+                    .then(() => {
+                      askForReason() // Prompt for reason again
+                    })
+                } else {
+                  // Pass the reason to reject
+                  RejectBooking(id, reasonResult.value.trim())
+                  console.log(reasonResult.value)
+                  getPendingApprovals(1)
+                }
+              }
+            })
+        }
+        askForReason() // Initial call to ask for reason
       }
     })
 }
@@ -243,11 +310,11 @@ onMounted(() => {
                 <td>{{ item.appointment_type }}</td>
                 <td>
                   <!-- Actions -->
-                  <button class="btn btn-outline-primary btn-sm me-3" @click="ApproveBooking(item.id)">
-                    <i class="fas fa-edit" title="Approve"></i>
+                  <button class="btn btn-outline-primary btn-sm me-3" @click="confirmApprove(item.id)">
+                    <i class="fas fa-check" title="APPROVE"></i>
                   </button>
                   <button v-if="item.is_deleted !== '1'" class="btn btn-outline-danger btn-sm me-3" @click="confirmReject(item.id)">
-                    <i class="fas fa-trash" title="REJECT"></i>
+                    <i class="fas fa-ban" title="REJECT"></i>
                   </button>
                 </td>
               </tr>

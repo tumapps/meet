@@ -115,11 +115,14 @@ const onSubmit = async () => {
   font-size: 0.9em;
 }
 
+
 .logo-img {
   height: 8rem; /* Equivalent to 48px */
-  max-width: 10rem; /* Maintain aspect ratio */ /* Prevent it from overflowing its container */
+  width: auto; /* Maintain aspect ratio */ /* Prevent it from overflowing its container */
   display: block;
   margin: 0 auto;
+  max-width: 100%;
+  min-width: fit-content;
 }
 
 .iq-auth-page {

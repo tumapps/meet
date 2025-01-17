@@ -191,7 +191,7 @@ onMounted(() => {
         <div>
           <button class="btn btn-link text-decoration-none">Roles</button>
           <ul class="list-group">
-            <li v-for="item in availableRoles" :key="item.name" :class="['list-group-item', isSelected(item, 'role', 'available') ? 'active-item' : '']"  @click="moveToSelected(item.name)">
+            <li v-for="item in availableRoles" :key="item.name" :class="['list-group-item', isSelected(item, 'role', 'available') ? 'active-item' : '']" @click="moveToSelected(item.name)">
               {{ item.name }}
             </li>
           </ul>
