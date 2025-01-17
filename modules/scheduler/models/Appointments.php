@@ -186,7 +186,7 @@ class Appointments extends BaseModel
         $pattern = '/^(07|01|\+254)[0-9]{8}$/';
 
         if (!preg_match($pattern, $this->$attribute)) {
-            $this->addError($attribute, 'Invalid phone number. It should start with 07, 01, or +254');
+            $this->addError($attribute, 'Invalid phone number');
         }
     }
 
