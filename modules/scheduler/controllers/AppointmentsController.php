@@ -80,6 +80,7 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendees = AppointmentAttendees::find()
+                ->select(['staff_id'])
                 ->where(['appointment_id' => $appointment->id])
                 ->asArray()
                 ->all();
@@ -173,7 +174,7 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
-        
+
         $model->status = Appointments::STATUS_REJECTED;
 
         if ($model->save(false)) {
@@ -652,7 +653,10 @@ class AppointmentsController extends \helpers\ApiController
 
         foreach ($currentAttendees as $attendee) {
             if (!in_array($attendee->id, $newAttendeeIds)) {
+                // Notify removed attendee via email
+                // $this->sendEmailNotification($attendee->email, 'You have been removed from the appointment', $attendee);
                 $attendee->delete();
+                // send email notification
             }
         }
 
@@ -667,82 +671,24 @@ class AppointmentsController extends \helpers\ApiController
                 unset($attendee->appointment_id);
 
                 if (!$attendee->validate() || !$attendee->save()) {
-                    // throw new \Exception('Failed to update attendee');
                     return $this->errorResponse($attendee->getErrors());
                 }
             } else {
+                // Notify new attendee via email
+                // $this->sendEmailNotification($attendeeData['email'], 'You have been invited to an appointment', $attendeeData);
                 $newAttendee = new AppointmentAttendees();
                 $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
                 $newAttendee->attributes = $attendeeData;
                 if (!$newAttendee->validate() || !$newAttendee->save()) {
                     return $this->errorResponse($newAttendee->getErrors());
-                    // throw new \Exception('Failed to add new attendee');
                 }
             }
         }
     }
 
-    // protected function updateAttendees($dataRequest, $currentAttendees)
-    // {
-    //     $errors = [];
-
-    //     if ($dataRequest['Appointments']['attendees'] === 'null') {
-    //         $dataRequest['Appointments']['attendees'] = null;
-    //     }
-
-    //     $newAttendeesData = $dataRequest['Appointments']['attendees'];
-    //     if (empty($newAttendeesData)) {
-    //         return true;
-    //     }
-
-    //     $existingAttendeesIds = array_column($currentAttendees, 'id');
-    //     $newAttendeeIds = array_column($newAttendeesData, 'id');
-
-    //     foreach ($currentAttendees as $attendee) {
-    //         if (!in_array($attendee->id, $newAttendeeIds)) {
-    //             if (!$attendee->delete()) {
-    //                 $errors[] = "Failed to delete attendee ID: {$attendee->id}";
-    //             }
-    //         }
-    //     }
-
-    //     foreach ($newAttendeesData as $attendeeData) {
-    //         if (in_array($attendeeData['id'], $existingAttendeesIds)) {
-    //             $attendee = AppointmentAttendees::findOne($attendeeData['id']);
-    //             $attendee->attributes = $attendeeData;
-
-    //             unset($attendee->appointment_id);
-
-    //             if (!$attendee->validate()) {
-    //                 $errors[] = "Validation failed for attendee ID: {$attendeeData['id']}, Errors: " . json_encode($attendee->getErrors());
-    //             } elseif (!$attendee->save()) {
-    //                 $errors[] = "Failed to update attendee ID: {$attendeeData['id']}";
-    //             }
-    //         } else {
-    //             $newAttendee = new AppointmentAttendees();
-    //             $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
-    //             $newAttendee->attributes = $attendeeData;
-
-    //             if (!$newAttendee->validate()) {
-    //                 $errors[] = "Validation failed for new attendee, Errors: " . json_encode($newAttendee->getErrors());
-    //             } elseif (!$newAttendee->save()) {
-    //                 $errors[] = "Failed to add new attendee";
-    //             }
-    //         }
-    //     }
-
-    //     if (!empty($errors)) {
-    //         throw new \Exception('Attendee update errors: ' . implode('; ', $errors));
-    //     }
-
-    //     return true;
-    // }
-
-
     protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
     {
         if (empty($dataRequest['Appointments']['space'] === 'null')) {
-            // throw new \Exception('No space data provided');
             $dataRequest['Appointments']['space'] === null;
         }
 
@@ -758,7 +704,6 @@ class AppointmentsController extends \helpers\ApiController
 
             if (!$currentSpaceAvailability->validate() || !$currentSpaceAvailability->save()) {
                 return $this->errorResponse($currentSpaceAvailability->getErrors());
-                // throw new \Exception('Failed to update space availability');
             }
         } else {
             $newSpaceAvailability = new SpaceAvailability();
@@ -766,45 +711,10 @@ class AppointmentsController extends \helpers\ApiController
             $newSpaceAvailability->appointment_id = $appointmentId;
 
             if (!$newSpaceAvailability->validate() || !$newSpaceAvailability->save()) {
-                // throw new \Exception('Failed to create space availability');
                 return $this->errorResponse($currentSpaceAvailability->getErrors());
             }
         }
     }
-
-    // protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
-    // {
-    //     $spaceData = $dataRequest['Appointments']['space'];
-    //     if($spaceData === 'null') {
-    //         $spaceData = null;
-    //     }
-
-    //     if ($spaceData) {
-    //         if ($currentSpaceAvailability) {
-    //             $currentSpaceAvailability->attributes = $spaceData;
-    //             $currentSpaceAvailability->appointment_id = $appointmentId;
-
-    //             if (!$currentSpaceAvailability->validate() || !$currentSpaceAvailability->save()) {
-    //                 throw new \Exception('Failed to update space availability');
-    //             }
-    //         } else {
-    //             $newSpaceAvailability = new SpaceAvailability();
-    //             $newSpaceAvailability->attributes = $spaceData;
-    //             $newSpaceAvailability->appointment_id = $appointmentId;
-
-    //             if (!$newSpaceAvailability->validate() || !$newSpaceAvailability->save()) {
-    //                 throw new \Exception('Failed to create space availability');
-    //             }
-    //         }
-    //     } else {
-    //         if ($currentSpaceAvailability) {
-    //             if (!$currentSpaceAvailability->delete()) {
-    //                 throw new \Exception('Failed to remove existing space availability');
-    //             }
-    //         }
-    //     }
-    // }
-
 
     public function actionConfirmAttendance()
     {
