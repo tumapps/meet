@@ -27,7 +27,6 @@ class MailQueueManager extends Component
 			if ($result > 0) {
 				return true;
 			}
-
 			return false;
 		} catch (\Exception $e) {
 			Yii::error('Error adding email to queue: ' . $e->getMessage(), __METHOD__);
@@ -73,7 +72,7 @@ class MailQueueManager extends Component
 	}
 
 
-	protected function retryFailedEmails()
+	public function retryFailedEmails()
 	{
 		$currentTime = time();
 
