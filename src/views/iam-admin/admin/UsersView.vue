@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, getCurrentInstance } from 'vue'
+import { ref, onMounted, computed, getCurrentInstance, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import Adduser from '@/components/AddUser.vue'
 
@@ -23,7 +23,18 @@ const userData = ref({
 // Fetch users from API with pagination
 const getUsers = async (page = 1) => {
   try {
-    const response = await axiosInstance.get(`/v1/auth/users?page=${page}&per-page=${selectedPerPage.value}`)
+    // const response = await axiosInstance.get(`/v1/auth/users?page=${page}&per-page=${selectedPerPage.value}`)
+    const params = {
+      page: page, // Current page number
+      'per-page': selectedPerPage.value // Items per page
+    }
+
+    // Include search query if it's not empty
+    if (searchQuery.value) {
+      params._search = searchQuery.value
+    }
+
+    const response = await axiosInstance.get('/v1/auth/users', { params })
 
     if (response.data && response.data.dataPayload) {
       tableData.value = response.data.dataPayload.data
@@ -39,25 +50,30 @@ const getUsers = async (page = 1) => {
   }
 }
 
+// watch searchQuery
+watch(searchQuery, () => {
+  getUsers(1)
+})
+
 // Handle items per page change
 const updatePerPage = () => {
   getUsers(1) // Fetch data for the first page with the new perPage value
 }
 
 // Perform search (if search query is used)
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    proxy.$showToast({
-      title: 'An error occurred ',
-      text: 'Ooops! an error occured',
-      icon: 'error'
-    })
-  }
-}
+// const performSearch = async () => {
+//   try {
+//     const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
+//     tableData.value = response.data.dataPayload.data
+//   } catch (error) {
+//     // console.error(error);
+//     proxy.$showToast({
+//       title: 'An error occurred ',
+//       text: 'Ooops! an error occured',
+//       icon: 'error'
+//     })
+//   }
+// }
 
 // Pagination logic
 const goToPage = (page) => {
@@ -275,7 +291,7 @@ const UpdateUser = async () => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch"> Search </b-button>
+                  <b-button variant="primary" @click="getUsers"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>

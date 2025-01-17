@@ -6,6 +6,8 @@ import BookAppointment from '@/components/modules/appointment/partials/BookAppoi
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'
 import { useAuthStore } from '@/store/auth.store.js'
 import UppyDashboard from '@/components/custom/uppy/UppyDashboard.vue'
+import FlatPickr from 'vue-flatpickr-component'
+import { debounce } from 'lodash-es'
 
 const authStore = useAuthStore()
 
@@ -37,7 +39,7 @@ const recordStatus = ref('')
 //get user_id from session storage
 // const userId = authStore.getUserId();
 
-const appointmentDetails = ref({
+const InitialappointmentDetails = {
   appointment_date: '',
   start_time: '',
   end_time: '',
@@ -52,7 +54,16 @@ const appointmentDetails = ref({
   statusLabel: '',
   user_id: '',
   space_id: ''
-})
+}
+
+const appointmentDetails = ref({ ...InitialappointmentDetails })
+
+const flatPickrConfig = {
+  dateFormat: 'd M Y',
+  altInput: true,
+  altFormat: 'F j, Y',
+  minDate: 'today'
+}
 
 const goToPage = (page) => {
   // Ensure the page is within the valid range
@@ -109,8 +120,8 @@ const confirmDelete = (id) => {
       showCancelButton: true,
       confirmButtonText: 'Delete',
       cancelButtonText: 'cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#076232'
+      confirmButtonColor: '076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {
@@ -136,8 +147,8 @@ const confirmCancel = (id) => {
       showCancelButton: true,
       confirmButtonText: 'Yes, CANCEL it!',
       cancelButtonText: 'No, keep it',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#097B3E',
+      confirmButtonColor: '076232',
+      cancelButtonColor: '#d33',
       preConfirm: (inputValue) => {
         if (!inputValue) {
           // Display error message if input is empty
@@ -291,8 +302,8 @@ const confirmRestore = (id) => {
       showCancelButton: true,
       confirmButtonText: 'RESTORE',
       cancelButtonText: 'cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#076232'
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {
@@ -304,8 +315,17 @@ const confirmRestore = (id) => {
 
 const getAppointments = async (page = 1) => {
   try {
-    // console.log("selected", selectedPerPage.value)
-    const response = await axiosInstance.get(`/v1/scheduler/appointments?page=${page}&per-page=${selectedPerPage.value}`)
+    const params = {
+      page: page, // Current page number
+      'per-page': selectedPerPage.value // Items per page
+    }
+
+    // Include search query if it's not empty
+    if (searchQuery.value) {
+      params._search = searchQuery.value
+    }
+
+    const response = await axiosInstance.get('/v1/scheduler/appointments', { params })
     //check if data is array
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
@@ -333,6 +353,11 @@ const getAppointments = async (page = 1) => {
     })
   }
 }
+
+//watch seach query and call getAppointments
+watch(searchQuery, () => {
+  getAppointments(1)
+})
 
 //slots for time
 const slotsData = ref({
@@ -368,20 +393,20 @@ const getAppointment = async (id) => {
       setUserId()
       // console.log("user_id", slotsData.value.user_id);
       downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
-      const formattedAppointmentDate = computed({
-        get() {
-          if (!appointmentDetails.value.appointment_date) return null
-          const date = new Date(appointmentDetails.value.appointment_date)
-          if (isNaN(date)) return null // Handle invalid dates
-          return date.toISOString().split('T')[0] // Returns 'YYYY-MM-DD'
-        },
-        set(value) {
-          appointmentDetails.value.appointment_date = value // Set the input value
-          console.log('formattedAppointmentDate', appointmentDetails.value.appointment_date)
-        }
-      })
+      // const formattedAppointmentDate = computed({
+      //   get() {
+      //     if (!appointmentDetails.value.appointment_date) return null
+      //     const date = new Date(appointmentDetails.value.appointment_date)
+      //     if (isNaN(date)) return null // Handle invalid dates
+      //     return date.toISOString().split('T')[0] // Returns 'YYYY-MM-DD'
+      //   },
+      //   set(value) {
+      //     appointmentDetails.value.appointment_date = value // Set the input value
+      //     console.log('formattedAppointmentDate', appointmentDetails.value.appointment_date)
+      //   }
+      // })
 
-      appointmentDetails.value.appointment_date = formattedAppointmentDate.value
+      // appointmentDetails.value.appointment_date = formattedAppointmentDate.value
 
       console.log('new date ', appointmentDetails.value.appointment_date)
 
@@ -416,15 +441,6 @@ const openModal = (id) => {
 
 const updateAppointment = async () => {
   console.log(appointmentDetails.value.checked_in)
-  // if (appointmentDetails.value.checked_in) {
-  //   //show toast
-  //   proxy.$showToast({
-  //     title: 'Cannot update: Appointment is already checked in',
-  //     // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-  //     icon: 'info'
-  //   })
-  // } else {
-  // Call the update function if checked_in is false
   try {
     errorDetails.value = {}
 
@@ -466,21 +482,21 @@ const updateAppointment = async () => {
 }
 // }
 
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+// const performSearch = async () => {
+//   try {
+//     const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
+//     tableData.value = response.data.dataPayload.data
+//   } catch (error) {
+//     // console.error(error);
+//     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
+//     proxy.$showToast({
+//       title: 'An error occurred',
+//       text: errorMessage,
+//       icon: 'error'
+//     })
+//   }
+// }
 
 const suggestions = ref([])
 const suggestedDate = ref('')
@@ -656,8 +672,8 @@ const confirmCheckIn = (item) => {
       showCancelButton: true,
       confirmButtonText: 'Check In',
       cancelButtonText: 'cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#076232'
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {
@@ -671,7 +687,8 @@ const confirmCheckIn = (item) => {
 const handleModalClose = () => {
   // Perform any actions you need after modal closes
   //   console.log('Modal has been closed');
-
+  // appointmentDetails.value = { ...InitialappointmentDetails }
+  errors.value = {}
   getAppointments(1) // Refresh the appointments after closing the modal
 }
 
@@ -681,8 +698,11 @@ const getSlots = async () => {
   try {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value)
 
-    // Update the `apiResponse` ref with the response data
-    apiResponse.value = response.data.dataPayload.data.slots
+    // Debug the response
+    console.log(response.data)
+
+    // Update the `apiResponse` ref with the response data (ensure it's an array)
+    apiResponse.value = Array.isArray(response.data.dataPayload?.data?.slots) ? response.data.dataPayload.data.slots : []
 
     // Set all slots to `selected: false`
     const slotsWithSelected = apiResponse.value.map((slot) => ({
@@ -693,11 +713,11 @@ const getSlots = async () => {
     // Update `timeSlots`
     timeSlots.value = slotsWithSelected
   } catch (error) {
-    console.error(error) // Handle error response if available
+    console.error(error) // Log the error for debugging
+
     if (error.response && error.response.data.errorPayload) {
       errorDetails.value = error.response.data.errorPayload.errors
     } else {
-      // Handle general error with a fallback message
       const errorMessage = error.response?.data.errorPayload?.errors?.message || 'An error occurred'
 
       proxy.$showToast({
@@ -709,13 +729,23 @@ const getSlots = async () => {
   }
 }
 
-const handleDateChange = (newValue) => {
-  slotsData.value.date = newValue
-  console.log('date changed:', newValue)
-
-  console.log('date changed:', newValue)
+const debouncedGetSlots = debounce(() => {
   getSlots()
-  searchQuery
+}, 300) // 300ms debounce
+
+const handleDateChange = (newValue) => {
+  if (!newValue) {
+    console.warn('Invalid date value:', newValue)
+    return
+  }
+
+  // Update the date in `slotsData`
+  slotsData.value.date = newValue
+
+  console.log('Date changed:', newValue)
+
+  // Call the debounced getSlots
+  debouncedGetSlots()
 }
 
 //watch for changes in appointmentDetails.appointment_date and call getSlots
@@ -723,18 +753,17 @@ const handleDateChange = (newValue) => {
 watch(
   () => appointmentDetails.value.appointment_date,
   (newValue, oldValue) => {
-    // console.log('date changed:', newValue);
-    handleDateChange(newValue, oldValue)
+    if (!newValue) {
+      console.warn('appointment_date reset to null. Ignoring change.')
+      return
+    }
+
+    if (newValue !== oldValue) {
+      console.log(`Date changed from ${oldValue} to ${newValue}`)
+      handleDateChange(newValue)
+    }
   }
 )
-
-// watch(
-//   () => appointmentModal.value,
-//   (newValue, oldValue) => {
-//     console.log('appointmentModal value changed:', oldValue, '->', newValue)
-//     getAppointment(1)
-//   }
-// )
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -782,7 +811,7 @@ onUnmounted(() => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" class="h-100" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch" class="h-100">
+                  <b-button variant="primary" @click="getAppointments" class="h-100">
                     <i class="fas fa-search"></i>
                   </b-button>
                 </b-input-group-append>
@@ -922,7 +951,23 @@ onUnmounted(() => {
     </b-row>
   </b-modal>
 
-  <b-modal ref="myModal" hide-footer title="Appointment Details" size="xl">
+  <!-- <b-modal ref="myModal" hide-footer :title="'Contact:' + '' + appointmentDetails.contact_name + ' ' + 'RE:' + ' ' + appointmentDetails.subject" size="xl">-->
+
+  <b-modal ref="myModal" hide-footer size="xl" @hide="handleModalClose">
+    <template #title>
+      <div class="custom-modal-title">
+        <!-- <span class="contact-name">{{ appointmentDetails.contact_name }}</span> -->
+        <span class="subject">{{ appointmentDetails.subject }}</span>
+        <span class="date">{{ appointmentDetails.appointment_date }}</span>
+        <span class="time">{{ appointmentDetails.start_time }} - {{ appointmentDetails.end_time }}</span>
+        <span class="status">
+          <b-badge :variant="recordStatus.theme" class="me-3">
+            {{ recordStatus.label }}
+          </b-badge>
+        </span>
+      </div>
+    </template>
+
     <b-row class="justify-content-center">
       <b-col lg="12" sm="12">
         <b-card-body>
@@ -938,7 +983,9 @@ onUnmounted(() => {
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Date</label>
-                  <b-form-input v-model="appointmentDetails.appointment_date" id="input-107" type="date"></b-form-input>
+                  <flat-pickr v-model="appointmentDetails.appointment_date" class="form-control" :config="flatPickrConfig" id="datePicker" />
+
+                  <!-- <b-form-input v-model="appointmentDetails.appointment_date" id="input-107" type="date"></b-form-input> -->
                   <div v-if="errorDetails.appointment_date" class="error">
                     {{ errorDetails.appointment_date }}
                   </div>
@@ -1005,21 +1052,45 @@ onUnmounted(() => {
                     <p>No attachment</p>
                   </div>
                 </b-col>
+                <b-col lg="12" md="12" class="mb-3">
+                  <label for="'attendees'" class="form-label">Attendees</label>
+                  <div>
+                    <!-- //show tags of attendees -->
+                    <b-form-tags v-model="appointmentDetails.attendees" id="attendees" tag-variant="primary" tag-pills>
+                      <template #tag="{ tag, removeTag }">
+                        <b-badge variant="primary" class="me-1">
+                          {{ tag.staff_id }}
+                          <b-icon @click="removeTag" icon="x" />
+                        </b-badge>
+                      </template>
+                    </b-form-tags>
+                  </div>
+                  <div v-if="errorDetails.attendees" class="error">
+                    {{ errorDetails.attendees }}
+                  </div>
+                </b-col>
+                <b-col lg="12" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Description</label>
+                  <b-form-textarea v-model="appointmentDetails.description" id="input-107" rows="3"></b-form-textarea>
+                  <div v-if="errorDetails.notes" class="error">
+                    {{ errorDetails.notes }}
+                  </div>
+                </b-col>
 
                 <b-col md="12" lg="12" sm="12">
                   <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
                 </b-col>
 
-                <b-row>
+                <b-row v-if="recordStatus.label === 'RESCHEDULE'">
                   <!-- //preview for the pdf file -->
                   <b-col lg="6" md="4" class="mb-3">
                     <label for="status-badge" class="form-label">Status</label>
                     <div id="status-badge" class="d-flex align-items-center">
-                      <b-badge :variant="recordStatus.theme" class="me-3">
+                      <!-- <b-badge :variant="recordStatus.theme" class="me-3">
                         {{ recordStatus.label }}
-                      </b-badge>
+                      </b-badge> -->
 
-                      <b-button v-if="recordStatus.label === 'RESCHEDULE'" :variant="recordStatus.theme" @click="suggestSlots">Suggest Open slots</b-button>
+                      <b-button :variant="recordStatus.theme" @click="suggestSlots">Suggest Open slots</b-button>
                     </div>
                   </b-col>
                 </b-row>
@@ -1067,5 +1138,29 @@ onUnmounted(() => {
 <style scoped>
 .error {
   color: red;
+}
+
+.custom-modal-title {
+  display: flex;
+  align-items: center; /* Vertically aligns items */
+  justify-content: flex-start; /* Ensures items are aligned to the start */
+  gap: 4rem; /* Adds spacing between each item */
+  width: 100%; /* Makes the title span the full width */
+  padding: 0.5rem; /* Adds some padding for better appearance */
+}
+
+.custom-modal-title .status {
+  margin-left: auto; /* Pushes the status badge to the far right */
+}
+
+.custom-modal-title span {
+  flex-shrink: 0; /* Prevents items from shrinking if the content overflows */
+}
+
+.custom-modal-title .contact-name,
+.custom-modal-title .subject,
+.custom-modal-title .date,
+.custom-modal-title .time {
+  color: #333; /* Custom text color */
 }
 </style>

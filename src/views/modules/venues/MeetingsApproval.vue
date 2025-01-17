@@ -1,5 +1,5 @@
 <script setup>
-import { ref, getCurrentInstance, onMounted, computed } from 'vue'
+import { ref, getCurrentInstance, onMounted, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 
 const toastPayload = ref('')
@@ -15,8 +15,7 @@ const perPage = ref(20) // Number of items per page (from API response)
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50])
 const searchQuery = ref('')
-const errors = ref('')
-const appointmentDetails = ref([])
+const errors = ref({})
 
 const updatePerPage = async () => {
   await getPendingApprovals(selectedPerPage.value)
@@ -72,6 +71,10 @@ const getPendingApprovals = async (page) => {
   }
 }
 
+watch(searchQuery, () => {
+  getPendingApprovals(1)
+})
+
 const ApproveBooking = async (id) => {
   try {
     const response = await axiosInstance.put(`v1/scheduler/approve/${id}`)
@@ -92,10 +95,10 @@ const ApproveBooking = async (id) => {
         icon: 'success'
       })
     }
-    getSpaces(1)
+    getPendingApprovals(1)
   } catch (error) {
     // console.error(error);
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred'
+    const errorMessage = error.response.data.errorPayload.errors?.message
 
     proxy.$showToast({
       title: 'An error occurred',
@@ -124,13 +127,13 @@ const RejectBooking = async (id) => {
         icon: 'success'
       })
     }
-    getSpaces(1)
+    getPendingApprovals(1)
   } catch (error) {
     // console.error(error);
     if (error.response && error.response.data.errorPayload) {
-      errorDetails.value = error.response.data.errorPayload.errors
+      errors.value = error.response.data.errorPayload.errors
     } else {
-      const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred'
+      const errorMessage = error.response.data.errorPayload.errors?.message
 
       proxy.$showToast({
         title: 'An error occurred',
@@ -142,18 +145,18 @@ const RejectBooking = async (id) => {
 }
 
 const confirmReject = (id) => {
-  selectedAvailability.value = id
+  // selectedAvailability.value = id
 
   proxy
     .$showAlert({
-      title: 'REJECT AND INJECT?',
+      title: 'REJECT',
       text: 'By rejecting the meeting will not take place unless they get another space. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, DELETE it!',
-      cancelButtonText: 'No, keep it',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#097B3E'
+      confirmButtonText: 'Proceed',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {

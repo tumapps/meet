@@ -165,6 +165,7 @@ const getSpace = async (id) => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/space/${id}`)
     SpaceDetails.value = response.data.dataPayload.data
+    console.log(SpaceDetails.value)
   } catch (error) {
     // console.error(error);
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message || error?.response?.data?.errorPayload?.message || error?.message || 'An unknown error occurred'
@@ -306,13 +307,13 @@ const deleteSpace = async (id) => {
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-      // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Space Deleted successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastMessage,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500,
+        showprogressBar: true
       })
     } else {
       // Fallback if toastPayload is not provided in the response
@@ -333,17 +334,17 @@ const deleteSpace = async (id) => {
   }
 }
 
-const confirmDelete = (id) => {
+const confirmAction = (id, action) => {
   // console.log("id", id);
   selectedAvailability.value = id
   proxy
     .$showAlert({
       title: 'Are you sure?',
-      text: ' Do you want to Delete this Space ?',
+      text: ' Do you want to' + ' ' + action + ' ' + 'this Space ?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Delete it!',
-      cancelButtonText: 'No, keep it',
+      confirmButtonText: action,
+      cancelButtonText: 'Cancel',
       confirmButtonColor: '#076232',
       cancelButtonColor: '#d33'
     })
@@ -470,16 +471,16 @@ onMounted(async () => {
                 </td>
                 <td>
                   <!-- //info button -->
-                  <button v-if="item.is_deleted !== '1'" class="btn btn-outline-info btn-sm me-3" @click="viewDeatils(item.id)">
+                  <button class="btn btn-outline-info btn-sm me-3" @click="viewDeatils(item.id)">
                     <i class="fas fa-info" title="View"></i>
                   </button>
-                  <button v-if="item.is_deleted !== '1'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                  <button class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
-                  <button v-if="item.is_deleted !== '1'" class="btn btn-outline-danger btn-sm me-3" @click="confirmDelete(item.id)">
+                  <button v-if="item.is_deleted !== 1" class="btn btn-outline-danger btn-sm me-3" @click="confirmAction(item.id, 'Delete')">
                     <i class="fas fa-trash" title="Delete"></i>
                   </button>
-                  <button v-if="item.is_deleted === '1'" class="btn btn-outline-danger btn-sm" @click="confirmRestore(item.id)">
+                  <button v-if="item.is_deleted === 1" class="btn btn-outline-danger btn-sm" @click="confirmAction(item.id, 'Restore')">
                     <i class="fas fa-undo" title="Restore"></i>
                   </button>
                 </td>
@@ -556,7 +557,7 @@ onMounted(async () => {
     </div>
   </b-modal>
 
-  <b-modal ref="editSpace" title="Edit Space" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="editSpace" title="Edit Space" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
@@ -568,7 +569,11 @@ onMounted(async () => {
       <b-col md="12">
         <div class="mb-3">
           <label for="level" class="form-label">Level</label>
-          <input type="text" v-model="SpaceDetails.level_id" class="form-control" id="level_id" />
+          <select v-model="SpaceDetails.level_id" class="form-control" id="levelDropdown">
+            <option v-for="level in levels" :key="level.id" :value="level.id">
+              {{ level.name }}
+            </option>
+          </select>
         </div>
         <div v-if="errors.level_id" class="error" aria-live="polite">{{ errors.level_id }}</div>
       </b-col>

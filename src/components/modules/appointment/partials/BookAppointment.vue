@@ -388,10 +388,14 @@ const getPriority = async () => {
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
   console.log('newUsername:', newUsername)
+
   const selectedUser = UsersOptions.value.find((user) => user.username === newUsername)
   selectedUser_id.value = selectedUser ? selectedUser.id : null
   userId.value = newUsername || authStore.getUserId()
+  appointmentData.value.user_id = userId.value
+  getSlots()
   console.log('selectedUser_id:', userId.value)
+  console.log('real id ', appointmentData.value.user_id)
   console.log(selectedUser)
 })
 
@@ -495,8 +499,6 @@ onMounted(() => {
             </b-row>
             <b-row v-if="role !== 'su'" class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <option value="" disabled selected>Choose Recipient</option>
-
                 <label for="space" class="col-form-label">
                   <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
                 </label>

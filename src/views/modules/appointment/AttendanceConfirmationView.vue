@@ -63,10 +63,10 @@ const confirmResponse = (id) => {
       text: 'You are about to confirm your attendance to this meeting. This action cannot be undone.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, confirm',
+      confirmButtonText: 'Confirm',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#076232'
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {

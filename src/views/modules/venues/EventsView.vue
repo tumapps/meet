@@ -9,7 +9,7 @@ const axiosInstance = AxiosInstance()
 const tableData = ref([])
 const sortKey = ref('') // Active column being sorted
 const sortOrder = ref('asc') // Sorting order: 'asc' or 'desc'
-const isArray = ref(false)
+// const isArray = ref(false)
 const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const perPage = ref(20) // Number of items per page (from API response)
@@ -60,13 +60,13 @@ const goToPage = (page) => {
   // Ensure the page is within the valid range
   if (page > 0 && page <= totalPages.value) {
     currentPage.value = page
-    getAppointments(page) // Fetch appointments for the selected page
+    getEvents(page) // Fetch appointments for the selected page
   }
 }
 
 const updatePerPage = async () => {
   currentPage.value = 1 // Reset to first page when changing items per page
-  await getAppointments(1) // Fetch appointments with the new perPage value
+  await getEvents(1) // Fetch appointments with the new perPage value
 }
 
 const sortTable = (key) => {
@@ -88,22 +88,6 @@ const sortedData = computed(() => {
   })
 })
 
-const performSearch = async () => {
-  try {
-    const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-    tableData.value = response.data.dataPayload.data
-  } catch (error) {
-    // console.error(error);
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred'
-
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
-
 const showModal = () => {
   if (newSpace.value) {
     newSpace.value.show()
@@ -116,7 +100,7 @@ const getEvent = async (id) => {
     eventDetails.value = response.data.dataPayload
   } catch (error) {
     // console.error(error);
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An unknown error occurred'
+    const errorMessage = error.response.data.errorPayload.errors?.message
 
     proxy.$showToast({
       title: errorMessage,
@@ -148,7 +132,7 @@ const AddEvent = async () => {
       // Show toast notification using the response data
       proxy.$showAlert({
         title: toastPayload.value.toastMessage,
-        icon: toastPayload.value.toastTheme , // You can switch this back to use the theme from the response
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
         showCancelButton: false,
         showConfirmButton: false,
         timer: 2000,
@@ -178,7 +162,7 @@ const AddEvent = async () => {
 
 const getEvents = async (page) => {
   try {
-    const response = await axiosInstance.get('v1/scheduler/events')
+    const response = await axiosInstance.get(`v1/scheduler/events?page=${page}&perPage=${selectedPerPage.value}&search=${searchQuery.value}`)
 
     tableData.value = response.data.dataPayload.data
 
@@ -196,7 +180,11 @@ const getEvents = async (page) => {
   }
 }
 
-const deleteEvent = async (id) => {
+watch(searchQuery, () => {
+  getEvents(1)
+})
+
+const AlterEvent = async (id) => {
   try {
     const response = await axiosInstance.delete(`v1/scheduler/events/${id}`)
 
@@ -220,83 +208,16 @@ const deleteEvent = async (id) => {
       })
     }
   } catch (error) {
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred'
+    const errorMessage = error.response.data.errorPayload.errors?.message
 
     proxy.$showToast({
       title: errorMessage,
-      // text: errorMessage,
+      text: errorMessage,
       icon: 'error'
     })
   }
 }
 
-const cancelEvent = async (id) => {
-  try {
-    const response = await axiosInstance.put(`v1/scheduler/events/cancel/${id}`)
-
-    //get events
-    getEvents(1)
-    if (response.data.toastPayload) {
-      toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-      // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Cancelled successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
-      })
-    } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
-        title: 'success',
-        icon: 'success'
-      })
-    }
-  } catch (error) {
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred'
-
-    proxy.$showToast({
-      title: errorMessage,
-      // text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
-
-const restoreEvent = async (id) => {
-  try {
-    const response = await axiosInstance.put(`v1/scheduler/events/${id}/restore`)
-
-    //get events
-    getEvents(1)
-    if (response.data.toastPayload) {
-      toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-      // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Restored successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
-      })
-    } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
-        title: 'success',
-        icon: 'success'
-      })
-    }
-  } catch (error) {
-    const errorMessage = response.data.errorPayload.errors?.message || errorPayload.message || 'An error occurred'
-
-    proxy.$showToast({
-      title: errorMessage,
-      // text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getEvents(1)
@@ -330,7 +251,7 @@ onMounted(async () => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="performSearch"> Search </b-button>
+                  <b-button variant="primary" @click="getEvents"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>

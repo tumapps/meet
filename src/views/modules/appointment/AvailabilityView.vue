@@ -101,10 +101,10 @@ const confirmCancel = (id) => {
       text: 'You are about to DELETE this entry. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, DELETE it!',
-      cancelButtonText: 'No, keep it',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#097B3E'
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
     })
     .then((result) => {
       if (result.isConfirmed) {

@@ -152,72 +152,6 @@ async function fetchEvents() {
   }
 }
 
-// this was replaced by the above function very slight changes to it on the date format handling
-// async function fetchEvents() {
-//   isLoading.value = true
-//   fetchError.value = null
-
-//   try {
-//     const response = await axiosInstance.get('/v1/scheduler/appointments')
-//     apiData.value = response.data.dataPayload.data
-//     console.log('API Data:', apiData.value)
-//     // apiData.value = dummyEvents
-
-//     // Ensure events are set after apiData is updated
-//     events.value = apiData.value.map((item) => {
-//       console.log('Item:', item)
-//       // Extract and format the date
-//       // const appointmentDate = format(parseISO(item.appointment_date.split(',')[0]), 'yyyy-MM-dd')
-
-//       // Determine background color
-//       let backgroundColor
-//       switch (item.recordStatus.label) {
-//         case 'ACTIVE':
-//           backgroundColor = '#86deb7'
-//           break
-//         case 'CANCELLED':
-//           backgroundColor = '#E05263'
-//           break
-//         case 'DELETED':
-//           backgroundColor = '#dc3545'
-//           break
-//         case 'PENDING':
-//           backgroundColor = '#b8e1ff'
-//           break
-//         case 'RESCHEDULE':
-//           backgroundColor = '#FFCAB1'
-//           break
-//         default:
-//           backgroundColor = '#FFB2E6'
-//       }
-//       console.log('Appointment Date:', appointmentDate)
-
-//       return {
-//         title: item.subject || 'No Subject', // Fallback if subject is missing
-//         start: `${appointmentDate}T${item.start_time}`, // Start date-time
-//         end: `${appointmentDate}T${item.end_time}`,   // End date-time
-//         backgroundColor: item.recordStatus.theme || backgroundColor,
-//         display: 'block',
-//         borderColor: 'transparent', // No border
-//         extendedProps: {
-//           start_time: item.start_time,
-//           end_time: item.end_time,
-//           description: item.description,
-//           contact_name: item.contact_name,
-//           status: item.recordStatus.label
-//         }
-//       }
-//     })
-
-//     // Log after assignment to ensure events have been updated
-//     console.log('Events:', events.value)
-//   } catch (error) {
-//     fetchError.value = 'Failed to load events. Please try again later.'
-//   } finally {
-//     isLoading.value = false
-//   }
-// }
-
 // Add class to grey out past dates
 function handleDayCellClassNames(arg) {
   const cellDate = new Date(arg.date).toISOString().split('T')[0]
@@ -244,17 +178,20 @@ const calendarOptions = ref({
   dayMaxEvents: 3,
   slotDuration: '00:30:00', // Set time slot intervals to 30 minutes
   slotMinTime: '08:00:00', // Start time of the day view
-  slotMaxTime: '18:00:00', // End time of the day view
+  slotMaxTime: '21:00:00', // End time of the day view
   dateClick: handleDateClick,
   eventClick: handleEventClick,
   dayCellClassNames: handleDayCellClassNames,
   dayHeaderFormat: window.innerWidth < 768 ? { weekday: 'narrow' } : { weekday: 'short', month: 'numeric', day: 'numeric' },
   views: {
     dayGridMonth: {
-      dayHeaderFormat: { weekday: 'short', month: 'numeric', day: 'numeric' }
+      dayHeaderFormat: { weekday: 'short' }
+    },
+    timeGridWeek: {
+      dayHeaderFormat: { weekday: 'short' }
     },
     timeGridDay: {
-      dayHeaderFormat: { weekday: 'narrow' }
+      dayHeaderFormat: { weekday: 'long' }
     }
   },
   headerToolbar: {
@@ -379,4 +316,6 @@ onMounted(async () => {
   background: #eee;
   border-radius: 4px;
 }
+
+
 </style>
