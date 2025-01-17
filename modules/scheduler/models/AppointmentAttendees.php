@@ -4,6 +4,9 @@ namespace scheduler\models;
 
 use Yii;
 use auth\models\User;
+use yii\base\Event;
+use helpers\EventHandler;
+use scheduler\models\Appointments;
 
 /**
  *@OA\Schema(
@@ -27,6 +30,13 @@ class AppointmentAttendees extends BaseModel
     const STATUS_CONFIRMED = 14;
     const STATUS_PENDING = 11;
 
+
+    const EVENT_ATTENDEE_UPDATE = 'attendeeUpdate';
+
+    const SCENARIO_REMOVE = 'removed';
+
+
+
     /**
      * {@inheritdoc}
      */
@@ -45,6 +55,7 @@ class AppointmentAttendees extends BaseModel
                 'id',
                 'appointment_id',
                 'staff_id',
+                'removal_reason',
                 'date',
                 'start_time',
                 'end_time',
@@ -65,7 +76,18 @@ class AppointmentAttendees extends BaseModel
             [['appointment_id', 'staff_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
             [['appointment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Appointments::class, 'targetAttribute' => ['appointment_id' => 'id']],
+
+            ['removal_reason', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Reason is required.'],
+            ['staff_id', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Staff id is required.'],
+
         ];
+    }
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_REMOVE] = ['removal_reason'];
+        return $scenarios;
     }
 
     /**
@@ -77,6 +99,7 @@ class AppointmentAttendees extends BaseModel
             'id' => 'ID',
             'appointment_id' => 'Appointment ID',
             'staff_id' => 'Staff ID',
+            //'removal_reason' => 'Removal Reason',
             'date' => 'Date',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
@@ -85,6 +108,37 @@ class AppointmentAttendees extends BaseModel
             'updated_at' => 'Updated At',
         ];
     }
+
+
+    public function sendAttendeeUpdateEvent($appointmentId, $attendeeId, $reason = '', $is_removed = false)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = $is_removed ? 'Meeting Updates' : 'Meeting Invitation';
+
+        $user = User::find()->where(['username' => $attendeeId])->one();
+        $email = $user->profile->email_address;
+
+        $appointmentData = Appointments::find()
+            ->select(['subject', 'appointment_date', 'start_time', 'end_time'])
+            ->where(['id' => $appointmentId])
+            ->one();
+
+        $eventData = [
+            'appointment_subject' => $appointmentData->subject,
+            'appointment_date' => $appointmentData->appointment_date,
+            'start_time' => $appointmentData->start_time,
+            'end_time' => $appointmentData->end_time,
+            'reason' => $reason,
+            'subject' => $subject,
+            'email' => $email,
+            'is_removed' => $is_removed,
+        ];
+
+        $this->on(self::EVENT_ATTENDEE_UPDATE, [EventHandler::class, 'onAttendeeUpdate'], $eventData);
+        $this->trigger(self::EVENT_ATTENDEE_UPDATE, $event);
+    }
+
 
     /**
      * Gets query for [[Appointment]].
@@ -132,24 +186,7 @@ class AppointmentAttendees extends BaseModel
         // return false;
     }
 
-    // public static function getAttendeesEmailsByAppointmentId($appointmentId)
-    // {
-    //     $attendees = self::find()
-    //         ->where(['appointment_id' => $appointmentId])
-    //         ->all();
 
-    //     $emails = [];
-
-    //     foreach ($attendees as $attendee) {
-    //         $user = User::find()->where(['username' => $attendee->staff_id])->one();
-
-    //         if ($user && $user->profile->email_address) {
-    //             $emails[] = $user->profile->email_address;
-    //         }
-    //     }
-
-    //     return $emails;
-    // }
 
     public static function getAttendeesEmailsByAppointmentId($appointmentId, $includeStaffId = false, $confirmedOnly = false)
     {
@@ -164,9 +201,9 @@ class AppointmentAttendees extends BaseModel
         $results = [];
 
         foreach ($attendees as $attendee) {
-            $user = User::find()->where(['username' => $attendee->staff_id])->one();
-
-            if ($user && $user->profile->email_address) {
+            $user = User::findOne(['user_id' => $attendee->staff_id]);
+            if ($user && !empty($user->profile->email_address)) {
+                // $email = $user->profile->email_address;
                 if ($includeStaffId) {
                     $results[] = [
                         'staff_id' => $attendee->staff_id,
