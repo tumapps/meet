@@ -19,7 +19,7 @@ const props = defineProps({
 
 console.log('dashType:', props.dashType)
 
-const { proxy } = getCurrentInstance()
+const { proxy, emit } = getCurrentInstance()
 const preferences = usePreferencesStore()
 const authStore = useAuthStore()
 const axiosInstance = AxiosInstance()
@@ -38,7 +38,13 @@ const appointmentModal = ref(null)
 
 //modal
 const showModal = () => {
-  appointmentModal.value.$refs.appointmentModal.show()
+  // appointmentModal.value.$refs.appointmentModal.show()
+  if (props.dashType === 'users') {
+    appointmentModal.value.$refs.appointmentModal.show()
+  } else {
+    //emit a create event
+    emit('createEvent')
+  }
 }
 const selectedDate = ref('')
 
