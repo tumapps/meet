@@ -10,6 +10,7 @@ class AssignmentSearch extends Model
 {
     public $id;
     public $username;
+    public $search;
 
     /**
      * @inheritdoc
@@ -17,7 +18,7 @@ class AssignmentSearch extends Model
     public function rules()
     {
         return [
-            [['id', 'username'], 'safe'],
+            [['id', 'username', 'search'], 'safe'],
         ];
     }
 
@@ -51,7 +52,7 @@ class AssignmentSearch extends Model
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['like', $usernameField, $this->username]);
+        $query->andFilterWhere(['ilike', $usernameField, $this->username]);
 
         return $dataProvider;
     }
