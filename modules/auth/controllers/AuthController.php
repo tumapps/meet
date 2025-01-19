@@ -12,10 +12,8 @@ use auth\models\RefreshToken;
 use auth\models\User;
 use auth\models\searches\UserSearch;
 use auth\models\Profiles;
+use scheduler\models\AppointmentAttendees;
 use yii\base\InvalidArgumentException;
-use auth\hooks\Configs;
-use auth\models\AuthItem;
-use auth\models\Assignment;
 
 class AuthController extends \helpers\ApiController
 {
@@ -28,12 +26,37 @@ class AuthController extends \helpers\ApiController
 		$users = $dataProvider->getModels();
 		$authManager = Yii::$app->authManager;
 
+		// Retrieve query parameters to be used when searching attendees
+		$queryParams = Yii::$app->request->queryParams;
+		$type = $queryParams['type'] ?? null;
+		$appointmentDate = $queryParams['appointment_date'] ?? null;
+		$startTime = $queryParams['start_time'] ?? null;
+		$endTime = $queryParams['end_time'] ?? null;
+
 		$filteredUsers = [];
 		foreach ($users as $user) {
 			$roles = array_keys($authManager->getRolesByUser($user->id));
 
 			if (in_array('su', $roles)) {
 				continue;
+			}
+
+			// $isAvailable = true;
+			// if ($type === 'attendees' && $appointmentDate && $startTime && $endTime) {
+			// 	$isAvailable = !AppointmentAttendees::isAttendeeUnavailable(
+			// 		$user->id,
+			// 		$appointmentDate,
+			// 		$startTime,
+			// 		$endTime
+			// 	);
+			// }
+
+			if ($type === 'attendees' && $appointmentDate && $startTime && $endTime) {
+				$conflictExists = AppointmentAttendees::isAttendeeUnavailable($user->id, $appointmentDate, $startTime, $endTime);
+
+				if ($conflictExists) {
+					continue;
+				}
 			}
 
 			$filteredUsers[] = [
@@ -45,6 +68,7 @@ class AuthController extends \helpers\ApiController
 				'fullname' => $user->profile->first_name . ' ' . $user->profile->last_name,
 				'mobile' => $user->profile->mobile_number,
 				'roles' => $roles,
+				// 'is_available' => $isAvailable
 			];
 		}
 
