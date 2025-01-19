@@ -72,7 +72,7 @@ class Events extends BaseModel
             [['start_date', 'end_date'], 'date', 'format' => 'php:Y-m-d'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['is_deleted', 'created_at', 'updated_at'], 'integer'],
+            [['is_deleted'], 'integer'],
             [['title'], 'string', 'max' => 255],
 
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
