@@ -81,7 +81,7 @@ class AppointmentsController extends \helpers\ApiController
 
             $attendees = AppointmentAttendees::find()
                 ->select(['staff_id'])
-                ->where(['appointment_id' => $appointment->id])
+                ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
                 ->asArray()
                 ->all();
 
@@ -283,6 +283,8 @@ class AppointmentsController extends \helpers\ApiController
         $model = new Appointments();
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+
+        return $dataRequest['Appointments'];
 
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
@@ -617,8 +619,17 @@ class AppointmentsController extends \helpers\ApiController
         $startTime = $dataRequest['Appointments']['start_time'];
         $endTime = $dataRequest['Appointments']['end_time'];
 
+        $userId = $dataRequest['Appointments']['user_id'] ?? null;
+
         if (is_string($attendees)) {
             $attendees = explode(',', $attendees);
+        }
+
+        // remove user-id ie the owner of the meeting from list of attendees
+        if ($userId !== null) {
+            $attendees = array_filter($attendees, function ($attendeeId) use ($userId) {
+                return trim($attendeeId) != $userId;
+            });
         }
 
         if (!empty($attendees)) {
@@ -655,7 +666,7 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $attendee->removal_reason = $model->removal_reason;
-        $attendee->is_removed = true;
+        $attendee->is_removed = AppointmentAttendees::STATUS_REMOVED;
         if ($attendee->save(false)) {
 
             $model->sendAttendeeUpdateEvent($attendee->appointment_id, $attendee->id, $model->removal_reason, true);
