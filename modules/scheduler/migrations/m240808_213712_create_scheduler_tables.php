@@ -142,7 +142,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'end_time' => $this->time()->notNull(),
             'removal_reason' => $this->string()->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
-            'is_removed' => $this->boolean()->defaultValue(false),
+            'is_removed' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[appointment_id]]) REFERENCES {{%appointments}} ([[id]])' .
