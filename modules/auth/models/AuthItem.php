@@ -4,13 +4,9 @@ namespace auth\models;
 
 use auth\hooks\Configs;
 use auth\hooks\Helper;
-use auth\controllers\AssignmentController;
-use auth\Module;
 use Yii;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
-use yii\helpers\Url;
 use yii\rbac\Item;
 use yii\rbac\Rule;
 
@@ -63,22 +59,22 @@ class AuthItem extends Model
      * @inheritdoc
      */
     public function rules()
-{
-    return [
-        [['ruleName'], 'checkRule'],
-        [['name', 'type', 'data'], 'required'],
-        [['name'], 'checkUnique', 'when' => function () {
-            return $this->isNewRecord || ($this->_item->name != $this->name);
-        }],
-        [['type'], 'integer'],
-        [['description', 'ruleName'], 'default'],
-        [['name'], 'string', 'max' => 64],
-        ['name', 'match', 'pattern' => '/^[a-zA-Z0-9\-]+$/', 'message' => 'Code should consist of letters (a-z, A-Z), numbers, or hyphens (-)'],
-        ['data', 'match', 'pattern' => '/^[a-zA-Z\s]*$/', 'message' => 'Only Alphabets and spaces are allowed'],
-        ['data', 'trim'],
-        ['name', 'trim']
-    ];
-}
+    {
+        return [
+            [['ruleName'], 'checkRule'],
+            [['name', 'type', 'data'], 'required'],
+            [['name'], 'checkUnique', 'when' => function () {
+                return $this->isNewRecord || ($this->_item->name != $this->name);
+            }],
+            [['type'], 'integer'],
+            [['description', 'ruleName'], 'default'],
+            [['name'], 'string', 'max' => 64],
+            ['name', 'match', 'pattern' => '/^[a-zA-Z0-9\-]+$/', 'message' => 'Code should consist of letters (a-z, A-Z), numbers, or hyphens (-)'],
+            ['data', 'match', 'pattern' => '/^[a-zA-Z\s]*$/', 'message' => 'Only Alphabets and spaces are allowed'],
+            ['data', 'trim'],
+            ['name', 'trim']
+        ];
+    }
 
 
     /**
@@ -97,7 +93,7 @@ class AuthItem extends Model
             $this->addError('name', Yii::$app->getI18n()->format($message, $params, Yii::$app->language));
         }
     }
- 
+
     /**
      * Check for rule
      */
@@ -291,7 +287,7 @@ class AuthItem extends Model
                 }
             }
         }
-        return array_diff_key($list,$exist);
+        return array_diff_key($list, $exist);
     }
     public static function getTypeName($type = null)
     {
