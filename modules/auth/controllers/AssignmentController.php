@@ -9,13 +9,15 @@ use auth\models\User;
 use yii\rbac\Item;
 use auth\hooks\Configs;
 use auth\models\searches\AssignmentSearch;
+use auth\models\searches\AuthItemSearch;
+
 
 
 class AssignmentController extends \helpers\ApiController
 {
     protected $type = Item::TYPE_ROLE;
 
-    public function actionManageRole($id)
+    public function actionManageRole2($id)
     {
         $authManager = Yii::$app->authManager;
 
@@ -24,6 +26,8 @@ class AssignmentController extends \helpers\ApiController
         if (!$role) {
             return $this->errorResponse('Role not found', 404);
         }
+        $searchModel = new AuthItemSearch();
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'AuthItemSearch');
 
         $allRoles = $authManager->getRoles();
         $allPermissions = $authManager->getPermissions();
@@ -35,6 +39,64 @@ class AssignmentController extends \helpers\ApiController
         // Filter available roles and permissions
         $availableRoles = array_diff_key($allRoles, $assignedRoles);
         $availablePermissions = array_diff_key($allPermissions, $assignedPermissions);
+
+        return $this->payloadResponse([
+            'available' => [
+                'roles' => $availableRoles,
+                'permissions' => $availablePermissions,
+            ],
+            'assigned' => [
+                'roles' => $assignedRoles,
+                'permissions' => $assignedPermissions,
+            ],
+        ]);
+    }
+   
+
+    public function actionManageRole($id)
+    {
+        $authManager = Yii::$app->authManager;
+
+        $role = $authManager->getRole($id);
+        if (!$role) {
+            return $this->errorResponse('Role not found', 404);
+        }
+
+        $queryParams = Yii::$app->request->queryParams;
+
+        $allRoles = $authManager->getRoles();
+        $allPermissions = $authManager->getPermissions();
+
+        $assignedRoles = $authManager->getChildRoles($role->name);
+        $assignedPermissions = $authManager->getPermissionsByRole($role->name);
+
+        $availableRoles = array_diff_key($allRoles, $assignedRoles);
+        $availablePermissions = array_diff_key($allPermissions, $assignedPermissions);
+
+        $search = isset($queryParams['_search']) ? $queryParams['_search'] : null;
+
+        // return  $assignedPermissions;
+
+        // return $search;
+
+        if (!empty($search)) {
+            $availableRoles = array_filter($availableRoles, function ($role, $key) use ($search) {
+                return stripos($key, $search) !== false;
+            }, ARRAY_FILTER_USE_BOTH);
+        
+            $assignedRoles = array_filter($assignedRoles, function ($role, $key) use ($search) {
+                return stripos($key, $search) !== false;
+            }, ARRAY_FILTER_USE_BOTH);
+        
+            $availablePermissions = array_filter($availablePermissions, function ($permission, $key) use ($search) {
+                return stripos($key, $search) !== false;
+            }, ARRAY_FILTER_USE_BOTH);
+        
+            $assignedPermissions = array_filter($assignedPermissions, function ($permission, $key) use ($search) {
+                return stripos($key, $search) !== false;
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+        
 
         return $this->payloadResponse([
             'available' => [
@@ -147,7 +209,7 @@ class AssignmentController extends \helpers\ApiController
     {
         $dataRequest['Assignment'] = Yii::$app->request->getBodyParams();
 
-        $roles = $dataRequest['Assignment']['roles'] ?? [''];
+        $roles = $dataRequest['Assignment']['items'] ?? [''];
 
         if (empty($roles) || !is_array($roles)) {
             return $this->errorResponse(['message' => ['Roles are required']]);
@@ -201,7 +263,6 @@ class AssignmentController extends \helpers\ApiController
             'assigned_roles' => $assignedRoles,
         ]);
     }
-
 
     public function actionRemove($id)
     {
