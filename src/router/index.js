@@ -81,9 +81,9 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/modules/venues/EventsView.vue')
   },
   {
-    path: '/admin@venues',
+    path: '/home/events',
     name: 'venues',
-    component: () => import('@/views/modules/appointment/VenuesView.vue'),
+    component: () => import('@/views/modules/venues/RegistrarDashView.vue'),
     meta: {
       requiresAuth: true
     }

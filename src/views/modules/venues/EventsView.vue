@@ -89,8 +89,17 @@ const sortedData = computed(() => {
 })
 
 const showModal = () => {
+  console.log('close modal', newEvent.value)
+
   if (newEvent.value) {
     newEvent.value.show()
+  }
+}
+
+const closeModal = () => {
+  console.log('close modal', newEvent.value)
+  if (newEvent.value) {
+    newEvent.value.hide() // Call the hide() method
   }
 }
 
@@ -100,7 +109,7 @@ const getEvent = async (id) => {
     eventDetails.value = response.data.dataPayload.data
   } catch (error) {
     // console.error(error);
-    const errorMessage = error.response.data.errorPayload.errors?.message
+    const errorMessage = error?.response?.data?.errorPayload?.errors?.message
 
     proxy.$showToast({
       title: errorMessage,
@@ -117,6 +126,12 @@ const openModal = (id) => {
   }
 }
 
+const hideModal = () => {
+  if (editevent.value) {
+    editevent.value.hide() // Call the hide() method
+  }
+}
+
 const saveEvent = async (isUpdate = false) => {
   try {
     const method = isUpdate ? 'put' : 'post' // toggle method based on isUpdate flag
@@ -127,10 +142,10 @@ const saveEvent = async (isUpdate = false) => {
 
     // Get events after the operation
     getEvents(1)
+    closeModal()
+    hideModal()
 
     // Close the modal
-    newEvent.value.hide()
-
     // Handle toast notification response
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
@@ -189,6 +204,28 @@ watch(searchQuery, () => {
   getEvents(1)
 })
 
+const confirmAction = (id, action) => {
+  // console.log("id", id);
+  // selectedAvailability.value = id
+
+  proxy
+    .$showAlert({
+      title: 'Are you sure?',
+      text: ' Do you want to' + ' ' + action + ' ' + 'this Event ?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: action,
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        AlterEvent(id)
+      }
+    })
+}
+
 const AlterEvent = async (id) => {
   try {
     const response = await axiosInstance.delete(`v1/scheduler/events/${id}`)
@@ -223,6 +260,106 @@ const AlterEvent = async (id) => {
   }
 }
 
+const RejectBooking = async (id, rejection_reason) => {
+  try {
+    const response = await axiosInstance.put(`v1/scheduler/cancel/{id}`, { rejection_reason })
+
+    if (response.data.toastPayload) {
+      toastPayload.value = response.data.toastPayload
+      // Show toast notification using the response data
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        text: toastPayload.value.toastMessage,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
+      })
+    } else {
+      // Fallback if toastPayload is not provided in the response
+      proxy.$showToast({
+        title: 'operation successful',
+        icon: 'success'
+      })
+    }
+    getEvents(1)
+  } catch (error) {
+    // console.error(error);
+    if (error.response && error.response.data.errorPayload) {
+      errors.value = error.response.data.errorPayload.errors
+    } else {
+      const errorMessage = error.response.data.errorPayload.errors?.message
+
+      proxy.$showToast({
+        title: 'An error occurred',
+        text: errorMessage,
+        icon: 'error'
+      })
+    }
+  }
+}
+
+const confirmReject = (id) => {
+  proxy
+    .$showAlert({
+      title: 'Cancel Event',
+      text: 'Do you want to Cancel this Event ?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Proceed',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#076232',
+      cancelButtonColor: '#d33'
+    })
+    .then((result) => {
+      if (result.isConfirmed) {
+        // Ask for reason
+        const askForReason = () => {
+          proxy
+            .$showAlert({
+              title: 'Event Cancellation',
+              text: 'Please provide a reason for cancelling this Event.',
+              input: 'text',
+              inputPlaceholder: 'reason',
+              inputAttributes: {
+                maxlength: 100
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Reject',
+              cancelButtonText: 'Cancel',
+              confirmButtonColor: '#076232',
+              cancelButtonColor: '#d33'
+            })
+            .then((reasonResult) => {
+              if (reasonResult.isConfirmed) {
+                // Check if the reason is valid
+                if (!reasonResult.value || reasonResult.value.trim() === '') {
+                  proxy
+                    .$showAlert({
+                      title: 'Invalid Input',
+                      text: 'Reason cannot be empty. Please provide a valid reason.',
+                      icon: 'error',
+                      confirmButtonText: 'OK',
+                      confirmButtonColor: '#d33',
+                      showCancelButton: false
+                    })
+                    .then(() => {
+                      askForReason() // Prompt for reason again
+                    })
+                } else {
+                  // Pass the reason to reject
+                  RejectBooking(id, reasonResult.value.trim())
+                  console.log(reasonResult.value)
+                  getEvents(1)
+                }
+              }
+            })
+        }
+        askForReason() // Initial call to ask for reason
+      }
+    })
+}
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getEvents(1)
@@ -298,28 +435,35 @@ onMounted(async () => {
                   <span :class="'badge bg-' + item.recordStatus.theme">{{ item.recordStatus.label }}</span>
                 </td>
                 <td>
-                  <button class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                  <!-- <button class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                    <i class="fas fa-edit" title="Edit"></i>
+                  </button> -->
+                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
-                  <!-- <button
-                                        v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
-                                        class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)">
-                                        <i class="fas fa-cancel" title="Cancel"></i>
-                                    </button>
-                                    <button
-                                        v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'"
-                                        class="btn btn-outline-danger btn-sm me-3" @click="confirmDelete(item.id)">
-                                        <i class="fas fa-trash" title="Delete"></i>
-                                    </button>
-                                    <button v-if="item.recordStatus.label === 'DELETED'"
-                                        class="btn btn-outline-danger btn-sm" @click="confirmRestore(item.id)">
-                                        <i class="fas fa-undo" title="Restore"></i>
-                                    </button>
-                                    <button v-if="item.recordStatus.label === 'CANCELLED'"
-                                        class="btn btn-outline-exclamation-circle btn-sm">
-                                        <i class="fas fa-undo"
-                                            title="appointment has been cancelled no further action can be done"></i>
-                                    </button> -->
+                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                    <i class="fas fa-eye" title="View"></i>
+                  </button>
+
+                  <!-- Cancel Button -->
+                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmReject(item.id, 'Cancel')" :disabled="item.checked_in">
+                    <i class="fas fa-cancel" title="Cancel"></i>
+                  </button>
+                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
+                    <i class="fas fa-cancel" title="Cancel (Disabled)"></i>
+                  </button>
+                  <!-- Delete Button -->
+                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-danger btn-sm me-3" @click="confirmAction(item.id, 'Delete')" :disabled="item.checked_in">
+                    <i class="fas fa-trash" title="Delete"></i>
+                  </button>
+                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-danger btn-sm me-3" disabled>
+                    <i class="fas fa-trash" title="Delete (Disabled)"></i>
+                  </button>
+
+                  <!-- Restore Button -->
+                  <button v-if="item.recordStatus.label === 'DELETED'" class="btn btn-outline-danger btn-sm" @click="confirmAction(item.id, 'Restore')">
+                    <i class="fas fa-undo" title="Restore"></i>
+                  </button>
                 </td>
               </tr>
             </template>
@@ -382,7 +526,7 @@ onMounted(async () => {
         </div>
         <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
       </b-col>
-      <b-col md="5">
+      <b-col md="6">
         <div class="mb-3">
           <label for="endTimePicker" class="form-label">End Time</label>
           <flat-pickr v-model="eventDetails.end_time" class="form-control" :config="config2" id="endTimePicker" />
@@ -401,7 +545,7 @@ onMounted(async () => {
         <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
       </b-col>
     </b-row>
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-center mt-5">
       <b-button @click="saveEvent()" variant="primary">Create</b-button>
     </div>
   </b-modal>
@@ -449,7 +593,7 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="saveEvent(true)" variant="primary" >Update</b-button>
+      <b-button @click="saveEvent(true)" variant="primary">Update</b-button>
     </div>
   </b-modal>
 </template>

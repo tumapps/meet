@@ -117,7 +117,13 @@ const getRoles = async (page = currentPage.value) => {
   }
 }
 watch(searchQuery, () => {
-  getRoles(1)
+  // getRoles(1)
+
+  if (searchQuery.value === '') {
+    getRoles()
+  } else {
+    performSearch()
+  }
 })
 
 const roleModal = ref(null)
@@ -147,24 +153,23 @@ const updatePerPage = async () => {
   await getRoles(1)
 }
 
-//search
-// const performSearch = async () => {
-//   try {
-//     const response = await axiosInstance.get(`v1/auth/roles?_search=${searchQuery.value}`)
-//     isArray.value = Array.isArray(response.data)
-//     tableData.value = response.data.dataPayload.data
-//   } catch (error) {
-//     // console.error(error);
-//     errors.value = error.response.data.errorPayload.errors
-//     const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+// search
+const performSearch = async () => {
+  try {
+    const response = await axiosInstance.get(`v1/auth/manage-role?_search=${searchQuery.value}`)
+    tableData.value = Object.values(response.data.dataPayload.data)
+  } catch (error) {
+    // console.error(error);
+    errors.value = error.response.data.errorPayload.errors
+    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
 
-//     proxy.$showToast({
-//       title: 'An error occurred',
-//       text: errorMessage,
-//       icon: 'error'
-//     })
-//   }
-// }
+    proxy.$showToast({
+      title: 'An error occurred',
+      text: errorMessage,
+      icon: 'error'
+    })
+  }
+}
 
 onMounted(() => {
   getRoles()

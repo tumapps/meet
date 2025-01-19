@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, getCurrentInstance } from 'vue'
+import { ref, onMounted, watch, getCurrentInstance, defineProps } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -9,6 +9,15 @@ import { useAuthStore } from '@/store/auth.store.js'
 import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue'
 import { usePreferencesStore } from '../../../store/preferences'
 import { parse, format } from 'date-fns'
+
+const props = defineProps({
+  dashType: {
+    type: String,
+    required: true
+  }
+})
+
+console.log('dashType:', props.dashType)
 
 const { proxy } = getCurrentInstance()
 const preferences = usePreferencesStore()
@@ -88,28 +97,94 @@ function parseCustomDate(dateString) {
   return parse(dateString, 'dd MMM yyyy', new Date())
 }
 
-async function fetchEvents() {
+// async function fetchAppointments() {
+//   isLoading.value = true
+//   fetchError.value = null
+//   try {
+//     const response = await axiosInstance.get('/v1/scheduler/appointments')
+
+//     apiData.value = response.data.dataPayload.data
+//     events.value = apiData.value
+//       .filter((item) => {
+//         // Ensure the event is ACTIVE and its date is today
+//         // const parsedDate = parse(item.appointment_date, 'yyyy-MM-dd', new Date())
+
+//         return item.recordStatus.label === 'ACTIVE'
+//       })
+//       .map((item) => {
+//         console.log('Item:', item)
+//         const parsedDate = parseCustomDate(item.appointment_date)
+//         const formattedDate = format(parsedDate, 'yyyy-MM-dd')
+//         let backgroundColor
+
+//         //this was used when i was displaying all events including cancelled now strictly showing active once
+//         // instead give diffrent colors to diffrent user id in secretary calendar view
+//         switch (item.recordStatus.label) {
+//           case 'ACTIVE':
+//             backgroundColor = '#86deb7'
+//             break
+//           case 'CANCELLED':
+//             backgroundColor = '#E05263'
+//             break
+//           case 'DELETED':
+//             backgroundColor = '#dc3545'
+//             break
+//           case 'PENDING':
+//             backgroundColor = '#b8e1ff'
+//             break
+//           case 'RESCHEDULE':
+//             backgroundColor = '#FFCAB1'
+//             break
+//           default:
+//             backgroundColor = '#FFB2E6'
+//         }
+//         return {
+//           title: item.subject,
+//           start: `${formattedDate}T${item.start_time}`,
+//           end: `${formattedDate}T${item.end_time}`,
+//           backgroundColor: item.recordStatus.themeColor || backgroundColor,
+//           display: 'block',
+//           borderColor: 'transparent',
+//           extendedProps: {
+//             start_time: item.start_time,
+//             end_time: item.end_time,
+//             description: item.description,
+//             contact_name: item.contact_name,
+//             status: item.recordStatus.label
+//           }
+
+//           console.log('tittle:', item.subject)
+
+//         }
+//       })
+//   } catch (error) {
+//     fetchError.value = 'Failed to load events. Please try again later.'
+//   } finally {
+//     isLoading.value = false
+//   }
+// }
+
+async function fetchAppointments() {
   isLoading.value = true
   fetchError.value = null
+
   try {
     const response = await axiosInstance.get('/v1/scheduler/appointments')
 
     apiData.value = response.data.dataPayload.data
     events.value = apiData.value
       .filter((item) => {
-        // Ensure the event is ACTIVE and its date is today
-        // const parsedDate = parse(item.appointment_date, 'yyyy-MM-dd', new Date())
-
+        // Ensure the event is ACTIVE
         return item.recordStatus.label === 'ACTIVE'
       })
       .map((item) => {
         console.log('Item:', item)
+
         const parsedDate = parseCustomDate(item.appointment_date)
         const formattedDate = format(parsedDate, 'yyyy-MM-dd')
         let backgroundColor
 
-        //this was used when i was displaying all events including cancelled now strictly showing active once
-        // instead give diffrent colors to diffrent user id in secretary calendar view
+        // Assign background color based on recordStatus.label
         switch (item.recordStatus.label) {
           case 'ACTIVE':
             backgroundColor = '#86deb7'
@@ -129,13 +204,17 @@ async function fetchEvents() {
           default:
             backgroundColor = '#FFB2E6'
         }
-        return {
+
+        // Construct the event object
+        const event = {
           title: item.subject,
           start: `${formattedDate}T${item.start_time}`,
           end: `${formattedDate}T${item.end_time}`,
           backgroundColor: item.recordStatus.themeColor || backgroundColor,
           display: 'block',
           borderColor: 'transparent',
+          initialView: 'timeGridWeek',
+
           extendedProps: {
             start_time: item.start_time,
             end_time: item.end_time,
@@ -144,9 +223,59 @@ async function fetchEvents() {
             status: item.recordStatus.label
           }
         }
+
+        // Log the constructed event
+        console.log('Event main Action :', event)
+
+        return event
       })
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
+    console.error('Error fetching appointments:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+//function to get events
+
+async function fetchEvents() {
+  isLoading.value = true
+  fetchError.value = null
+
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/events')
+
+    apiData.value = response.data.dataPayload.data
+    // Filter and map API data to FullCalendar's required format
+    events.value = apiData.value
+      .filter((item) => item.recordStatus.label === 'ACTIVE') // Filter only ACTIVE events
+      .map((item) => {
+        // Combine date and time for FullCalendar's `start` and `end` fields
+        const start = `${item.start_date}T${item.start_time}`
+        const end = `${item.end_date}T${item.end_time}`
+
+        return {
+          title: item.title,
+          start,
+          end,
+          backgroundColor: item.recordStatus.theme || '#d33', // Default color if not provided
+          display: 'block', // Ensures the event is shown as a block
+          borderColor: 'transparent', // Removes borders
+          initialView: 'timeGridMonth',
+          extendedProps: {
+            start_time: item.start_time,
+            end_time: item.end_time,
+            description: item.description,
+            status: item.recordStatus.label // Include additional info for later use
+          }
+        }
+      })
+
+    console.log('Mapped Events:', events.value) // Debug the mapped events
+  } catch (error) {
+    fetchError.value = 'Failed to load events. Please try again later.'
+    console.error('Error fetching events:', error)
   } finally {
     isLoading.value = false
   }
@@ -171,7 +300,7 @@ watch(
 // FullCalendar options
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
+  // initialView: 'timeGridWeek',
   height: 'auto',
   events: events.value,
   weekends: preferences.weekend,
@@ -246,14 +375,16 @@ watch(events, (newEvents) => {
 
 // // Load events when the component is mounted
 // onMounted(() => {
-//   fetchEvents() // Fetch events from the API
+//   fetchAppointments() // Fetch events from the API
 //   console.log('events ata mount:', events.value)
 // })
 
 onMounted(async () => {
-  await fetchEvents() // Wait for fetchEvents to complete
-  console.log('events at mount:', apiData.value) // Log the events after the fetch is done
-  console.log('events at mount:', events.value) // Log the events after the fetch is done
+  if (props.dashType === 'user') {
+    await fetchAppointments()
+  } else {
+    await fetchEvents()
+  }
 })
 </script>
 <template>
@@ -275,7 +406,7 @@ onMounted(async () => {
     <p><strong>Start:</strong> {{ selectedEvent.start_time }}</p>
     <p><strong>End:</strong> {{ selectedEvent.end_time }}</p>
     <p><strong>Description:</strong> {{ selectedEvent.description }}</p>
-    <p><strong>Contact Name:</strong> {{ selectedEvent.contact_name }}</p>
+    <p v-if(selectedEvent.contact_name)><strong>Contact Name:</strong> {{ selectedEvent.contact_name }}</p>
     <p><strong>Status:</strong> {{ selectedEvent.status }}</p>
     <template #footer>
       <b-button variant="warning" @click="isModalOpen = false">Close</b-button>
@@ -316,6 +447,4 @@ onMounted(async () => {
   background: #eee;
   border-radius: 4px;
 }
-
-
 </style>

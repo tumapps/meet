@@ -47,10 +47,22 @@ const showModal = () => {
   }
 }
 
+const hideModal = () => {
+  if (newAvailability.value) {
+    newAvailability.value.hide()
+  }
+}
+
 const openModal = (id) => {
   if (updateAvailability.value) {
     getAvailability(id)
     updateAvailability.value.show()
+  }
+}
+
+const closeModal = () => {
+  if (updateAvailability.value) {
+    updateAvailability.value.hide()
   }
 }
 
@@ -75,6 +87,22 @@ const sortTable = (key) => {
     sortKey.value = key
     sortOrder.value = 'asc'
   }
+}
+
+const resetData = () => {
+  availabilityDetails.value = {
+    user_id: user_id.value,
+    start_date: '',
+    end_date: '',
+    start_time: '',
+    end_time: '',
+    description: ''
+  }
+  errors.value = {}
+}
+
+const handleClose = () => {
+  resetData()
 }
 
 const performSearch = async () => {
@@ -200,6 +228,10 @@ const saveAvailability = async () => {
   try {
     // Make the API call to save availability details
     const response = await axiosInstance.post('v1/scheduler/availability', availabilityDetails.value)
+
+    //close modal
+    hideModal()
+
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
@@ -244,6 +276,9 @@ const updateAvailabilityDetails = async (id) => {
 
     // Show success toast notification
     // Check if toastPayload exists in the response and update it
+
+    closeModal()
+
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
@@ -391,7 +426,7 @@ onMounted(async () => {
   </b-col>
 
   <!-- //modal -->
-  <b-modal ref="newAvailability" title="New Availability" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="newAvailability" title="New Availability" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <h4>Availability Settings</h4>
     <b-row>
       <b-col md="12">
@@ -436,7 +471,7 @@ onMounted(async () => {
     </div>
   </b-modal>
 
-  <b-modal ref="updateAvailability" title="update Availability" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="updateAvailability" title="update Availability" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <h4>Availability Settings</h4>
     <b-row>
       <b-col md="12">

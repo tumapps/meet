@@ -10,6 +10,7 @@ const axiosInstance = AxiosInstance()
 const authStore = useAuthStore()
 const username = ref('')
 //change the events owner
+const dashType = 'user'
 const role = ref('')
 role.value = authStore.getRole()
 const userId = ref('')
@@ -115,7 +116,7 @@ onMounted(() => {
     <b-col lg="12">
       <div class="full-calendar-container h-75">
         <!-- Ensures FullCalendar takes full height -->
-        <Fullcalendar />
+        <Fullcalendar :dashType="dashType" />
       </div>
     </b-col>
   </b-row>
