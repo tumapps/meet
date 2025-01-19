@@ -99,22 +99,6 @@ class PermissionController extends \helpers\ApiController
         }
     }
 
-
-    // public function actionDelete($id)
-    // {
-    //     $model = $this->findModel($id);
-    //     if ($model->is_deleted) {
-    //         // Yii::$app->user->can('PermissionRestore');
-    //         $model->restore();
-    //         return $this->toastResponse(['statusCode' => 202, 'message' => 'Record restored successfully']);
-    //     } else {
-    //         // Yii::$app->user->can('PermissionDelete');
-    //         $model->delete();
-    //         return $this->toastResponse(['statusCode' => 202, 'message' => 'Record deleted successfully']);
-    //     }
-    //     return $this->errorResponse($model->getErrors());
-    // }
-
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
