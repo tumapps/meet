@@ -18,7 +18,7 @@ class AuthItemSearch extends Model
     public $description;
     public $ruleName;
     public $data;
-    public $globalSearch;
+    public $search;
 
     /**
      * @inheritdoc
@@ -26,7 +26,7 @@ class AuthItemSearch extends Model
     public function rules()
     {
         return [
-            [['name', 'ruleName', 'description','id'], 'safe'],
+            [['name', 'ruleName', 'description', 'id', 'search'], 'safe'],
             [['type'], 'integer'],
         ];
     }
@@ -44,14 +44,13 @@ class AuthItemSearch extends Model
         if ($this->type == Item::TYPE_ROLE) {
             $items = $authManager->getRoles();
         } else {
-            $items = array_filter($authManager->getPermissions(), function($item) use ($advanced){
-              $isPermission = $this->type == Item::TYPE_PERMISSION;
-              if ($advanced) {
-                return $isPermission xor (strncmp($item->name, '/', 1) === 0 or strncmp($item->name, '@', 1) === 0);
-              }
-              else {
-                return $isPermission xor strncmp($item->name, '/', 1) === 0;
-              }
+            $items = array_filter($authManager->getPermissions(), function ($item) use ($advanced) {
+                $isPermission = $this->type == Item::TYPE_PERMISSION;
+                if ($advanced) {
+                    return $isPermission xor (strncmp($item->name, '/', 1) === 0 or strncmp($item->name, '@', 1) === 0);
+                } else {
+                    return $isPermission xor strncmp($item->name, '/', 1) === 0;
+                }
             });
         }
         $this->load($params);
