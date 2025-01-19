@@ -886,15 +886,15 @@ onUnmounted(() => {
                   <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
-                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" disabled>
-                    <i class="fas fa-edit" title="Edit (Disabled)"></i>
+                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                    <i class="fas fa-eye" title="View"></i>
                   </button>
 
                   <!-- Cancel Button -->
                   <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-cancel" title="Cancel"></i>
                   </button>
-                  <button v-else-if="item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
+                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
                     <i class="fas fa-cancel" title="Cancel (Disabled)"></i>
                   </button>
 
@@ -1124,7 +1124,7 @@ onUnmounted(() => {
                 <b-row class="m-5">
                   <b-col>
                     <div class="d-flex justify-content-center">
-                      <b-button variant="primary" class="me-3" @click="updateAppointment" ref="updateButton"> Update </b-button>
+                      <b-button variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE'"> Update </b-button>
                     </div>
                   </b-col>
                 </b-row>

@@ -17,7 +17,7 @@ const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPageOptions = ref([10, 20, 50, 100])
 const searchQuery = ref('')
 const errors = ref('')
-const newSpace = ref(null)
+const newEvent = ref(null)
 const editevent = ref(null)
 
 const InitialeventDetails = ref({
@@ -89,15 +89,15 @@ const sortedData = computed(() => {
 })
 
 const showModal = () => {
-  if (newSpace.value) {
-    newSpace.value.show()
+  if (newEvent.value) {
+    newEvent.value.show()
   }
 }
 
 const getEvent = async (id) => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/events/${id}`)
-    eventDetails.value = response.data.dataPayload
+    eventDetails.value = response.data.dataPayload.data
   } catch (error) {
     // console.error(error);
     const errorMessage = error.response.data.errorPayload.errors?.message
@@ -117,35 +117,40 @@ const openModal = (id) => {
   }
 }
 
-const AddEvent = async () => {
+const saveEvent = async (isUpdate = false) => {
   try {
-    const response = await axiosInstance.post('v1/scheduler/events', eventDetails.value)
+    const method = isUpdate ? 'put' : 'post' // toggle method based on isUpdate flag
+    const url = isUpdate ? `v1/scheduler/events/${eventDetails.value.id}` : 'v1/scheduler/events'
 
-    //get events
+    // Send the appropriate request based on isUpdate flag
+    const response = await axiosInstance[method](url, eventDetails.value)
+
+    // Get events after the operation
     getEvents(1)
-    //close the modal
-    newSpace.value.hide()
+
+    // Close the modal
+    newEvent.value.hide()
+
+    // Handle toast notification response
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
 
-      // Show toast notification using the response data
       proxy.$showAlert({
         title: toastPayload.value.toastMessage,
-        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        icon: toastPayload.value.toastTheme,
         showCancelButton: false,
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true
       })
     } else {
-      // Fallback if toastPayload is not provided in the response
       proxy.$showToast({
         title: 'success',
         icon: 'success'
       })
     }
   } catch (error) {
+    // Handle error if the request fails
     if (error.response && error.response.data.errorPayload) {
       errors.value = error.response.data.errorPayload.errors
     } else {
@@ -343,7 +348,7 @@ onMounted(async () => {
     </b-card>
   </b-col>
 
-  <b-modal ref="newSpace" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
+  <b-modal ref="newEvent" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
@@ -397,11 +402,11 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="AddEvent" variant="primary">Create</b-button>
+      <b-button @click="saveEvent()" variant="primary">Create</b-button>
     </div>
   </b-modal>
 
-  <b-modal ref="editevent" title="Edit Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer>
+  <b-modal ref="editevent" title="Edit Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
@@ -422,7 +427,7 @@ onMounted(async () => {
       <b-col md="12">
         <div class="mb-3">
           <label for="levelDropdown" class="form-label">End Date </label>
-          <flat-pickr v-model="eventDetails.event_date" class="form-control" :config="config" id="startDatePicker" />
+          <flat-pickr v-model="eventDetails.end_date" class="form-control" :config="config" id="startDatePicker" />
         </div>
         <div v-if="errors.event_date" class="error" aria-live="polite">{{ errors.event_date }}</div>
       </b-col>
@@ -444,7 +449,7 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-end">
-      <b-button @click="UpdateEvent" variant="primary">Update</b-button>
+      <b-button @click="saveEvent(true)" variant="primary" >Update</b-button>
     </div>
   </b-modal>
 </template>

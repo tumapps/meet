@@ -24,7 +24,20 @@ const props = defineProps({
   }
 })
 
+const resetState = () => {
+  errors.value = {}
+  toastPayload.value = {}
+  availableRoles.value = {}
+  availablePermissions.value = []
+  assignedRoles.value = []
+  assignedPermissions.value = []
+  selectedItems.value = { items: [] }
+  custompath.value = ''
+  rolename.value = ''
+}
+
 const custompath = ref('')
+const custompath2 = ref('')
 
 const rolename = ref('')
 
@@ -37,20 +50,27 @@ const rolename = ref('')
 const onModalShow = () => {
   console.log('RolePermissions mounted heree', props.roleName)
   rolename.value = ref(props.roleName)
+  console.log('selected items', selectedItems.value)
 
   if (props.user_id && props.roleName) {
-    custompath.value = `role-to-user/${props.user_id}`
+    custompath.value = `/v1/auth/assign-role-user/${props.user_id}`
+    custompath2.value = `/v1/auth/assign-role-user/${props.user_id}`
   } else if (props.roleName) {
     custompath.value = `/v1/auth/assign?role=${props.roleName}`
+    custompath2.value = `/v1/auth/remove?id=${props.roleName}`
+  }
+
+  if (!props.user_id) {
+    getRoleDetails()
+  } else if (props.user_id) {
+    console.log('Getting user roles')
+    getUserRoles()
   }
 }
 
 const handleclose = () => {
   console.log('RolePermissions closed')
-  //reset the selected items
-  selectedItems.value.items = []
-  //reset props
-  rolename.value = ''
+  resetState() // Reset state
 }
 //selected items
 const selectedItems = ref({
@@ -60,13 +80,18 @@ const roleModal = ref(null) // Reference for <b-modal>
 
 watch(
   () => props.roleName,
-  (newRoleName, oldRoleName) => {
+  props.user_id,
+  (newRoleName, oldRoleName, newUserId, oldUserId) => {
     rolename.value = newRoleName
     console.log('RoleName changed:', rolename.value)
 
     if (newRoleName !== oldRoleName && !props.user_id) {
       console.log('RoleName changed:', newRoleName)
       getRoleDetails()
+    }
+    if (newUserId !== oldUserId && props.user_id) {
+      console.log('User ID changed:', newUserId)
+      getUserRoles()
     }
   }
 )
@@ -95,14 +120,27 @@ const isSelected = (item) => {
   return selectedItems.value.items.includes(item.name)
 }
 
+const getUserRoles = async () => {
+  const response = await axiosInstance.get(`/v1/auth/manage-user-roles/${props.user_id}`)
+  availableRoles.value = response.data.dataPayload.data.available.roles
+  availablePermissions.value = response.data.dataPayload.data.available.permissions
+  assignedPermissions.value = response.data.dataPayload.data.assigned.permissions
+  assignedRoles.value = response.data.dataPayload.data.assigned.roles
+}
+
 //send the selected items to the backend
 const updateRolePermissions = async () => {
   try {
+    console.log('Selected items:', selectedItems.value)
     // Send the selected items to the backend
     const response = await axiosInstance.post(custompath.value, selectedItems.value)
 
     // Refresh the role details
-    getRoleDetails()
+    if (!props.user_id) {
+      getRoleDetails()
+    } else if (props.user_id) {
+      getUserRoles()
+    }
 
     // Clear the selected items
     selectedItems.value.items = []
@@ -139,10 +177,18 @@ const updateRolePermissions = async () => {
 
 const stripRolePermissions = async () => {
   try {
-    const response = await axiosInstance.post(`/v1/auth/remove?id=${props.roleName}`, selectedItems.value)
-    getRoleDetails()
+    // const response = await axiosInstance.post(`/v1/auth/remove?id=${props.roleName}`, selectedItems.value)
+    const response = await axiosInstance.post(custompath2.value, selectedItems.value)
+
     //clear the selected items
+
     selectedItems.value.items = []
+
+    if (!props.user_id) {
+      getRoleDetails()
+    } else if (props.user_id) {
+      getUserRoles()
+    }
 
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
@@ -159,22 +205,26 @@ const stripRolePermissions = async () => {
       })
     }
   } catch (error) {
-    // console.error(error);
-    errors.value = error.response.data.errorPayload.errors
+    const errorMessage = error?.response?.data?.errorPayload?.errors?.message || error?.response?.data?.toastPayload?.toastMessage
+    const theme = error?.response?.data?.toastPayload?.toastTheme || 'error'
 
-    proxy.$showAlert({
-      title: error.response.data.toastPayload.toastTheme,
-      text: error.response.data.toastPayload.toastMessage,
-      icon: error.response.data.toastPayload.toastTheme
+    // Show a toast notification for the error
+    proxy.$showToast({
+      title: errorMessage,
+      text: errorMessage,
+      icon: theme
     })
   }
 }
 
 onMounted(() => {
-  console.log('RolePermissions mounted', props.roleName)
-  if (!props.user_id) {
-    getRoleDetails()
-  }
+  // // console.log('RolePermissions mounted', props.roleName, props.user_id)
+  // if (!props.user_id) {
+  //   // getRoleDetails()
+  // } else if (props.user_id) {
+  //   console.log('Getting user roles')
+  //   // getUserRoles()
+  // }
 })
 </script>
 <template>
@@ -211,8 +261,8 @@ onMounted(() => {
 
       <!-- Control Buttons (Centered vertically and horizontally) -->
       <div class="col-md-2 d-flex flex-column justify-content-center align-items-center" style="position: sticky; top: 0; height: 70vh; background-color: white; z-index: 10">
-        <button class="btn btn-primary mb-2" @click="updateRolePermissions">&gt;&gt;</button>
-        <button class="btn btn-danger" @click="stripRolePermissions">&lt;&lt;</button>
+        <button class="btn btn-primary mb-2" @click="updateRolePermissions" :disabled="selectedItems.items.length === 0">&gt;&gt;</button>
+        <button class="btn btn-danger" @click="stripRolePermissions" :disabled="selectedItems.items.length === 0">&lt;&lt;</button>
       </div>
 
       <!-- Assigned Items Column -->
