@@ -52,7 +52,6 @@ class AssignmentController extends \helpers\ApiController
         ]);
     }
    
-
     public function actionManageRole($id)
     {
         $authManager = Yii::$app->authManager;
@@ -75,9 +74,6 @@ class AssignmentController extends \helpers\ApiController
 
         $search = isset($queryParams['_search']) ? $queryParams['_search'] : null;
 
-        // return  $assignedPermissions;
-
-        // return $search;
 
         if (!empty($search)) {
             $availableRoles = array_filter($availableRoles, function ($role, $key) use ($search) {
