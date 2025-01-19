@@ -81,7 +81,8 @@
      *   ),
      * )
      */
-    'GET manage-role'     => 'assignment/manage-role',
+    // 'GET manage-role/{id}'     => 'assignment/manage-role',
+    'GET manage-role' => 'assignment/manage-role',
 
     /**
      * @OA\Get(path="/auth/manage-user-roles",
