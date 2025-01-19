@@ -29,6 +29,7 @@ class AppointmentAttendees extends BaseModel
     const STATUS_DECLINED = 15;
     const STATUS_CONFIRMED = 14;
     const STATUS_PENDING = 11;
+    const STATUS_REMOVED = 1;
 
 
     const EVENT_ATTENDEE_UPDATE = 'attendeeUpdate';
@@ -153,7 +154,7 @@ class AppointmentAttendees extends BaseModel
     public static function isAttendeeUnavailable($staffId, $date, $startTime, $endTime)
     {
         $overlap = self::find()
-            ->where(['staff_id' => $staffId, 'date' => $date])
+            ->where(['staff_id' => $staffId, 'date' => $date, 'is_removed' => 0])
             ->andWhere([
                 'or',
                 ['between', 'start_time', $startTime, $endTime],
@@ -190,7 +191,7 @@ class AppointmentAttendees extends BaseModel
 
     public static function getAttendeesEmailsByAppointmentId($appointmentId, $includeStaffId = false, $confirmedOnly = false)
     {
-        $query = self::find()->where(['appointment_id' => $appointmentId]);
+        $query = self::find()->where(['appointment_id' => $appointmentId, 'is_removed' => 0]);
 
         if ($confirmedOnly) {
             $query->andWhere(['status' => self::STATUS_CONFIRMED]);
