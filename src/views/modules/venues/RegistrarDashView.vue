@@ -132,7 +132,7 @@ onMounted(() => {
   </b-row>
   <b-row>
     <b-col lg="12">
-      <div class="full-calendar-container h-75">
+      <div class="">
         <!-- Ensures FullCalendar takes full height -->
         <!-- pass dashType as a prop to the Fullcalendar component -->
         <Fullcalendar :dashType="dashType" @createEvent="showModal" />
@@ -231,6 +231,14 @@ h1 {
   object-fit: cover;
 }
 
+/* .fc-button-group{
+  color: primary !important;
+  /* margin-bottom: 20px !important; */
+/* }  */
+
+.fc-toolbar-chunk {
+  margin-bottom: 20px !important;
+}
 b-card {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 12px;

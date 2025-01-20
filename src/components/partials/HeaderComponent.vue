@@ -8,7 +8,7 @@ import BrandName from '@/components/custom/logo/BrandName.vue'
 import { useRoute } from 'vue-router'
 const store = useSetting()
 
-const fontSize = computed(() => store.theme_font_sizeDefaultNa_value)
+const fontSize = computed(() => store.theme_font_size_value)
 
 // const themeSchemeDirection = computed(() => store.theme_scheme_direction_value)
 
@@ -42,6 +42,7 @@ const toggleSidebar = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', onscroll())
+  console.log('mounted the navv bar hubsjhdjbhj', fontSize)
 })
 
 onUnmounted(() => {

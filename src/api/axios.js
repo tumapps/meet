@@ -140,7 +140,7 @@ const AxiosInstance = () => {
       router.push({ path: '/auth/login' })
       console.log('Successfully logged out')
     } catch (error) {
-      // console.error('Error during logout:', error);
+      console.error('Error during logout:', error)
     }
   }
   axiosInstance.logout = logout

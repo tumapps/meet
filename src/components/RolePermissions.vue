@@ -12,6 +12,8 @@ const availableRoles = ref({})
 const availablePermissions = ref([])
 const assignedRoles = ref([])
 const assignedPermissions = ref([])
+const availableItemsSearch = ref('')
+const assignedItemsSearch = ref('')
 //get the role name from the last part of the url
 const props = defineProps({
   roleName: {
@@ -213,6 +215,44 @@ const stripRolePermissions = async () => {
       title: errorMessage,
       text: errorMessage,
       icon: theme
+    })
+  }
+}
+
+const flag = ref('')
+
+watch(
+  () => availableItemsSearch.value,
+  (newVal) => {
+    performSearch(props.roleName, newVal)
+  }
+)
+
+watch(
+  () => assignedItemsSearch.value,
+  (newVal) => {
+    flag.value = 'assinged'
+    performSearch(props.roleName, newVal)
+  }
+)
+const performSearch = async (role, searchQuery) => {
+  try {
+    const response = await axiosInstance.get(`v1/auth/manage-role?id=${role}&_search=${searchQuery}`)
+
+    if (flag.value === 'assinged') {
+      assignedRoles.value = response.data.dataPayload.data.assigned.roles
+    } else {
+      availableRoles.value = response.data.dataPayload.data.available.roles
+    }
+  } catch (error) {
+    // console.error(error);
+    errors.value = error.response.data.errorPayload.errors
+    const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+
+    proxy.$showToast({
+      title: 'An error occurred',
+      text: errorMessage,
+      icon: 'error'
     })
   }
 }

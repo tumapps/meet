@@ -14,11 +14,12 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const perPage = ref(20) // Number of items per page (from API response)
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
-const perPageOptions = ref([10, 20, 50, 100])
+const perPageOptions = ref([20, 50, 100])
 const searchQuery = ref('')
 const errors = ref('')
 const newEvent = ref(null)
 const editevent = ref(null)
+const isloading = ref(false)
 
 const InitialeventDetails = ref({
   title: '',
@@ -134,6 +135,7 @@ const hideModal = () => {
 
 const saveEvent = async (isUpdate = false) => {
   try {
+    isloading.value = true
     const method = isUpdate ? 'put' : 'post' // toggle method based on isUpdate flag
     const url = isUpdate ? `v1/scheduler/events/${eventDetails.value.id}` : 'v1/scheduler/events'
 
@@ -144,6 +146,7 @@ const saveEvent = async (isUpdate = false) => {
     getEvents(1)
     closeModal()
     hideModal()
+    handleClose()
 
     // Close the modal
     // Handle toast notification response
@@ -177,12 +180,14 @@ const saveEvent = async (isUpdate = false) => {
         icon: 'error'
       })
     }
+  } finally {
+    isloading.value = false
   }
 }
 
 const getEvents = async (page) => {
   try {
-    const response = await axiosInstance.get(`v1/scheduler/events?page=${page}&perPage=${selectedPerPage.value}&search=${searchQuery.value}`)
+    const response = await axiosInstance.get(`v1/scheduler/events?page=${page}&perPage=${selectedPerPage.value}&_search=${searchQuery.value}`)
 
     tableData.value = response.data.dataPayload.data
 
@@ -546,7 +551,11 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <div class="d-flex justify-content-center mt-5">
-      <b-button @click="saveEvent()" variant="primary">Create</b-button>
+      <b-button v-if="isloading === false" @click="saveEvent()" variant="primary">Submit</b-button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        submitting...
+      </button>
     </div>
   </b-modal>
 

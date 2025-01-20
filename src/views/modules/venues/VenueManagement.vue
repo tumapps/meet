@@ -141,7 +141,7 @@ const getLevels = async () => {
 const getSpaces = async (page) => {
   try {
     console.log(selectedPerPage.value)
-    const response = await axiosInstance.get(`v1/scheduler/spaces?page=${page}&per-page=${selectedPerPage.value}&search=${searchQuery.value}`)
+    const response = await axiosInstance.get(`v1/scheduler/spaces?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
     console.log(response.data.dataPayload.data)
