@@ -337,6 +337,23 @@ class EventHandler
 		}
 	}
 
+	public static function onBackUpFileUploaded(Event $event)
+	{
+		$email = $event->data['email'];
+		$subject = $event->data['subject'];
+		$file_url = $event->data['file_url'];
+		$self_link = $event->data['file_url'];
+
+		$body = "Dear Admin,\n\n";
+		$body .= "The database backup has been successfully uploaded.\n\n";
+		$body .= "You can view or download the backup file using the following links:\n";
+		$body .= "Download Link: {$file_url}\n";
+		$body .= "Self Link: {$self_link}\n\n";
+		$body .= "Thank you for managing the system backup.";
+
+		self::addEmailToQueue($email, $subject, $body);
+	}
+
 	public static function addEmailToQueue($email, $subject, $body, $type = null, $id = null)
 	{
 		self::initQueue();
