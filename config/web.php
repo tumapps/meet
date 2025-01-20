@@ -8,10 +8,10 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
         'log',
-        function () {
-            $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
-            $controller->actionSyncPermissions(false);
-        }
+        // function () {
+        //     $controller = new \auth\controllers\AssignmentController('assignment', Yii::$app);
+        //     $controller->actionSyncPermissions(false);
+        // }
     ],
     'controllerNamespace' => 'main\controllers',
     'timeZone' => 'Africa/Nairobi',
