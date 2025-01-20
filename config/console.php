@@ -32,6 +32,9 @@ $config = [
         'test-rabbitmq' => [
             'class' => 'cmd\controllers\TestRabbitmqController',
         ],
+        'db-backup' => [
+            'class' => 'cmd\controllers\BackupController',
+        ],
     ],
     'components' => [
         'cache' => [
@@ -71,6 +74,12 @@ $config = [
                 'port' =>$_ENV['MAIL_PORT'],
                 'encryption' => $_ENV['ENCRYPTION'],
             ],
+        ],
+        'backup' => [
+            'class' => 'amoracr\backup\Backup',
+            'backupDir' => '@app/providers/bin',
+            'compression' => 'zip',
+            'databases' => ['db'],
         ],
         'log' => [
             'targets' => [
