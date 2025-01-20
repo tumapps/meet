@@ -31,7 +31,8 @@ watch(
 const users = ref([
   { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active' },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Inactive' },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 'Active' }
+  { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 'Active' },
+  { id: 4, name: 'Bob Brown', email: 'kk@hk.com', status: 'Active' }
 ])
 
 const handleSearch = async () => {
