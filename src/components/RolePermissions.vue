@@ -73,6 +73,8 @@ const onModalShow = () => {
 const handleclose = () => {
   console.log('RolePermissions closed')
   resetState() // Reset state
+  assignedItemsSearch.value = ''
+  availableItemsSearch.value = ''
 }
 //selected items
 const selectedItems = ref({
