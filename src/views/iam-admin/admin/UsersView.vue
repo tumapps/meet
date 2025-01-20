@@ -126,6 +126,7 @@ const getRoles = async () => {
   }
 }
 
+const isloading = ref(false)
 const roleModal = ref(null)
 const propUser_id = ref('')
 const roleName = ref('')
@@ -225,6 +226,7 @@ const confirmStatusChange = (id) => {
 
 //update user details
 const UpdateUser = async () => {
+  isloading.value = true
   try {
     const response = await axiosInstance.put(`/v1/auth/update-user/${userData.value.user_id}`, userData.value)
 
@@ -257,6 +259,8 @@ const UpdateUser = async () => {
     })
 
     throw error // Re-throw the error so `onToggleCheckIn` can handle it
+  } finally {
+    isloading.value = false
   }
 }
 </script>
@@ -366,14 +370,14 @@ const UpdateUser = async () => {
 
   <!-- modal to view and edit user details -->
   <RolePermissions ref="roleModal" :roleName="roleName" :user_id="propUser_id" />
-  <b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user" hide-footer>
+  <b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-xl fade" id="edit_user" hide-footer>
     <template #modal-header="{ close }">
       <h5 class="modal-title">User Details</h5>
       <b-button variant="light" @click="close" class="close"> &times; </b-button>
     </template>
 
     <b-row class="mb-5">
-      <b-col cols="6" class="mb-5">
+      <b-col cols="5" class="mb-5">
         <div class="profile-picture d-flex align-items-center">
           <!-- Profile Image -->
           <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center text-center">
@@ -390,7 +394,7 @@ const UpdateUser = async () => {
           </div>
         </div>
       </b-col>
-      <b-col md="12" lg="6" class="mb-5 d-flex align-items-center">
+      <b-col md="12" lg="5" class="mb-5 d-flex align-items-center">
         <!-- Form Switch -->
         <div class="form-check form-switch">
           <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" :checked="userData.status === 10" @change="confirmStatusChange(userData.user_id)" />
@@ -404,44 +408,53 @@ const UpdateUser = async () => {
           {{ errors.status }}
         </div>
       </b-col>
+      <b-col md="12" lg="2" class="mb-5 d-flex align-items-center">
+        <div class="mb-3">
+          <!-- <label for="roledescription" class="form-label">Role</label> -->
+          <b-button @click="showRoleModal" variant="outline-primary" class="w-100"> Role</b-button>
+        </div>
+        <div v-if="errors.role" class="error" aria-live="polite">
+          {{ errors.role }}
+        </div>
+      </b-col>
 
-      <b-col md="12" lg="4">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">First Name</label>
           <b-form-input v-model="userData.first_name" id="startDatePicker" type="text" placeholder="Enter Role Name"></b-form-input>
         </div>
         <div v-if="errors.first_name" class="error" aria-live="polite">{{ errors.first_name }}</div>
       </b-col>
-      <b-col md="12" lg="4">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">Last Name</label>
           <b-form-input v-model="userData.first_last" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
         <div v-if="errors.first_last" class="error" aria-live="polite">{{ errors.first_last }}</div>
       </b-col>
-      <b-col md="12" lg="4">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="roledescription" class="form-label">Username</label>
           <b-form-input v-model="userData.username" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
         </div>
         <div v-if="errors.username" class="error" aria-live="polite">{{ errors.username }}</div>
       </b-col>
-    </b-row>
-    <b-row>
-      <b-col md="12" lg="4">
-        <div class="mb-3">
-          <label for="rolerulename" class="form-label">Email</label>
-          <b-form-input v-model="userData.email" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
-        </div>
-        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email }}</div>
-      </b-col>
-      <b-col md="12" lg="4">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="roledescription" class="form-label">Phone Number</label>
           <b-form-input v-model="userData.mobile_number" id="roledescription" type="text" placeholder="Enter description"></b-form-input>
         </div>
         <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
       </b-col>
+      <b-col md="12" lg="12">
+        <div class="mb-3">
+          <label for="rolerulename" class="form-label">Email</label>
+          <b-form-input v-model="userData.email" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
+        </div>
+        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email }}</div>
+      </b-col>
+    </b-row>
+    <!-- <b-row>
       <b-col md="12" lg="4">
         <div class="mb-3">
           <label for="roledescription" class="form-label">Role</label>
@@ -451,10 +464,14 @@ const UpdateUser = async () => {
           {{ errors.role }}
         </div>
       </b-col>
-    </b-row>
+    </b-row> -->
 
-    <div class="d-flex justify-content-end">
-      <b-button @click="UpdateUser" variant="primary">Save</b-button>
+    <div class="d-flex justify-content-center">
+      <b-button v-if="isloading === false" @click="UpdateUser" variant="outline-primary">Update</b-button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        submitting...
+      </button>
     </div>
   </b-modal>
   <!--<b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user">
