@@ -46,30 +46,33 @@ class ConfigWrapper
             'jwt.audience' => 'http://example.org',
             'jwt.id' => '4f1g23a12aa',
             'jwt_secret' => getenv('JWT_SECRET'),
-            'adminEmail' => 'tum@gmail.com',
+            'adminEmail' => $_SERVER['SYSTEM_ADMIN_EMAIL'] ?? 'francisyuppie@gmail.com',
             'user.passwordResetTokenExpire' => 900,
             'allowedDomains' => 'http://localhost:9000',
             'passwordResetLink' => 'http://10.17.0.24/request-password-reset?token=',
             'confirmationLink' => 'http://10.17.0.247/attendance-confirmation/',
             'loginUrl' => 'http://10.17.0.24',
             'menus' => [
-                    ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
-                    ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
-                    ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
-                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
-                    ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock'], // user,
-                    ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox'], // registra
-                    ['route' => 'venues', 'label' => 'venues', 'icon' => 'location-dot'], // registra
-                    ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'], // regitra
-                    ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'], // admin
-                    ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
-                    ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'], // registra
+                ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
+                ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
+                ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
+                ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
+                ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock'], // user,
+                ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox'], // registra
+                ['route' => 'venues', 'label' => 'venues', 'icon' => 'location-dot'], // registra
+                ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'], // regitra
+                ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'], // admin
+                ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
+                ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'],
+                // 'iam' => [
+                //     ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'],
+                //     ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'],
+                //     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'],
+                // ]
             ],
             'africasTalkingApi' => $_SERVER['AT_API_KEY'],
             'africasTalkingUserName' => $_SERVER['AT_USERNAME'],
-            'mdm.admin.configs' => [
-                
-            ],
+            'mdm.admin.configs' => [],
         ];
     }
     public function load($item)
