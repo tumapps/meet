@@ -11,7 +11,7 @@ const errors = ref({})
 // Data variables
 const tableData = ref([])
 const searchQuery = ref('')
-const perPageOptions = [5, 10, 15, 20]
+const perPageOptions = [20, 50, 100]
 const selectedPerPage = ref(perPageOptions[0])
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -275,7 +275,7 @@ const UpdateUser = async () => {
         <b-col lg="12" md="12" sm="12">
           <div class="d-flex justify-content-between">
             <div class="d-flex align-items-center">
-              <label for="itemsPerPage" class="me-2">Items per page:</label>
+              <!-- <label for="itemsPerPage" class="me-2">Items per page:</label> -->
               <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage" class="form-select form-select-sm" style="width: auto">
                 <option v-for="option in perPageOptions" :key="option" :value="option">
                   {{ option }}

@@ -61,13 +61,10 @@ function handleClose() {
   resetFormData()
 }
 
-const saveEvent = async (isUpdate = false) => {
+const saveEvent = async () => {
   try {
-    const method = isUpdate ? 'put' : 'post' // toggle method based on isUpdate flag
-    const url = isUpdate ? `v1/scheduler/events/${eventDetails.value.id}` : 'v1/scheduler/events'
-
     // Send the appropriate request based on isUpdate flag
-    const response = await axiosInstance[method](url, eventDetails.value)
+    const response = await axiosInstance.post('/v1/scheduler/events', eventDetails.value)
 
     // Get events after the operation
     closeModal()

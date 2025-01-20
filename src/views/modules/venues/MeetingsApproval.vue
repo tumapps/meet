@@ -13,7 +13,7 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const perPage = ref(20) // Number of items per page (from API response)
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
-const perPageOptions = ref([10, 20, 50])
+const perPageOptions = ref([20, 50, 100])
 const searchQuery = ref('')
 const errors = ref({})
 
@@ -251,7 +251,7 @@ onMounted(() => {
   <b-col lg="12">
     <b-card>
       <div>
-        <h2>Requests</h2>
+        <h2>Space Requests</h2>
       </div>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">

@@ -60,21 +60,6 @@ const updatePerPage = () => {
   getUsers(1) // Fetch data for the first page with the new perPage value
 }
 
-// Perform search (if search query is used)
-// const performSearch = async () => {
-//   try {
-//     const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-//     tableData.value = response.data.dataPayload.data
-//   } catch (error) {
-//     // console.error(error);
-//     proxy.$showToast({
-//       title: 'An error occurred ',
-//       text: 'Ooops! an error occured',
-//       icon: 'error'
-//     })
-//   }
-// }
-
 // Pagination logic
 const goToPage = (page) => {
   // console.log('page', page);

@@ -214,7 +214,7 @@ onMounted(() => {
         <table class="table table-hover">
           <thead>
             <tr>
-              <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th>
+              <!-- <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th> -->
               <th @click="sortTable('start_date')">Role Name <i class="fas fa-sort"></i></th>
               <th>Description</th>
               <th>Data</th>
@@ -226,7 +226,7 @@ onMounted(() => {
           <tbody>
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
-                <td>{{ index }}</td>
+                <!-- <td>{{ index }}</td> -->
                 <td>{{ item.name }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.data }}</td>

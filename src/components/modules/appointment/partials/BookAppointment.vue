@@ -5,6 +5,7 @@ import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlo
 import FlatPickr from 'vue-flatpickr-component'
 import IconComponent from '@/components/icons/IconComponent.vue'
 import { useAuthStore } from '@/store/auth.store.js'
+import AttendeesComponent from './AttendeesComponent.vue'
 
 const authStore = useAuthStore()
 const axiosInstance = createAxiosInstance()
@@ -409,6 +410,13 @@ watch(selectedPriority, (newPriority) => {
 //   //close
 // }
 
+const attendeeModal = ref(null)
+
+const openModal = () => {
+  console.log('Opening modal')
+  attendeeModal.value.$refs.attendeeModal.show()
+}
+
 onMounted(() => {
   slotsData.value.date = today.value
   getSpaces()
@@ -421,7 +429,9 @@ onMounted(() => {
 })
 </script>
 <template>
-  <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="resetErrors">
+  <!-- //AttendeesComponent -->
+  <AttendeesComponent ref="attendeeModal" />
+  <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="resetErrors">
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
@@ -555,6 +565,9 @@ onMounted(() => {
                 </div>
               </b-col>
             </b-row> -->
+            <b-row class="g-3 align-items-center form-group">
+              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-primary" @click="openModal">Open Modal</button> </b-col>
+            </b-row>
 
             <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">

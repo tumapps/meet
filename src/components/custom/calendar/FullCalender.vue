@@ -39,7 +39,7 @@ const appointmentModal = ref(null)
 //modal
 const showModal = () => {
   // appointmentModal.value.$refs.appointmentModal.show()
-  if (props.dashType === 'users') {
+  if (props.dashType === 'user') {
     appointmentModal.value.$refs.appointmentModal.show()
   } else {
     //emit a create event

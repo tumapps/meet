@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth.store.js'
 import UppyDashboard from '@/components/custom/uppy/UppyDashboard.vue'
 import FlatPickr from 'vue-flatpickr-component'
 import { debounce } from 'lodash-es'
+import AttendeesComponent from '../../../components/modules/appointment/partials/AttendeesComponent.vue'
 
 const authStore = useAuthStore()
 
@@ -53,10 +54,18 @@ const InitialappointmentDetails = {
   updated_at: '',
   statusLabel: '',
   user_id: '',
-  space_id: ''
+  space_id: '',
+  file: null
 }
 
 const appointmentDetails = ref({ ...InitialappointmentDetails })
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    appointmentDetails.value.file = file
+  }
+}
 
 const flatPickrConfig = {
   dateFormat: 'd M Y',
@@ -687,7 +696,7 @@ const confirmCheckIn = (item) => {
 const handleModalClose = () => {
   // Perform any actions you need after modal closes
   //   console.log('Modal has been closed');
-  // appointmentDetails.value = { ...InitialappointmentDetails }
+  appointmentDetails.value = { ...InitialappointmentDetails }
   errors.value = {}
   getAppointments(1) // Refresh the appointments after closing the modal
 }
@@ -764,6 +773,16 @@ watch(
     }
   }
 )
+// const showModal = () => {
+//   appointmentModal.value.$refs.appointmentModal.show()
+// }
+
+const attendeeModal = ref(null)
+
+const openAttendeeModal = () => {
+  console.log('Opening modal')
+  attendeeModal.value.$refs.attendeeModal.show()
+}
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -778,6 +797,8 @@ onUnmounted(() => {
 })
 </script>
 <template>
+  <AttendeesComponent ref="attendeeModal" />
+
   <b-col lg="12">
     <b-card>
       <b-row class="mb-4">
@@ -1042,21 +1063,30 @@ onUnmounted(() => {
                 </b-col>
                 <!-- preview the pdf file using the pdf viewer -->
                 <b-col lg="4" md="12" class="mb-5">
-                  <label for="input-107" class="form-label">Attachment</label>
-                  <div v-if="downloadLink" class="d-flex align-items-center">
-                    <div class="card-body position-relative d-flex align-items-center">
-                      <img src="@/assets/modules/file-manager/images/pdf.svg" alt="PDF Icon" class="card-img-left" style="width: 50px; height: 40px; object-fit: contain" />
-                      <a :href="downloadLink" target="_blank" class="btn btn-primary btn-sm">View Attachment</a>
+                  <label for="input-107" class="form-label">Agenda</label>
+                  <div v-if="downloadLink" class="">
+                    <div class="card-body position-relative d-flex align-items-start">
+                      <a :href="downloadLink" target="_blank"><img src="@/assets/modules/file-manager/images/pdf.svg" alt="PDF Icon" class="card-img-left" style="width: 50px; height: 40px; object-fit: contain" /></a>
                     </div>
+                    <!-- <button
+          class="btn btn-success btn-sm ms-2"
+          
+          @click="updateAgenda"
+        >Update Agenda</button> -->
                   </div>
                   <div v-else>
-                    <p>No attachment</p>
+                    <!-- <b-col cols="10"> -->
+                    <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
+                    <!-- <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
+                </div> -->
+                    <!-- </b-col> -->
                   </div>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
-                  <label for="'attendees'" class="form-label">Attendees</label>
+                  <!-- <label for="'attendees'" class="form-label">Attendees</label>
                   <div>
-                    <!-- //show tags of attendees -->
+                    
                     <b-form-tags v-model="appointmentDetails.attendees" id="attendees" tag-variant="primary" tag-pills>
                       <template #tag="{ tag, removeTag }">
                         <b-badge variant="primary" class="me-1">
@@ -1068,7 +1098,8 @@ onUnmounted(() => {
                   </div>
                   <div v-if="errorDetails.attendees" class="error">
                     {{ errorDetails.attendees }}
-                  </div>
+                  </div> -->
+                  <button class="btn btn-primary" @click="openAttendeeModal">Open Modal</button>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Description</label>
