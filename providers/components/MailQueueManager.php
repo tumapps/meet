@@ -36,7 +36,6 @@ class MailQueueManager extends Component
 
 	public function processQueue()
 	{
-		// $redis = Yii::$app->redis;
 		while ($serializedEmail = $this->redis->lpop('email_queue')) {
 			$emailData = unserialize($serializedEmail);
 
@@ -44,14 +43,14 @@ class MailQueueManager extends Component
 			$subject = $emailData['subject'];
 			$body = $emailData['body'];
 
-
-			$type = $emailData['type']; // Retrieve the type of the email event 
+			$type = array_key_exists('type', $emailData) ? $emailData['type'] : null; // Retrieve the type of the email event 
+			$id = array_key_exists('id', $emailData) ? $emailData['id'] : null; // id for tracking send reminders
 
 			$date = date('Y-m-d H:i:s');
 
 			if (self::send($email, $subject, $body)) {
 				if ($type !== null && $type === 'reminder') {
-					Appointments::updateReminder($emailData['id']);
+					Appointments::updateReminder($id);
 				}
 				echo "Email sent to {$email} at: {$date}\n";
 				$this->logEmailStatus($email, true);
