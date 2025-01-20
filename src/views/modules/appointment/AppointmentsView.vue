@@ -1083,30 +1083,17 @@ onUnmounted(() => {
                     <!-- </b-col> -->
                   </div>
                 </b-col>
-                <b-col lg="12" md="12" class="mb-3">
-                  <!-- <label for="'attendees'" class="form-label">Attendees</label>
-                  <div>
-                    
-                    <b-form-tags v-model="appointmentDetails.attendees" id="attendees" tag-variant="primary" tag-pills>
-                      <template #tag="{ tag, removeTag }">
-                        <b-badge variant="primary" class="me-1">
-                          {{ tag.staff_id }}
-                          <b-icon @click="removeTag" icon="x" />
-                        </b-badge>
-                      </template>
-                    </b-form-tags>
-                  </div>
-                  <div v-if="errorDetails.attendees" class="error">
-                    {{ errorDetails.attendees }}
-                  </div> -->
-                  <button class="btn btn-primary" @click="openAttendeeModal">Open Modal</button>
-                </b-col>
-                <b-col lg="12" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Description</label>
+                <b-col lg="7" md="12" class="mb-3">
+                  <label for="description" class="form-label">Description</label>
                   <b-form-textarea v-model="appointmentDetails.description" id="input-107" rows="3"></b-form-textarea>
                   <div v-if="errorDetails.notes" class="error">
                     {{ errorDetails.notes }}
                   </div>
+                </b-col>
+                <b-col lg="3" md="12" class="mb-3">
+                  <label for="attendees" class="form-label">Attendees</label>
+
+                  <button class="btn btn-outline-primary" @click="openAttendeeModal">Open Modal</button>
                 </b-col>
 
                 <b-col md="12" lg="12" sm="12">

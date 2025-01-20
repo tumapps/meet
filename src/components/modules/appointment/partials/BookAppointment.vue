@@ -412,10 +412,10 @@ watch(selectedPriority, (newPriority) => {
 
 const attendeeModal = ref(null)
 
-const openModal = () => {
-  console.log('Opening modal')
-  attendeeModal.value.$refs.attendeeModal.show()
-}
+// const openModal = () => {
+//   console.log('Opening modal')
+//   attendeeModal.value.$refs.attendeeModal.show()
+// }
 
 onMounted(() => {
   slotsData.value.date = today.value
@@ -565,9 +565,14 @@ onMounted(() => {
                 </div>
               </b-col>
             </b-row> -->
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-primary" @click="openModal">Open Modal</button> </b-col>
-            </b-row>
+
+            <!-- add attendees modal  -->
+            <!-- <b-row class="align-items-center form-group">
+              <b-col cols="1" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <label for="attendees" class="col-form-label">cc:</label>
+              </b-col>
+              <b-col cols="6" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-outline-primary" @click="openModal">Attendees</button> </b-col>
+            </b-row> -->
 
             <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
@@ -613,6 +618,10 @@ onMounted(() => {
                   <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
                 </div> -->
               </b-col>
+              <!-- <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <label for="attendees" class="col-form-label">cc:</label>
+              </b-col>
+              <b-col cols="4" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-outline-primary" @click="openModal">Attendees</button> </b-col> -->
             </b-row>
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
