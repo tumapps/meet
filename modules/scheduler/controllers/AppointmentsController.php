@@ -80,7 +80,7 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendees = AppointmentAttendees::find()
-                ->select(['staff_id'])
+                ->select(['staff_id',])
                 ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
                 ->asArray()
                 ->all();
@@ -226,13 +226,26 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $attendees = AppointmentAttendees::find()
-            ->where(['appointment_id' => $appointment->id])
+            ->select(['staff_id',])
+            ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
             ->asArray()
             ->all();
 
+        $attendeeDetails = [];
+        foreach ($attendees as $attendee) {
+            if (isset($attendee['staff_id'])) {
+                $user = User::findOne($attendee['staff_id']);
+                $attendeeDetails[] = [
+                    'staff_id' => $attendee['staff_id'],
+                    'email' => $user ? $user->profile->email_address : '',
+                    'name' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
+                ];
+            }
+        }
+
         $file = AppointmentAttachments::getAppointmentAttachment($appointment->id);
         $appointmentData['attachment'] = $file;
-        $appointmentData['attendees'] = $attendees;
+        $appointmentData['attendees'] =  $attendeeDetails;
 
         return $this->payloadResponse($appointmentData);
     }
