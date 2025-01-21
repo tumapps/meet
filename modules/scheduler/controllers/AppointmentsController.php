@@ -717,8 +717,8 @@ class AppointmentsController extends \helpers\ApiController
         $existingAttendeesIds = array_column($currentAttendees, 'id');
 
         foreach ($newAttendeesData as $attendeeData) {
-            if (in_array($attendeeData['id'], $existingAttendeesIds)) {
-                $attendee = AppointmentAttendees::findOne($attendeeData['id']);
+            if (in_array($attendeeData['staff_id'], $existingAttendeesIds)) {
+                $attendee = AppointmentAttendees::findOne($attendeeData['staff_id']);
                 $attendee->attributes = $attendeeData;
 
                 return $attendee;
