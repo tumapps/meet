@@ -235,31 +235,78 @@ class AuthController extends \helpers\ApiController
 		return $this->errorResponse($model->getErrors());
 	}
 
+	// public function filterMenus($roles)
+	// {
+	// 	$menus = Yii::$app->params['menus'];
+
+	// 	$roleNames = array_keys($roles);
+
+	// 	if (in_array('su', $roleNames)) {
+	// 		// return $menus;
+	// 		$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
+	// 	} elseif (in_array('secretary', $roleNames)) {
+	// 		$allowedRoutes = ['home', 'appointments'];
+	// 	} elseif (in_array('user', $roleNames)) {
+	// 		$allowedRoutes = ['home', 'appointments', 'availability'];
+	// 	} elseif (in_array('registrar', $roleNames)) {
+	// 		$allowedRoutes = ['meetings-approval', 'venues', 'events', 'venue-management'];
+	// 	} else {
+	// 		$allowedRoutes = [];
+	// 	}
+
+	// 	$menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
+	// 		return in_array($menu['route'], $allowedRoutes);
+	// 	}));
+
+	// 	return $menus;
+	// }
+
 	public function filterMenus($roles)
 	{
 		$menus = Yii::$app->params['menus'];
-
 		$roleNames = array_keys($roles);
 
+		$filteredMenus = [];
+
 		if (in_array('su', $roleNames)) {
-			// return $menus;
-			$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
-		} elseif (in_array('secretary', $roleNames)) {
-			$allowedRoutes = ['home', 'appointments'];
-		} elseif (in_array('user', $roleNames)) {
-			$allowedRoutes = ['home', 'appointments', 'availability'];
-		} elseif (in_array('registrar', $roleNames)) {
-			$allowedRoutes = ['meetings-approval', 'venues', 'events', 'venue-management'];
-		} else {
-			$allowedRoutes = [];
+			$filteredMenus = array_map(function ($menu) {
+				unset($menu['roles']);
+				return $menu;
+			}, array_values(array_filter($menus, fn($menu) => isset($menu['route']))));
+
+			if (isset($menus['iam'])) {
+				$filteredMenus[] = [
+					'IAM' => array_map(function ($iamMenu) {
+						unset($iamMenu['roles']);
+						return $iamMenu;
+					}, $menus['iam']),
+				];
+			}
+
+			return $filteredMenus;
 		}
 
-		$menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
-			return in_array($menu['route'], $allowedRoutes);
+		$allowedRoutes = [];
+		foreach ($menus as $menu) {
+			if (isset($menu['roles']) && is_array($menu['roles'])) {
+				if (in_array('*', $menu['roles']) || array_intersect($roleNames, $menu['roles'])) {
+					$allowedRoutes[] = $menu['route'];
+				}
+			}
+		}
+
+		$filteredMenus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
+			return isset($menu['route']) && in_array($menu['route'], $allowedRoutes);
 		}));
 
-		return $menus;
+		$filteredMenus = array_map(function ($menu) {
+			unset($menu['roles']);
+			return $menu;
+		}, $filteredMenus);
+
+		return $filteredMenus;
 	}
+
 
 	public function actionRegister()
 	{
