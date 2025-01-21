@@ -52,24 +52,39 @@ class ConfigWrapper
             'passwordResetLink' => 'http://10.17.0.24/request-password-reset?token=',
             'confirmationLink' => 'http://10.17.0.247/attendance-confirmation/',
             'loginUrl' => 'http://10.17.0.24',
+            // 'menus' => [
+            //     ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
+            //     ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
+            //     ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
+            //     // ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
+            //     ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock'], // user,
+            //     ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox'], // registra
+            //     ['route' => 'venues', 'label' => 'venues', 'icon' => 'location-dot'], // registra
+            //     ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'], // regitra
+            //     // ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'], // admin
+            //     // ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
+            //     ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'],
+            //     'iam' => [
+            //         ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'],
+            //         ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'],
+            //         ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'],
+            //     ]
+            // ],
             'menus' => [
-                ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home'], // sec, user
-                ['route' => 'admin', 'label' => 'Dashboard', 'icon' => 'home'], // admin
-                ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar'], // same
-                ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'], // admin
-                ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock'], // user,
-                ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox'], // registra
-                ['route' => 'venues', 'label' => 'venues', 'icon' => 'location-dot'], // registra
-                ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar'], // regitra
-                ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'], // admin
-                ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'], // admin
-                ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot'],
-                // 'iam' => [
-                //     ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield'],
-                //     ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears'],
-                //     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user'],
-                // ]
+                ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home', 'roles' => ['*']],
+                ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar', 'roles' => ['user', 'registrar']],
+                ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock', 'roles' => ['user']],
+                ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox', 'roles' => ['registrar']],
+                ['route' => 'venues', 'label' => 'Venues', 'icon' => 'location-dot', 'roles' => ['registrar']],
+                ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar', 'roles' => ['registrar']],
+                ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot', 'roles' => ['registrar']],
+                'iam' => [ 
+                    ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield', 'roles' => ['su']],
+                    ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears', 'roles' => ['su']],
+                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user', 'roles' => ['su']],
+                ],
             ],
+
             'africasTalkingApi' => $_SERVER['AT_API_KEY'],
             'africasTalkingUserName' => $_SERVER['AT_USERNAME'],
             'mdm.admin.configs' => [],
