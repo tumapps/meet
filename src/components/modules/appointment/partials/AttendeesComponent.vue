@@ -3,38 +3,43 @@ import { ref, defineProps, watch, defineEmits } from 'vue'
 import createAxiosInstance from '@/api/axios'
 
 const attendeeModal = ref(null) // Reference for <b-modal>
-const attendees = ref([]) // To store the attendees from the API
+const attendees = ref([]) // To store attendees being added
+const finalAttendees = ref([]) // To store the final attendees
+const selectedItems = ref([]) // Temporary list of selected attendees
+const uploading = ref(false) // Loading state
 
 const props = defineProps({
-  showModal: {
-    type: Boolean, // Use Boolean for direct binding
-    required: true
+  users: {
+    type: Array,
+    default: () => [] // Default to an empty array
   }
 })
+
 const emit = defineEmits(['update:showModal']) // Emit event to sync with parent
 
 const axiosInstance = createAxiosInstance()
-const availableUsers = ref([])
+const availableUsers = ref([]) // All users from the API
 const searchQuery = ref('')
 const searchResults = ref([])
-const selectedItems = ref([])
 
-// Watch for prop updates
+// Reactive copy of props.users
+const users = ref([])
+
 watch(
-  () => props.showModal,
-  (newVal) => {
-    console.log('Child modal showModal updated:', newVal)
-  }
+  () => props.users,
+  (newUsers) => {
+    users.value = [...newUsers] // Ensure reactivity
+  },
+  { immediate: true }
 )
 
-// Sample user data
-const users = ref([
-  { id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Inactive' },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 'Active' },
-  { id: 4, name: 'Bob Brown', email: 'kk@hk.com', status: 'Active' }
-])
+// Remove a user from `users`
+const removeUser = (index) => {
+  users.value.splice(index, 1)
+  console.log('Updated users: ', users.value)
+}
 
+// Fetch and search users
 const handleSearch = async () => {
   const query = searchQuery.value.trim().toLowerCase()
   try {
@@ -45,41 +50,47 @@ const handleSearch = async () => {
   } catch (error) {
     console.error('Error fetching users:', error)
   }
-  searchResults.value = availableUsers.value.filter((attendee) => attendee.username.toLowerCase().includes(query))
+  searchResults.value = availableUsers.value.filter((attendee) => attendee.username && attendee.username.toLowerCase().includes(query))
 }
 
-function addToAttendees() {
-  const ids = selectedItems.value.map((item) => item.id) // Extract IDs
-  attendees.value = [...attendees.value, ...ids] // Add to attendees
-  console.log('Updated attendees: ', attendees.value)
-}
-
+// Add a selected user to `selectedItems`
 const addSelectedItem = (item) => {
-  // Avoid duplicates
   if (!selectedItems.value.find((selected) => selected.id === item.id)) {
     selectedItems.value.push(item)
   }
-  addToAttendees()
-  // Clear the search field and results
+
+  // Clear search input and results
   searchQuery.value = ''
   searchResults.value = []
-
-  console.log('added to list ', selectedItems.value)
+  console.log('Added to selectedItems: ', selectedItems.value)
 }
 
+// Remove a user from `selectedItems`
 const removeSelectedItem = (index) => {
   selectedItems.value.splice(index, 1)
 }
 
+// Push users and selected attendees to `attendees`
+const pushToAttendees = () => {
+  attendees.value = [...new Set([...users.value, ...selectedItems.value])]
+  users.value = [...attendees.value]
+  finalAttendees.value = [...attendees.value]
+  console.log('Final attendees: ', finalAttendees.value)
+}
+
+// Reset temporary states and emit close
 const closeModal = () => {
-  emit('update:showModal', false) // Notify parent to hide modal
+  selectedItems.value = []
+  searchQuery.value = ''
+  searchResults.value = []
+  emit('update:showModal', false)
 }
 </script>
 
 <template>
-  <b-modal ref="attendeeModal" title="Child Modal" hide-footer @hide="closeModal" class="child-modal" style="z-index: 1055">
+  <b-modal ref="attendeeModal" title="Child Modal" hide-footer @hide="closeModal" class="child-modal" style="z-index: 1055" size="xl">
     <!-- Modal content -->
-    <b-col cols="10">
+    <b-col cols="10" lg="10">
       <div class="search-form shadow-sm">
         <!-- Selected Items -- -->
         <div v-if="selectedItems.length" class="mb-2">
@@ -100,6 +111,9 @@ const closeModal = () => {
         <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
       </div>
     </b-col>
+    <b-col cols="2" lg="2" class="d-flex align-items-center justify-content-center">
+      <button type="button" class="btn btn-primary" @click="pushToAttendees">Add</button>
+    </b-col>
     <div class="table-responsive">
       <table class="table table-striped table-bordered">
         <thead>
@@ -107,6 +121,7 @@ const closeModal = () => {
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -123,9 +138,21 @@ const closeModal = () => {
                 {{ user.status }}
               </span>
             </td>
+            <td>
+              <button type="button" class="btn btn-danger" @click="removeUser(index)">Remove</button>
+            </td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <!-- //button to submit the selected items -->
+    <div class="modal-footer border-0">
+      <button v-if="uploading === false" type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="pushToAttendees">Submit</button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        Loading...
+      </button>
+      <button v-if="uploading === false" type="button" class="btn btn-outline-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
     </div>
   </b-modal>
 </template>

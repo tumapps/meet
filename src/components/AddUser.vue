@@ -22,6 +22,7 @@ const toggleModal = () => {
 }
 
 // Expose toggleModal so it can be accessed in the parent component
+// eslint-disable-next-line no-undef
 defineExpose({
   toggleModal
 })
@@ -109,7 +110,7 @@ const submitForm = async () => {
           <!-- Email -->
           <b-col md="12" lg="6">
             <b-form-group label="Email*" label-class="mb-2">
-              <b-form-input type="email" placeholder="Email address" v-model="formData.email_address"  class="mb-3" />
+              <b-form-input type="email" placeholder="Email address" v-model="formData.email_address" class="mb-3" />
               <div v-if="errors.email_address" class="errors">{{ errors.email_address }}</div>
             </b-form-group>
           </b-col>
@@ -117,7 +118,7 @@ const submitForm = async () => {
           <!-- Username -->
           <b-col md="12" lg="6">
             <b-form-group label="Username*" label-class="mb-2">
-              <b-form-input type="text" placeholder="Username" v-model="formData.username"  class="mb-3" />
+              <b-form-input type="text" placeholder="Username" v-model="formData.username" class="mb-3" />
               <div v-if="errors.username" class="errors">{{ errors.username }}</div>
             </b-form-group>
           </b-col>
@@ -145,7 +146,7 @@ const submitForm = async () => {
           <!-- First Name -->
           <b-col md="12" lg="6">
             <b-form-group label="First Name*" label-class="mb-2">
-              <b-form-input type="text" placeholder="First Name" v-model="formData.first_name"  class="mb-3" />
+              <b-form-input type="text" placeholder="First Name" v-model="formData.first_name" class="mb-3" />
               <div v-if="errors.first_name" class="errors">{{ errors.first_name }}</div>
             </b-form-group>
           </b-col>

@@ -489,23 +489,6 @@ const updateAppointment = async () => {
     }
   }
 }
-// }
-
-// const performSearch = async () => {
-//   try {
-//     const response = await axiosInstance.get(`v1/scheduler/appointments?_search=${searchQuery.value}`)
-//     tableData.value = response.data.dataPayload.data
-//   } catch (error) {
-//     // console.error(error);
-//     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
-
-//     proxy.$showToast({
-//       title: 'An error occurred',
-//       text: errorMessage,
-//       icon: 'error'
-//     })
-//   }
-// }
 
 const suggestions = ref([])
 const suggestedDate = ref('')
@@ -557,61 +540,6 @@ const suggestSlots = async (id) => {
     })
   }
 }
-
-// const toggleCheckIn = async (id) => {
-//   try {
-//     const response = await axiosInstance.put(`/v1/scheduler/checkin/${id}`)
-//     getAppointment(id)
-//     getAppointments(1)
-
-//     // Check if toastPayload exists in the response and update it
-//     if (response.data.toastPayload) {
-//       toastPayload.value = response.data.toastPayload
-//       // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-//       // Show toast notification using the response data
-//       proxy.$showAlert({
-//         // title: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
-//         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-//         icon: toastPayload.value.toastTheme || 'success',
-//         showCancelButton: false,
-//         showConfirmButton: false,
-//         text: toastPayload.value.toastMessage || 'Appointment Checked In successfully',
-//         timer: 3000,
-//         timerProgressBar: true
-//       })
-//     } else {
-//       // Fallback if toastPayload is not provided in the response
-//       proxy.$showAlert({
-//         title: 'Appointment Checked In successfully',
-//         icon: 'success',
-//         showCancelButton: false,
-//         showConfirmButton: false,
-//         timer: 1500,
-//         timerProgressBar: true
-
-//       })
-//     }
-//   } catch (error) {
-//     // console.error(error);
-//     let errorMessage = 'An error occurred'
-
-//     if (error.response && error.response.data.errorPayload) {
-//       // Check if errorPayload exists and has errors
-//       const errors = error.response.data.errorPayload.errors
-//       if (errors && errors.message) {
-//         errorMessage = errors.message // Use specific error message
-//       }
-//     }
-
-//     // Show toast notification for error
-//     proxy.$showToast({
-//       title: errorMessage, // Change title to be more indicative of an error
-//       text: errorMessage, // Show specific error message
-//       icon: 'error'
-//     })
-//   }
-// }
 
 const toggleCheckIn = async (id) => {
   try {
@@ -777,6 +705,15 @@ watch(
 //   appointmentModal.value.$refs.appointmentModal.show()
 // }
 
+const users = ref([
+  { id: 1, name: 'John Doe', email: 'john@example.com', status: 10 },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 10 },
+  { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 10 },
+  { id: 4, name: 'Bob Brown', email: 'kk@hk.com', status: 10 },
+  { id: 5, name: 'John Doe', email: 'doe@.gm.com', status: 10 },
+  { id: 6, name: 'John Doe', email: 'doe@.gm.com', status: 10 }
+])
+
 const attendeeModal = ref(null)
 
 const openAttendeeModal = () => {
@@ -797,7 +734,7 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <AttendeesComponent ref="attendeeModal" />
+  <AttendeesComponent ref="attendeeModal" :users="users" />
 
   <b-col lg="12">
     <b-card>
