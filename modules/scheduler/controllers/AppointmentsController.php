@@ -284,8 +284,6 @@ class AppointmentsController extends \helpers\ApiController
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
-        return $dataRequest['Appointments'];
-
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
         }
