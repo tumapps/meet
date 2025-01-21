@@ -33,11 +33,22 @@ watch(
   { immediate: true }
 )
 
+watch(
+  () => attendeeModal.value,
+  (newVal) => {
+    if (newVal) {
+      console.log('Modal opened', attendeeModal.value)
+    }
+  }
+)
+
 // Remove a user from `users`
 const removeUser = (index) => {
   users.value.splice(index, 1)
   console.log('Updated users: ', users.value)
 }
+
+const userIds = ref([]) // Array of user IDs
 
 // Fetch and search users
 const handleSearch = async () => {
@@ -73,10 +84,18 @@ const removeSelectedItem = (index) => {
 // Push users and selected attendees to `attendees`
 const pushToAttendees = () => {
   attendees.value = [...new Set([...users.value, ...selectedItems.value])]
-  users.value = [...attendees.value]
+  users.value = attendees.value.filter((attendee, index, self) => index === self.findIndex((a) => a.id === attendee.id))
+
+  console.log('Updated users unique: ', users.value)
+  userIds.value = users.value.map((user) => user.id)
+  attendees.value = [...new Set([...userIds.value, ...selectedItems.value.map((item) => item.id)])]
   finalAttendees.value = [...attendees.value]
+  selectedItems.value = []
+
   console.log('Final attendees: ', finalAttendees.value)
 }
+
+//on modal show fetch all users
 
 // Reset temporary states and emit close
 const closeModal = () => {
@@ -90,30 +109,32 @@ const closeModal = () => {
 <template>
   <b-modal ref="attendeeModal" title="Child Modal" hide-footer @hide="closeModal" class="child-modal" style="z-index: 1055" size="xl">
     <!-- Modal content -->
-    <b-col cols="10" lg="10">
-      <div class="search-form shadow-sm">
-        <!-- Selected Items -- -->
-        <div v-if="selectedItems.length" class="mb-2">
-          <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
+    <b-row>
+      <b-col cols="10" lg="10">
+        <div class="search-form shadow-sm">
+          <!-- Selected Items -- -->
+          <div v-if="selectedItems.length" class="mb-2">
+            <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
+          </div>
+
+          <!-- Search Input -- -->
+          <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search to add attendees...." aria-label="Search for a username" />
+
+          <!-- Search Results  -->
+          <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
+            <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
+              {{ result.username }}
+            </li>
+          </ul>
+
+          <!-- No Results Message  -->
+          <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
         </div>
-
-        <!-- Search Input -- -->
-        <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
-
-        <!-- Search Results  -->
-        <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
-          <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
-            {{ result.username }}
-          </li>
-        </ul>
-
-        <!-- No Results Message  -->
-        <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
-      </div>
-    </b-col>
-    <b-col cols="2" lg="2" class="d-flex align-items-center justify-content-center">
-      <button type="button" class="btn btn-primary" @click="pushToAttendees">Add</button>
-    </b-col>
+      </b-col>
+      <b-col cols="2" lg="2" class="d-flex align-items-center justify-content-center">
+        <button type="button" class="btn btn-primary" @click="pushToAttendees">Add</button>
+      </b-col>
+    </b-row>
     <div class="table-responsive">
       <table class="table table-striped table-bordered">
         <thead>
@@ -132,14 +153,15 @@ const closeModal = () => {
               <span
                 class="badge"
                 :class="{
-                  'badge-success': user.status === 'Active',
-                  'badge-danger': user.status === 'Inactive'
-                }">
-                {{ user.status }}
+                  'badge-success': user.status === 10,
+                  'badge-danger': user.status === 9
+                }"
+                :style="user.status === 8 ? { backgroundColor: '#0dcaf0', color: '#ffffff' } : {}">
+                {{ user.status === 10 ? 'Confirmed' : user.status === 9 ? 'Declined' : 'Pending' }}
               </span>
             </td>
             <td>
-              <button type="button" class="btn btn-danger" @click="removeUser(index)">Remove</button>
+              <button type="button" class="btn btn-outline-danger" @click="removeUser(index)">Remove</button>
             </td>
           </tr>
         </tbody>

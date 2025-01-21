@@ -706,12 +706,12 @@ watch(
 // }
 
 const users = ref([
-  { id: 1, name: 'John Doe', email: 'john@example.com', status: 10 },
+  { id: 1, name: 'John Doe', email: 'john@example.com', status: 9 },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 10 },
   { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 10 },
   { id: 4, name: 'Bob Brown', email: 'kk@hk.com', status: 10 },
-  { id: 5, name: 'John Doe', email: 'doe@.gm.com', status: 10 },
-  { id: 6, name: 'John Doe', email: 'doe@.gm.com', status: 10 }
+  { id: 5, name: 'John Doe', email: 'doe@.gm.com', status: 9 },
+  { id: 6, name: 'John Doe', email: 'doe@.gm.com', status: 8 }
 ])
 
 const attendeeModal = ref(null)
