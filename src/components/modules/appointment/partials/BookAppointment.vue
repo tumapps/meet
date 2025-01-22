@@ -251,7 +251,6 @@ const getSlots = async () => {
     }
   }
 }
-
 const submitAppointment = async () => {
   // Reset errors
   resetErrors()
@@ -320,6 +319,7 @@ const submitAppointment = async () => {
 }
 
 const appointmentTypeOptions = ref([])
+
 const getAppointmentType = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/types')

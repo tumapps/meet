@@ -23,6 +23,7 @@ const perPageOptions = ref([10, 20, 50, 100])
 const searchQuery = ref('')
 const selectedAvailability = ref('')
 const errors = ref({})
+const isLoading = ref(false)
 
 //get user id from session storage
 
@@ -193,6 +194,7 @@ const sortedData = computed(() => {
 // Function to save settings (add API or local storage logic here)
 const saveSpace = async () => {
   try {
+    isLoading.value = true
     // Make the API call to save availability details
     const response = await axiosInstance.post('v1/scheduler/space', SpaceDetails.value)
     if (response.data.toastPayload) {
@@ -242,11 +244,14 @@ const saveSpace = async () => {
         icon: 'error'
       })
     }
+  } finally {
+    isLoading.value = false
   }
 }
 
 const updateSpaceDetails = async (id) => {
   try {
+    isLoading.value = true
     // console.log(availabilityDetails.value);
 
     // Make the API call to update availability details
@@ -255,6 +260,8 @@ const updateSpaceDetails = async (id) => {
     // Show success toast notification
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
+      //close the modal
+      editSpace.value.hide()
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
       proxy.$showToast({
@@ -286,6 +293,8 @@ const updateSpaceDetails = async (id) => {
         icon: 'error'
       })
     }
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -555,8 +564,12 @@ onMounted(async () => {
         <div v-if="errors.closing_time" class="error" aria-live="polite">{{ errors.closing_time }}</div>
       </b-col>
     </b-row>
-    <div class="d-flex justify-content-end">
-      <b-button @click="saveSpace" variant="primary">Save</b-button>
+    <div class="d-flex justify-content-center">
+      <b-button v-if="isLoading === false" @click="saveSpace" variant="primary">Save</b-button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Saving...
+      </button>
     </div>
   </b-modal>
 
@@ -597,8 +610,12 @@ onMounted(async () => {
         <div v-if="errors.closing_time" class="error" aria-live="polite">{{ errors.closing_time }}</div>
       </b-col>
     </b-row>
-    <div class="d-flex justify-content-end">
-      <b-button @click="updateSpaceDetails(SpaceDetails.id)" variant="primary">Update</b-button>
+    <div class="d-flex justify-content-center mt-5">
+      <b-button v-if="isLoading === false" @click="updateSpaceDetails(SpaceDetails.id)" variant="primary">Update</b-button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Updating...
+      </button>
     </div>
   </b-modal>
 </template>

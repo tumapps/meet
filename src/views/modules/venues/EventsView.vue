@@ -20,6 +20,7 @@ const errors = ref('')
 const newEvent = ref(null)
 const editevent = ref(null)
 const isloading = ref(false)
+const recordStatus = ref('')
 
 const InitialeventDetails = ref({
   title: '',
@@ -108,6 +109,9 @@ const getEvent = async (id) => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/events/${id}`)
     eventDetails.value = response.data.dataPayload.data
+    recordStatus.value = eventDetails.value.recordStatus
+
+    console.log(eventDetails.value)
   } catch (error) {
     // console.error(error);
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message
@@ -141,7 +145,6 @@ const saveEvent = async (isUpdate = false) => {
 
     // Send the appropriate request based on isUpdate flag
     const response = await axiosInstance[method](url, eventDetails.value)
-
     // Get events after the operation
     getEvents(1)
     closeModal()
@@ -601,8 +604,12 @@ onMounted(async () => {
         <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
       </b-col>
     </b-row>
-    <div class="d-flex justify-content-end">
-      <b-button @click="saveEvent(true)" variant="primary">Update</b-button>
+    <div class="d-flex justify-content-center">
+      <b-button v-if="isloading === false" @click="saveEvent(true)" variant="primary" :disabled="recordStatus.label !== 'ACTIVE'">Update</b-button>
+      <button v-else class="btn btn-primary" type="button" disabled>
+        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+        submitting...
+      </button>
     </div>
   </b-modal>
 </template>
