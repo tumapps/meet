@@ -34,6 +34,9 @@ const availableUsers = ref([])
 //CLEAR ERRORS
 
 const resetErrors = () => {
+  appointmentData.value = { ...initialAppointmentData }
+  attendees.value = []
+  UsersOptions.value = []
   errors.value = {}
   //clear form data
 }
@@ -150,11 +153,11 @@ const initialAppointmentData = {
 
 const appointmentData = ref({ ...initialAppointmentData })
 
-function resetAppointmentData() {
-  appointmentData.value = { ...initialAppointmentData }
-  attendees.value = []
-  UsersOptions.value = []
-}
+// function resetAppointmentData() {
+//   appointmentData.value = { ...initialAppointmentData }
+//   attendees.value = []
+//   UsersOptions.value = []
+// }
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
@@ -167,7 +170,7 @@ const closeModal = () => {
   //clear errors
   resetErrors()
   appointmentModal.value.hide() // Close the modal using the hide() method
-  resetAppointmentData()
+  // resetAppointmentData()
 }
 //handle date change
 const handleDateChange = (newValue) => {
@@ -220,7 +223,6 @@ const getSpaces = async () => {
   }
 }
 
-// Function to fetch slots from the API
 const getSlots = async () => {
   try {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value)
@@ -541,39 +543,6 @@ onMounted(() => {
                 <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
               </b-col>
             </b-row>
-
-            <!-- <b-row class="g-3 align-items-center form-group">
-              <b-col class="bg-primary" cols="2">
-                <label for="addphonenumber" class="col-form-label">cc:</label>
-              </b-col>
-              <b-col class="bg-warning" cols="10">
-                <div class="search-form">
-                   Selected Items --
-                  <div v-if="selectedItems.length" class="selected-items">
-                    <span v-for="(item, index) in selectedItems" :key="item.id" class="selected-item" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
-                  </div>
-
-                   Search Input --
-                  <input v-model="searchQuery" @input="handleSearch" type="text" class="search-input" placeholder="username..." />
-
-                   Search Results --
-                  <ul v-if="searchResults.length" class="search-results">
-                    <li v-for="result in searchResults" :key="result.id" @click="addSelectedItem(result)" class="search-result-item">
-                      {{ result.username }}
-                    </li>
-                  </ul>
-                </div>
-              </b-col>
-            </b-row> -->
-
-            <!-- add attendees modal  -->
-            <!-- <b-row class="align-items-center form-group">
-              <b-col cols="1" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="attendees" class="col-form-label">cc:</label>
-              </b-col>
-              <b-col cols="6" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-outline-primary" @click="openModal">Attendees</button> </b-col>
-            </b-row> -->
-
             <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <label for="addappointmenttype" class="col-form-label">
@@ -597,7 +566,8 @@ onMounted(() => {
                 </label>
               </b-col>
               <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" />
+                <span v-if="!selectedUsername" class="text-muted"> Select a user to view available slots</span>
+                <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" />
               </b-col>
             </b-row>
             <b-row class="g-3 align-items-center form-group mt-3 p-2">
@@ -614,14 +584,7 @@ onMounted(() => {
               </b-col>
               <b-col cols="10">
                 <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-                <!-- <div class="progress">
-                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
-                </div> -->
               </b-col>
-              <!-- <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="attendees" class="col-form-label">cc:</label>
-              </b-col>
-              <b-col cols="4" class="mb-sm-3 mb-md-3 mb-lg-0"> <button class="btn btn-outline-primary" @click="openModal">Attendees</button> </b-col> -->
             </b-row>
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2">
@@ -649,7 +612,7 @@ onMounted(() => {
                   </div>
 
                   <!-- Search Input -- -->
-                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
+                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" :disabled="!selectedDate" />
 
                   <!-- Search Results  -->
                   <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
@@ -662,19 +625,6 @@ onMounted(() => {
                   <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
                 </div>
               </b-col>
-              <!-- <b-col cols="10">
-                <div class="search-form shadow-sm">
-                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
-                  <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
-                    <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
-                      {{ result.username }}
-                    </li>
-                  </ul>
-
-                  <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
-                  <textarea :value="selectedItemsText" class="form-control mb-2" placeholder="Selected usernames will appear here..." readonly rows="2"></textarea>
-                </div>
-              </b-col> -->
             </b-row>
           </div>
         </div>
