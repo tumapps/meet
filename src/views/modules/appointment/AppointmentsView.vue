@@ -36,6 +36,7 @@ const searchQuery = ref('')
 const errors = ref({})
 const errorDetails = ref({})
 const recordStatus = ref('')
+const attendees = ref([])
 
 //get user_id from session storage
 // const userId = authStore.getUserId();
@@ -391,6 +392,8 @@ const getAppointment = async (id) => {
 
     if (response.data.dataPayload && !response.data.errorPayload) {
       appointmentDetails.value = response.data.dataPayload.data
+      attendees.value = response.data.dataPayload.data.attendees
+      console.log('attendees me', attendees.value)
       //convert start created at to yyyy-mm-dd
       //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
       appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id || null
@@ -701,18 +704,6 @@ watch(
     }
   }
 )
-// const showModal = () => {
-//   appointmentModal.value.$refs.appointmentModal.show()
-// }
-
-const users = ref([
-  { id: 1, name: 'John Doe', email: 'john@example.com', status: 9 },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 10 },
-  { id: 3, name: 'Alice Johnson', email: 'alice@example.com', status: 10 },
-  { id: 4, name: 'Bob Brown', email: 'kk@hk.com', status: 10 },
-  { id: 5, name: 'John Doe', email: 'doe@.gm.com', status: 9 },
-  { id: 6, name: 'John Doe', email: 'doe@.gm.com', status: 8 }
-])
 
 const attendeeModal = ref(null)
 
@@ -734,7 +725,7 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <AttendeesComponent ref="attendeeModal" :users="users" />
+  <AttendeesComponent ref="attendeeModal" :users="attendees" />
 
   <b-col lg="12">
     <b-card>
@@ -1059,7 +1050,6 @@ onUnmounted(() => {
                     <p class="ms-3 mb-0">Add Document</p>
                   </div>
                 </b-button> -->
-
                 <b-col lg="5" class="mb-3">
                   <div v-if="appointmentDetails.status === 3">
                     <div v-if="timeSlots.length > 1">

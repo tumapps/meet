@@ -1,38 +1,37 @@
 <script setup>
-import { ref, defineProps, watch, defineEmits } from 'vue'
+import { ref, defineProps, watch, defineEmits, computed } from 'vue'
 import createAxiosInstance from '@/api/axios'
 
-const attendeeModal = ref(null) // Reference for <b-modal>
-const attendees = ref([]) // To store attendees being added
-const finalAttendees = ref([]) // To store the final attendees
-const selectedItems = ref([]) // Temporary list of selected attendees
-const uploading = ref(false) // Loading state
+// References
+const attendeeModal = ref(null)
+const attendees = ref([])
+// const finalAttendees = ref([]);
+const selectedItems = ref([])
+const uploading = ref(false)
+const rejects = ref([])
+const reasons = ref({})
+const rejectedUsers = ref({})
+const showModal = ref(false)
 
+// Props and Emit
 const props = defineProps({
   users: {
     type: Array,
-    default: () => [] // Default to an empty array
+    default: () => [] // Default empty array
   }
 })
+const emit = defineEmits(['update:showModal']) // Sync with parent
 
-const emit = defineEmits(['update:showModal']) // Emit event to sync with parent
-
+// Axios Instance
 const axiosInstance = createAxiosInstance()
-const availableUsers = ref([]) // All users from the API
+const availableUsers = ref([])
 const searchQuery = ref('')
 const searchResults = ref([])
 
-// Reactive copy of props.users
-const users = ref([])
+// Use a computed property to make `props.users` reactive
+const users = computed(() => props.users)
 
-watch(
-  () => props.users,
-  (newUsers) => {
-    users.value = [...newUsers] // Ensure reactivity
-  },
-  { immediate: true }
-)
-
+// Watch attendeeModal
 watch(
   () => attendeeModal.value,
   (newVal) => {
@@ -42,67 +41,76 @@ watch(
   }
 )
 
-// Remove a user from `users`
+// Remove a user
 const removeUser = (index) => {
-  users.value.splice(index, 1)
+  rejects.value.push(users.value[index])
+  console.log('Rejects: ', rejects.value)
+  users.value.splice(index, 1) // Make sure to copy `users` properly if directly mutating.
   console.log('Updated users: ', users.value)
 }
 
-const userIds = ref([]) // Array of user IDs
-
-// Fetch and search users
+// Fetch and Search Users
 const handleSearch = async () => {
   const query = searchQuery.value.trim().toLowerCase()
   try {
     const response = await axiosInstance.get('/v1/auth/users')
-    if (response.data && response.data.dataPayload) {
+    if (response.data?.dataPayload) {
       availableUsers.value = response.data.dataPayload.data
     }
   } catch (error) {
     console.error('Error fetching users:', error)
   }
-  searchResults.value = availableUsers.value.filter((attendee) => attendee.username && attendee.username.toLowerCase().includes(query))
+  searchResults.value = availableUsers.value.filter((attendee) => attendee.username?.toLowerCase().includes(query))
 }
 
-// Add a selected user to `selectedItems`
+// Add a selected item
 const addSelectedItem = (item) => {
-  if (!selectedItems.value.find((selected) => selected.id === item.id)) {
+  if (!selectedItems.value.some((selected) => selected.id === item.id)) {
     selectedItems.value.push(item)
   }
-
-  // Clear search input and results
   searchQuery.value = ''
   searchResults.value = []
   console.log('Added to selectedItems: ', selectedItems.value)
 }
 
-// Remove a user from `selectedItems`
+// Remove a selected item
 const removeSelectedItem = (index) => {
   selectedItems.value.splice(index, 1)
 }
 
-// Push users and selected attendees to `attendees`
+// Push attendees
 const pushToAttendees = () => {
-  attendees.value = [...new Set([...users.value, ...selectedItems.value])]
-  users.value = attendees.value.filter((attendee, index, self) => index === self.findIndex((a) => a.id === attendee.id))
-
-  console.log('Updated users unique: ', users.value)
-  userIds.value = users.value.map((user) => user.id)
-  attendees.value = [...new Set([...userIds.value, ...selectedItems.value.map((item) => item.id)])]
-  finalAttendees.value = [...attendees.value]
+  attendees.value = [...new Set([...props.users, ...selectedItems.value])]
   selectedItems.value = []
-
-  console.log('Final attendees: ', finalAttendees.value)
+  // openModal()
+  rejectedUsers.value = {}
+  console.log('Final attendees: ', attendees.value)
 }
 
-//on modal show fetch all users
-
-// Reset temporary states and emit close
+// Reset and close modal
 const closeModal = () => {
   selectedItems.value = []
   searchQuery.value = ''
   searchResults.value = []
   emit('update:showModal', false)
+}
+
+// Open modal
+// const openModal = () => {
+//   showModal.value?.show()
+// }
+
+// Submit rejections
+const submitRejections = () => {
+  Object.entries(rejectedUsers.value).forEach(([userId, reason]) => {
+    if (reason) {
+      console.log(`User ${userId} rejected for reason: ${reason}`)
+    }
+  })
+  reasons.value = {}
+  rejectedUsers.value = {}
+  showModal.value = false
+  alert('Rejections submitted successfully!')
 }
 </script>
 
@@ -141,15 +149,15 @@ const closeModal = () => {
           <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Status</th>
+            <!-- <th>Status</th> -->
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="user in users" :key="user.staff_id">
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>
+            <!-- <td>
               <span
                 class="badge"
                 :class="{
@@ -159,7 +167,7 @@ const closeModal = () => {
                 :style="user.status === 8 ? { backgroundColor: '#0dcaf0', color: '#ffffff' } : {}">
                 {{ user.status === 10 ? 'Confirmed' : user.status === 9 ? 'Declined' : 'Pending' }}
               </span>
-            </td>
+            </td> -->
             <td>
               <button type="button" class="btn btn-outline-danger" @click="removeUser(index)">Remove</button>
             </td>
@@ -176,6 +184,33 @@ const closeModal = () => {
       </button>
       <button v-if="uploading === false" type="button" class="btn btn-outline-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
     </div>
+    <!-- <button @click="openModal" class="btn btn-warning mb-4">
+      Open Rejection Modal
+    </button> -->
+
+    <div v-if="Object.keys(rejectedUsers).length > 0">
+      <h3>Rejected Users:</h3>
+      <ul>
+        <li v-for="(reason, userId) in rejectedUsers" :key="userId">User {{ userId }}: {{ reason }}</li>
+      </ul>
+    </div>
+  </b-modal>
+
+  <!-- //reasons  -->
+  <!-- Modal for Rejection Reason -->
+  <b-modal ref="showModal" title="Provide Rejection Reasons" size="lg">
+    <template #default>
+      <div>
+        <div v-for="userId in rejects" :key="userId">
+          <label :for="`reason-${userId}`">Reason for rejecting User {{ userId }}:</label>
+          <input v-model="reasons[userId]" type="text" class="form-control mb-3" :id="`reason-${userId}`" placeholder="Enter rejection reason" />
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <b-button @click="submitRejections" variant="danger" class="mr-2"> Submit Rejections </b-button>
+      <b-button @click="showModal = false" variant="secondary"> Close </b-button>
+    </template>
   </b-modal>
 </template>
 <style>

@@ -165,7 +165,7 @@ const routes = [
     }
   },
   {
-    path: '/attendance-confirmation/:meetingId', // Dynamic parameter `meetingId`
+    path: '/confirm/:meetingId', // Dynamic parameter `meetingId`
     name: 'AttendanceConfirmation',
     component: MeetingConfirmationView
   },

@@ -70,8 +70,9 @@ const AxiosInstance = () => {
         } catch (refreshError) {
           if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
             //call logout function\
-            logout()
-            // router.push({ path: `/auth/login` })
+            // logout()
+            router.push({ path: `/auth/login` })
+            localStorage.clear()
           } else {
             console.error('Failed to refresh access token', refreshError)
           }

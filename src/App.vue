@@ -54,6 +54,8 @@ const resizePlugin = () => {
 
 // Lifecycle hooks for component mount and unmount
 onMounted(() => {
+  // Add the event listener when the component is mounted
+  window.addEventListener('beforeunload', handleBeforeUnload)
   window.addEventListener('resize', resizePlugin)
   setTimeout(() => {
     resizePlugin()
@@ -62,9 +64,16 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // Remove the event listener when the component is unmounted
+  window.removeEventListener('beforeunload', handleBeforeUnload)
   window.removeEventListener('resize', resizePlugin)
   authStore.initStore()
 })
+
+// Function to handle the `beforeunload` event
+function handleBeforeUnload() {
+  localStorage.clear() // Clear localStorage
+}
 </script>
 
 <style lang="scss">

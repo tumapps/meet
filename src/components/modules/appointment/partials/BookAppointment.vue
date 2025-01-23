@@ -3,7 +3,6 @@ import { ref, getCurrentInstance, watch, onMounted } from 'vue'
 import createAxiosInstance from '@/api/axios'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue' // Import the child component
 import FlatPickr from 'vue-flatpickr-component'
-import IconComponent from '@/components/icons/IconComponent.vue'
 import { useAuthStore } from '@/store/auth.store.js'
 import AttendeesComponent from './AttendeesComponent.vue'
 
@@ -169,8 +168,9 @@ const handleFileUpload = (event) => {
 const closeModal = () => {
   //clear errors
   resetErrors()
+  appointmentData.value = { ...initialAppointmentData }
+  selectedDate.value = null
   appointmentModal.value.hide() // Close the modal using the hide() method
-  // resetAppointmentData()
 }
 //handle date change
 const handleDateChange = (newValue) => {
@@ -441,80 +441,99 @@ onMounted(() => {
         <div class="w-100" id="v-pills-tabContent">
           <div class="fade active show m-5" id="-3">
             <b-row class="align-items-center form-group">
-              <b-col cols="2">
-                <label for="addcontactname" class="col-form-label">Name</label>
-              </b-col>
-              <b-col cols="10">
-                <input type="text" id="addcontactname" v-model="appointmentData.contact_name" class="form-control" />
-                <div v-if="errors.contact_name" class="error" aria-live="polite">{{ errors.contact_name }}</div>
-              </b-col>
-            </b-row>
-            <b-row class="align-items-center form-group">
-              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addphonenumber" class="col-form-label">Phone</label>
-              </b-col>
-              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <input type="text" id="addphonenumber" v-model="appointmentData.mobile_number" class="form-control" />
-                <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
-              </b-col>
-
-              <b-col cols="2" lg="1">
-                <label for="addemail" class="col-form-label">Email</label>
-              </b-col>
-              <b-col cols="10" lg="5">
-                <input type="text" id="addemail" v-model="appointmentData.email_address" class="form-control" />
-                <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
+              <b-col cols="12" lg="12" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <div class="mb-3 form-floating custom-form-floating form-group">
+                  <b-form-input type="text" id="subject" v-model="appointmentData.subject" class="form-control" placeholder="what the meeting is about" />
+                  <label for="subject">Subject</label>
+                  <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
+                </div>
               </b-col>
             </b-row>
 
             <b-row v-if="role === 'su'" class="align-items-center form-group">
-              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addappointmenttype" class="col-form-label">
-                  <icon-component type="outlined" icon-name="user" :size="24"></icon-component>
-                </label>
-              </b-col>
-              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <!-- Bind the select dropdown to selectedUsername -->
-                <!-- //make it required -->
-
-                <select v-model="selectedUsername" name="service" class="form-select" id="receipent" required>
-                  <option value="" disabled selected>Choose Recipient</option>
-                  <option v-for="user in UsersOptions" :key="user.username" :value="user.id">
-                    {{ user.username }}
-                  </option>
-                </select>
+              <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
+                <div class="form-floating">
+                  <select v-model="selectedUsername" name="service" class="form-select" id="receipent" required>
+                    <option v-for="user in UsersOptions" :key="user.username" :value="user.id">
+                      {{ user.username }}
+                    </option>
+                  </select>
+                  <label for="receipent">Chair</label>
+                </div>
                 <div v-if="errors.user_id" class="error" aria-live="polite">
                   {{ errors.user_id }}
                 </div>
               </b-col>
-              <b-col cols="2" lg="1" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="space" class="col-form-label">
-                  <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
-                </label>
-              </b-col>
-              <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0" required>
-                  <!-- Default option -->
-                  <option value="" disabled selected>
-                    {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
-                  </option>
 
-                  <!-- Loop through spaces array if available else show no spaces available -->
-                  <option v-if="!spaces || spaces.length === 0" disabled>No spaces available</option>
-                  <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
-                </select>
-
+              <!-- Venue Field -->
+              <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
+                <div class="form-floating">
+                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0" required>
+                    <!-- Default option -->
+                    <option value="" disabled selected>
+                      {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
+                    </option>
+                    <!-- Loop through spaces array -->
+                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
+                  </select>
+                  <label for="space">Venue</label>
+                </div>
                 <!-- Display errors if there are any -->
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
                 </div>
               </b-col>
+
+              <!-- Date Field -->
+              <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <div class="form-floating">
+                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" />
+                  <label for="datePicker">Date</label>
+                </div>
+              </b-col>
             </b-row>
+            <b-row class="g-3 align-items-center form-group mt-3 p-2">
+              <b-row>
+                <b-col md="12" lg="12" sm="12">
+                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                </b-col>
+              </b-row>
+              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
+            </b-row>
+            <b-row class="align-items-center form-group">
+              <b-col cols="12" lg="4">
+                <div class="mb-3 form-floating custom-form-floating form-group">
+                  <b-form-input type="text" class="form-control" id="contactname" v-model="appointmentData.contact_name" placeholder="contact name" />
+                  <!-- :state="errors.contact_name ? 'true' : 'true'"  for field border color validation  -->
+                  <label for="contactname">Contact</label>
+
+                  <div v-if="errors.contact_name" class="error" aria-live="polite">{{ errors.contact_name }}</div>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row class="align-items-center form-group">
+              <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <div class="mb-3 form-floating custom-form-floating form-group">
+                  <b-form-input type="text" id="addphonenumber" v-model="appointmentData.mobile_number" class="form-control" placeholder="phone number" />
+                  <label for="addphonenumber" class="col-form-label">Phone</label>
+                </div>
+
+                <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
+              </b-col>
+
+              <b-col cols="12" lg="5">
+                <div class="mb-3 form-floating custom-form-floating form-group">
+                  <b-form-input type="text" id="addemail" v-model="appointmentData.email_address" class="form-control" placeholder="email" />
+                  <label for="addemail" class="col-form-label">Email</label>
+                </div>
+
+                <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
+              </b-col>
+            </b-row>
+
             <b-row v-if="role !== 'su'" class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="space" class="col-form-label">
-                  <icon-component type="outlined" icon-name="location" :size="24"></icon-component>
-                </label>
+                <label for="space" class="col-form-label">Venue </label>
               </b-col>
               <b-col cols="10" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <!-- Only render the select element if spaces is not null or an empty array -->
@@ -535,19 +554,8 @@ onMounted(() => {
             </b-row>
 
             <b-row class="align-items-center form-group">
-              <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addsubject" class="col-form-label">RE:</label>
-              </b-col>
-              <b-col cols="10" lg="10" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <input type="text" id="addsubject" v-model="appointmentData.subject" class="form-control" placeholder="what the meeting is about" />
-                <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
-              </b-col>
-            </b-row>
-            <b-row class="align-items-center form-group">
               <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addappointmenttype" class="col-form-label">
-                  <icon-component type="outlined" icon-name="pencil" :size="24"></icon-component>
-                </label>
+                <label for="addappointmenttype" class="col-form-label"> Meeting Type </label>
               </b-col>
               <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
@@ -560,24 +568,8 @@ onMounted(() => {
                 </select>
                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
               </b-col>
-              <b-col cols="2" lg="1" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addappointmenttype" class="col-form-label">
-                  <icon-component type="outlined" icon-name="calendar" :size="24"></icon-component>
-                </label>
-              </b-col>
-              <b-col cols="10" lg="5" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <span v-if="!selectedUsername" class="text-muted"> Select a user to view available slots</span>
-                <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" />
-              </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group mt-3 p-2">
-              <b-row>
-                <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                </b-col>
-              </b-row>
-              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
-            </b-row>
+
             <b-row class="g-3 align-items-center form-group">
               <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <label for="addsubject" class="col-form-label">Agenda</label>
@@ -600,7 +592,7 @@ onMounted(() => {
             <b-row class="g-3 align-items-center form-group">
               <!-- Label Section -->
               <b-col cols="2" class="d-flex align-items-center justify-content-start">
-                <label for="addphonenumber" class="col-form-label fw-bold">cc:</label>
+                <label for="addphonenumber" class="col-form-label">Attendees</label>
               </b-col>
 
               <!-- Input and Search Section -->

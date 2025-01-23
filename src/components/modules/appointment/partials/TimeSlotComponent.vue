@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, defineEmits, defineProps } from 'vue'
 
 // Define props
 const props = defineProps({
@@ -80,12 +80,14 @@ const selectSlot = (index) => {
 </script>
 
 <template>
-  <div class="timeslots-container justify-content-center">
+  <div class="timeslots-container justify-content-start">
+    
     <!-- Loop through time slots and display them -->
     <div v-for="(slot, index) in timeSlots" :key="slot.startTime" :class="['timeslot', { booked: slot.booked, selected: slot.selected }]" @click="selectSlot(index)">
-      <div class="d-flex flex-column justify-content-center align-items-center h-100">
-        <div class="px-3 py-2 text-center w-100">{{ slot.startTime }}</div>
-        <div class="px-3 py-2 text-center w-100">{{ slot.endTime }}</div>
+      <div class="d-flex flex-column justify-content-center align-items-center h-100 no-gap">
+        <div class="px-3 text-center w-100">{{ slot.startTime }}</div>
+        <p class="m-0">to</p>
+        <div class="px-3 text-center w-100">{{ slot.endTime }}</div>
       </div>
     </div>
   </div>
@@ -123,5 +125,9 @@ const selectSlot = (index) => {
   background-color: #d89837;
   color: white;
   pointer-events: none;
+}
+.no-gap > * {
+  margin: -2px;
+  padding: 0;
 }
 </style>
