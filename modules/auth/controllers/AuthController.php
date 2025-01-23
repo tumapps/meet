@@ -272,8 +272,10 @@ class AuthController extends \helpers\ApiController
 			$filteredMenus = array_map(function ($menu) {
 				unset($menu['roles']);
 				return $menu;
-			}, array_values(array_filter($menus, fn($menu) => isset($menu['route']))));
-
+			}, array_values(array_filter($menus, function ($menu) {
+				return isset($menu['route']) && !in_array($menu['route'], ['availability', 'home']);
+			})));
+	
 			if (isset($menus['iam'])) {
 				$filteredMenus[] = [
 					'IAM' => array_map(function ($iamMenu) {
@@ -282,7 +284,7 @@ class AuthController extends \helpers\ApiController
 					}, $menus['iam']),
 				];
 			}
-
+	
 			return $filteredMenus;
 		}
 
