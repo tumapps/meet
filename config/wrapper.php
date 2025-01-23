@@ -78,7 +78,10 @@ class ConfigWrapper
                 ['route' => 'venues', 'label' => 'Venues', 'icon' => 'location-dot', 'roles' => ['registrar']],
                 ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar', 'roles' => ['registrar']],
                 ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot', 'roles' => ['registrar']],
-                'iam' => [ 
+                ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield', 'roles' => ['su']],
+                ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears', 'roles' => ['su']],
+                ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user', 'roles' => ['su']],
+                'iam2' => [
                     ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield', 'roles' => ['su']],
                     ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears', 'roles' => ['su']],
                     ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user', 'roles' => ['su']],
