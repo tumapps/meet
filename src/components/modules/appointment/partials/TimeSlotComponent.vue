@@ -81,9 +81,8 @@ const selectSlot = (index) => {
 
 <template>
   <div class="timeslots-container justify-content-start">
-    
     <!-- Loop through time slots and display them -->
-    <div v-for="(slot, index) in timeSlots" :key="slot.startTime" :class="['timeslot', { booked: slot.booked, selected: slot.selected }]" @click="selectSlot(index)">
+    <div v-for="(slot, index) in timeSlots" :key="slot.startTime" :class="['timeslot', { booked: slot.booked, selected: slot.selected, expired: slot.is_expired }]" @click="selectSlot(index)">
       <div class="d-flex flex-column justify-content-center align-items-center h-100 no-gap">
         <div class="px-3 text-center w-100">{{ slot.startTime }}</div>
         <p class="m-0">to</p>
@@ -123,6 +122,12 @@ const selectSlot = (index) => {
 
 .timeslot.booked {
   background-color: #d89837;
+  color: white;
+  pointer-events: none;
+}
+
+.timeslot.expired {
+  background-color: #e2e1e0;
   color: white;
   pointer-events: none;
 }

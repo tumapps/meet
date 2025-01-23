@@ -33,7 +33,6 @@ const availableUsers = ref([])
 //CLEAR ERRORS
 
 const resetErrors = () => {
-  appointmentData.value = { ...initialAppointmentData }
   attendees.value = []
   UsersOptions.value = []
   errors.value = {}
@@ -169,8 +168,12 @@ const closeModal = () => {
   //clear errors
   resetErrors()
   appointmentData.value = { ...initialAppointmentData }
-  selectedDate.value = null
-  appointmentModal.value.hide() // Close the modal using the hide() method
+selectedDate.value = null
+timeSlots.value = []
+apiResponse.value = []
+  // appointmentData.value = { ...initialAppointmentData }
+  // selectedDate.value = null
+  // appointmentModal.value.hide() // Close the modal using the hide() method
 }
 //handle date change
 const handleDateChange = (newValue) => {
@@ -252,6 +255,7 @@ const getSlots = async () => {
   }
 }
 const submitAppointment = async () => {
+  console.log('appointmentData finallll:', appointmentData.value)
   // Reset errors
   resetErrors()
   uploading.value = true
@@ -433,7 +437,7 @@ onMounted(() => {
 <template>
   <!-- //AttendeesComponent -->
   <AttendeesComponent ref="attendeeModal" />
-  <b-modal ref="appointmentModal" title="Book Appointment" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="resetErrors">
+  <b-modal ref="appointmentModal" title="Book Meeting" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="closeModal">
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
@@ -442,24 +446,23 @@ onMounted(() => {
           <div class="fade active show m-5" id="-3">
             <b-row class="align-items-center form-group">
               <b-col cols="12" lg="12" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <div class="mb-3 form-floating custom-form-floating form-group">
+                <b-form-group label="Subject:" label-for="input-1">
                   <b-form-input type="text" id="subject" v-model="appointmentData.subject" class="form-control" placeholder="what the meeting is about" />
-                  <label for="subject">Subject</label>
+
                   <div v-if="errors.subject" class="error" aria-live="polite">{{ errors.subject }}</div>
-                </div>
+                </b-form-group>
               </b-col>
             </b-row>
 
-            <b-row v-if="role === 'su'" class="align-items-center form-group">
-              <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
-                <div class="form-floating">
-                  <select v-model="selectedUsername" name="service" class="form-select" id="receipent" required>
+            <b-row class="align-items-center form-group">
+              <b-col v-if="role === 'su'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Chair:" label-for="input-1">
+                  <select v-model="selectedUsername" name="service" class="form-select" id="receipent">
                     <option v-for="user in UsersOptions" :key="user.username" :value="user.id">
                       {{ user.username }}
                     </option>
                   </select>
-                  <label for="receipent">Chair</label>
-                </div>
+                </b-form-group>
                 <div v-if="errors.user_id" class="error" aria-live="polite">
                   {{ errors.user_id }}
                 </div>
@@ -467,17 +470,16 @@ onMounted(() => {
 
               <!-- Venue Field -->
               <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
-                <div class="form-floating">
-                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0" required>
+                <b-form-group label="Venue:" label-for="input-1">
+                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0">
                     <!-- Default option -->
                     <option value="" disabled selected>
                       {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
                     </option>
                     <!-- Loop through spaces array -->
-                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
+                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.name }}</option>
                   </select>
-                  <label for="space">Venue</label>
-                </div>
+                </b-form-group>
                 <!-- Display errors if there are any -->
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
@@ -486,10 +488,9 @@ onMounted(() => {
 
               <!-- Date Field -->
               <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <div class="form-floating">
-                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" />
-                  <label for="datePicker">Date</label>
-                </div>
+                <b-form-group label="Date:" label-for="input-1">
+                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" v-b-tooltip.hover title="chair must be selected" />
+                </b-form-group>
               </b-col>
             </b-row>
             <b-row class="g-3 align-items-center form-group mt-3 p-2">
@@ -500,103 +501,61 @@ onMounted(() => {
               </b-row>
               <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
             </b-row>
-            <b-row class="align-items-center form-group">
-              <b-col cols="12" lg="4">
-                <div class="mb-3 form-floating custom-form-floating form-group">
-                  <b-form-input type="text" class="form-control" id="contactname" v-model="appointmentData.contact_name" placeholder="contact name" />
-                  <!-- :state="errors.contact_name ? 'true' : 'true'"  for field border color validation  -->
-                  <label for="contactname">Contact</label>
-
-                  <div v-if="errors.contact_name" class="error" aria-live="polite">{{ errors.contact_name }}</div>
-                </div>
+            <b-row class="align-items-center form-group mb-5">
+              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Meeting Type:" label-for="input-1">
+                  <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                    <!-- Default placeholder option -->
+                    <option value="">Appointment Type</option>
+                    <!-- Dynamically populated options from API -->
+                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                      {{ type }}
+                    </option>
+                  </select>
+                </b-form-group>
+                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+              </b-col>
+              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Agenda:" label-for="input-1">
+                  <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
+                </b-form-group>
               </b-col>
             </b-row>
             <b-row class="align-items-center form-group">
-              <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <div class="mb-3 form-floating custom-form-floating form-group">
-                  <b-form-input type="text" id="addphonenumber" v-model="appointmentData.mobile_number" class="form-control" placeholder="phone number" />
-                  <label for="addphonenumber" class="col-form-label">Phone</label>
-                </div>
-
-                <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
+              <b-col cols="12" lg="4">
+                <b-form-group label="Contact Name:" label-for="input-1">
+                  <b-form-input type="text" class="form-control" id="contactname" v-model="appointmentData.contact_name" />
+                  <!-- :state="errors.contact_name ? 'true' : 'true'"  for field border color validation  -->
+                  <div v-if="errors.contact_name" class="error" aria-live="polite">{{ errors.contact_name }}</div>
+                </b-form-group>
               </b-col>
 
-              <b-col cols="12" lg="5">
-                <div class="mb-3 form-floating custom-form-floating form-group">
-                  <b-form-input type="text" id="addemail" v-model="appointmentData.email_address" class="form-control" placeholder="email" />
-                  <label for="addemail" class="col-form-label">Email</label>
-                </div>
+              <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Phone Number:" label-for="input-1">
+                  <b-form-input type="text" id="addphonenumber" v-model="appointmentData.mobile_number" class="form-control" />
+                  <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
+                </b-form-group>
+              </b-col>
+
+              <b-col cols="12" lg="4">
+                <b-form-group label="Email:" label-for="input-1"> <b-form-input type="text" id="addemail" v-model="appointmentData.email_address" class="form-control" placeholder="email" /> </b-form-group>
 
                 <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
               </b-col>
             </b-row>
-
-            <b-row v-if="role !== 'su'" class="align-items-center form-group">
-              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="space" class="col-form-label">Venue </label>
-              </b-col>
-              <b-col cols="10" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <!-- Only render the select element if spaces is not null or an empty array -->
-                <select v-if="spaces && spaces.length > 0" v-model="appointmentData.space_id" name="space" class="form-select" id="space" required>
-                  <option value="" disabled selected>Choose Space</option>
-                  <!-- Loop through spaces array and bind the option value to space.id -->
-                  <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.id }} : {{ space.name }}</option>
-                </select>
-
-                <!-- Show a message if spaces is null or empty -->
-                <p v-else>No spaces available</p>
-
-                <!-- Display errors if there are any -->
-                <div v-if="errors.space_id" class="error" aria-live="polite">
-                  {{ errors.space_id }}
-                </div>
-              </b-col>
-            </b-row>
-
-            <b-row class="align-items-center form-group">
-              <b-col cols="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addappointmenttype" class="col-form-label"> Meeting Type </label>
-              </b-col>
-              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
-                  <!-- Default placeholder option -->
-                  <option value="">Appointment Type</option>
-                  <!-- Dynamically populated options from API -->
-                  <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
-                    {{ type }}
-                  </option>
-                </select>
-                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
-              </b-col>
-            </b-row>
-
             <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2" lg="2" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <label for="addsubject" class="col-form-label">Agenda</label>
-              </b-col>
-              <b-col cols="10">
-                <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-              </b-col>
-            </b-row>
-            <b-row class="g-3 align-items-center form-group">
-              <b-col cols="2">
-                <label for="description" class="col-form-label">Notes</label>
-              </b-col>
-              <b-col cols="10">
-                <textarea type="text" id="adddescription" v-model="appointmentData.description" class="form-control" rows="3" />
-                <!-- //upload progress bar -->
-
-                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
+              <b-col cols="12" lg="12" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Description:" label-for="input-1">
+                  <textarea type="text" id="description" v-model="appointmentData.description" class="form-control" rows="3" placeholder="description" />
+                  <!-- //upload progress bar -->
+                  <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
+                </b-form-group>
               </b-col>
             </b-row>
             <b-row class="g-3 align-items-center form-group">
               <!-- Label Section -->
-              <b-col cols="2" class="d-flex align-items-center justify-content-start">
-                <label for="addphonenumber" class="col-form-label">Attendees</label>
-              </b-col>
-
               <!-- Input and Search Section -->
-              <b-col cols="10">
+              <b-col cols="12">
                 <div class="search-form shadow-sm">
                   <!-- Selected Items -- -->
                   <div v-if="selectedItems.length" class="mb-2">
@@ -604,8 +563,9 @@ onMounted(() => {
                   </div>
 
                   <!-- Search Input -- -->
-                  <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" :disabled="!selectedDate" />
-
+                  <b-form-group label="Attendees:" label-for="input-1">
+                    <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" :disabled="!selectedDate" />
+                  </b-form-group>
                   <!-- Search Results  -->
                   <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
                     <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
@@ -622,13 +582,12 @@ onMounted(() => {
         </div>
       </div>
     </form>
-    <div class="modal-footer border-0">
+    <div class="modal-footer border-0 d-flex justify-content-center w-100">
       <button v-if="uploading === false" type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="submitAppointment">Submit</button>
       <button v-else class="btn btn-primary" type="button" disabled>
         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
         Loading...
       </button>
-      <button v-if="uploading === false" type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="closeModal()">Close</button>
     </div>
   </b-modal>
 </template>
