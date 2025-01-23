@@ -92,7 +92,7 @@ trait UserJwt
      */
     public static function findByJTI($token)
     {
-        return static::findOne(['auth_key' => $token, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['auth_key' => $token, 'status' => \auth\models\User::STATUS_ACTIVE]);
     }
 
     /**
