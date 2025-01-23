@@ -449,7 +449,8 @@ class AppointmentsController extends \helpers\ApiController
                 $model->id // exclude current appointment from the check
             );
             if (!$isAvailable || $appointmentExists) {
-                return $this->errorResponse(['message' => ['The appointment cannot be restored because the time slot is no longer available.']]);
+                // return $this->errorResponse(['message' => ['The appointment cannot be restored because the time slot is no longer available.']]);
+                return $this->toastResponse(['message' => 'The appointment cannot be restored because the time slot is no longer available.']);
             }
             $model->restore();
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments restored successfully']);
