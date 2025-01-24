@@ -411,7 +411,7 @@ const UpdateUser = async () => {
       <b-col md="12" lg="2" class="mb-5 d-flex align-items-center">
         <div class="mb-3">
           <!-- <label for="roledescription" class="form-label">Role</label> -->
-          <b-button @click="showRoleModal" variant="outline-primary" class="w-100">Manage Role</b-button>
+          <b-button @click="showRoleModal" variant="outline-primary" class="w-100">Manage Roles</b-button>
         </div>
         <div v-if="errors.role" class="error" aria-live="polite">
           {{ errors.role }}

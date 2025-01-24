@@ -504,7 +504,7 @@ onMounted(() => {
                 <b-form-group label="Meeting Type:" label-for="input-1">
                   <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
                     <!-- Default placeholder option -->
-                    <option value="">Appointment Type</option>
+                    <option value="">Meeting Type</option>
                     <!-- Dynamically populated options from API -->
                     <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
                       {{ type }}
