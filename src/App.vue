@@ -73,7 +73,8 @@ onUnmounted(() => {
 // Function to handle the `beforeunload` event
 function handleBeforeUnload() {
   localStorage.clear() // Clear localStorage
-}
+  }
+
 </script>
 
 <style lang="scss">

@@ -34,7 +34,6 @@ const availableUsers = ref([])
 
 const resetErrors = () => {
   attendees.value = []
-  UsersOptions.value = []
   errors.value = {}
   //clear form data
 }
@@ -114,7 +113,12 @@ const flatPickrConfig = {
   dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'F j, Y',
-  minDate: 'today'
+  minDate: 'today',
+  disable: [
+    function (date) {
+      return date.getDay() === 6 || date.getDay() === 0
+    }
+  ]
 }
 
 const today = ref(new Date().toLocaleDateString())
@@ -168,9 +172,10 @@ const closeModal = () => {
   //clear errors
   resetErrors()
   appointmentData.value = { ...initialAppointmentData }
-selectedDate.value = null
-timeSlots.value = []
-apiResponse.value = []
+  selectedDate.value = null
+  timeSlots.value = []
+  apiResponse.value = []
+  selectedUsername.value = []
   // appointmentData.value = { ...initialAppointmentData }
   // selectedDate.value = null
   // appointmentModal.value.hide() // Close the modal using the hide() method
@@ -456,9 +461,12 @@ onMounted(() => {
 
             <b-row class="align-items-center form-group">
               <b-col v-if="role === 'su'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
-                <b-form-group label="Chair:" label-for="input-1">
+                <b-form-group label="ChairPerson:" label-for="input-1">
                   <select v-model="selectedUsername" name="service" class="form-select" id="receipent">
-                    <option v-for="user in UsersOptions" :key="user.username" :value="user.id">
+                    <!-- Show this option if UsersOptions is null or empty -->
+                    <option v-if="!UsersOptions || UsersOptions.length === 0" disabled>No users available</option>
+                    <!-- Render users if available -->
+                    <option v-else v-for="user in UsersOptions" :key="user.username" :value="user.id">
                       {{ user.username }}
                     </option>
                   </select>
@@ -471,7 +479,7 @@ onMounted(() => {
               <!-- Venue Field -->
               <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Venue:" label-for="input-1">
-                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space" :disabled="!Array.isArray(spaces) || spaces.length === 0">
+                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space">
                     <!-- Default option -->
                     <option value="" disabled selected>
                       {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
@@ -489,20 +497,10 @@ onMounted(() => {
               <!-- Date Field -->
               <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Date:" label-for="input-1">
-                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername" v-b-tooltip.hover title="chair must be selected" />
+                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername && role === 'su'" v-b-tooltip.hover="{ title: 'Chair must be selected', disabled: !!selectedUsername }" />
                 </b-form-group>
               </b-col>
-            </b-row>
-            <b-row class="g-3 align-items-center form-group mt-3 p-2">
-              <b-row>
-                <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                </b-col>
-              </b-row>
-              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
-            </b-row>
-            <b-row class="align-items-center form-group mb-5">
-              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col v-if="role !== 'su'" cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Meeting Type:" label-for="input-1">
                   <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
                     <!-- Default placeholder option -->
@@ -515,7 +513,30 @@ onMounted(() => {
                 </b-form-group>
                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
               </b-col>
-              <b-col cols="10" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+            </b-row>
+            <b-row class="g-3 align-items-center form-group mt-3 p-2">
+              <b-row>
+                <b-col md="12" lg="12" sm="12">
+                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                </b-col>
+              </b-row>
+              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
+            </b-row>
+            <b-row class="align-items-center form-group mb-5">
+              <b-col v-if="role === 'su'" cols="12" :lg="role === 'su' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Meeting Type:" label-for="input-1">
+                  <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                    <!-- Default placeholder option -->
+                    <option value="">Meeting Type</option>
+                    <!-- Dynamically populated options from API -->
+                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                      {{ type }}
+                    </option>
+                  </select>
+                </b-form-group>
+                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+              </b-col>
+              <b-col cols="12" :lg="role === 'su' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
                   <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
                 </b-form-group>
