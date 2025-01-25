@@ -32,6 +32,7 @@ class AuthController extends \helpers\ApiController
 		$appointmentDate = $queryParams['appointment_date'] ?? null;
 		$startTime = $queryParams['start_time'] ?? null;
 		$endTime = $queryParams['end_time'] ?? null;
+		
 
 		$filteredUsers = [];
 		foreach ($users as $user) {
@@ -141,20 +142,24 @@ class AuthController extends \helpers\ApiController
 
 	public function actionGetUser($id)
 	{
+		
 		if (!$id) {
 			return $this->errorResponse(['message' => ['User ID is required']]);
 		}
 		$user = User::findOne($id);
+
 		if (!$user) {
 			return $this->errorResponse(['message' => ['User not found']]);
 		}
 
 		$profile = Profiles::find()->where(['user_id' => $id])->one();
+
 		if (!$profile) {
 			return $this->errorResponse(['message' => ['Profile not found']]);
 		}
 
 		$roles = \Yii::$app->authManager->getRolesByUser($id);
+
 		$roleNames = array_keys($roles);
 
 		$formattedUser = [
