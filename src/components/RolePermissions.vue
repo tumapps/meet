@@ -243,8 +243,10 @@ const performSearch = async (role, searchQuery) => {
 
     if (flag.value === 'assinged') {
       assignedRoles.value = response.data.dataPayload.data.assigned.roles
+      assignedPermissions.value = response.data.dataPayload.data.assigned.permissions
     } else {
       availableRoles.value = response.data.dataPayload.data.available.roles
+      availablePermissions.value = response.data.dataPayload.data.available.permissions
     }
   } catch (error) {
     // console.error(error);
