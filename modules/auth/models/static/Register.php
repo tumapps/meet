@@ -10,6 +10,8 @@ use scheduler\models\Settings;
 use helpers\traits\Keygen;
 use yii\base\Event;
 use helpers\EventHandler;
+use borales\extensions\phoneInput\PhoneInputValidator;
+
 
 class Register extends Model
 {
@@ -46,31 +48,17 @@ class Register extends Model
 
             //profile validation
             [['first_name', 'last_name', 'email_address'], 'required'],
-            [['first_name', 'last_name', 'middle_name'], 'string', 'max' => 50],
+            [['first_name', 'last_name'], 'string', 'max' => 50, 'min' => 3],
+            [['middle_name'], 'string', 'max' => 50, 'min' => 1],
             [['email_address'], 'string', 'max' => 128],
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
-            [['mobile_number'], 'string', 'max' => 13],
-            // ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 15 digits.'],
-            ['mobile_number', 'validateMobileNumber'],
+            [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
+            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+
             // [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
-    //Abc#123456
-    // public function save1()
-    // {
-    //     $uid = $this->uid('USERS', true);
-    //     $user = new User();
-    //     $user->user_id = $uid;
-    //     $user->username = $this->username;
-    //     $user->setPassword($this->password);
-    //     $user->generateAuthKey();
-    //     if($this->validate()){
-    //         if ($user->save(false)) {
-    //             return $user;
-    //         }
-    //     }
-    // }
 
     public function validateMobileNumber($attribute, $params)
     {
@@ -78,6 +66,15 @@ class Register extends Model
 
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Invalid phone number');
+        }
+    }
+
+    public function validateName($attribute, $params)
+    {
+        $name = $this->$attribute;
+
+        if (!preg_match("/^[a-zA-Z']+$/", $name)) {
+            $this->addError($attribute, 'The name can only contain alphabetic characters');
         }
     }
 
