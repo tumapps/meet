@@ -4,6 +4,8 @@ namespace auth\models;
 
 use Yii;
 use auth\models\User;
+use borales\extensions\phoneInput\PhoneInputValidator;
+
 
 /**
  * This is the model class for table "profiles".
@@ -37,16 +39,38 @@ class Profiles extends \helpers\ActiveRecord
     public function rules()
     {
         return [
-            [['first_name', 'last_name', 'email_address'], 'required'],
-            [['first_name', 'last_name','middle_name'], 'string', 'max' => 50],
+            [['first_name', 'last_name', 'email_address', 'mobile_number'], 'required'],
+            [['first_name', 'last_name','middle_name'], 'string', 'max' => 50, 'min' => 3],
+            [['middle_name'], 'string', 'max' => 50, 'min' => 1],
             [['email_address'], 'string', 'max' => 128],
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
-            [['mobile_number'], 'string', 'max' => 15],
-            ['mobile_number', 'match', 'pattern' => '/^\+?[0-9]{7,15}$/', 'message' => 'Phone number must be a valid integer with a maximum of 15 digits.'],
+
+            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            [['first_name', 'last_name','middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
     }
+
+
+    public function validateMobileNumber($attribute, $params)
+    {
+        $pattern = '/^(07|01|\+254)[0-9]{8}$/';
+
+        if (!preg_match($pattern, $this->$attribute)) {
+            $this->addError($attribute, 'Invalid phone number');
+        }
+    }
+
+    public function validateName($attribute, $params)
+    {
+        $name = $this->$attribute;
+
+        if (!preg_match("/^[a-zA-Z']+$/", $name)) {
+            $this->addError($attribute, 'The name can only contain alphabetic characters');
+        }
+    }
+
 
     /**
      * {@inheritdoc}
