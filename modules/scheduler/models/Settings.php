@@ -24,6 +24,13 @@ class Settings extends BaseModel
     /**
      * {@inheritdoc}
      */
+
+    //  public $start_time;
+    //  public $end_time;
+    //  public $advanced_booking;
+    //  public $slot_duration;
+    //  public $booking_window;
+
     public static function tableName()
     {
         return '{{%settings}}';
@@ -36,7 +43,7 @@ class Settings extends BaseModel
         return array_merge(
             parent::fields(),
             [
-                'id',
+                // 'id',
                 'user_id',
                 'start_time',
                 'end_time',
@@ -85,9 +92,6 @@ class Settings extends BaseModel
             }
         }
     }
-
-
-
 
     /**
      * {@inheritdoc}
