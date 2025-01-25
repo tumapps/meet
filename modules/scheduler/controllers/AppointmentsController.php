@@ -306,14 +306,15 @@ class AppointmentsController extends \helpers\ApiController
         try {
 
             if ($model->load($dataRequest)) {
+
+                $model->uploadedFile = UploadedFile::getInstanceByName('file');
+                $space = null;
+                $levelName = null;
+
                 if (!$model->validate()) {
                     return $this->errorResponse($model->getErrors());
                 }
 
-                $uploadedFile = UploadedFile::getInstanceByName('file');
-
-                $space = null;
-                $levelName = null;
 
                 if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
                     $space = Space::findOne($dataRequest['Appointments']['space_id']);
@@ -342,7 +343,7 @@ class AppointmentsController extends \helpers\ApiController
                         $this->saveSpaceAvailability($dataRequest, $model->id);
                     }
 
-                    $uploadResult = $this->handleFileUpload($uploadedFile, $model->id);
+                    $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
 
                     if ($uploadResult !== true) {
                         return $this->errorResponse(['message' => $uploadResult['message']]);
