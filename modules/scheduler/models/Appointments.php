@@ -12,6 +12,8 @@ use scheduler\models\SpaceAvailability;
 use yii\base\Event;
 use scheduler\models\Availability;
 use helpers\EventHandler;
+use borales\extensions\phoneInput\PhoneInputValidator;
+
 
 /**
  *@OA\Schema(
@@ -148,8 +150,7 @@ class Appointments extends BaseModel
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
-            ['mobile_number', 'string', 'max' => 13, 'tooLong' => 'Phone number must not exceed 13 digits.'],
-            ['mobile_number', 'validateMobileNumber'],
+            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
