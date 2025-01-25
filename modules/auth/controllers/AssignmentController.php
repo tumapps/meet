@@ -51,7 +51,7 @@ class AssignmentController extends \helpers\ApiController
             ],
         ]);
     }
-   
+
     public function actionManageRole($id)
     {
         $authManager = Yii::$app->authManager;
@@ -79,20 +79,20 @@ class AssignmentController extends \helpers\ApiController
             $availableRoles = array_filter($availableRoles, function ($role, $key) use ($search) {
                 return stripos($key, $search) !== false;
             }, ARRAY_FILTER_USE_BOTH);
-        
+
             $assignedRoles = array_filter($assignedRoles, function ($role, $key) use ($search) {
                 return stripos($key, $search) !== false;
             }, ARRAY_FILTER_USE_BOTH);
-        
+
             $availablePermissions = array_filter($availablePermissions, function ($permission, $key) use ($search) {
                 return stripos($key, $search) !== false;
             }, ARRAY_FILTER_USE_BOTH);
-        
+
             $assignedPermissions = array_filter($assignedPermissions, function ($permission, $key) use ($search) {
                 return stripos($key, $search) !== false;
             }, ARRAY_FILTER_USE_BOTH);
         }
-        
+
 
         return $this->payloadResponse([
             'available' => [
@@ -231,6 +231,7 @@ class AssignmentController extends \helpers\ApiController
             if ($role) {
                 try {
                     $auth->assign($role, $id);
+                    // (new Assignment($id))->assign([$role]);
                     $assignedRoles[] = $roleName;
                 } catch (\Exception $e) {
                     Yii::error("Error assigning role '{$roleName}' to user ID '{id}': " . $e->getMessage(), __METHOD__);
@@ -255,10 +256,70 @@ class AssignmentController extends \helpers\ApiController
 
         return $this->toastResponse([
             'statusCode' => 202,
-            'message' => ucfirst($rolelabel) . "successfully assigned to user with ID '{$id}'.",
+            'message' => ucfirst($rolelabel) . ' ' . "successfully assigned to user with ID '{$id}'.",
             'assigned_roles' => $assignedRoles,
         ]);
     }
+
+    public function actionRevokeRole($id)
+    {
+        $dataRequest['Revoke'] = Yii::$app->request->getBodyParams();
+
+        $roles = $dataRequest['Revoke']['items'] ?? [''];
+
+        if (empty($roles) || !is_array($roles)) {
+            return $this->errorResponse(['message' => ['Roles are required']]);
+        }
+
+        if (!is_numeric($id)) {
+            return $this->errorResponse(['message' => ['User ID must be an integer']]);
+        }
+
+        $auth = Yii::$app->authManager;
+
+        $user = User::findOne(['user_id' => (int)$id]);
+
+        if (!$user) {
+            return $this->errorResponse(['message' => ['Provided user ID does not exist']]);
+        }
+
+        $revokedRoles = [];
+        $notFoundRoles = [];
+        foreach ($roles as $roleName) {
+            $role = $auth->getRole($roleName);
+
+            if ($role) {
+                try {
+                    $auth->revoke($role, $id);
+                    $revokedRoles[] = $roleName;
+                } catch (\Exception $e) {
+                    Yii::error("Error revoking role '{$roleName}' from user ID '{$id}': " . $e->getMessage(), __METHOD__);
+                }
+            } else {
+                $notFoundRoles[] = $roleName;
+            }
+        }
+
+        $roleLabel = count($roles) > 1 ? 'roles' : 'role';
+        $notFoundLabel = count($notFoundRoles) > 1 ? 'roles' : 'role';
+
+        if (!empty($notFoundRoles)) {
+            return $this->errorResponse([
+                'message' => [
+                    'Some ' . $notFoundLabel . ' could not be revoked because they do not exist.',
+                    'not_found_roles' => $notFoundRoles,
+                    'revoked_roles' => $revokedRoles,
+                ]
+            ]);
+        }
+
+        return $this->toastResponse([
+            'statusCode' => 202,
+            'message' => ucfirst($roleLabel) . " successfully revoked from user with ID '{$id}'.",
+            'revoked_roles' => $revokedRoles,
+        ]);
+    }
+
 
     public function actionRemove($id)
     {
