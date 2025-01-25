@@ -539,6 +539,7 @@ onMounted(() => {
               <b-col cols="12" :lg="role === 'su' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
                   <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
+                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.file }}</div>
                 </b-form-group>
               </b-col>
             </b-row>
