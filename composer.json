@@ -33,7 +33,8 @@
         "yiisoft/yii2-queue": "^2.3",
         "yiisoft/yii2-redis": "~2.0.0",
         "africastalking/africastalking": "^3.0",
-        "amoracr/yii2-backup": "*"
+        "amoracr/yii2-backup": "*",
+        "borales/yii2-phone-input": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
