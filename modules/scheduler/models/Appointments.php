@@ -78,6 +78,7 @@ class Appointments extends BaseModel
 
     public $attendees = [];
     public $space_id;
+    public $uploadedFile;
 
 
 
@@ -159,6 +160,9 @@ class Appointments extends BaseModel
             ['cancellation_reason', 'string', 'max' => 255],
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
             ['rejection_reason', 'string', 'max' => 255],
+
+            // file upload
+            [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
         ];
     }
 
