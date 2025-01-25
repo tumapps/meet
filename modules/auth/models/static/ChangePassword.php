@@ -18,6 +18,7 @@ class ChangePassword extends Model
 {
     public  $oldPassword;
     public  $newPassword;
+    public  $confirm_password;
 
     /**
      * @return array the validation rules.
@@ -26,12 +27,15 @@ class ChangePassword extends Model
     {
         return [
 
-            ['oldPassword', 'required', 'message' => 'This field can not be blank'],
-            // ['newPassword', 'required', 'message' => 'Please choose a password you can remember'],
+            [['oldPassword', 'confirm_password'], 'required', 'message' => 'This field can not be blank'],
             ['newPassword', 'required', 'message' => 'This field can not be blank'],
             ['newPassword', 'string', 'min' => 8],
+            ['newPassword', 'validatePassword'],
             ['newPassword', 'validateNewPassword'],
             ['oldPassword', 'validateOldPassword'],
+            ['confirm_password', 'required', 'message' => 'This field can not be blank'],
+            ['confirm_password', 'compare', 'compareAttribute' => 'newPassword', 'message' => "The passwords do not match."],
+            // ['newPassword', 'match', 'pattern' => '/^\S*(?=\S*[\W])(?=\S*[a-z])(?=\S*[A-Z])(?=\S*[\d])\S*$/', 'message' => 'Password Should contain at atleast: 1 number, 1 lowercase letter, 1 uppercase letter and 1 special character'],
         ];
     }
 
@@ -51,6 +55,14 @@ class ChangePassword extends Model
         }
     }
 
+    public function validatePasswordMatch($attribute, $params)
+    {
+        if ($this->newPassword !== $this->confirm_password) {
+            $this->addError($attribute, 'The passwords do not match.');
+        }
+    }
+
+
     // Validate the new password against password history
     public function validateNewPassword($attribute, $params)
     {
@@ -63,34 +75,48 @@ class ChangePassword extends Model
         }
     }
 
+    // public function validatePassword($attribute, $params)
+    // {
+    //     $password = $this->$attribute;
+
+    //     $pattern = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/';
+
+    //     if (!preg_match($pattern, $password)) {
+    //         $this->addError($attribute, 'The password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one special symbol, and one number.');
+    //     }
+    // }
+
+    public function validatePassword($attribute, $params)
+    {
+        $password = $this->$attribute;
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            $this->addError($attribute, 'The password must include at least one uppercase letter.');
+            return;
+        }
+
+        if (!preg_match('/[a-z]/', $password)) {
+            $this->addError($attribute, 'The password must include at least one lowercase letter.');
+            return;
+        }
+
+        if (!preg_match('/\d/', $password)) {
+            $this->addError($attribute, 'The password must include at least one numeric character.');
+            return;
+        }
+
+        if (!preg_match('/[@$!%*?&]/', $password)) {
+            $this->addError($attribute, 'The password must include at least one special symbol');
+            return;
+        }
+    }
+
+
+
     /**
      * updates password of the currently logged in user.
      * @return bool whether the password is updated successfully
      */
-
-    // public function updatePassword()
-    // {
-    //     if (!$this->validate()) {
-    //         return false;
-    //     }
-
-    //     $user = Yii::$app->user->identity;
-    //     $oldPasswordHash = md5($this->oldPassword);
-
-    //     $user->password_hash = Yii::$app->security->generatePasswordHash($this->newPassword);
-
-    //     if ($user) {
-    //         $passwordHistory = new PasswordHistory();
-    //         $passwordHistory->user_id = $user->id;
-    //         $passwordHistory->old_password = $oldPasswordHash;
-    //         $passwordHistory->save();
-
-    //         return true;
-    //     }
-
-    //     return false;
-
-    // }
 
     public function updatePassword()
     {
