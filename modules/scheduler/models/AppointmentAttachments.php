@@ -57,7 +57,7 @@ class AppointmentAttachments extends BaseModel
             [['appointment_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['appointment_id', 'is_deleted'], 'integer'],
             [['file_url', 'file_name'], 'string', 'max' => 255],
-            [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
+            [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false, 'message' => 'Upload exceeds maximum size'],
             [['appointment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Appointments::class, 'targetAttribute' => ['appointment_id' => 'id']],
         ];
     }
