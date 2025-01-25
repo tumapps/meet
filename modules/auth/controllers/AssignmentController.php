@@ -445,15 +445,6 @@ class AssignmentController extends \helpers\ApiController
 
     protected function findModel($id)
     {
-        // $auth = Yii::$app->authManager;
-        // $item =  $auth->getRole($id);
-
-        // if ($item) {
-        //     return new AuthItem($item);
-        // } else {
-        //     throw new \yii\web\NotFoundHttpException('Record not found.');
-        // }
-
         $auth = Configs::authManager();
         $item = $this->type === Item::TYPE_ROLE ? $auth->getRole($id) : $auth->getPermission($id);
         if ($item) {
