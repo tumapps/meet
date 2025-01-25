@@ -275,7 +275,7 @@ class AuthController extends \helpers\ApiController
 			}, array_values(array_filter($menus, function ($menu) {
 				return isset($menu['route']) && !in_array($menu['route'], ['availability', 'home']);
 			})));
-	
+
 			if (isset($menus['iam'])) {
 				$filteredMenus[] = [
 					'IAM' => array_map(function ($iamMenu) {
@@ -284,7 +284,7 @@ class AuthController extends \helpers\ApiController
 					}, $menus['iam']),
 				];
 			}
-	
+
 			return $filteredMenus;
 		}
 
@@ -364,15 +364,12 @@ class AuthController extends \helpers\ApiController
 
 	public function actionChangePassword()
 	{
-		// $user = Yii::$app->user->identity;
 		$model = new ChangePassword();
 		$dataRequest['ChangePassword'] = Yii::$app->request->getBodyParams();
 
 		if ($model->load($dataRequest) && $model->updatePassword()) {
 			Yii::$app->response->statusCode = 440;
-			Yii::$app->response->statusCode = 440;
-			return ['errorResponse' => ['errors' => ['message' => 'Your Password has been updated successfully']]];
-			// return $this->payloadResponse(['message' => 'Your Password has been updated successfully']);
+			return ['errorResponse' => ['errors' => ['message' => 'session expired']]];
 		}
 		return $this->errorResponse($model->getErrors());
 	}
@@ -406,7 +403,7 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
-	public function actionRefresh()
+	public function actionRefresh($logOut = false)
 	{
 		$refreshToken = Yii::$app->request->cookies->getValue('refresh-token', false);
 		if (!$refreshToken) {
