@@ -712,6 +712,11 @@ const openAttendeeModal = () => {
   attendeeModal.value.$refs.attendeeModal.show()
 }
 
+const truncatedSubject = computed((subject) => {
+  subject = appointmentDetails.value.subject || ''
+  return subject.length > 12 ? subject.slice(0, 30) + '...' : subject
+})
+
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getAppointments(1)
@@ -840,7 +845,7 @@ onUnmounted(() => {
                   </button>
 
                   <!-- Cancel Button -->
-                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
+                  <button v-if="item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-cancel" title="Cancel"></i>
                   </button>
                   <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
@@ -906,9 +911,9 @@ onUnmounted(() => {
     <template #title>
       <div class="custom-modal-title">
         <!-- <span class="contact-name">{{ appointmentDetails.contact_name }}</span> -->
-        <span class="subject">RE: {{ appointmentDetails.subject }}</span>
+        <span class="subject">RE: {{ truncatedSubject }}</span>
         <span class="date"> Date: {{ appointmentDetails.appointment_date }}</span>
-        <span class="time"> Time:{{ appointmentDetails.start_time }} - {{ appointmentDetails.end_time }}</span>
+        <span class="time"> Time: {{ appointmentDetails.start_time }} to {{ appointmentDetails.end_time }}</span>
         <span class="status"
           >Status:
           <b-badge :variant="recordStatus.theme" class="me-3">
@@ -1025,7 +1030,7 @@ onUnmounted(() => {
                 </b-col>
 
                 <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                  <TimeSlotComponent v-if="recordStatus.label === 'ACTIVE'" :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">

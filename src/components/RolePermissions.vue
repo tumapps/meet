@@ -56,7 +56,7 @@ const onModalShow = () => {
 
   if (props.user_id && props.roleName) {
     custompath.value = `/v1/auth/assign-role-user/${props.user_id}`
-    custompath2.value = `/v1/auth/assign-role-user/${props.user_id}`
+    custompath2.value = `/v1/auth/revoke-user-roles/${props.user_id}`
   } else if (props.roleName) {
     custompath.value = `/v1/auth/assign?role=${props.roleName}`
     custompath2.value = `/v1/auth/remove?id=${props.roleName}`
