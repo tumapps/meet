@@ -12,8 +12,26 @@ class m241031_090730_seeding_migration extends Migration
      */
     public function safeUp()
     {
-         
-        $this->seedLevel();
+        // return false;
+
+        // $this->seedLevel();
+        $this->insert('{{%meeting_types}}', [
+            'type' => 'Appintment',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        $this->insert('{{%meeting_types}}', [
+            'type' => 'group',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        $this->insert('{{%meeting_types}}', [
+            'type' => 'in person',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
     }
 
     /**
@@ -21,21 +39,20 @@ class m241031_090730_seeding_migration extends Migration
      */
     public function safeDown()
     {
-        // echo "m241031_090730_seeding_migration cannot be reverted.\n";
 
         return false;
     }
 
     private function seedLevel()
     {
-        for ($i = 1; $i <= 4; $i++) {
-            $this->insert('{{%levels}}', [
-                'name' => 'Level ' . $i,
-                'code' => 'L' . $i . '00',
-                'created_at' => time(),
-                'updated_at' => time(),
-            ]);
-        }
+        // for ($i = 1; $i <= 4; $i++) {
+        //     $this->insert('{{%levels}}', [
+        //         'name' => 'Level ' . $i,
+        //         'code' => 'L' . $i . '00',
+        //         'created_at' => time(),
+        //         'updated_at' => time(),
+        //     ]);
+        // }
     }
 
     /*
