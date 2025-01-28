@@ -82,11 +82,11 @@
             <h2>Appointment Rejected</h2>
         </div>
         <div class="email-body">
-            <?php if ($recipientType === 'user'): ?>
+            <?php if ($recipientType === 'contactPerson'): ?>
                 <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
                 <p>Your appointment request with <?= htmlspecialchars($username) ?> has been rejected. Below are the details:</p>
 
-            <?php elseif ($recipientType === 'vc'): ?>
+            <?php elseif ($recipientType === 'chairPerson'): ?>
                 <p>Dear <?= htmlspecialchars($username) ?>,</p>
                 <p>Your appointment request by <?= htmlspecialchars($contact_name) ?> has been rejected. Here are the details:</p>
              
