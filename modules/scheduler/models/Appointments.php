@@ -13,6 +13,7 @@ use yii\base\Event;
 use scheduler\models\Availability;
 use helpers\EventHandler;
 use borales\extensions\phoneInput\PhoneInputValidator;
+use yii\behaviors\BlameableBehavior;
 
 
 /**
@@ -59,6 +60,8 @@ class Appointments extends BaseModel
     const EVENT_APPOINTMENT_REMINDER = 'appointmentReminder';
     const EVENT_APPOINTMENT_CREATED = 'appointmentCreated';
     const EVENT_APPOINTMENT_REJECTED = 'appointmentRejected';
+    const EVENT_APPOINTMENT_DATE_UPDATED = 'appointmentUpdated';
+
 
 
     protected static $statusLabels = [
@@ -74,17 +77,25 @@ class Appointments extends BaseModel
 
     const SCENARIO_CANCEL = 'cancel';
     const SCENARIO_REJECT = 'reject';
-
+    const SCENARIO_DECLINE = 'reject';
 
     public $attendees = [];
     public $space_id;
     public $uploadedFile;
-
+    public $cancellation_reason;
+    public $reject_reason;
 
 
     public function init()
     {
         parent::init();
+    }
+
+    public function behaviors()
+    {
+        return [
+            BlameableBehavior::class,
+        ];
     }
 
     /**
@@ -130,7 +141,7 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'space_id'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
 
             // Custom inline validators as separate rules
@@ -143,6 +154,8 @@ class Appointments extends BaseModel
             [['appointment_date'], 'validateOverlappingEvents'],
             [['appointment_date'], 'validateBookingWindow'],
             [['appointment_date'], 'validateOverlappingAppointment'],
+            [['attendees'], 'validateAttendeesCount'],
+
 
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
@@ -155,14 +168,16 @@ class Appointments extends BaseModel
             [['appointment_type'], 'string', 'max' => 255],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
-            // Rules for cancellation and rejection scenarios
+            // Rules for scenarios
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
             ['rejection_reason', 'string', 'max' => 255],
+           
 
             // file upload
             [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
+            [['uploadedFile'], 'validateFileAttachment'],
         ];
     }
 
@@ -172,6 +187,7 @@ class Appointments extends BaseModel
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CANCEL] = ['cancellation_reason'];
         $scenarios[self::SCENARIO_REJECT] = ['rejection_reason'];
+        $scenarios[self::SCENARIO_DECLINE] = ['decline_reason'];
         return $scenarios;
     }
 
@@ -307,6 +323,33 @@ class Appointments extends BaseModel
         }
     }
 
+    public function validateFileAttachment($attribute, $params)
+    {
+        $existingAttachment = AppointmentAttachments::findOne(['appointment_id' => $this->id]);
+
+        if ($this->uploadedFile && $existingAttachment) {
+            $this->addError($attribute, 'A file is already attached to this appointment. File updates are not allowed.');
+        }
+    }
+
+    public function validateAttendeesCount($attribute, $params)
+    {
+        $space = Space::findOne($this->space_id);
+
+        if ($space) {
+            $capacity = $space->capacity;
+            $attendeesCount = count($this->attendees);
+
+            if ($attendeesCount > $capacity) {
+                $this->addError($attribute, "The number of attendees ({$attendeesCount}) exceeds the space capacity ({$capacity}).");
+            }
+        } else {
+            $this->addError('space_id', 'The specified space does not exist.');
+        }
+    }
+
+
+
     /**
      * {@inheritdoc}
      */
@@ -423,23 +466,23 @@ class Appointments extends BaseModel
     }
 
 
-    public function sendAppointmentCancelledEvent($email, $name, $date, $startTime, $endTime, $bookedUserEmail)
+    public function sendAppointmentCancelledEvent($contactPersonEmail, $contactPersonName, $date, $startTime, $endTime, $chairPerosnEmail, $user_id)
     {
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Cancelled';
 
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
-
+        $cancellation_reason = OperationReasons::getActionReason($this->id, $user_id);
 
         $eventData = [
-            'contactEmail' => $email,
-            'contact_name' => $name,
+            'contactEmail' => $contactPersonEmail,
+            'contact_name' => $contactPersonName,
             'date' => $date,
             'startTime' => $startTime,
             'endTime' => $endTime,
-            'bookedUserEmail' => $bookedUserEmail,
-            'cancellation_reason' => $this->cancellation_reason,
+            'bookedUserEmail' => $chairPerosnEmail,
+            'cancellation_reason' => $cancellation_reason,
             'subject' => $subject,
             'attendees_emails' => $attendeesEmails,
 
@@ -509,7 +552,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event);
     }
 
-    public function sendAppointmentRescheduledEvent($user_id, $email, $date, $startTime, $endTime, $name)
+    public function sendAppointmentRescheduledEvent($user_id, $email, $date, $startTime, $endTime, $contact_person_name)
     {
         $event = new Event();
         $event->sender = $this;
@@ -522,13 +565,38 @@ class Appointments extends BaseModel
             'date' => $date,
             'sartTime' => $startTime,
             'endTime' => $endTime,
-            'name' => $name,
+            'name' => $contact_person_name,
             'username' => $this->getUserName($user_id),
             'attendees_emails' => $attendeesEmails,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULED, [EventHandler::class, 'onAppointmentRescheduled'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULED, $event);
+    }
+
+
+    public function sendAppointmentDateUpdatedEvent($user_id, $email, $current_date, $start_time, $end_time, $contact_person_name, $initial_date_time)
+    {
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Meeting Date Updates';
+        $attendees_emails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+        $initial_date_time =  \Yii::$app->formatter->asDatetime($initial_date_time, 'php:Y-m-d H:i');
+
+        $eventData = [
+            'email' => $email,
+            'subject' => $subject,
+            'current_date' => $current_date,
+            'initial_date' => $initial_date_time,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            'contact_person_name' => $contact_person_name,
+            'username' => $this->getUserName($user_id), // chair of the appointment
+            'attendees_emails' => $attendees_emails,
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_DATE_UPDATED, [EventHandler::class, 'onAppointmentDateUpdated'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_DATE_UPDATED, $event);
     }
 
     public static function updatePassedAppointments()
@@ -664,7 +732,8 @@ class Appointments extends BaseModel
         $user = User::findOne($user_id);
         $bookedUserEmail = $user->profile->email_address;
 
-        $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
+        $rejection_reason = OperationReasons::getActionReason($this->id, $user_id);
+        $attendeesEmails = [];
 
         $eventData = [
             'email' => $email,
@@ -676,7 +745,7 @@ class Appointments extends BaseModel
             'username' => $this->getUserName($user_id),
             'user_email' => $bookedUserEmail,
             'attendees_emails' => $attendeesEmails,
-            'rejection_reason' => $this->rejection_reason,
+            'rejection_reason' => $rejection_reason
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REJECTED, [EventHandler::class, 'onAppointmentRejected'], $eventData);
