@@ -112,6 +112,6 @@ class SpaceAvailability extends BaseModel
      */
     public function getSpace()
     {
-        return $this->hasOne(Spaces::class, ['id' => 'space_id']);
+        return $this->hasOne(Space::class, ['id' => 'space_id']);
     }
 }
