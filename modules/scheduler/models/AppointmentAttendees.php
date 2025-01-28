@@ -56,7 +56,6 @@ class AppointmentAttendees extends BaseModel
                 'id',
                 'appointment_id',
                 'staff_id',
-                'removal_reason',
                 'date',
                 'start_time',
                 'end_time',
@@ -78,18 +77,18 @@ class AppointmentAttendees extends BaseModel
             [['date', 'start_time', 'end_time'], 'safe'],
             [['appointment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Appointments::class, 'targetAttribute' => ['appointment_id' => 'id']],
 
-            ['removal_reason', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Reason is required.'],
+            // ['removal_reason', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Reason is required.'],
             ['staff_id', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Staff id is required.'],
 
         ];
     }
 
-    public function scenarios()
-    {
-        $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_REMOVE] = ['removal_reason'];
-        return $scenarios;
-    }
+    // public function scenarios()
+    // {
+    //     $scenarios = parent::scenarios();
+    //     $scenarios[self::SCENARIO_REMOVE] = ['removal_reason'];
+    //     return $scenarios;
+    // }
 
     /**
      * {@inheritdoc}
@@ -100,7 +99,6 @@ class AppointmentAttendees extends BaseModel
             'id' => 'ID',
             'appointment_id' => 'Appointment ID',
             'staff_id' => 'Staff ID',
-            //'removal_reason' => 'Removal Reason',
             'date' => 'Date',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
