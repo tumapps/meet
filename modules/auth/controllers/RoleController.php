@@ -109,16 +109,7 @@ class RoleController extends \helpers\ApiController
         return $this->errorResponse($model->getErrors());
     }
 
-    public function actionUpdate3($id)
-    {
-        // Yii::$app->user->can('updateRole');
-        $dataRequest['Role'] = Yii::$app->request->getBodyParams();
-        $model = $this->findModel($id);
-        if ($model->load($dataRequest) &&  $model->save()) {
-            return $this->payloadResponse($this->findModel($id), ['statusCode' => 202, 'message' => 'Record updated successfully']);
-        }
-        return $this->errorResponse($model->getErrors());
-    }
+
 
     public function actionUpdate($id)
     {
@@ -139,7 +130,7 @@ class RoleController extends \helpers\ApiController
 
         if ($name !== $role->name && $auth->getRole($name)) {
             return $this->toastResponse([
-                'statusCode' => 409, 
+                'statusCode' => 409,
                 'message' => "Role name '{$name}' already exists. Please choose a different name."
             ]);
         }
@@ -148,6 +139,11 @@ class RoleController extends \helpers\ApiController
         $role->name = $name;
         $role->data = $data;
         $role->description = $description;
+
+        $protectedRoles = ['user', 'su', 'api'];
+        if (in_array($role->name, $protectedRoles)) {
+            return $this->errorResponse(['message' => 'This is a system defined role, cannot be updated']);
+        }
 
         // Save the updated role
         if ($auth->update($id, $role)) {
@@ -166,37 +162,36 @@ class RoleController extends \helpers\ApiController
 
     public function actionDelete($id)
     {
-        $model = $this->findModel($id);
         $auth = Yii::$app->authManager;
+
+        $role = $auth->getRole($id);
+
+        if (!$role) {
+            return $this->errorResponse(['message' => ['Role not found']]);
+        }
+
+        $model = $this->findModel($id);
+
+        $protectedRoles = ['user', 'su', 'api'];
+        
+        if (in_array($model->name, $protectedRoles)) {
+            return $this->errorResponse(['message' => ['This is a system defined Role and cannot be deleted.']]);
+        }
+
+        $assignedUsers = $this->getUsersByRole($model->name);
+
+        if (!empty($assignedUsers)) {
+            foreach ($assignedUsers as $userId) {
+                $auth->revoke($model, $userId);
+
+                $defaultRole = $auth->getRole('user');
+                $auth->assign($defaultRole, $userId);
+            }
+        }
+
         $auth->remove($model->item);
         return $this->toastResponse(['statusCode' => 202, 'message' => 'Record deleted successfully']);
     }
-
-    // public function actionDelete2($id)
-    // {
-    //     $auth = Yii::$app->authManager;
-
-    //     $role = $auth->getRole($id);
-
-    //     if (!$role) {
-    //         return $this->toastResponse([
-    //             'statusCode' => 404,
-    //             'message' => "Role '{$id}' does not exist."
-    //         ]);
-    //     }
-
-    //     if ($auth->remove($role)) {
-    //         return $this->toastResponse([
-    //             'statusCode' => 200,
-    //             'message' => "Role '{$id}' has been successfully deleted."
-    //         ]);
-    //     } else {
-    //         return $this->toastResponse([
-    //             'statusCode' => 500,
-    //             'message' => "Failed to delete role '{$id}'."
-    //         ]);
-    //     }
-    // }
 
     protected function findModel($id)
     {
@@ -209,5 +204,12 @@ class RoleController extends \helpers\ApiController
         } else {
             throw new \yii\web\NotFoundHttpException('Record not found.');
         }
+    }
+
+    protected function getUsersByRole($role)
+    {
+        return Yii::$app->db->createCommand("SELECT user_id FROM auth_assignments WHERE item_name = :role")
+            ->bindValue(':role', $role)
+            ->queryColumn();
     }
 }
