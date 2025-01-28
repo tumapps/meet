@@ -33,7 +33,10 @@ class ConfigWrapper
             ]
         ];
         $this->_tokens = [
-            '{id}' => '<id:\\d[\\d,]*>',
+            // '{id}' => '<id:\\d[\\d,]*>',
+            '{id}' => '<id:[a-zA-Z0-9_\\-]+>',
+            '{appointment_id}' => '<appointment_id:[a-zA-Z0-9_\\-]+>',
+            '{attendee_id}' => '<attendee_id:[a-zA-Z0-9_\\-]+>',
             '{key}' => '<key:[a-zA-Z0-9_\-\/]+>',
             '{crypt_id}' => '<crypt_id:[a-zA-Z0-9\\-]+>',
         ];
