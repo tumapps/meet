@@ -5,35 +5,60 @@ namespace scheduler\controllers;
 use Yii;
 use scheduler\models\Space;
 use scheduler\models\searches\SpaceSearch;
+
 /**
  * @OA\Tag(
  *     name="Space",
  *     description="Available endpoints for Space model"
  * )
  */
-class SpaceController extends \helpers\ApiController{
+class SpaceController extends \helpers\ApiController
+{
+
     public $permissions = [
-        'schedulerSpaceList'=>'View Space List',
-        'schedulerSpaceCreate'=>'Add Space',
-        'schedulerSpaceUpdate'=>'Edit Space',
-        'schedulerSpaceDelete'=>'Delete Space',
-        'schedulerSpaceRestore'=>'Restore Space',
-        ];
+        'schedulerSpaceList' => 'View Space List',
+        'schedulerSpaceCreate' => 'Add Space',
+        'schedulerSpaceUpdate' => 'Edit Space',
+        'schedulerSpaceDelete' => 'Delete Space',
+        'schedulerSpaceRestore' => 'Restore Space',
+    ];
     public function actionIndex()
     {
+        $currentUserId = Yii::$app->user->id;
+
+        $roleFlags = $this->getRoleFlags($currentUserId);
+
         Yii::$app->user->can('schedulerSpaceList');
         $searchModel = new SpaceSearch();
-        $search = $this->queryParameters(Yii::$app->request->queryParams,'SpaceSearch');
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'SpaceSearch');
         $dataProvider = $searchModel->search($search);
+
+
+        if ($roleFlags['isUser']) {
+            $dataProvider->query->andWhere(['user_id' => $currentUserId, 'space_type' => Space::SPACE_TYPE_UNMANAGED]);
+        } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
+            $dataProvider->query->andWhere(['space_type' => Space::SPACE_TYPE_MANAGED]);
+        }
 
         $spaceDetails = $dataProvider->getModels();
 
-        foreach ($spaceDetails as $spaceDetail) {
-            $spaceDetail->level_id = $spaceDetail->level ? $spaceDetail->level->name : 'Unknown Level';
+        foreach ($spaceDetails as $space) {
+            $space->space_type = $space->space_type == Space::SPACE_TYPE_MANAGED ? 'Managed' : 'Unmanaged';
         }
 
-        return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
+        return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
+
+    protected function getRoleFlags($userId)
+    {
+        $roles = Yii::$app->authManager->getRolesByUser($userId);
+        return [
+            'isSuperAdmin' => array_key_exists('su', $roles),
+            'isRegistrar' => array_key_exists('registrar', $roles),
+            'isUser' => array_key_exists('user', $roles),
+        ];
+    }
+
 
     public function actionView($id)
     {
@@ -47,10 +72,10 @@ class SpaceController extends \helpers\ApiController{
         $model = new Space();
         $model->loadDefaultValues();
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
-        if($model->load($dataRequest) && $model->save()) {
-            return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Space added successfully']);
+        if ($model->load($dataRequest) && $model->save()) {
+            return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Space added successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     public function actionLockSpace($id)
@@ -58,30 +83,42 @@ class SpaceController extends \helpers\ApiController{
         Yii::$app->user->can('registrar');
 
         $space = Space::findOne($id);
-        
+
         if (!$space) {
-            return $this->toastResponse(['statusCode'=>400,'message'=>'Space not found.']);
+            return $this->toastResponse(['statusCode' => 400, 'message' => 'Space not found.']);
         }
 
         $space->is_locked = !$space->is_locked;
 
         if ($space->save(false)) {
-             return $this->toastResponse(['statusCode'=>200,'message'=> $space->is_locked ? 'Space has been locked.' : 'Space has been unlocked.']);
+            return $this->toastResponse(['statusCode' => 200, 'message' => $space->is_locked ? 'Space has been locked.' : 'Space has been unlocked.']);
         } else {
-            return $this->errorResponse($space->getErrors()); 
+            return $this->errorResponse($space->getErrors());
         }
     }
-
 
     public function actionUpdate($id)
     {
         Yii::$app->user->can('registrar');
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
-        if($model->load($dataRequest) && $model->save()) {
-           return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Space updated successfully']);
+
+        $roleFlags = $this->getRoleFlags(Yii::$app->user->user_id);
+
+        if ($roleFlags['isUser']) {
+            if ($model->id !== Yii::$app->user->user_id || $model->space_type !== Space::SPACE_TYPE_UNMANAGED) {
+                return $this->errorResponse(['message' => ['You can only update your own unmanaged spaces']]);
+            }
+        } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
+            if ($model->space_type !== Space::SPACE_TYPE_MANAGED) {
+                return $this->errorResponse(['message' => ['Only managed spaces can be updated by registrar or admin']]);
+            }
         }
-        return $this->errorResponse($model->getErrors()); 
+
+        if ($model->load($dataRequest) && $model->save()) {
+            return $this->payloadResponse($this->findModel($id), ['statusCode' => 202, 'message' => 'Space updated successfully']);
+        }
+        return $this->errorResponse($model->getErrors());
     }
 
     public function actionDelete($id)
@@ -90,13 +127,13 @@ class SpaceController extends \helpers\ApiController{
         if ($model->is_deleted) {
             Yii::$app->user->can('schedulerSpaceRestore');
             $model->restore();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Space restored successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Space restored successfully']);
         } else {
             Yii::$app->user->can('schedulerSpaceDelete');
             $model->delete();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Space deleted successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Space deleted successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     protected function findModel($id)
