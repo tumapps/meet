@@ -25,7 +25,6 @@ class m240808_213712_create_scheduler_tables extends Migration
             'description' => $this->string(255)->null(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
-            // 'is_deleted' => $this->boolean()->defaultValue(false),
             'is_deleted' => $this->integer()->defaultValue(0),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
@@ -45,13 +44,13 @@ class m240808_213712_create_scheduler_tables extends Migration
             'appointment_type' => $this->string(), //personal or group
             'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(10),
-            'cancellation_reason' => $this->string(255)->null(),
-            'rejection_reason' => $this->string(255)->null(),
+            // 'cancellation_reason' => $this->string(255)->null(),
+            // 'rejection_reason' => $this->string(255)->null(),
             'priority' => $this->integer()->null(),
             'checked_in' => $this->boolean()->defaultValue(false),
-            // 'is_deleted' => $this->boolean()->defaultValue(false),
             'is_deleted' => $this->integer()->defaultValue(0),
             'reminder_sent_at' => $this->integer()->null()->defaultValue(null),
+            'created_by' => $this->bigInteger(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
@@ -65,30 +64,19 @@ class m240808_213712_create_scheduler_tables extends Migration
             'created_at'
         );
 
-        $this->createTable('{{%levels}}', [
-            'id' => $this->primaryKey(),
-            'name' => $this->string()->notNull()->unique(), // eg level 1, 2 3
-            'code' => $this->string()->notNull()->unique(),
-            'description' => $this->text()->null(),
-            'is_deleted' => $this->integer()->defaultValue(0),
-            'created_at' => $this->integer()->notNull(),
-            'updated_at' => $this->integer()->notNull(),
-        ], $tableOptions);
-
         $this->createTable('{{%spaces}}', [
-            'id' => $this->primaryKey(),
-            'level_id' => $this->integer()->notNull(),
+            'id' => $this->bigInteger()->unique(),
             'name' => $this->string()->notNull()->unique(),
-            'opening_time' => $this->time()->notNull(), 
+            'space_type' => $this->integer()->defaultValue(1)->notNull(),
+            'opening_time' => $this->time()->notNull(),
             'closing_time' => $this->time()->notNull(),
+            'capacity' => $this->integer()->notNull(),
             'is_locked' => $this->boolean()->defaultValue(false),
             'location' => $this->string()->null(),
             'description' => $this->text()->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
-            'FOREIGN KEY ([[level_id]]) REFERENCES {{%levels}} ([[id]])' .
-                $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
 
@@ -99,14 +87,13 @@ class m240808_213712_create_scheduler_tables extends Migration
             'date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
-            //'availability_status' => $this->integer()->defaultValue(1),  // 1 = fully available, 2 = partially, 3 = unavailable
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[space_id]]) REFERENCES {{%spaces}} ([[id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
             'FOREIGN KEY ([[appointment_id]]) REFERENCES {{%appointments}} ([[id]])' .
-            $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
+                $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
 
@@ -119,12 +106,12 @@ class m240808_213712_create_scheduler_tables extends Migration
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
             'status' => $this->integer()->notNull()->defaultValue(10),
-            'cancellation_reason' => $this->string(255)->null(),
+            // 'cancellation_reason' => $this->string(255)->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
         ]);
-        
+
         $this->createIndex(
             'idx-events-start_date',
             '{{%events}}',
@@ -135,18 +122,31 @@ class m240808_213712_create_scheduler_tables extends Migration
         $this->createTable('appointment_attendees', [
             'id' => $this->primaryKey(),
             'appointment_id' => $this->integer()->notNull(),
-            'staff_id' => $this->integer()->notNull(),
+            'attendee_id' => $this->integer()->notNull(),
             'date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
             'status' => $this->integer()->notNull()->defaultValue(11), //pending status
             'end_time' => $this->time()->notNull(),
-            'removal_reason' => $this->string()->null(),
+            // 'removal_reason' => $this->string()->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'is_removed' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[appointment_id]]) REFERENCES {{%appointments}} ([[id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
+        ], $tableOptions);
+
+        $this->createTable('operation_reasons', [
+            'id' => $this->primaryKey(),
+            'entity_id' => $this->integer()->notNull(),
+            'type' => $this->string(),
+            'entity_type' => $this->integer()->notNull(),
+            'reason' => $this->string(),
+            'is_deleted' => $this->integer()->defaultValue(0),
+            'affected_user_id' => $this->integer()->notNull(),
+            'created_by' => $this->integer()->notNull(),
+            'created_at' => $this->integer()->notNull(),
+            'updated_at' => $this->integer()->notNull(),
         ], $tableOptions);
 
         $this->createTable('appointment_files', [
@@ -162,21 +162,28 @@ class m240808_213712_create_scheduler_tables extends Migration
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
+        $this->createTable('{{%meeting_types}}', [
+            'id' => $this->primaryKey(),
+            'type' => $this->string(50)->notNull(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
+            'created_at' => $this->integer(),
+            'updated_at' => $this->integer()
+        ]);
     }
 
     /**
      * {@inheritdoc}
      */
     public function safeDown()
-    {   
+    {
+        $this->dropTable('{{%meeting_types}}');
         $this->dropTable('{{%appointment_files}}');
         $this->dropTable('{{%appointment_attendees}}');
-        $this->dropIndex('idx-events-start_date','{{%events}}');
+        $this->dropIndex('idx-events-start_date', '{{%events}}');
         $this->dropTable('{{%events}}');
         $this->dropTable('{{%space_availability}}');
         $this->dropTable('{{%spaces}}');
-        $this->dropTable('{{%levels}}');
-        $this->dropIndex('idx-appointments-created_at','{{%appointments}}');
+        $this->dropIndex('idx-appointments-created_at', '{{%appointments}}');
         $this->dropTable('{{%appointments}}');
         $this->dropTable('{{%unavailable_slots}}');
     }

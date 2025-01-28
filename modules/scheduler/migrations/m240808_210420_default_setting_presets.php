@@ -43,10 +43,28 @@ class m240808_210420_default_setting_presets extends Migration
             'email_password' => $this->string(128)->notNull(),
             'description' => $this->text()->null(), // description column can be useful for storing metadata or explanations about each setting.
             'email_username' => $this->string(128)->notNull(),
-            'updated_at' => $this->integer(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
-            'is_deleted' => $this->boolean()->defaultValue(false),
+        ]);
+
+        $this->seedSystemSettings();
+    }
+
+    private function seedSystemSettings()
+    {
+        $this->insert('{{%system_settings}}', [
+            'app_name' => 'Tummeet Scheduler',
+            'system_email' => 'francisyuppie@gmail.com',
+            'email_scheme' => 'smtp',
+            'email_smtps' => 'smtp.gmail.com',
+            'email_port' => 587,
+            'email_encryption' => 'tls',
+            'email_password' => 'utws lgpt hsjr jdec',
+            'description' => 'Default system settings for Tummeet Scheduler',
+            'email_username' => 'francisyuppie@gmail.com',
+            'created_at' => time(),
+            'updated_at' => time(),
         ]);
     }
 
