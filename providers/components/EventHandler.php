@@ -95,12 +95,12 @@ class EventHandler
 		$subject = $event->data['subject'];
 		$username = $event->data['username'];
 		$loginLink = $event->data['loginLink'];
-		$contact_name = $event->data['contact_name'];
+		$name = $event->data['name'];
 
 		$body = Yii::$app->view->render('@ui/views/emails/accountCreated', [
 			'username' => $username,
 			'loginLink' => $loginLink,
-			'contact_name' => $contact_name,
+			'contact_name' => $name,
 		]);
 
 		self::addEmailToQueue($email, $subject, $body);
@@ -122,17 +122,17 @@ class EventHandler
 			'rejectionReason' => $event->data['rejection_reason']
 		];
 
-		$userEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
-			'recipientType' => 'user',
+		$contactPerson = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
+			'recipientType' => 'contactPerson',
 		]));
 
-		self::addEmailToQueue($email, $subject, $userEmailBody);
+		self::addEmailToQueue($email, $subject, $contactPerson);
 
-		$vcEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
-			'recipientType' => 'vc',
+		$chairPerson = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
+			'recipientType' => 'chairPerson',
 		]));
 
-		self::addEmailToQueue($bookedUserEmail, $subject, $vcEmailBody);
+		self::addEmailToQueue($bookedUserEmail, $subject, $chairPerson);
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -274,6 +274,42 @@ class EventHandler
 			foreach ($attendeesEmails as $attendeeEmail) {
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
 				$attendeeBody = Yii::$app->view->render('@ui/views/emails/appointmentRescheduled', array_merge($commonData, [
+					'recipientType' => 'attendee',
+					'attendeeName' => $attendeeName
+				]));
+				self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody);
+			}
+		}
+	}
+
+	public static function onAppointmentDateUpdated(Event $event)
+	{
+		$email = $event->data['email'];
+		$subject = $event->data['subject'];
+		$attendeesEmails = $event->data['attendees_emails'];
+
+		$commonData = [
+			'username' => $event->data['username'],  // chair of the meeting
+			'current_date' => $event->data['current_date'],
+			'initial_date' => $event->data['initial_date'],
+			'start_time' => $event->data['start_time'],
+			'end_time' => $event->data['end_time'],
+		];
+
+		$body = Yii::$app->view->render(
+			'@ui/views/emails/appointmentDateUpdated',
+			array_merge($commonData, [
+				'recipientType' => 'contact_person', // contact person
+				'contact_person_name' => $event->data['contact_person_name'],
+			])
+		);
+
+		self::addEmailToQueue($email, $subject, $body);
+
+		if (!empty($attendeesEmails)) {
+			foreach ($attendeesEmails as $attendeeEmail) {
+				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+				$attendeeBody = Yii::$app->view->render('@ui/views/emails/appointmentDateUpdated', array_merge($commonData, [
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
