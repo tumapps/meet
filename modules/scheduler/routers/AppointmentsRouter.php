@@ -164,7 +164,7 @@ return [
 
 
 'POST self-booking'		=> 'appointments/self-book',
-'GET types'  => 'appointments/appointments-types',
+'GET types'  => 'appointments/meeting-types',
 
 /**
  * @OA\Get(path="/scheduler/priorities",
@@ -278,7 +278,7 @@ return [
  * )
  *),
  */
-'POST attendance-confirmation' => 'appointments/confirm-attendance',
+'POST attendance-confirmation/{appointment_id}/{attendee_id}' => 'appointments/confirm-attendance',
 
 
 /**
