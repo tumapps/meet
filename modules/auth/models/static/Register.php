@@ -7,6 +7,7 @@ use yii\base\Model;
 use auth\models\User;
 use auth\models\Profiles;
 use scheduler\models\Settings;
+use scheduler\models\Space;
 use helpers\traits\Keygen;
 use yii\base\Event;
 use helpers\EventHandler;
@@ -103,7 +104,7 @@ class Register extends Model
             $profile->full_name = $this->full_name;
             $profile->email_address = $this->email_address;
             $profile->mobile_number = $this->mobile_number;
-            // $profile->save(false);
+
             if ($profile->save(false)) {
                 $settings = new Settings();
                 $settings->user_id = $user->user_id;
@@ -111,32 +112,54 @@ class Register extends Model
                 $settings->end_time = '17:00:00';
                 $settings->slot_duration = 30; // 30 mins by default
                 $settings->booking_window = 12; // 12 months by default
-                $settings->advanced_booking = 30; //dfault 30 min
+                $settings->advanced_booking = 30; // Default 30 mins
 
                 if ($settings->save()) {
 
-                    $auth = Yii::$app->authManager;
-                    $defaultRole = $auth->getRole('user');
+                    // Create the default space (office)
+                    $space = new Space();
+                    $space->id = $user->user_id;
+                    $space->name = ucfirst($this->first_name) . ' ' . ucfirst($this->last_name) . ' Office';
+                    $space->opening_time = $settings->start_time;
+                    $space->closing_time = $settings->end_time;
+                    $space->capacity = 2;
+                    $space->space_type = Space::SPACE_TYPE_UNMANAGED;
+                    $space->is_locked = false;
+                    $space->description = 'Default office space for ' . $this->first_name . ' ' . $this->last_name;
 
-                    if ($defaultRole) {
-                        $auth->assign($defaultRole, $user->user_id);
+                    if ($space->save(false)) {
+                        $auth = Yii::$app->authManager;
+                        $defaultRole = $auth->getRole('user');
+
+                        if ($defaultRole) {
+                            $auth->assign($defaultRole, $user->user_id);
+                        }
+
+                        $subject = 'Account Created';
+
+                        $eventData = [
+                            'username' => $this->username,
+                            'email' => $this->email_address,
+                            'subject' => $subject,
+                            'loginLink' => $loginUrl,
+                            'name' => ucfirst($this->first_name) . ' ' . ucfirst($this->last_name),
+                        ];
+
+                        $this->on(self::ACCOUNT_CREATED_EVENT, [EventHandler::class, 'onAccountCreation'], $eventData);
+
+                        $event = new Event();
+                        $this->trigger(self::ACCOUNT_CREATED_EVENT, $event);
+                        return $user;
+                    } else {
+                        $settings->delete();
+                        $profile->delete();
+                        $user->delete();
+                        return false;
                     }
-
-                    $subject = 'Account Created';
-
-                    $eventData = [
-                        'username' => $this->username,
-                        'email' => $this->email_address,
-                        'subject' => $subject,
-                        'loginLink' => $loginUrl,
-                        'contact_name' => ucfirst($this->first_name) . ' ' . ucfirst($this->last_name),
-                    ];
-
-                    $this->on(self::ACCOUNT_CREATED_EVENT, [EventHandler::class, 'onAccountCreation'], $eventData);
-
-                    $event = new Event();
-                    $this->trigger(self::ACCOUNT_CREATED_EVENT, $event);
-                    return $user;
+                } else {
+                    $profile->delete();
+                    $user->delete();
+                    return false;
                 }
             } else {
                 $user->delete();
