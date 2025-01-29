@@ -35,6 +35,7 @@ class AppointmentsController extends \helpers\ApiController
         'schedulerAppointmentsUpdate' => 'Edit Appointments',
         'schedulerAppointmentsDelete' => 'Delete Appointments',
         'schedulerAppointmentsRestore' => 'Restore Appointments',
+        'schedulerAppointmentsCancel' => 'Cancel Appointments',
     ];
 
     public function actionIndex()
@@ -498,6 +499,8 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionCancel($id)
     {
+        Yii::$app->user->can('schedulerAppointmentsCancel');
+
         $request = Yii::$app->request;
 
         $model = $this->findModel($id);
