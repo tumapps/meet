@@ -178,15 +178,20 @@ onMounted(() => {
 <template>
   <b-col lg="12">
     <b-card>
-      <div>
-        <h2>Roles</h2>
-      </div>
-      <b-row class="mb-3">
-        <b-col lg="12" class="mb-3">
+      <b-row class="mb-5">
+        <b-col lg="6">
+          <div>
+            <h2>Roles</h2>
+          </div>
+        </b-col>
+        <b-col lg="6">
           <div class="d-flex justify-content-end">
             <b-button variant="primary" @click="showModal"> New Role </b-button>
           </div>
         </b-col>
+      </b-row>
+
+      <b-row class="mb-3">
         <b-col lg="12">
           <!-- Table Controls -->
           <div class="d-flex justify-content-between">

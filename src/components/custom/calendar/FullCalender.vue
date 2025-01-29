@@ -6,7 +6,6 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
-import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue'
 import { usePreferencesStore } from '../../../store/preferences'
 import { parse, format } from 'date-fns'
 
@@ -394,7 +393,6 @@ onMounted(async () => {
 })
 </script>
 <template>
-  <BookAppointment ref="appointmentModal" :selectedDate="selectedDate" />
 
   <!-- Skeleton Loader or Spinner -->
   <div v-if="isLoading" class="loading-spinner">

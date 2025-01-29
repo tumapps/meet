@@ -144,37 +144,27 @@ const submitRejections = () => {
       </b-col>
     </b-row>
     <div class="table-responsive">
-      <table class="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <!-- <th>Status</th> -->
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in users" :key="user.staff_id">
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <!-- <td>
-              <span
-                class="badge"
-                :class="{
-                  'badge-success': user.status === 10,
-                  'badge-danger': user.status === 9
-                }"
-                :style="user.status === 8 ? { backgroundColor: '#0dcaf0', color: '#ffffff' } : {}">
-                {{ user.status === 10 ? 'Confirmed' : user.status === 9 ? 'Declined' : 'Pending' }}
-              </span>
-            </td> -->
-            <td>
-              <button type="button" class="btn btn-outline-danger" @click="removeUser(index)">Remove</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="table table-striped table-bordered">
+      <thead>
+        <tr class="mytr">
+          <th>Name</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users" :key="user.staff_id" class="custom-row">
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <button type="button" class="btn btn-outline-danger" @click="removeUser(user.staff_id)">
+              Remove
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
     <!-- //button to submit the selected items -->
     <div class="modal-footer border-0">
       <button v-if="uploading === false" type="button" class="btn btn-primary" data-bs-dismiss="modal" name="save" @click="pushToAttendees">Submit</button>
@@ -219,6 +209,12 @@ const submitRejections = () => {
   margin: 0;
 }
 
+.table tbody tr td{
+  /* background-color: rgb(96, 96, 177) !important; */
+  padding: 8px !important;
+}
+
+
 .badge-success {
   background-color: #28a745;
 }
@@ -230,4 +226,6 @@ const submitRejections = () => {
 .child-modal {
   z-index: 1055 !important; /* Default Bootstrap modal z-index is 1050 */
 }
+
+
 </style>

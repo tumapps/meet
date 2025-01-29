@@ -69,8 +69,9 @@ const AxiosInstance = () => {
           return newToken
         } catch (refreshError) {
           if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
-            //call logout function\
-            // logout()
+            //clear queue
+            refreshAndRetryQueue.length = 0
+            logout()
             router.push({ path: `/auth/login` })
             localStorage.clear()
           } else {
@@ -98,13 +99,17 @@ const AxiosInstance = () => {
             isRefreshing = true
             try {
               const newToken = await refreshAccessToken()
-              originalRequest.headers['Authorization'] = `Bearer ${newToken}`
 
-              // Retry requests in queue with new token
-              refreshAndRetryQueue.forEach(({ config, resolve, reject }) => {
-                axiosInstance.request(config).then(resolve).catch(reject)
-              })
-              refreshAndRetryQueue.length = 0
+              // if successfull try
+              if (newToken) {
+                originalRequest.headers['Authorization'] = `Bearer ${newToken}`
+
+                // Retry requests in queue with new token
+                refreshAndRetryQueue.forEach(({ config, resolve, reject }) => {
+                  axiosInstance.request(config).then(resolve).catch(reject)
+                })
+                refreshAndRetryQueue.length = 0
+              }
 
               return axiosInstance(originalRequest)
             } catch (refreshError) {

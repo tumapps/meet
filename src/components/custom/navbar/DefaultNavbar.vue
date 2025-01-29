@@ -114,7 +114,7 @@ export default {
               </b-button>
             </template>
             <b-dropdown-item variant="none" @click="toProfile">Profile</b-dropdown-item>
-            <b-dropdown-item v-if="role !== 'su'" variant="none" @click="toSettings">Settings</b-dropdown-item>
+            <!-- <b-dropdown-item v-if="role !== 'su'" variant="none" @click="toSettings">Settings</b-dropdown-item> -->
             <li>
               <hr class="dropdown-divider" />
             </li>

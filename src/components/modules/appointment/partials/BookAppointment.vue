@@ -19,7 +19,6 @@ const { proxy, emit } = getCurrentInstance()
 const role = ref('')
 role.value = authStore.getRole()
 const userId = ref('')
-const appointmentModal = ref(null) // Reference for <b-modal>
 const spaces = ref([]) // To store the spaces from the API
 const attendees = ref([]) // To store the attendees from the API
 const searchQuery = ref('') // Holds the current search query
@@ -29,7 +28,7 @@ const uploadProgress = ref(0) // Holds the upload progress
 const uploading = ref(false) // Holds the upload status
 const availableUsers = ref([])
 
-// /mergeProps
+// /mergePropsI
 // defineProps({
 //   name: String
 // })
@@ -65,7 +64,7 @@ const handleSearch = async () => {
 // add the selecteditems id to the attendees array
 function addToAttendees() {
   const ids = selectedItems.value.map((item) => item.id) // Extract IDs
-  appointmentData.value.attendees = [...attendees.value, ...ids] // Add to attendees
+  appointmentData.value.attendees = [...attendees.value, ...ids] // Add to attendees //pass this to the atteendee module
   console.log('Updated attendees: ', appointmentData.value.attendees)
 }
 // Function to add a selected item
@@ -294,8 +293,6 @@ const submitAppointment = async () => {
       }
     })
 
-    appointmentModal.value.hide()
-
     // Show toast notification
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
@@ -420,17 +417,6 @@ watch(selectedPriority, (newPriority) => {
   appointmentData.value.priority = selectedPriority ? selectedPriority.code : null
 })
 
-// const close = () => {
-//   //close
-// }
-
-// const attendeeModal = ref(null)
-
-// const openModal = () => {
-//   console.log('Opening modal')
-//   attendeeModal.value.$refs.attendeeModal.show()
-// }
-
 onMounted(() => {
   slotsData.value.date = today.value
   getSpaces()
@@ -446,8 +432,15 @@ onMounted(() => {
   <!-- //AttendeesComponent -->
   <!-- <AttendeesComponent ref="attendeeModal" /> -->
   <!-- <b-modal ref="appointmentModal" title="Book Meeting" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="closeModal"> -->
-  <b-card
-    ><form id="add-form" action="javascript:void(0)" method="post">
+  <b-card>
+    <b-row class="mb-4 myheading">
+      <b-col lg="12" class="d-flex justify-content-left">
+        <div>
+          <h2>New Meeting</h2>
+        </div>
+      </b-col>
+    </b-row>
+    <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
         <input type="hidden" name="appointment_type" />
@@ -625,10 +618,7 @@ onMounted(() => {
   font-size: 0.9em;
 }
 
-card {
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: azure;
+.myheading {
+  border-bottom: 2px solid #e9e6e6;
 }
 </style>

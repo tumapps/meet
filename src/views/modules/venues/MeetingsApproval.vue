@@ -250,9 +250,11 @@ onMounted(() => {
 <template>
   <b-col lg="12">
     <b-card>
-      <div>
-        <h2>Space Requests</h2>
-      </div>
+      <b-col lg="6">
+        <div>
+          <h2>Space Requests</h2>
+        </div>
+      </b-col>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">
           <!-- <div class="d-flex justify-content-end">

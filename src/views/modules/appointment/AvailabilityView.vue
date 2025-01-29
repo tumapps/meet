@@ -336,15 +336,20 @@ onMounted(async () => {
 
   <b-col lg="12">
     <b-card>
-      <div>
-        <h2>Availability</h2>
-      </div>
-      <b-row class="mb-3">
-        <b-col lg="12" class="mb-3">
+      <b-row>
+        <b-col lg="6">
+          <div>
+            <h2>Availability</h2>
+          </div>
+        </b-col>
+        <b-col lg="6">
           <div class="d-flex justify-content-end">
             <b-button variant="primary" @click="showModal"> New Availability </b-button>
           </div>
         </b-col>
+      </b-row>
+
+      <b-row class="mb-3">
         <b-col lg="12">
           <!-- Table Controls -->
           <div class="d-flex justify-content-between">

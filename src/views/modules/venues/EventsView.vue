@@ -376,15 +376,20 @@ onMounted(async () => {
 <template>
   <b-col lg="12">
     <b-card>
-      <div>
-        <h2>Events</h2>
-      </div>
-      <b-row class="mb-3">
-        <b-col lg="12" md="12" sm="12" class="mb-3">
+      <b-row class="mb-5">
+        <b-col lg="6">
+          <div>
+            <h2>Events</h2>
+          </div>
+        </b-col>
+        <b-col lg="6">
           <div class="d-flex justify-content-end">
             <b-button variant="primary" @click="showModal"> Add Event </b-button>
           </div>
         </b-col>
+      </b-row>
+
+      <b-row class="mb-3">
         <b-col lg="12" md="12" sm="12">
           <div class="d-flex justify-content-between">
             <div class="d-flex align-items-center">

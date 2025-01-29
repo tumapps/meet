@@ -827,7 +827,7 @@ onUnmounted(() => {
         </b-col>
       </b-row>
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table  table-hover">
           <thead>
             <tr>
               <th @click="sortTable('start_time')">
@@ -863,7 +863,7 @@ onUnmounted(() => {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="table-striped ">
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td class="subject-column" :title="item.subject">{{ item.subject }}</td>

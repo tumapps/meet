@@ -239,8 +239,5 @@ h1 {
 .fc-toolbar-chunk {
   margin-bottom: 20px !important;
 }
-b-card {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-}
+
 </style>
