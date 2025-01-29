@@ -491,7 +491,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
     }
 
-    public function sendAppointmentCreatedEvent($id, $email, $name, $user_id, $date, $startTime, $endTime)
+    public function sendAppointmentCreatedEvent($id, $contact_person_email, $contact_person_name, $user_id, $date, $startTime, $endTime)
     {
 
         $event = new Event();
@@ -499,7 +499,7 @@ class Appointments extends BaseModel
         $subject = 'Appointment Created';
 
         $user = User::findOne($user_id);
-        $bookedUserEmail = $user->profile->email_address;
+        $chairPersonEmail = $user->profile->email_address;
 
         $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true, false);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
@@ -514,14 +514,14 @@ class Appointments extends BaseModel
 
         $eventData = [
             'appointment_id' => $this->id,
-            'email' => $email,
+            'contact_person_email' => $contact_person_email,
             'subject' => $subject,
-            'contact_name' => $name,
+            'contact_person_name' => $contact_person_name,
             'date' => $date,
             'start_time' => $startTime,
             'end_time' => $endTime,
-            'username' => $this->getUserName($user_id),
-            'user_email' => $bookedUserEmail,
+            'contact_person_username' => $this->getUserName($user_id),
+            'chair_person_email' => $chairPersonEmail,
             'attendees_details' => $attendeesDetails,
             'attachment_file_name' => $fileName,
             'attachment_download_link' => $downloadLink,
