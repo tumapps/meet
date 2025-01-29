@@ -11,7 +11,7 @@ use yii\helpers\ArrayHelper;
 
 class TimeHelper
 {
-	/**
+    /**
      * Convert a time string to DateTime object.
      *
      * @param string $time
@@ -22,7 +22,7 @@ class TimeHelper
         return new \DateTime($time);
     }
 
-     /**
+    /**
      * Validate that the end time is not earlier than the start time.
      *
      * @param DateTime $startTime
@@ -34,21 +34,23 @@ class TimeHelper
         return $endTime > $startTime;
     }
 
-    /**
-     * Get the number of days between 2 dates.
-     *
-     * @param DateTime $date1
-     * @param DateTime $date2
-     * @return string
-     */
+
     public static function getDifferenceBetweenDates($date1, $date2)
     {
-        
-        $days = date_diff($date1, $date2)->format("%R%a days");
-        return $days;
+        $datetime1 = new \DateTime($date1);
+        $datetime2 = new \DateTime($date2);
+        $interval = $datetime1->diff($datetime2);
+
+        return sprintf(
+            "%d years, %d months, %d days",
+            $interval->y,
+            $interval->m,
+            $interval->d
+        );
     }
 
-     /**
+
+    /**
      * Get information about the date.
      *
      * @param DateTime $date
@@ -56,12 +58,12 @@ class TimeHelper
      */
     public static function getDateInfo($date)
     {
-        $info = date_parse($date);
-        foreach ($info as $key => $value) {
-            return [
-                $key => $value
-            ];
+        if ($date instanceof \DateTimeInterface) {
+            $date = $date->format('Y-m-d H:i:s');
         }
+
+        $info = date_parse($date);
+        return $info;
     }
 
     /**
@@ -77,7 +79,7 @@ class TimeHelper
         return ($interval->h * 60) + $interval->i;
     }
 
-     /**
+    /**
      * Get available slots for a specific date.
      *
      * @param int $user_id - The user ID (e.g., Vice Chancellor)
@@ -87,11 +89,12 @@ class TimeHelper
      * @param int $interval - The slot duration in minutes (e.g., 30)
      * @return array - List of available time slots
      */
-    public static function getAvailableSlots($user_id, $date, $priority = 1)
+    public static function getAvailableSlots($user_id, $date)
     {
         $allSlots = self::generateTimeSlots($user_id);
-        // return $allSlots;
-        if(!is_array($allSlots)){
+        $bufferTime = Settings::find()->select('advanced_booking')->where(['user_id' => $user_id])->scalar() ?? 30; // defaults to 30  mins
+
+        if (!is_array($allSlots)) {
             return 'No available slots';
         }
 
@@ -99,20 +102,14 @@ class TimeHelper
 
         foreach ($allSlots as $slot) {
             $isAvailable = self::isSlotAvailable($user_id, $date, $slot);
-            // return $isAvailable;
             list($slotStart, $slotEnd) = explode('-', $slot);
-            $expireTime = self::checkExpireTime($date, $slotStart);
+            $expireTime = self::checkExpireTime($date, $slotStart, $bufferTime);
             $slotDetails = [
-                    'startTime' => $slotStart,
-                    'endTime' => $slotEnd,
-                    'booked' => !$isAvailable,
-                    'is_expired' => $expireTime,
-                    // 'can_overide' => self::checkOveride($user_id, $date, $slot, $priority)
+                'startTime' => $slotStart,
+                'endTime' => $slotEnd,
+                'booked' => !$isAvailable,
+                'is_expired' => $expireTime,
             ];
-
-            // if ($priority !== null) {
-            //     $slotDetails['can_override'] = self::checkOveride($user_id, $date, $slot, $priority);
-            // }
 
             $slotsWithAvailability[] = $slotDetails;
         }
@@ -134,7 +131,7 @@ class TimeHelper
         $startTime = Settings::find()->select('start_time')->where(['user_id' => $user_id])->scalar();
         $endTime = Settings::find()->select('end_time')->where(['user_id' => $user_id])->scalar();
 
-        if(empty($startTime) || empty($endTime)){
+        if (empty($startTime) || empty($endTime)) {
             return 'start time or endtime is not set';
         }
 
@@ -142,7 +139,7 @@ class TimeHelper
         $end = new \DateTime($endTime);
         $interval = Settings::find()->select('slot_duration')->where(['user_id' => $user_id])->scalar();
 
-        if(empty($interval)){
+        if (empty($interval)) {
             return 'slot duration is not set';
         }
 
@@ -158,7 +155,7 @@ class TimeHelper
         return $slots;
     }
 
-     /**
+    /**
      * Check if a specific slot is available on a given date.
      *
      * @param int $user_id - The user ID (e.g.,)
@@ -176,7 +173,7 @@ class TimeHelper
         if ($unavailable) {
             return false;
         }
-        
+
         // Check in the appointments table
         $appointmentOverlap = Appointments::hasOverlappingAppointment($user_id, $date, $start_time, $end_time);
 
@@ -193,10 +190,10 @@ class TimeHelper
      */
     public static function isValidBookingDuration($user_id, $startTime, $endTime, $interval = 30)
     {
-        $interval= Settings::find()
-                        ->select('slot_duration')
-                        ->where(['user_id' => $user_id])
-                        ->scalar();
+        $interval = Settings::find()
+            ->select('slot_duration')
+            ->where(['user_id' => $user_id])
+            ->scalar();
 
         $start = new \DateTime($startTime);
         $end = new \DateTime($endTime);
@@ -214,10 +211,10 @@ class TimeHelper
     public static function isWithinBookingWindow($user_id, $appointmentDate)
     {
         $bookingWindow = Settings::find()
-                         ->select('booking_window')
-                         ->where(['user_id' => $user_id])
-                         ->scalar();
-        
+            ->select('booking_window')
+            ->where(['user_id' => $user_id])
+            ->scalar();
+
         $bookingWindowMonths = is_numeric($bookingWindow) ? (int)$bookingWindow : 12;  // default 12 month window
         // $bookingWindowMonths = $bookingWindow;
 
@@ -231,7 +228,7 @@ class TimeHelper
         $appointmentDate = new \DateTime($appointmentDate);
 
         //check if the appointment is within booking window
-        if($appointmentDate <= $maxBookingDate){
+        if ($appointmentDate <= $maxBookingDate) {
             return true;
         }
         return false;
@@ -264,7 +261,23 @@ class TimeHelper
 
 
 
-    public static function checkExpireTime($appointment_date, $slot_start_time)
+    // public static function checkExpireTime($appointment_date, $slot_start_time, $buffer_time)
+    // {
+    //     // Get current date and time
+    //     $currentDate = date('Y-m-d');
+    //     $currentTime = date('H:i:s');
+
+    //     // Check if the appointment date is today
+    //     if ($appointment_date == $currentDate) {
+    //         // If the slot's start time is earlier than the current time, it's expired
+    //         return $slot_start_time < $currentTime;
+    //     }
+
+    //     // For future dates, the slot is not expired
+    //     return false;
+    // }
+
+    public static function checkExpireTime($appointment_date, $slot_start_time, $buffer_time)
     {
         // Get current date and time
         $currentDate = date('Y-m-d');
@@ -272,16 +285,20 @@ class TimeHelper
 
         // Check if the appointment date is today
         if ($appointment_date == $currentDate) {
-            // If the slot's start time is earlier than the current time, it's expired
-            return $slot_start_time < $currentTime;
+            // Add buffer time to the current time
+            $bufferedTime = date('H:i:s', strtotime("+$buffer_time minutes", strtotime($currentTime)));
+
+            // If the slot's start time is earlier than the buffered time, it's expired
+            return $slot_start_time < $bufferedTime;
         }
 
         // For future dates, the slot is not expired
         return false;
     }
 
-   public static function checkOveride($user_id, $date, $slot, $priority = 3, $appointment=null)
-   {
+
+    public static function checkOveride($user_id, $date, $slot, $priority = 3, $appointment = null)
+    {
         // If there's an overlapping appointment, check if it can be overridden
         if ($appointment) {
             return Appointments::canOverride($appointment, $priority);
@@ -290,5 +307,4 @@ class TimeHelper
         // If no appointment overlaps, no override is necessary
         return false;
     }
-
 }
