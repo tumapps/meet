@@ -5,7 +5,6 @@ namespace helpers;
 use Yii;
 use yii\base\Event;
 // use helpers\traits\Mail;
-use PhpAmqpLib\Message\AMQPMessage;
 use app\providers\components\MailQueueManager;
 
 class EventHandler
@@ -28,7 +27,6 @@ class EventHandler
 
 	public static function handlePasswordResetRequest(Event $event)
 	{
-		// $data = $event->data;
 		$email = $event->data['email'];
 		$subject = $event->data['subject'];
 		$body = $event->data['body'];
@@ -39,9 +37,9 @@ class EventHandler
 
 	public static function onCreatedAppointment(Event $event)
 	{
-		$email = $event->data['email'];
+		$contactPersonEmail = $event->data['contact_person_email'];
 		$subject = $event->data['subject'];
-		$bookedUserEmail = $event->data['user_email'];
+		$chairPersonEmail = $event->data['chair_person_email'];
 		$attendeesDetails = $event->data['attendees_details'];
 		$appointmentId = $event->data['appointment_id'];
 
@@ -49,35 +47,37 @@ class EventHandler
 			'date' => $event->data['date'],
 			'startTime' => $event->data['start_time'],
 			'endTime' => $event->data['end_time'],
-			'username' => $event->data['username'],
-			'contact_name' => $event->data['contact_name'],
+			'username' => $event->data['contact_person_username'],
+			'contact_name' => $event->data['contact_person_name'],
 			'attachment_file_name' => $event->data['attachment_file_name'],
 			'attachment_download_link' => $event->data['attachment_download_link'],
 		];
 
-		$userEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
-			'recipientType' => 'user',
+		$contactPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
+			'recipientType' => 'contact_person',
 		]));
 
-		self::addEmailToQueue($email, $subject, $userEmailBody);
+		self::addEmailToQueue($contactPersonEmail, $subject, $contactPersonEmailBody);
 
-		$reciepientEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
-			'recipientType' => 'vc',
+		$chairPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
+			'recipientType' => 'chair_person',
 		]));
 
-		self::addEmailToQueue($bookedUserEmail, $subject, $reciepientEmailBody);
+		self::addEmailToQueue($chairPersonEmail, $subject, $chairPersonEmailBody);
 
 		if (!empty($attendeesDetails)) {
 			foreach ($attendeesDetails as $attendeeDetail) {
 				$attendeeEmail = $attendeeDetail['email'];
 				$staffId = $attendeeDetail['staff_id'];
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
-				$confirmationBase = Yii::$app->params['confirmationLink'];
-				$confirmationLink = $confirmationBase . $appointmentId . '?' . http_build_query([
-					// 'email' => base64_encode($attendeeEmail),
-					'appointmentId' => $appointmentId,
-					'staff_id' => $staffId
-				]);
+				$confirmationBaseUrl = Yii::$app->params['confirmationLink'];
+				// $confirmationLink = $confirmationBaseUrl . $appointmentId . '?' . http_build_query([
+				// 	// 'email' => base64_encode($attendeeEmail),
+				// 	'appointmentId' => $appointmentId,
+				// 	'staff_id' => $staffId
+				// ]);
+
+				$confirmationLink = $confirmationBaseUrl . '/'. $appointmentId . '/' . $staffId;
 
 				$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
 					'recipientType' => 'attendee',
