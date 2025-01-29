@@ -80,7 +80,7 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendees = AppointmentAttendees::find()
-                ->select(['staff_id',])
+                ->select(['staff_id', 'status'])
                 ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
                 ->asArray()
                 ->all();
@@ -93,6 +93,7 @@ class AppointmentsController extends \helpers\ApiController
                         'staff_id' => $attendee['staff_id'],
                         'email' => $user ? $user->profile->email_address : '',
                         'name' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
+                        'status' => $attendee['status']
                     ];
                 }
             }
@@ -749,7 +750,6 @@ class AppointmentsController extends \helpers\ApiController
         $attendees = $dataRequest['Attendee']['Attendees'] ?? [];
 
         $model = new AppointmentAttendees();
-        $model->scenario = AppointmentAttendees::SCENARIO_REMOVE;
 
         if (!$model->load($dataRequest, 'Attendees') || !$model->validate()) {
             return $this->errorResponse($model->getErrors());
