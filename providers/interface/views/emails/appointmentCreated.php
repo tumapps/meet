@@ -97,11 +97,11 @@
             <h2>Appointment Created</h2>
         </div>
         <div class="email-body">
-            <?php if ($recipientType === 'user'): ?>
+            <?php if ($recipientType === 'contact_person'): ?>
                 <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
                 <p>An appointment has been successfully created for you with <?= htmlspecialchars($username) ?>. Below are the appointment details:</p>
 
-            <?php elseif ($recipientType === 'vc'): ?>
+            <?php elseif ($recipientType === 'chair_person'): ?>
                 <p>Dear <?= htmlspecialchars($username) ?>,</p>
                 <p>A new appointment has been booked with you by <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
 
@@ -119,7 +119,7 @@
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
-                <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'user' ? $username : $contact_name) ?></p>
+                <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'contact_person' ? $username : $contact_name) ?></p>
             </div>
 
             <?php if (!empty($attachment_file_name) && !empty($attachment_download_link)): ?>
