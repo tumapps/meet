@@ -4,7 +4,10 @@ import createAxiosInstance from '@/api/axios'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue' // Import the child component
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
-import AttendeesComponent from './AttendeesComponent.vue'
+import JExcel from '@/components/JExcel.vue'
+//import JExcel2 from '@/components/modules/appointment/JExcel.vue'
+
+// import AttendeesComponent from './AttendeesComponent.vue'
 
 const authStore = useAuthStore()
 const axiosInstance = createAxiosInstance()
@@ -168,19 +171,19 @@ const handleFileUpload = (event) => {
   }
 }
 
-const closeModal = () => {
-  //clear errors
-  resetErrors()
-  appointmentData.value = { ...initialAppointmentData }
-  selectedDate.value = null
-  timeSlots.value = []
-  apiResponse.value = []
-  selectedUsername.value = []
-  // appointmentData.value = { ...initialAppointmentData }
-  // selectedDate.value = null
-  // appointmentModal.value.hide() // Close the modal using the hide() method
-}
-//handle date change
+// const closeModal = () => {
+//   //clear errors
+//   resetErrors()
+//   appointmentData.value = { ...initialAppointmentData }
+//   selectedDate.value = null
+//   timeSlots.value = []
+//   apiResponse.value = []
+//   selectedUsername.value = []
+//   // appointmentData.value = { ...initialAppointmentData }
+//   // selectedDate.value = null
+//   // appointmentModal.value.hide() // Close the modal using the hide() method
+// }
+// //handle date change
 const handleDateChange = (newValue) => {
   appointmentData.value.appointment_date = newValue
   slotsData.value.date = newValue
@@ -421,7 +424,7 @@ watch(selectedPriority, (newPriority) => {
 //   //close
 // }
 
-const attendeeModal = ref(null)
+// const attendeeModal = ref(null)
 
 // const openModal = () => {
 //   console.log('Opening modal')
@@ -441,9 +444,10 @@ onMounted(() => {
 </script>
 <template>
   <!-- //AttendeesComponent -->
-  <AttendeesComponent ref="attendeeModal" />
-  <b-modal ref="appointmentModal" title="Book Meeting" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="closeModal">
-    <form id="add-form" action="javascript:void(0)" method="post">
+  <!-- <AttendeesComponent ref="attendeeModal" /> -->
+  <!-- <b-modal ref="appointmentModal" title="Book Meeting" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="closeModal"> -->
+  <b-card
+    ><form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
         <input type="hidden" name="appointment_type" />
@@ -574,7 +578,7 @@ onMounted(() => {
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group">
+            <b-row class="align-items-center form-group">
               <!-- Label Section -->
               <!-- Input and Search Section -->
               <b-col cols="12">
@@ -594,11 +598,12 @@ onMounted(() => {
                       {{ result.username }}
                     </li>
                   </ul>
-
                   <!-- No Results Message  -->
                   <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
                 </div>
               </b-col>
+              <JExcel />
+              <JExcel2 />
             </b-row>
           </div>
         </div>
@@ -611,7 +616,8 @@ onMounted(() => {
         Loading...
       </button>
     </div>
-  </b-modal>
+  </b-card>
+  <!-- </b-modal> -->
 </template>
 <style>
 .error {
@@ -619,13 +625,10 @@ onMounted(() => {
   font-size: 0.9em;
 }
 
-/* Add rounded corners to the modal */
-.modal-fullscreen .modal-content {
-  border-radius: 5px !important;
-  /* You can adjust the radius value */
-}
-
-.progress-bar {
-  transition: width 0.2s ease;
+card {
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: azure;
 }
 </style>

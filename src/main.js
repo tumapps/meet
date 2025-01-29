@@ -31,6 +31,7 @@ import 'flatpickr/dist/themes/material_blue.css' // Optional theme, pick one tha
 import { useMenuStore } from '@/store/menuStore'
 import { usePreferencesStore } from '@/store/preferences'
 import WebSocketPlugin from './plugins/websocket'
+
 // import Vue3Autocounter from 'vue3-autocounter'
 require('waypoints/lib/noframework.waypoints.min')
 

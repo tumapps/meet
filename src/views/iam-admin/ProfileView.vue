@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import CreateAxiosInstance from '@/api/axios.js'
-// import { useAuthStore } from '@/store/auth.store.js'
+import UserSettings from '@/components/UserSettings.vue'
+import { useAuthStore } from '@/store/auth.store.js'
 
-// const authStore = useAuthStore()
+const authStore = useAuthStore()
 const axiosInstance = CreateAxiosInstance()
 const errors = ref({})
 const { proxy } = getCurrentInstance()
@@ -16,9 +17,14 @@ const last_name = ref('')
 const mobile_number = ref('')
 const email_address = ref('')
 const oldPassword = ref('')
+const user_id = ref('')
+const role = ref('')
 
 onMounted(() => {
   getProfile()
+  user_id.value = authStore.getUserId()
+  console.log(user_id.value)
+  role.value = authStore.getRole()
 })
 
 //get user_id from session storage
@@ -144,87 +150,110 @@ const updatePassword = async () => {
 </script>
 
 <template>
-  <b-row>
-    <div class="col-xl-12 col-lg-12">
-      <div>
-        <card-header class="card-header d-flex justify-content-between">
-          <div class="header-title">
-            <h4 class="card-title">Account Details</h4>
-          </div>
-        </card-header>
-        <b-card-body>
-          <div class="new-user-info pb-5">
-            <form @submit.prevent="updateProfile">
-              <b-row>
-                <b-col md="12" class="form-group">
-                  <label class="form-label" for="fname">First Name:</label>
-                  <input v-model="first_name" type="text" class="form-control" id="fname" placeholder="First Name" />
-                  <div v-if="errors.first_name" class="error" aria-live="polite">{{ errors.first_name }}</div>
-                </b-col>
-                <b-col md="12" class="form-group">
-                  <label class="form-label" for="cname">Middle Name:</label>
-                  <input v-model="middle_name" type="text" class="form-control" id="cname" placeholder="Middle Name" />
-                  <div v-if="errors.middle_name" class="error" aria-live="polite">{{ errors.middle_name }}</div>
-                </b-col>
-                <b-col md="12" class="form-group">
-                  <label class="form-label" for="lname">Last Name:</label>
-                  <input v-model="last_name" type="text" class="form-control" id="lname" placeholder="Last Name" />
-                  <div v-if="errors.last_name" class="error" aria-live="polite">{{ errors.last_name }}</div>
-                </b-col>
-                <b-col md="6" class="form-group">
-                  <label class="form-label" for="mobno">Mobile Number:</label>
-                  <input v-model="mobile_number" type="text" class="form-control" id="mobno" placeholder="Mobile Number" />
-                  <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
-                </b-col>
-                <b-col md="6" class="form-group">
-                  <label class="form-label" for="email">Email:</label>
-                  <input v-model="email_address" type="email" class="form-control" id="email" placeholder="Email" />
-                  <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
-                </b-col>
-              </b-row>
-              <button type="submit" class="btn btn-primary">Update</button>
-            </form>
-          </div>
-        </b-card-body>
+  <div class="bd-example">
+    <nav>
+      <div class="mb-3 nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link active d-flex align-items-center" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="true">Profile</button>
+        <button class="nav-link" id="nav-password-tab" data-bs-toggle="tab" data-bs-target="#nav-password" type="button" role="tab" aria-controls="nav-password" aria-selected="false">Password</button>
+        <button v-if="role !== 'su'" class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</button>
       </div>
-    </div>
-  </b-row>
-
-  <b-row class="mt-5">
-    <div class="col-xl-12 col-lg-12">
-      <div>
-        <card-header class="">
-          <div class="header-title">
-            <h4 class="mb-2">Change Password</h4>
-          </div>
-
-          <div>
-            <form @submit.prevent="updatePassword" class="mt-3">
-              <div class="row">
-                <b-col md="12" lg="12" class="form-group">
-                  <label class="form-label" for="pass"> Current Password:</label>
-                  <input v-model="oldPassword" type="password" class="form-control" id="oldpass" placeholder="Password" />
-                  <div v-if="errors.oldPassword" class="error" aria-live="polite">{{ errors.oldPassword }}</div>
-                </b-col>
-                <b-col md="12" class="form-group">
-                  <label class="form-label" for="pass">Password:</label>
-                  <input v-model="password" type="password" class="form-control" id="pass" placeholder="Password" />
-                  <div v-if="errors.newPassword" class="error" aria-live="polite">{{ errors.newPassword }}</div>
-                </b-col>
-                <b-col md="12" class="form-group">
-                  <label class="form-label" for="rpass">Repeat Password:</label>
-                  <input v-model="confirm_password" type="password" class="form-control" id="rpass" placeholder="Repeat Password " />
-                  <i class="bi bi-eye-slash" id="togglePassword"></i>
-                  <div v-if="errors.confirm_password" class="error" aria-live="polite">{{ errors.confirm_password }}</div>
-                </b-col>
+    </nav>
+    <div class="tab-content iq-tab-fade-up" id="simple-tab-content">
+      <div class="tab-pane fade show active" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+        <!-- //account -->
+        <b-card>
+          <b-row>
+            <div class="col-xl-12 col-lg-12">
+              <div>
+                <card-header class="card-header d-flex justify-content-between">
+                  <!-- <div class="header-title">
+                    <h4 class="card-title">Account Details</h4>
+                  </div> -->
+                </card-header>
+                <b-card-body>
+                  <div class="new-user-info pb-5">
+                    <form @submit.prevent="updateProfile">
+                      <b-row>
+                        <b-col md="12" lg="4" class="form-group">
+                          <label class="form-label" for="fname">First Name:</label>
+                          <input v-model="first_name" type="text" class="form-control" id="fname" placeholder="First Name" />
+                          <div v-if="errors.first_name" class="error" aria-live="polite">{{ errors.first_name }}</div>
+                        </b-col>
+                        <b-col md="12" lg="4" class="form-group">
+                          <label class="form-label" for="cname">Middle Name:</label>
+                          <input v-model="middle_name" type="text" class="form-control" id="cname" placeholder="Middle Name" />
+                          <div v-if="errors.middle_name" class="error" aria-live="polite">{{ errors.middle_name }}</div>
+                        </b-col>
+                        <b-col md="12" lg="4" class="form-group">
+                          <label class="form-label" for="lname">Last Name:</label>
+                          <input v-model="last_name" type="text" class="form-control" id="lname" placeholder="Last Name" />
+                          <div v-if="errors.last_name" class="error" aria-live="polite">{{ errors.last_name }}</div>
+                        </b-col>
+                        <b-col md="6" lg="4" class="form-group">
+                          <label class="form-label" for="mobno">Mobile Number:</label>
+                          <input v-model="mobile_number" type="text" class="form-control" id="mobno" placeholder="Mobile Number" />
+                          <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
+                        </b-col>
+                        <b-col md="6" lg="4" class="form-group">
+                          <label class="form-label" for="email">Email:</label>
+                          <input v-model="email_address" type="email" class="form-control" id="email" placeholder="Email" />
+                          <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email_address }}</div>
+                        </b-col>
+                      </b-row>
+                      <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                  </div>
+                </b-card-body>
               </div>
-              <button type="submit" class="btn btn-primary">Update</button>
-            </form>
-          </div>
-        </card-header>
+            </div>
+          </b-row>
+        </b-card>
+      </div>
+      <div class="tab-pane fade" id="nav-password" role="tabpanel" aria-labelledby="nav-password-tab">
+        <!-- //password -->
+        <b-card
+          ><b-row class="mt-5">
+            <div class="col-xl-12 col-lg-12">
+              <div>
+                <card-header class="">
+                  <div class="header-title">
+                    <h4 class="mb-2">Change Password</h4>
+                  </div>
+
+                  <div>
+                    <form @submit.prevent="updatePassword" class="mt-3">
+                      <div class="row">
+                        <b-col md="12" lg="12" class="form-group">
+                          <label class="form-label" for="pass"> Current Password:</label>
+                          <input v-model="oldPassword" type="password" class="form-control" id="oldpass" placeholder="Password" />
+                          <div v-if="errors.oldPassword" class="error" aria-live="polite">{{ errors.oldPassword }}</div>
+                        </b-col>
+                        <b-col md="12" class="form-group">
+                          <label class="form-label" for="pass">Password:</label>
+                          <input v-model="password" type="password" class="form-control" id="pass" placeholder="Password" />
+                          <div v-if="errors.newPassword" class="error" aria-live="polite">{{ errors.newPassword }}</div>
+                        </b-col>
+                        <b-col md="12" class="form-group">
+                          <label class="form-label" for="rpass">Repeat Password:</label>
+                          <input v-model="confirm_password" type="password" class="form-control" id="rpass" placeholder="Repeat Password " />
+                          <i class="bi bi-eye-slash" id="togglePassword"></i>
+                          <div v-if="errors.confirm_password" class="error" aria-live="polite">{{ errors.confirm_password }}</div>
+                        </b-col>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                  </div>
+                </card-header>
+              </div>
+            </div>
+          </b-row>
+        </b-card>
+      </div>
+      <div v-if="role !== 'su'" class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+        <UserSettings :user_id="user_id" />
       </div>
     </div>
-  </b-row>
+  </div>
 </template>
 <style scoped>
 .error {

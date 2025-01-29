@@ -78,10 +78,9 @@ const selectSlot = (index) => {
   // console.log(selectedSlots.value);
 }
 </script>
-
+<!-- 
 <template>
   <div class="timeslots-container justify-content-start">
-    <!-- Loop through time slots and display them -->
     <div v-for="(slot, index) in timeSlots" :key="slot.startTime" :class="['timeslot', { booked: slot.booked, selected: slot.selected, expired: slot.is_expired }]" @click="selectSlot(index)">
       <div class="d-flex flex-column justify-content-center align-items-center h-100 no-gap">
         <div class="px-3 text-center w-100">{{ slot.startTime }}</div>
@@ -134,5 +133,79 @@ const selectSlot = (index) => {
 .no-gap > * {
   margin: -2px;
   padding: 0;
+}
+</style> -->
+
+<!-- //deepseek made sure the styles are not overriden by the parent component chatgpt broke existing onces😂😂😂😂😂😂😂😂😂😂 -->
+<template>
+  <div class="timeslots-container justify-content-start">
+    <!-- Loop through time slots and display them -->
+    <div v-for="(slot, index) in timeSlots" :key="slot.startTime" :class="['timeslot', { booked: slot.booked, selected: slot.selected, expired: slot.is_expired }]" @click="selectSlot(index)">
+      <div class="timeslot-content">
+        <div class="timeslot-time">{{ slot.startTime }}</div>
+        <p class="timeslot-separator">to</p>
+        <div class="timeslot-time">{{ slot.endTime }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.timeslots-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.timeslot {
+  width: 80px;
+  height: 80px;
+  margin: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff !important;
+  color: black !important;
+  cursor: pointer;
+  border: 1px solid #ddd !important;
+  border-radius: 5px !important;
+  padding: 5px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: background-color 0.3s !important;
+}
+
+.timeslot.selected {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.timeslot.booked {
+  background-color: #d89837 !important;
+  color: white !important;
+  pointer-events: none !important;
+}
+
+.timeslot.expired {
+  background-color: #e2e1e0 !important;
+  color: white !important;
+  pointer-events: none !important;
+}
+
+.timeslot-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.timeslot-time {
+  padding: 0 12px;
+  text-align: center;
+  width: 100%;
+}
+
+.timeslot-separator {
+  margin: 0;
 }
 </style>

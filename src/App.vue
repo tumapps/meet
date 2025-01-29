@@ -8,7 +8,7 @@ import { useMenuStore } from '@/store/menuStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
-import { useAuthStore } from '@/store/auth.store.js'
+// import { useAuthStore } from '@/store/auth.store.js'
 
 // Import Pinia Store
 import { useSetting } from './store/pinia'
@@ -19,7 +19,7 @@ useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
 const route = useRoute()
-const authStore = useAuthStore()
+// const authStore = useAuthStore()
 
 watch(
   () => route.meta.customMenus,
@@ -55,7 +55,7 @@ const resizePlugin = () => {
 // Lifecycle hooks for component mount and unmount
 onMounted(() => {
   // Add the event listener when the component is mounted
-  window.addEventListener('beforeunload', handleBeforeUnload)
+  // window.addEventListener('beforeunload', handleBeforeUnload)
   window.addEventListener('resize', resizePlugin)
   setTimeout(() => {
     resizePlugin()
@@ -63,17 +63,17 @@ onMounted(() => {
   store.setSetting()
 })
 
-onUnmounted(() => {
-  // Remove the event listener when the component is unmounted
-  window.removeEventListener('beforeunload', handleBeforeUnload)
-  window.removeEventListener('resize', resizePlugin)
-  authStore.initStore()
-})
+// onUnmounted(() => {
+//   // Remove the event listener when the component is unmounted
+//   window.removeEventListener('beforeunload', handleBeforeUnload)
+//   window.removeEventListener('resize', resizePlugin)
+//   authStore.initStore()
+// })
 
-// Function to handle the `beforeunload` event
-function handleBeforeUnload() {
-  localStorage.clear() // Clear localStorage
-  }
+// // Function to handle the `beforeunload` event
+// function handleBeforeUnload() {
+//   localStorage.clear() // Clear localStorage
+//   }
 
 </script>
 

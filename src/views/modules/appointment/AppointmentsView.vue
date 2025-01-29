@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref, getCurrentInstance, computed, watch, onUnmounted } from 'vue'
 import AxiosInstance from '@/api/axios'
-import BookAppointment from '@/components/modules/appointment/partials/BookAppointment.vue'
 // import globalUtils from '@/utilities/globalUtils'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'
 import { useAuthStore } from '@/store/auth.store.js'
@@ -9,15 +8,18 @@ import UppyDashboard from '@/components/custom/uppy/UppyDashboard.vue'
 import FlatPickr from 'vue-flatpickr-component'
 import { debounce } from 'lodash-es'
 import AttendeesComponent from '../../../components/modules/appointment/partials/AttendeesComponent.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const authStore = useAuthStore()
 
 const role = ref('')
 role.value = authStore.getRole()
 // const globalUtils = require('@/utils/globalUtils');
-const appointmentModal = ref(null)
 const showModal = () => {
-  appointmentModal.value.$refs.appointmentModal.show()
+  //redirect to booking page
+  router.push({ name: 'booking' })
 }
 const downloadLink = ref(null)
 const toastPayload = ref('')
@@ -36,6 +38,7 @@ const searchQuery = ref('')
 const errors = ref({})
 const errorDetails = ref({})
 const recordStatus = ref('')
+const space = ref('')
 const attendees = ref([])
 
 //get user_id from session storage
@@ -60,12 +63,20 @@ const InitialappointmentDetails = {
 }
 
 const appointmentDetails = ref({ ...InitialappointmentDetails })
-
+const fileName = ref(null)
+const fileInput = ref(null)
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
     appointmentDetails.value.file = file
+    fileName.value = file.name
   }
+}
+
+const removeFile = () => {
+  appointmentDetails.value.file = null
+  fileName.value = null
+  fileInput.value.value = ''
 }
 
 const flatPickrConfig = {
@@ -74,6 +85,8 @@ const flatPickrConfig = {
   altFormat: 'F j, Y',
   minDate: 'today'
 }
+
+const myModal = ref(null)
 
 const goToPage = (page) => {
   // Ensure the page is within the valid range
@@ -399,6 +412,7 @@ const getAppointment = async (id) => {
       appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id || null
       // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
+      space.value = appointmentDetails.value.space
       selectedAppointmentId.value = id
 
       //set user id depending on the user role
@@ -443,10 +457,10 @@ const getAppointment = async (id) => {
 // Function to open modal
 const selectedAppointmentId = ref('')
 const openModal = (id) => {
-  const modal = proxy.$refs.myModal // Use proxy to access $refs
   getAppointment(id)
+  getAppointmentType()
   selectedAppointmentId.value = id
-  modal.show()
+  myModal.value.show() // Open the modal
 
   // console.log("selectedAppointmentId", selectedAppointmentId.value);
 }
@@ -466,11 +480,17 @@ const updateAppointment = async () => {
       // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'success',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastMessage,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 5000
       })
+      //close the modal
+
+      handleModalClose()
+      myModal.value.hide()
     } else {
       // Fallback if toastPayload is not provided in the response
       proxy.$showToast({
@@ -482,7 +502,8 @@ const updateAppointment = async () => {
     if (error.response && error.response.data.errorPayload) {
       errorDetails.value = error.response.data.errorPayload.errors
     } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+      console.error('bug', error)
+      const errorMessage = error.response?.data?.errorPayload?.errors?.message || 'An error occurred'
 
       proxy.$showToast({
         title: 'An error occurred',
@@ -632,6 +653,29 @@ const handleModalClose = () => {
   getAppointments(1) // Refresh the appointments after closing the modal
 }
 
+const appointmentTypeOptions = ref([])
+const getAppointmentType = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/types')
+    appointmentTypeOptions.value = response.data.dataPayload.data.types
+  } catch (error) {
+    // console.error('Error fetching appointment types:', error);
+
+    if (error.response && error.response.data && error.response.data.errorPayload) {
+      // Extract and handle errors from server response
+      errors.value = error.response.data.errorPayload.errors
+    } else {
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+
+      proxy.$showToast({
+        title: errorMessage,
+        text: errorMessage,
+        icon: 'error'
+      })
+    }
+  }
+}
+
 const apiResponse = ref([])
 
 const getSlots = async () => {
@@ -712,10 +756,17 @@ const openAttendeeModal = () => {
   attendeeModal.value.$refs.attendeeModal.show()
 }
 
-const truncatedSubject = computed((subject) => {
-  subject = appointmentDetails.value.subject || ''
+const truncatedSubject = computed(() => {
+  const subject = appointmentDetails.value.subject || ''
   return subject.length > 12 ? subject.slice(0, 30) + '...' : subject
 })
+
+//control visibilty of timeSlot component in edit modal
+const timeSlotShow = ref(false)
+
+const toggletimeSlotShow = () => {
+  timeSlotShow.value = !timeSlotShow.value
+}
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -730,6 +781,7 @@ onUnmounted(() => {
 })
 </script>
 <template>
+  <Pdfview :pdfUrl="downloadLink"></Pdfview>
   <AttendeesComponent ref="attendeeModal" :users="attendees" />
 
   <b-col lg="12">
@@ -778,31 +830,34 @@ onUnmounted(() => {
         <table class="table table-hover">
           <thead>
             <tr>
-              <th @click="sortTable('contact_name')">
-                Name
-                <i class="fas fa-sort"></i>
-              </th>
-              <th @click="sortTable('mobile_number')">
-                Contact
-                <i class="fas fa-sort"></i>
-              </th>
-              <th @click="sortTable('appointment_date')">
-                Date
-                <i class="fas fa-sort"></i>
-              </th>
               <th @click="sortTable('start_time')">
                 Subject
                 <i class="fas fa-sort"></i>
               </th>
-              <th @click="sortTable('email_address')">
-                Email
+              <th v-if="role === 'su'">ChairPerson</th>
+
+              <th @click="sortTable('appointment_date')">
+                Date
                 <i class="fas fa-sort"></i>
               </th>
               <th @click="sortTable('start_time')">
                 Time
                 <i class="fas fa-sort"></i>
               </th>
-              <th v-if="role === 'su'">Recipient</th>
+              <th @click="sortTable('contact_name')">
+                Contact Name
+                <i class="fas fa-sort"></i>
+              </th>
+              <!-- <th @click="sortTable('mobile_number')">
+                Contact
+                <i class="fas fa-sort"></i>
+              </th> -->
+
+              <!-- <th @click="sortTable('email_address')">
+                Email
+                <i class="fas fa-sort"></i>
+              </th> -->
+
               <th>Status</th>
               <th>Checked In</th>
               <th>Actions</th>
@@ -811,13 +866,14 @@ onUnmounted(() => {
           <tbody>
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
-                <td>{{ item.contact_name }}</td>
-                <td>{{ item.mobile_number }}</td>
-                <td>{{ item.appointment_date }}</td>
-                <td>{{ item.subject }}</td>
-                <td>{{ item.email_address }}</td>
-                <td>{{ item.start_time }} - {{ item.end_time }}</td>
+                <td class="subject-column" :title="item.subject">{{ item.subject }}</td>
                 <td v-if="role === 'su'">{{ item.userName }}</td>
+                <td>{{ item.appointment_date }}</td>
+                <td>{{ item.start_time }} - {{ item.end_time }}</td>
+                <td class="subject-column" :title="item.contact_name">{{ item.contact_name }}</td>
+                <!-- <td>{{ item.mobile_number }}</td>
+                <td>{{ item.email_address }}</td> -->
+
                 <td>
                   <span :class="'badge bg-' + item.recordStatus.theme">{{ item.recordStatus.label }}</span>
                 </td>
@@ -837,10 +893,10 @@ onUnmounted(() => {
 
                 <td>
                   <!-- Edit Button -->
-                  <button v-if="item.recordStatus.label !== 'DELETED' && item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
+                  <button v-if="item.recordStatus.label === 'ACTIVE'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
-                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                  <button v-else-if="item.recordStatus.label !== 'ACTIVE'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
                     <i class="fas fa-eye" title="View"></i>
                   </button>
 
@@ -891,7 +947,7 @@ onUnmounted(() => {
       </b-col>
     </b-card>
   </b-col>
-  <BookAppointment ref="appointmentModal" @close="handleModalClose" @appointment-created="getAppointments(1)" />
+  <!-- <BookAppointment ref="appointmentModal" @close="handleModalClose" @appointment-created="getAppointments(1)" /> -->
   <b-modal id="uppyModal" size="m" hide-header>
     <b-row>
       <b-col lg="12">
@@ -911,7 +967,7 @@ onUnmounted(() => {
     <template #title>
       <div class="custom-modal-title">
         <!-- <span class="contact-name">{{ appointmentDetails.contact_name }}</span> -->
-        <span class="subject">RE: {{ truncatedSubject }}</span>
+        <span class="subject">Subject: {{ truncatedSubject }}</span>
         <span class="date"> Date: {{ appointmentDetails.appointment_date }}</span>
         <span class="time"> Time: {{ appointmentDetails.start_time }} to {{ appointmentDetails.end_time }}</span>
         <span class="status"
@@ -930,10 +986,10 @@ onUnmounted(() => {
             <b-form-group>
               <b-row>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Name</label>
-                  <b-form-input v-model="appointmentDetails.contact_name" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.contact_name" class="error">
-                    {{ errorDetails.contact_name }}
+                  <label for="input-107" class="form-label">Subject</label>
+                  <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.subject" class="error">
+                    {{ errorDetails.subject }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
@@ -948,9 +1004,9 @@ onUnmounted(() => {
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Time</label>
                   <div class="d-flex">
-                    <b-form-input v-model="appointmentDetails.start_time" id="input-107" type="time" class="me-2"></b-form-input>
+                    <b-form-input v-model="appointmentDetails.start_time" id="input-107" type="time" class="me-2" @click="toggletimeSlotShow"></b-form-input>
                     <span class="align-self-center">to</span>
-                    <b-form-input v-model="appointmentDetails.end_time" id="input-108" type="time" class="ms-2"></b-form-input>
+                    <b-form-input v-model="appointmentDetails.end_time" id="input-108" type="time" class="ms-2" @click="toggletimeSlotShow"></b-form-input>
                   </div>
                   <div v-if="errorDetails.start_time" class="error">
                     {{ errorDetails.start_time }}
@@ -958,6 +1014,17 @@ onUnmounted(() => {
                   <div v-if="errorDetails.end_time" class="error">
                     {{ errorDetails.end_time }}
                   </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Contact Person</label>
+                  <b-form-input v-model="appointmentDetails.contact_name" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.contact_name" class="error">
+                    {{ errorDetails.contact_name }}
+                  </div>
+                </b-col>
+
+                <b-col md="12" lg="12" sm="12">
+                  <TimeSlotComponent v-if="recordStatus.label === 'ACTIVE' && timeSlotShow" :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" class="mb-4" />
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Phone Number</label>
@@ -973,19 +1040,26 @@ onUnmounted(() => {
                     {{ errorDetails.email_address }}
                   </div>
                 </b-col>
-                <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Subject</label>
-                  <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.subject" class="error">
-                    {{ errorDetails.subject }}
+
+                <b-col lg="4" md="12" sm="12">
+                  <label for="input-107" class="form-label">Space</label>
+                  <b-form-input v-model="space.name" id="input-107"></b-form-input>
+                  <div v-if="errorDetails.space" class="error">
+                    {{ errorDetails.space }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Appointment Type</label>
-                  <b-form-input v-model="appointmentDetails.appointment_type" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.appointment_type" class="error">
-                    {{ errorDetails.appointment_type }}
-                  </div>
+                  <b-form-group label="Meeting Type:" label-for="input-1">
+                    <select v-model="appointmentDetails.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                      <!-- Default placeholder option -->
+                      <option value="">Meeting Type</option>
+                      <!-- Dynamically populated options from API -->
+                      <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                        {{ type }}
+                      </option>
+                    </select>
+                  </b-form-group>
+                  <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Booked on</label>
@@ -995,28 +1069,33 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <!-- preview the pdf file using the pdf viewer -->
-                <b-col lg="4" md="12" class="mb-5">
+                <b-col lg="6" md="12" class="mb-2">
                   <label for="input-107" class="form-label">Agenda</label>
                   <div v-if="downloadLink" class="">
                     <div class="card-body position-relative d-flex align-items-start">
                       <a :href="downloadLink" target="_blank"><img src="@/assets/modules/file-manager/images/pdf.svg" alt="PDF Icon" class="card-img-left" style="width: 50px; height: 40px; object-fit: contain" /></a>
                     </div>
-                    <!-- <button
-          class="btn btn-success btn-sm ms-2"
-          
-          @click="updateAgenda"
-        >Update Agenda</button> -->
                   </div>
                   <div v-else>
                     <!-- <b-col cols="10"> -->
-                    <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-                    <!-- <div class="progress">
-                  <div class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" :style="{ width: `${uploadProgress.value}%` }">{{ uploadProgress.value }}%</div>
-                </div> -->
-                    <!-- </b-col> -->
+                    <!-- <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" /> -->
+                    <div class="file-input-container position-relative d-flex align-items-center">
+                      <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" ref="fileInput" />
+                      <span v-if="fileName" class="clear-file ms-2" @click="removeFile">
+                        <i class="fas fa-times"></i>
+                      </span>
+                    </div>
+                    <p v-if="fileName" class="text-primary">{{ fileName }}</p>
                   </div>
                 </b-col>
-                <b-col lg="7" md="12" class="mb-3">
+                <b-col lg="6" md="12">
+                  <label for="input-107" class="form-label">Attendees</label>
+                  <div>attendees go here</div>
+                  <div v-if="errorDetails.attendees" class="error">
+                    {{ errorDetails.attendees }}
+                  </div>
+                </b-col>
+                <b-col lg="12" md="12" class="mb-3">
                   <label for="description" class="form-label">Description</label>
                   <b-form-textarea v-model="appointmentDetails.description" id="input-107" rows="3"></b-form-textarea>
                   <div v-if="errorDetails.notes" class="error">
@@ -1027,10 +1106,6 @@ onUnmounted(() => {
                   <label for="attendees" class="form-label">Attendees</label>
 
                   <button class="btn btn-outline-primary" @click="openAttendeeModal">Open Modal</button>
-                </b-col>
-
-                <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent v-if="recordStatus.label === 'ACTIVE'" :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">
@@ -1091,6 +1166,13 @@ onUnmounted(() => {
   color: red;
 }
 
+.subject-column {
+  max-width: 200px; /* Set the maximum width */
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide overflowed text */
+  text-overflow: ellipsis; /* Show ellipses for overflowed text */
+}
+
 .custom-modal-title {
   display: flex;
   align-items: center; /* Vertically aligns items */
@@ -1113,5 +1195,20 @@ onUnmounted(() => {
 .custom-modal-title .date,
 .custom-modal-title .time {
   color: #333; /* Custom text color */
+}
+.file-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.clear-file {
+  cursor: pointer;
+  color: #070707; /* Default icon color */
+  font-size: 16px; /* Adjust icon size */
+  margin-left: 10px; /* Space between input and icon */
+}
+
+.clear-file:hover {
+  color: #3d4453; /* Icon color on hover */
 }
 </style>

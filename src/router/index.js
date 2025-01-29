@@ -1,19 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth'
-// import { useMenuStore } from '@/store/menuStore'
-
-// const menuStore = useMenuStore()
-
-// //got to the first menu
-// function goToFirstMenu() {
-//   menuStore.navigateToFirstMenu();
-// }
 
 // Lazy load components
 const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
-import MeetingConfirmationView from '@/views/modules/appointment/AttendanceConfirmationView.vue'
+const home = () => import('@/views/modules/appointment/DashboardPageView.vue')
+const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
+const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
 
 // Default routes
 export const defaultChildRoutes = (prefix) => [
@@ -21,7 +15,7 @@ export const defaultChildRoutes = (prefix) => [
     path: '/home',
     name: 'home', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'Home', isBanner: false },
-    component: () => import('@/views/modules/appointment/DashboardPageView.vue')
+    component: home
   },
   {
     path: 'users',
@@ -30,10 +24,10 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/iam-admin/admin/UsersView.vue')
   },
   {
-    path: '/settings',
+    path: '/admin/settings',
     name: prefix + '.settings', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'settings' },
-    component: () => import('@/views/modules/appointment/SettingsView.vue')
+    component: () => import('@/views/iam-admin/admin/SettingsView.vue')
   },
   {
     path: '/new-user',
@@ -60,6 +54,12 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true },
     component: () => import('@/views/modules/appointment/AvailabilityView.vue')
   },
+  {
+    path: '/booking',
+    name: 'booking',
+    meta: { requiresAuth: true },
+    component: booking
+  },
 
   //venues routes
   {
@@ -83,10 +83,8 @@ export const defaultChildRoutes = (prefix) => [
   {
     path: '/home/events',
     name: 'venues',
-    component: () => import('@/views/modules/venues/RegistrarDashView.vue'),
-    meta: {
-      requiresAuth: true
-    }
+    component: RegistrarDashView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/:catchAll(.*)', // Update the wildcard route
@@ -167,7 +165,7 @@ const routes = [
   {
     path: '/confirm/:meetingId', // Dynamic parameter `meetingId`
     name: 'AttendanceConfirmation',
-    component: MeetingConfirmationView
+    component: () => import('@/views/modules/appointment/AttendanceConfirmationView.vue')
   },
 
   ...authRoutes

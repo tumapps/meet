@@ -115,7 +115,6 @@ const onSubmit = async () => {
   font-size: 0.9em;
 }
 
-
 .logo-img {
   height: 8rem; /* Equivalent to 48px */
   width: auto; /* Maintain aspect ratio */ /* Prevent it from overflowing its container */
