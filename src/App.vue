@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, computed } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -74,7 +74,6 @@ onMounted(() => {
 // function handleBeforeUnload() {
 //   localStorage.clear() // Clear localStorage
 //   }
-
 </script>
 
 <style lang="scss">

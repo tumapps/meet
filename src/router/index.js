@@ -8,6 +8,7 @@ const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue
 const home = () => import('@/views/modules/appointment/DashboardPageView.vue')
 const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
 const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
+const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 
 // Default routes
 export const defaultChildRoutes = (prefix) => [
@@ -25,9 +26,9 @@ export const defaultChildRoutes = (prefix) => [
   },
   {
     path: '/admin/settings',
-    name: prefix + '.settings', // Now it will become appointment.dashboard
+    name: 'settings', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'settings' },
-    component: () => import('@/views/iam-admin/admin/SettingsView.vue')
+    component: settings
   },
   {
     path: '/new-user',

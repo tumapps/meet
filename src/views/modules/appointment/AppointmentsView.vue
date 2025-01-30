@@ -454,10 +454,37 @@ const getAppointment = async (id) => {
   }
 }
 
+//funtion to get spaces
+const spaces = ref([]) // To store the spaces from the API
+
+const getSpaces = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/scheduler/spaces')
+    spaces.value = response.data.dataPayload.data
+    console.log('Spaces data:', response.data.dataPayload.data)
+  } catch (error) {
+    // console.error('Error fetching spaces:', error);
+
+    if (error.response && error.response.data && error.response.data.errorPayload) {
+      // Extract and handle errors from server response
+      errors.value = error.response.data.errorPayload.errors
+    } else {
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+
+      proxy.$showToast({
+        title: errorMessage,
+        text: errorMessage,
+        icon: 'error'
+      })
+    }
+  }
+}
+
 // Function to open modal
 const selectedAppointmentId = ref('')
 const openModal = (id) => {
   getAppointment(id)
+  getSpaces()
   getAppointmentType()
   selectedAppointmentId.value = id
   myModal.value.show() // Open the modal
@@ -465,30 +492,97 @@ const openModal = (id) => {
   // console.log("selectedAppointmentId", selectedAppointmentId.value);
 }
 
+// const updateAppointment = async () => {
+//   console.log(appointmentDetails.value.checked_in)
+//   try {
+//     errorDetails.value = {}
+
+//     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
+
+//     // Check if toastPayload exists in the response and update it
+//     if (response.data.toastPayload) {
+//       toastPayload.value = response.data.toastPayload
+
+//       getAppointments(1)
+//       // console.log("toastPayload", toastPayload.value); // Log for debugging
+
+//       // Show toast notification using the response data
+//       proxy.$showAlert({
+//         title: toastPayload.value.toastMessage,
+//         icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+//         showCancelButton: false,
+//         showConfirmButton: false,
+//         timer: 5000
+//       })
+//       //close the modal
+
+//       handleModalClose()
+//       myModal.value.hide()
+//     } else {
+//       // Fallback if toastPayload is not provided in the response
+//       proxy.$showToast({
+//         title: 'Appointment Updated successfully',
+//         icon: 'success'
+//       })
+//     }
+//   } catch (error) {
+//     if (error.response && error.response.data.errorPayload) {
+//       errorDetails.value = error.response.data.errorPayload.errors
+//     } else {
+//       console.error('bug', error)
+//       const errorMessage = error.response?.data?.errorPayload?.errors?.message || 'An error occurred'
+
+//       proxy.$showToast({
+//         title: 'An error occurred',
+//         text: errorMessage,
+//         icon: 'error'
+//       })
+//     }
+//   }
+// }
+
 const updateAppointment = async () => {
   console.log(appointmentDetails.value.checked_in)
   try {
     errorDetails.value = {}
 
-    const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
+    // Create a new FormData object
+    const formData = new FormData()
+
+    // Append all appointment details to the FormData object
+    for (const key in appointmentDetails.value) {
+      if (key === 'file' && appointmentDetails.value[key]) {
+        // Append the file
+        formData.append(key, appointmentDetails.value[key])
+      } else if (appointmentDetails.value[key] !== null && appointmentDetails.value[key] !== undefined) {
+        // Append other fields
+        formData.append(key, appointmentDetails.value[key])
+      }
+    }
+
+    // Send the FormData object in the PUT request
+    const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data' // Set the content type to multipart/form-data
+      }
+    })
 
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
 
       getAppointments(1)
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
       proxy.$showAlert({
         title: toastPayload.value.toastMessage,
-        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        icon: toastPayload.value.toastTheme,
         showCancelButton: false,
         showConfirmButton: false,
         timer: 5000
       })
-      //close the modal
 
+      // Close the modal
       handleModalClose()
       myModal.value.hide()
     } else {
@@ -749,19 +843,12 @@ watch(
   }
 )
 
-const attendeeModal = ref(null)
-
-const openAttendeeModal = () => {
-  console.log('Opening modal')
-  attendeeModal.value.$refs.attendeeModal.show()
-}
-
 const truncatedSubject = computed(() => {
   const subject = appointmentDetails.value.subject || ''
   return subject.length > 12 ? subject.slice(0, 30) + '...' : subject
 })
 
-//control visibilty of timeSlot component in edit modal
+//control visibilty of timeSlot component in edit modalI
 const timeSlotShow = ref(false)
 
 const toggletimeSlotShow = () => {
@@ -782,7 +869,6 @@ onUnmounted(() => {
 </script>
 <template>
   <Pdfview :pdfUrl="downloadLink"></Pdfview>
-  <AttendeesComponent ref="attendeeModal" :users="attendees" />
 
   <b-col lg="12">
     <b-card>
@@ -827,7 +913,7 @@ onUnmounted(() => {
         </b-col>
       </b-row>
       <div class="table-responsive">
-        <table class="table  table-hover">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th @click="sortTable('start_time')">
@@ -848,22 +934,12 @@ onUnmounted(() => {
                 Contact Name
                 <i class="fas fa-sort"></i>
               </th>
-              <!-- <th @click="sortTable('mobile_number')">
-                Contact
-                <i class="fas fa-sort"></i>
-              </th> -->
-
-              <!-- <th @click="sortTable('email_address')">
-                Email
-                <i class="fas fa-sort"></i>
-              </th> -->
-
               <th>Status</th>
               <th>Checked In</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody class="table-striped ">
+          <tbody class="table-striped">
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td class="subject-column" :title="item.subject">{{ item.subject }}</td>
@@ -901,10 +977,10 @@ onUnmounted(() => {
                   </button>
 
                   <!-- Cancel Button -->
-                  <button v-if="item.recordStatus.label !== 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
+                  <button v-if="item.recordStatus.label !== 'CANCELLED' && item.recordStatus.label === 'ACTIVE'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-cancel" title="Cancel"></i>
                   </button>
-                  <button v-else-if="item.recordStatus.label === 'DELETED' || item.recordStatus.label === 'CANCELLED'" class="btn btn-outline-warning btn-sm me-3" disabled>
+                  <button v-else-if="item.recordStatus.label !== 'ACTIVE'" class="btn btn-outline-warning btn-sm me-3" disabled>
                     <i class="fas fa-cancel" title="Cancel (Disabled)"></i>
                   </button>
 
@@ -1016,15 +1092,45 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
+                  <b-form-group label="Meeting Type:" label-for="input-1">
+                    <select v-model="appointmentDetails.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                      <!-- Default placeholder option -->
+                      <option value="">Meeting Type</option>
+                      <!-- Dynamically populated options from API -->
+                      <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                        {{ type }}
+                      </option>
+                    </select>
+                  </b-form-group>
+                  <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+                </b-col>
+                <b-col lg="4" md="12" sm="12">
+                  <label for="input-107" class="form-label">Space</label>
+                  <select v-model="space.id" name="space" class="form-select" id="space">
+                    <!-- Default option -->
+                    <option value="" disabled selected>
+                      {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
+                    </option>
+                    <!-- Loop through spaces array -->
+                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.name }}</option>
+                  </select>
+                  <div v-if="errorDetails.space" class="error">
+                    {{ errorDetails.space }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
+                  <label for="input-107" class="form-label">Booked on</label>
+                  <b-form-input v-model="appointmentDetails.created_at" id="input-107" disabled></b-form-input>
+                  <div v-if="errorDetails.created_at" class="error">
+                    {{ errorDetails.created_at }}
+                  </div>
+                </b-col>
+                <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Contact Person</label>
                   <b-form-input v-model="appointmentDetails.contact_name" id="input-107"></b-form-input>
                   <div v-if="errorDetails.contact_name" class="error">
                     {{ errorDetails.contact_name }}
                   </div>
-                </b-col>
-
-                <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent v-if="recordStatus.label === 'ACTIVE' && timeSlotShow" :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" class="mb-4" />
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Phone Number</label>
@@ -1041,35 +1147,12 @@ onUnmounted(() => {
                   </div>
                 </b-col>
 
-                <b-col lg="4" md="12" sm="12">
-                  <label for="input-107" class="form-label">Space</label>
-                  <b-form-input v-model="space.name" id="input-107"></b-form-input>
-                  <div v-if="errorDetails.space" class="error">
-                    {{ errorDetails.space }}
-                  </div>
+                <b-col md="12" lg="12" sm="12">
+                  <TimeSlotComponent v-if="recordStatus.label === 'ACTIVE' && timeSlotShow" :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" class="mb-4" />
                 </b-col>
-                <b-col lg="4" md="12" class="mb-3">
-                  <b-form-group label="Meeting Type:" label-for="input-1">
-                    <select v-model="appointmentDetails.appointment_type" name="service" class="form-select" id="addappointmenttype">
-                      <!-- Default placeholder option -->
-                      <option value="">Meeting Type</option>
-                      <!-- Dynamically populated options from API -->
-                      <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
-                        {{ type }}
-                      </option>
-                    </select>
-                  </b-form-group>
-                  <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
-                </b-col>
-                <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Booked on</label>
-                  <b-form-input v-model="appointmentDetails.created_at" id="input-107" disabled></b-form-input>
-                  <div v-if="errorDetails.created_at" class="error">
-                    {{ errorDetails.created_at }}
-                  </div>
-                </b-col>
+
                 <!-- preview the pdf file using the pdf viewer -->
-                <b-col lg="6" md="12" class="mb-2">
+                <b-col lg="12" md="12" class="mb-2">
                   <label for="input-107" class="form-label">Agenda</label>
                   <div v-if="downloadLink" class="">
                     <div class="card-body position-relative d-flex align-items-start">
@@ -1088,13 +1171,6 @@ onUnmounted(() => {
                     <p v-if="fileName" class="text-primary">{{ fileName }}</p>
                   </div>
                 </b-col>
-                <b-col lg="6" md="12">
-                  <label for="input-107" class="form-label">Attendees</label>
-                  <div>attendees go here</div>
-                  <div v-if="errorDetails.attendees" class="error">
-                    {{ errorDetails.attendees }}
-                  </div>
-                </b-col>
                 <b-col lg="12" md="12" class="mb-3">
                   <label for="description" class="form-label">Description</label>
                   <b-form-textarea v-model="appointmentDetails.description" id="input-107" rows="3"></b-form-textarea>
@@ -1102,10 +1178,8 @@ onUnmounted(() => {
                     {{ errorDetails.notes }}
                   </div>
                 </b-col>
-                <b-col lg="3" md="12" class="mb-3">
-                  <label for="attendees" class="form-label">Attendees</label>
-
-                  <button class="btn btn-outline-primary" @click="openAttendeeModal">Open Modal</button>
+                <b-col lg="12" md="12" class="mb-3">
+                  <AttendeesComponent :attendees="attendees" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">
@@ -1162,6 +1236,11 @@ onUnmounted(() => {
   </b-modal>
 </template>
 <style scoped>
+.table tbody tr td {
+  /* background-color: rgb(96, 96, 177) !important; */
+  padding: 10px !important;
+}
+
 .error {
   color: red;
 }

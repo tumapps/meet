@@ -4,8 +4,7 @@ import createAxiosInstance from '@/api/axios'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue' // Import the child component
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
-import JExcel from '@/components/JExcel.vue'
-//import JExcel2 from '@/components/modules/appointment/JExcel.vue'
+import AttendeesComponent from './AttendeesComponent.vue'
 
 // import AttendeesComponent from './AttendeesComponent.vue'
 
@@ -21,12 +20,8 @@ role.value = authStore.getRole()
 const userId = ref('')
 const spaces = ref([]) // To store the spaces from the API
 const attendees = ref([]) // To store the attendees from the API
-const searchQuery = ref('') // Holds the current search query
-const searchResults = ref([]) // Holds the filtered search results
-const selectedItems = ref([]) // Holds the selected items
 const uploadProgress = ref(0) // Holds the upload progress
 const uploading = ref(false) // Holds the upload status
-const availableUsers = ref([])
 
 // /mergePropsI
 // defineProps({
@@ -38,57 +33,6 @@ const resetErrors = () => {
   attendees.value = []
   errors.value = {}
   //clear form data
-}
-
-// Function to handle local search
-const handleSearch = async () => {
-  const query = searchQuery.value.trim().toLowerCase()
-
-  try {
-    const response = await axiosInstance.get('/v1/auth/users')
-
-    if (response.data && response.data.dataPayload) {
-      availableUsers.value = response.data.dataPayload.data
-      console.log(searchResults.value)
-    }
-  } catch (error) {
-    // console.error('Error fetching users:', error);
-  }
-
-  // Filter fakeAttendees based on the search query
-  searchResults.value = availableUsers.value.filter((attendee) => attendee.username.toLowerCase().includes(query))
-
-  console.log('search results', searchResults.value)
-}
-
-// add the selecteditems id to the attendees array
-function addToAttendees() {
-  const ids = selectedItems.value.map((item) => item.id) // Extract IDs
-  appointmentData.value.attendees = [...attendees.value, ...ids] // Add to attendees //pass this to the atteendee module
-  console.log('Updated attendees: ', appointmentData.value.attendees)
-}
-// Function to add a selected item
-const addSelectedItem = (item) => {
-  // Avoid duplicates
-  if (!selectedItems.value.find((selected) => selected.id === item.id)) {
-    selectedItems.value.push(item)
-  }
-  addToAttendees()
-  // Clear the search field and results
-  searchQuery.value = ''
-  searchResults.value = []
-
-  console.log('added to list ', selectedItems.value)
-}
-
-// Computed property to format selectedItems as a comma-separated string
-// const selectedItemsText = computed(() => {
-//   return selectedItems.value.map((item) => item.username).join(', ')
-// })
-
-// Function to remove a selected item
-const removeSelectedItem = (index) => {
-  selectedItems.value.splice(index, 1)
 }
 
 const toastPayload = ref('')
@@ -157,17 +101,21 @@ const initialAppointmentData = {
 
 const appointmentData = ref({ ...initialAppointmentData })
 
-// function resetAppointmentData() {
-//   appointmentData.value = { ...initialAppointmentData }
-//   attendees.value = []
-//   UsersOptions.value = []
-// }
-
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
     appointmentData.value.file = file
+    fileName.value = file.name
   }
+}
+
+const fileName = ref(null)
+const fileInput = ref(null)
+
+const removeFile = () => {
+  appointmentData.value.file = null
+  fileName.value = null
+  fileInput.value.value = ''
 }
 
 // const closeModal = () => {
@@ -535,8 +483,13 @@ onMounted(() => {
               </b-col>
               <b-col cols="12" :lg="role === 'su' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
-                  <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" />
-                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile }}</div>
+                  <div class="file-input-container position-relative d-flex align-items-center">
+                    <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" ref="fileInput" />
+                    <span v-if="fileName" class="clear-file ms-2" @click="removeFile">
+                      <i class="fas fa-times"></i>
+                    </span>
+                  </div>
+                  <p v-if="fileName" class="text-primary">{{ fileName }}</p>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -574,29 +527,28 @@ onMounted(() => {
             <b-row class="align-items-center form-group">
               <!-- Label Section -->
               <!-- Input and Search Section -->
-              <b-col cols="12">
+              <!-- <b-col cols="12">
                 <div class="search-form shadow-sm">
-                  <!-- Selected Items -- -->
+                  Selected Items --
                   <div v-if="selectedItems.length" class="mb-2">
                     <span v-for="(item, index) in selectedItems" :key="item.id" class="badge bg-primary text-white me-2 p-2" @click="removeSelectedItem(index)"> {{ item.username }} ✖ </span>
                   </div>
 
-                  <!-- Search Input -- -->
+                  Search Input --
                   <b-form-group label="Attendees:" label-for="input-1">
                     <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" :disabled="!selectedDate" />
                   </b-form-group>
-                  <!-- Search Results  -->
+                  Search Results 
                   <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
                     <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addSelectedItem(result)">
                       {{ result.username }}
                     </li>
                   </ul>
-                  <!-- No Results Message  -->
+                  No Results Message 
                   <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
                 </div>
-              </b-col>
-              <JExcel />
-              <JExcel2 />
+              </b-col> -->
+              <AttendeesComponent />
             </b-row>
           </div>
         </div>
@@ -620,5 +572,25 @@ onMounted(() => {
 
 .myheading {
   border-bottom: 2px solid #e9e6e6;
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.clear-file {
+  cursor: pointer;
+  color: #070707;
+  /* Default icon color */
+  font-size: 16px;
+  /* Adjust icon size */
+  margin-left: 10px;
+  /* Space between input and icon */
+}
+
+.clear-file:hover {
+  color: #3d4453;
+  /* Icon color on hover */
 }
 </style>
