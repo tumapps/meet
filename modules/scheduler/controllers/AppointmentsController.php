@@ -93,7 +93,7 @@ class AppointmentsController extends \helpers\ApiController
                     $attendeeDetails[] = [
                         'staff_id' => $attendee['staff_id'],
                         'email' => $user ? $user->profile->email_address : '',
-                        'name' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
+                        'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
                         'status' => $attendee['status']
                     ];
                 }
@@ -248,7 +248,7 @@ class AppointmentsController extends \helpers\ApiController
                 $attendeeDetails[] = [
                     'staff_id' => $attendee['staff_id'],
                     'email' => $user ? $user->profile->email_address : '',
-                    'name' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
+                    'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
                     'status' => $attendee['status'],
                 ];
             }
