@@ -1,129 +1,74 @@
 <template>
-  <div class="settings-page container mt-5">
-    <h1 class="mb-4">App Settings</h1>
+  <b-card>
+    <b-card-header>
+      <h4 class="card-title">App Settings</h4>
+    </b-card-header>
+    <b-card-body>
+      <b-row>
+        <b-col md="6">
+          <b-form-group label="App Name" label-for="app_name" invalid-feedback="errors.app_name">
+            <b-form-input id="app_name" v-model="settings.app_name" :state="errors.app_name ? false : null" />
+          </b-form-group>
+        </b-col>
 
-    <!-- Card for General Settings -->
-    <div class="card mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0">General Settings</h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <!-- App Name -->
-          <div class="col-md-6 mb-3">
-            <label for="app_name" class="form-label">App Name</label>
-            <input type="text" id="app_name" v-model="settings.app_name" class="form-control" :class="{ 'is-invalid': errors.app_name }" />
-            <div v-if="errors.app_name" class="invalid-feedback">
-              {{ errors.app_name[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="System Email" label-for="system_email" invalid-feedback="errors.system_email">
+            <b-form-input id="system_email" v-model="settings.system_email" :state="errors.system_email ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- System Email -->
-          <div class="col-md-6 mb-3">
-            <label for="system_email" class="form-label">System Email</label>
-            <input type="email" id="system_email" v-model="settings.system_email" class="form-control" :class="{ 'is-invalid': errors.system_email }" />
-            <div v-if="errors.system_email" class="invalid-feedback">
-              {{ errors.system_email[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Category" label-for="category" invalid-feedback="errors.category">
+            <b-form-input id="category" v-model="settings.category" :state="errors.category ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Category -->
-          <div class="col-md-6 mb-3">
-            <label for="category" class="form-label">Category</label>
-            <input type="text" id="category" v-model="settings.category" class="form-control" :class="{ 'is-invalid': errors.category }" />
-            <div v-if="errors.category" class="invalid-feedback">
-              {{ errors.category[0] }}
-            </div>
-          </div>
 
-          <!-- Description -->
-          <div class="col-md-12 mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea id="description" v-model="settings.description" class="form-control" :class="{ 'is-invalid': errors.description }" rows="3"></textarea>
-            <div v-if="errors.description" class="invalid-feedback">
-              {{ errors.description[0] }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <b-col md="6">
+          <b-form-group label="Email Scheme" label-for="email_scheme" invalid-feedback="errors.email_scheme">
+            <b-form-input id="email_scheme" v-model="settings.email_scheme" :state="errors.email_scheme ? false : null" />
+          </b-form-group>
+        </b-col>
 
-    <!-- Card for Email Settings -->
-    <div class="card mb-4">
-      <div class="card-header bg-primary text-white">
-        <h5 class="card-title mb-0">Email Settings</h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <!-- Email Scheme -->
-          <div class="col-md-4 mb-3">
-            <label for="email_scheme" class="form-label">Email Scheme</label>
-            <input type="text" id="email_scheme" v-model="settings.email_scheme" class="form-control" :class="{ 'is-invalid': errors.email_scheme }" />
-            <div v-if="errors.email_scheme" class="invalid-feedback">
-              {{ errors.email_scheme[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Email SMTPs" label-for="email_smtps" invalid-feedback="errors.email_smtps">
+            <b-form-input id="email_smtps" v-model="settings.email_smtps" :state="errors.email_smtps ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Email SMTP Server -->
-          <div class="col-md-4 mb-3">
-            <label for="email_smtps" class="form-label">Email SMTP Server</label>
-            <input type="text" id="email_smtps" v-model="settings.email_smtps" class="form-control" :class="{ 'is-invalid': errors.email_smtps }" />
-            <div v-if="errors.email_smtps" class="invalid-feedback">
-              {{ errors.email_smtps[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Email Port" label-for="email_port" invalid-feedback="errors.email_port">
+            <b-form-input id="email_port" v-model="settings.email_port" :state="errors.email_port ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Email Port -->
-          <div class="col-md-4 mb-3">
-            <label for="email_port" class="form-label">Email Port</label>
-            <input type="number" id="email_port" v-model="settings.email_port" class="form-control" :class="{ 'is-invalid': errors.email_port }" />
-            <div v-if="errors.email_port" class="invalid-feedback">
-              {{ errors.email_port[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Email Encryption" label-for="email_encryption" invalid-feedback="errors.email_encryption">
+            <b-form-input id="email_encryption" v-model="settings.email_encryption" :state="errors.email_encryption ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Email Encryption -->
-          <div class="col-md-4 mb-3">
-            <label for="email_encryption" class="form-label">Email Encryption</label>
-            <input type="text" id="email_encryption" v-model="settings.email_encryption" class="form-control" :class="{ 'is-invalid': errors.email_encryption }" />
-            <div v-if="errors.email_encryption" class="invalid-feedback">
-              {{ errors.email_encryption[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Email Password" label-for="email_password" invalid-feedback="errors.email_password">
+            <b-form-input id="email_password" v-model="settings.email_password" :state="errors.email_password ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Email Username -->
-          <div class="col-md-4 mb-3">
-            <label for="email_username" class="form-label">Email Username</label>
-            <input type="text" id="email_username" v-model="settings.email_username" class="form-control" :class="{ 'is-invalid': errors.email_username }" />
-            <div v-if="errors.email_username" class="invalid-feedback">
-              {{ errors.email_username[0] }}
-            </div>
-          </div>
+        <b-col md="6">
+          <b-form-group label="Email Username" label-for="email_username" invalid-feedback="errors.email_username">
+            <b-form-input id="email_username" v-model="settings.email_username" :state="errors.email_username ? false : null" />
+          </b-form-group>
+        </b-col>
 
-          <!-- Email Password -->
-          <div class="col-md-4 mb-3">
-            <label for="email_password" class="form-label">Email Password</label>
-            <input type="password" id="email_password" v-model="settings.email_password" class="form-control" :class="{ 'is-invalid': errors.email_password }" />
-            <div v-if="errors.email_password" class="invalid-feedback">
-              {{ errors.email_password[0] }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <b-col md="12">
+          <b-form-group label="Description" label-for="description" invalid-feedback="errors.description">
+            <b-form-textarea id="description" v-model="settings.description" :state="errors.description ? false : null" rows="5"/>
+          </b-form-group>
+        </b-col>
 
-    <!-- Submit Button -->
-    <div class="text-end">
-      <button type="submit" class="btn btn-primary" @click="updateSettings" :disabled="loading">
-        {{ loading ? 'Updating...' : 'Update Settings' }}
-      </button>
-    </div>
-
-    <!-- Success/Error Message -->
-    <div v-if="message" :class="['alert', message.type === 'success' ? 'alert-success' : 'alert-danger']" class="mt-4">
-      {{ message.text }}
-    </div>
-  </div>
+      </b-row>
+    </b-card-body>
+  </b-card>
 </template>
 
 <script setup>
@@ -193,7 +138,7 @@ const updateSettings = async () => {
 }
 
 // Fetch settings when the page is mounted
-onMounted(fetchSettings)
+// onMounted(fetchSettings)
 </script>
 
 <style>

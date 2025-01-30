@@ -144,7 +144,7 @@ const submitRemovedAttendees = () => {
           <tr v-for="(user, index) in attendees" :key="user.staff_id" class="custom-row" :class="{ 'text-muted': user.removed }">
             <td>
               <span :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
-                {{ user.name }}
+                {{ user.fullname }}
               </span>
             </td>
             <td>
@@ -169,16 +169,15 @@ const submitRemovedAttendees = () => {
     </div>
 
     <!-- Rejection Reasons Modal -->
-    <b-modal ref="rejectionModal" title="Provide Rejection Reason" size="lg">
+    <b-modal ref="rejectionModal" title="Provide Rejection Reason" size="lg" hide-footer>
       <template #default>
         <div>
           <label for="rejectionReason">Reason for rejection:</label>
           <input v-model="rejectionReason" type="text" class="form-control mb-3" id="rejectionReason" placeholder="Enter rejection reason" />
         </div>
-      </template>
-      <template #footer>
-        <b-button @click="confirmRejection" variant="danger" class="mr-2">Submit</b-button>
-        <b-button @click="rejectionModal.hide()" variant="secondary">Close</b-button>
+        <div class="mt-3 mb-4">
+          <b-button @click="confirmRejection" variant="primary" class="mr-2">Submit</b-button>
+        </div>
       </template>
     </b-modal>
 

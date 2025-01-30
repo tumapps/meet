@@ -93,6 +93,7 @@ const getUser = async (id) => {
   } catch (error) {
     // Check if error.response is defined before accessing it
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
+    errors.value = error.response.data.errorPayload?.errors
 
     proxy.$showToast({
       title: 'An error occurred',
@@ -246,17 +247,18 @@ const UpdateUser = async () => {
     //close modal
     ViewUser.value.hide()
   } catch (error) {
-    let errorMessage = 'An error occurred'
-
+    let errorMessage
     if (error.response?.data.errorPayload?.errors?.message) {
       errorMessage = error.response.data.errorPayload.errors.message
+
+      proxy.$showAlert({
+        title: errorMessage,
+        text: errorMessage,
+        icon: 'error'
+      })
     }
 
-    proxy.$showToast({
-      title: errorMessage,
-      text: errorMessage,
-      icon: 'error'
-    })
+    errors.value = error.response.data.errorPayload?.errors
 
     throw error // Re-throw the error so `onToggleCheckIn` can handle it
   } finally {
