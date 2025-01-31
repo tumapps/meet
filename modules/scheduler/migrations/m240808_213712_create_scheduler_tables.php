@@ -44,13 +44,12 @@ class m240808_213712_create_scheduler_tables extends Migration
             'appointment_type' => $this->string(), //personal or group
             'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(10),
-            // 'cancellation_reason' => $this->string(255)->null(),
-            // 'rejection_reason' => $this->string(255)->null(),
             'priority' => $this->integer()->null(),
             'checked_in' => $this->boolean()->defaultValue(false),
             'is_deleted' => $this->integer()->defaultValue(0),
             'reminder_sent_at' => $this->integer()->null()->defaultValue(null),
             'created_by' => $this->bigInteger(),
+            'updated_by' => $this->bigInteger(),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
