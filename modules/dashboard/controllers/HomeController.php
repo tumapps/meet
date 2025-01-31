@@ -76,4 +76,9 @@ class HomeController extends \helpers\DashboardController
         Yii::$app->response->sendFile($file, false, ['mimeType' => 'json', 'inline' => true]);
         return true;
     }
+
+    public function actionDoc()
+    {
+            return 'hello';
+    }
 }
