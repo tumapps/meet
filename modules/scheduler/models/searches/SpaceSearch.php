@@ -18,7 +18,7 @@ class SpaceSearch extends Space
     public function rules()
     {
         return [
-            [['id', 'level_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['name', 'opening_time', 'closing', 'location', 'description','search'], 'safe'],
             [['is_locked'], 'boolean'],
         ];
@@ -62,7 +62,6 @@ class SpaceSearch extends Space
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'level_id' => $this->level_id,
             'opening_time' => $this->opening_time,
             'closing_time' => $this->closing_time,
             'is_locked' => $this->is_locked,
