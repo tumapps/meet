@@ -5,7 +5,6 @@ namespace scheduler\controllers;
 use Yii;
 use yii\web\UploadedFile;
 use scheduler\models\Appointments;
-use scheduler\models\AppointmentType;
 use scheduler\models\searches\AppointmentsSearch;
 use scheduler\models\Availability;
 use scheduler\models\SpaceAvailability;
@@ -307,13 +306,14 @@ class AppointmentsController extends \helpers\ApiController
 
         $transaction = Yii::$app->db->beginTransaction();
 
+
         try {
 
             if ($model->load($dataRequest)) {
-
                 $model->uploadedFile = UploadedFile::getInstanceByName('file');
                 $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
-                $model->space = $dataRequest['Appointments']['space_id'];
+
+                $model->space_id = $dataRequest['Appointments']['space_id'];
 
                 if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
                     $space = Space::findOne($dataRequest['Appointments']['space_id']);
@@ -333,6 +333,8 @@ class AppointmentsController extends \helpers\ApiController
 
                     $model->status = Appointments::STATUS_ACTIVE;
                 }
+
+
 
                 if (!$model->validate()) {
                     return $this->errorResponse($model->getErrors());
@@ -685,9 +687,9 @@ class AppointmentsController extends \helpers\ApiController
 
         if (!empty($attendees)) {
             foreach ($attendees as $attendeeId) {
-                $staffId = trim($attendeeId);
+                $attendee_id = trim($attendeeId);
                 $addAttendee = new AppointmentAttendees();
-                $addAttendee->addAttendee($id, $staffId, $date, $startTime, $endTime);
+                $addAttendee->addAttendee($id, $attendee_id, $date, $startTime, $endTime);
             }
         }
     }
