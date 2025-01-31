@@ -55,7 +55,7 @@ class AppointmentAttendees extends BaseModel
             [
                 'id',
                 'appointment_id',
-                'staff_id',
+                'attendee_id',
                 'date',
                 'start_time',
                 'end_time',
@@ -71,14 +71,14 @@ class AppointmentAttendees extends BaseModel
     public function rules()
     {
         return [
-            [['appointment_id', 'staff_id', 'date', 'start_time', 'end_time'], 'required'],
-            [['appointment_id', 'staff_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['appointment_id', 'staff_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
+            [['appointment_id', 'attendee_id', 'date', 'start_time', 'end_time'], 'required'],
+            [['appointment_id', 'attendee_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
+            [['appointment_id', 'attendee_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
             [['appointment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Appointments::class, 'targetAttribute' => ['appointment_id' => 'id']],
 
             // ['removal_reason', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Reason is required.'],
-            ['staff_id', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Staff id is required.'],
+            ['attendee_id', 'required', 'on' => self::SCENARIO_REMOVE, 'message' => 'Staff id is required.'],
 
         ];
     }
@@ -98,7 +98,7 @@ class AppointmentAttendees extends BaseModel
         return [
             'id' => 'ID',
             'appointment_id' => 'Appointment ID',
-            'staff_id' => 'Staff ID',
+            'attendee_id' => 'Attendee ID',
             'date' => 'Date',
             'start_time' => 'Start Time',
             'end_time' => 'End Time',
@@ -169,10 +169,10 @@ class AppointmentAttendees extends BaseModel
         return $overlap;
     }
 
-    public function addAttendee($id, $staffId, $date, $startTime, $endTime)
+    public function addAttendee($id, $attendee_id, $date, $startTime, $endTime)
     {
         $this->appointment_id = $id;
-        $this->staff_id = $staffId;
+        $this->attendee_id = $attendee_id;
         $this->date = $date;
         $this->start_time = $startTime;
         $this->end_time = $endTime;
@@ -200,12 +200,12 @@ class AppointmentAttendees extends BaseModel
         $results = [];
 
         foreach ($attendees as $attendee) {
-            $user = User::findOne(['user_id' => $attendee->staff_id]);
+            $user = User::findOne(['user_id' => $attendee->attendee_id]);
             if ($user && !empty($user->profile->email_address)) {
                 // $email = $user->profile->email_address;
                 if ($includeStaffId) {
                     $results[] = [
-                        'staff_id' => $attendee->staff_id,
+                        'staff_id' => $attendee->attendee_id,
                         'email' => $user->profile->email_address,
                     ];
                 } else {
