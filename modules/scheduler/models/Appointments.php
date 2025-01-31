@@ -14,6 +14,8 @@ use scheduler\models\Availability;
 use helpers\EventHandler;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+
 
 
 /**
@@ -83,7 +85,7 @@ class Appointments extends BaseModel
     public $space_id;
     public $uploadedFile;
     public $cancellation_reason;
-    public $reject_reason;
+    public $rejection_reason;
 
 
     public function init()
@@ -95,6 +97,7 @@ class Appointments extends BaseModel
     {
         return [
             BlameableBehavior::class,
+            TimeStampBehavior::class,
         ];
     }
 
@@ -128,6 +131,8 @@ class Appointments extends BaseModel
                 'recordStatus' => function () {
                     return $this->recordStatus;
                 },
+                'created_by',
+                'updated_by',
                 'created_at',
                 'updated_at',
             ]
@@ -141,8 +146,8 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description', 'space_id'], 'required'],
-            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'attendees', 'space_id'], 'safe'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
+            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'created_by', 'updated_by', 'attendees', 'space_id'], 'safe'],
 
             // Custom inline validators as separate rules
             [['start_time', 'end_time'], 'validateTimeRange'],
@@ -173,7 +178,7 @@ class Appointments extends BaseModel
             ['cancellation_reason', 'string', 'max' => 255],
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
             ['rejection_reason', 'string', 'max' => 255],
-           
+
 
             // file upload
             [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
