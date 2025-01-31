@@ -80,17 +80,17 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendees = AppointmentAttendees::find()
-                ->select(['staff_id', 'status'])
+                ->select(['attendee_id', 'status'])
                 ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
                 ->asArray()
                 ->all();
 
             $attendeeDetails = [];
             foreach ($attendees as $attendee) {
-                if (isset($attendee['staff_id'])) {
-                    $user = User::findOne($attendee['staff_id']);
+                if (isset($attendee['attendee_id'])) {
+                    $user = User::findOne($attendee['attendee_id']);
                     $attendeeDetails[] = [
-                        'staff_id' => $attendee['staff_id'],
+                        'attendee_id' => $attendee['attendee_id'],
                         'email' => $user ? $user->profile->email_address : '',
                         'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
                         'status' => $attendee['status']
@@ -235,17 +235,17 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $attendees = AppointmentAttendees::find()
-            ->select(['staff_id', 'status'])
+            ->select(['attendee_id', 'status'])
             ->where(['appointment_id' => $appointment->id, 'is_removed' => 0])
             ->asArray()
             ->all();
 
         $attendeeDetails = [];
         foreach ($attendees as $attendee) {
-            if (isset($attendee['staff_id'])) {
-                $user = User::findOne($attendee['staff_id']);
+            if (isset($attendee['attendee_id'])) {
+                $user = User::findOne($attendee['attendee_id']);
                 $attendeeDetails[] = [
-                    'staff_id' => $attendee['staff_id'],
+                    'attendee_id' => $attendee['attendee_id'],
                     'email' => $user ? $user->profile->email_address : '',
                     'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
                     'status' => $attendee['status'],
@@ -714,7 +714,7 @@ class AppointmentsController extends \helpers\ApiController
     //     foreach ($attendees as $attendeeId => $removalReason) {
     //         $attendee = AppointmentAttendees::findOne([
     //             'appointment_id' => $id,
-    //             'staff_id' => $attendeeId,
+    //             'attendee_id' => $attendeeId,
     //         ]);
 
     //         if (!$attendee) {
