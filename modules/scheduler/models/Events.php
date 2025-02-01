@@ -28,6 +28,8 @@ class Events extends BaseModel
 
     const SCENARIO_CANCEL = 'cancel';
 
+    public $cancellation_reason;
+
     /**
      * {@inheritdoc}
      */
