@@ -2,6 +2,10 @@
 
 /**
  * @OA\Server(
+ *     description="Vue Frontend calling Yii2 API TUMMEET",
+ *     url="http://localhost:3001/v1"
+ * )
+ * @OA\Server(
  *     description="API Development Server",
  *     url="http://playground:8080/v1"
  * )
@@ -20,9 +24,5 @@
  * @OA\Server(
  *     description=" DIrecte API Access for Tummeet",
  *     url="http://localhost/projects/vc_schedular/omnibase/v1/"
- * )
-  * @OA\Server(
- *     description="Vue Frontend calling Yii2 API TUMMEET",
- *     url="http://localhost:3001/v1"
  * )
  */

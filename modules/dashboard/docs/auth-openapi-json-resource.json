@@ -15,6 +15,10 @@
     },
     "servers": [
         {
+            "url": "http://localhost:3001/v1",
+            "description": "Vue Frontend calling Yii2 API TUMMEET"
+        },
+        {
             "url": "http://playground:8080/v1",
             "description": "API Development Server"
         },
@@ -33,10 +37,6 @@
         {
             "url": "http://localhost/projects/vc_schedular/omnibase/v1/",
             "description": " DIrecte API Access for Tummeet"
-        },
-        {
-            "url": "http://localhost:3001/v1",
-            "description": "Vue Frontend calling Yii2 API TUMMEET"
         }
     ],
     "paths": {
