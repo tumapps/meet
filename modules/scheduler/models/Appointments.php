@@ -98,6 +98,9 @@ class Appointments extends BaseModel
         return [
             BlameableBehavior::class,
             TimeStampBehavior::class,
+            \helpers\behaviors\Delete::class,
+            \helpers\behaviors\Creator::class,
+            \helpers\behaviors\DateFormatter::class,
         ];
     }
 
