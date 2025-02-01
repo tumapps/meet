@@ -40,7 +40,7 @@ class Profiles extends \helpers\ActiveRecord
     {
         return [
             [['first_name', 'last_name', 'email_address', 'mobile_number'], 'required'],
-            [['first_name', 'last_name','middle_name'], 'string', 'max' => 50, 'min' => 3],
+            [['first_name', 'last_name'], 'string', 'max' => 50, 'min' => 3],
             [['middle_name'], 'string', 'max' => 50, 'min' => 1],
             [['email_address'], 'string', 'max' => 128],
             [['email_address'], 'email'],
