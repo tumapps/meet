@@ -2,7 +2,11 @@
 
 namespace scheduler\models;
 
-use Yii;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+
 /**
  *@OA\Schema(
  *  schema="SystemSettings",
@@ -35,11 +39,33 @@ class SystemSettings extends BaseModel
     /**
      * list of fields to output by the payload.
      */
+    // public function fields()
+    // {
+    //     return array_merge(
+    //         parent::fields(),
+    //         [
+    //             'id',
+    //             'app_name',
+    //             'system_email',
+    //             'category',
+    //             'email_scheme',
+    //             'email_smtps',
+    //             'email_port',
+    //             'email_encryption',
+    //             'email_password',
+    //             'description',
+    //             'email_username',
+    //             'updated_at',
+    //             'created_at',
+    //             'is_deleted',
+    //         ]
+    //     );
+    // }
     public function fields()
     {
-        return array_merge(
-            parent::fields(), 
-            [
+        $fields = parent::fields();
+
+        $customFields = [
             'id',
             'app_name',
             'system_email',
@@ -48,15 +74,22 @@ class SystemSettings extends BaseModel
             'email_smtps',
             'email_port',
             'email_encryption',
-            'email_password',
             'description',
             'email_username',
             'updated_at',
             'created_at',
             'is_deleted',
-            ]
-        );
+        ];
+
+        unset($fields['email_password']);
+
+        $customFields['decrypted_email_password'] = function () {
+            return '[PROTECTED]';
+        };
+
+        return array_merge($fields, $customFields);
     }
+
     /**
      * {@inheritdoc}
      */
@@ -64,14 +97,17 @@ class SystemSettings extends BaseModel
     {
         return [
             [['system_email', 'email_scheme', 'email_smtps', 'email_port', 'email_encryption', 'email_password', 'email_username'], 'required'],
+            [['system_email'], 'email'],
             [['email_port', 'updated_at', 'created_at'], 'default', 'value' => null],
             [['email_port', 'updated_at', 'created_at'], 'integer'],
             [['description'], 'string'],
             [['is_deleted'], 'boolean'],
             [['app_name'], 'string', 'max' => 255],
             [['system_email', 'email_scheme', 'email_smtps', 'email_password', 'email_username'], 'string', 'max' => 128],
+            [['email_encryption'], 'in', 'range' => ['tls', 'ssl', 'none']],
             [['category'], 'string', 'max' => 20],
             [['email_encryption'], 'string', 'max' => 10],
+            [['email_smtps'], 'validateSmtpConnection']
         ];
     }
 
@@ -96,5 +132,46 @@ class SystemSettings extends BaseModel
             'created_at' => 'Created At',
             'is_deleted' => 'Is Deleted',
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (!empty($this->email_password)) {
+            if (!password_get_info($this->email_password)['algo']) {
+                $this->email_password = password_hash($this->email_password, PASSWORD_BCRYPT);
+            }
+        }
+
+        return parent::beforeSave($insert);
+    }
+
+
+    public function validateSmtpConnection($attribute, $params)
+    {
+        try {
+            $dsn = sprintf(
+                '%s://%s:%s@%s:%d',
+                $this->email_scheme,
+                $this->email_username,
+                $this->email_password,
+                $this->email_smtps,
+                $this->email_port
+            );
+
+            // Create Symfony Mailer Transport
+            $transport = Transport::fromDsn($dsn);
+            $mailer = new Mailer($transport);
+
+            // Try sending a test email (does not actually send, but validates credentials)
+            $testEmail = (new Email())
+                ->from($this->system_email)
+                ->to($this->system_email) // Self-test
+                ->subject('SMTP Validation Test')
+                ->text('Testing SMTP credentials.');
+
+            $mailer->send($testEmail);
+        } catch (TransportExceptionInterface $e) {
+            $this->addError($attribute, 'SMTP connection failed: ' . $e->getMessage());
+        }
     }
 }
