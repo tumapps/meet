@@ -83,7 +83,7 @@ class SpaceController extends \helpers\ApiController
     {
         Yii::$app->user->can('registrar');
 
-        $space = Space::findOne($id);
+        $space = Space::findOne(['id' => $id]);
 
         if (!$space) {
             return $this->toastResponse(['statusCode' => 400, 'message' => 'Space not found.']);
