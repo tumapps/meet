@@ -196,7 +196,7 @@ return [
      *   )
      * )
      */
-    'DELETE role' => 'role/delete',
+    'DELETE role/{id}' => 'role/delete',
 
     /**
      * @OA\Patch(
