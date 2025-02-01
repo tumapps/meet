@@ -18,7 +18,11 @@
  *     url="http://127.0.0.1:8088/v1/"
  * )
  * @OA\Server(
- *     description="API Development Server for Tummeet",
+ *     description=" DIrecte API Access for Tummeet",
  *     url="http://localhost/projects/vc_schedular/omnibase/v1/"
+ * )
+  * @OA\Server(
+ *     description="Vue Frontend calling Yii2 API TUMMEET",
+ *     url="http://localhost:3001/v1"
  * )
  */
