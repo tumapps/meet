@@ -28,9 +28,9 @@ class Space extends BaseModel
      * {@inheritdoc}
      */
 
-      
-     const SPACE_TYPE_MANAGED = 1;
-     const SPACE_TYPE_UNMANAGED = 0;
+
+    const SPACE_TYPE_MANAGED = 1;
+    const SPACE_TYPE_UNMANAGED = 0;
 
 
     public static function tableName()
@@ -59,6 +59,11 @@ class Space extends BaseModel
                 'updated_at',
             ]
         );
+    }
+
+    public static function primaryKey()
+    {
+        return ['id'];
     }
     /**
      * {@inheritdoc}
