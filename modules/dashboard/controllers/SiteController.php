@@ -4,6 +4,8 @@ namespace dashboard\controllers;
 
 use Yii;
 use yii\web\Response;
+use app\providers\components\GoogleStorageComponent;
+
 
 class SiteController extends \helpers\DashboardController
 {
