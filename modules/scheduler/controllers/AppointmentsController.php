@@ -393,7 +393,6 @@ class AppointmentsController extends \helpers\ApiController
     {
         Yii::$app->user->can('schedulerAppointmentsUpdate');
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        return  $dataRequest['Appointments'];
         $dataRequest['Appointments']['appointment_date'] = date('Y-m-d', strtotime($dataRequest['Appointments']['appointment_date']));
 
         $model = $this->findModel($id);
