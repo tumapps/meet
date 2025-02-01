@@ -24,18 +24,19 @@ class SpaceController extends \helpers\ApiController
     ];
     public function actionIndex()
     {
+        Yii::$app->user->can('schedulerSpaceList');
+
         $currentUserId = Yii::$app->user->id;
 
         $roleFlags = $this->getRoleFlags($currentUserId);
 
-        Yii::$app->user->can('schedulerSpaceList');
         $searchModel = new SpaceSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'SpaceSearch');
         $dataProvider = $searchModel->search($search);
 
 
         if ($roleFlags['isUser']) {
-            $dataProvider->query->andWhere(['user_id' => $currentUserId, 'space_type' => Space::SPACE_TYPE_UNMANAGED]);
+            $dataProvider->query->andWhere(['id' => $currentUserId, 'space_type' => Space::SPACE_TYPE_UNMANAGED]);
         } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
             $dataProvider->query->andWhere(['space_type' => Space::SPACE_TYPE_MANAGED]);
         }
