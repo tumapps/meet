@@ -19,6 +19,6 @@
  * )
  * @OA\Server(
  *     description="API Development Server for Tummeet",
- *     url="http://localhost/projects/vc_schedular/omnibase//v1/"
+ *     url="http://localhost/projects/vc_schedular/omnibase/v1/"
  * )
  */
