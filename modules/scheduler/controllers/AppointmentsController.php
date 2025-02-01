@@ -321,8 +321,9 @@ class AppointmentsController extends \helpers\ApiController
 
                 $model->space_id = $dataRequest['Appointments']['space_id'];
 
+
                 if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
-                    $space = Space::findOne($dataRequest['Appointments']['space_id']);
+                    $space = Space::findOne(['id' => $model->space_id]);
 
                     if (!$space) {
                         return $this->errorResponse(['message' => ['The specified space does not exist']]);
@@ -339,7 +340,6 @@ class AppointmentsController extends \helpers\ApiController
 
                     $model->status = Appointments::STATUS_ACTIVE;
                 }
-
 
 
                 if (!$model->validate()) {
