@@ -51,7 +51,7 @@ class ConfigWrapper
             'jwt_secret' => getenv('JWT_SECRET'),
             'adminEmail' => $_SERVER['SYSTEM_ADMIN_EMAIL'] ?? 'francisyuppie@gmail.com',
             'user.passwordResetTokenExpire' => 900,
-            'allowedDomains' => 'http://localhost:9000',
+            'allowedDomains' => '*',
             'passwordResetLink' => $_SERVER['FRONTEND_BASE_URL'] . $_SERVER['PASSWORD_RESET_LINK'],
             'confirmationLink' => $_SERVER['FRONTEND_BASE_URL'] . $_SERVER['CONFIRMATION_LINK'],
             'loginUrl' => $_SERVER['FRONTEND_BASE_URL'],
