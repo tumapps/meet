@@ -409,10 +409,10 @@ const getAppointment = async (id) => {
       console.log('attendees me', attendees.value)
       //convert start created at to yyyy-mm-dd
       //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
-      //appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id
+      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
       // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
-      space.value = appointmentDetails.value.space
+      space.value = appointmentDetails.value.space ?? 'no space here'
       selectedAppointmentId.value = id
 
       //set user id depending on the user role
