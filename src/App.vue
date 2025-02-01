@@ -8,16 +8,18 @@ import { useMenuStore } from '@/store/menuStore'
 import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
+import createAxiosInstance from '@/api/axios'
 // import { useAuthStore } from '@/store/auth.store.js'
 
 // Import Pinia Store
-import { useSetting } from './store/pinia'
+import { useSetting } from '@/store/pinia'
 
 import '@/plugins/styles'
 
 useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
+const axiosInstance = createAxiosInstance()
 const route = useRoute()
 // const authStore = useAuthStore()
 
@@ -52,6 +54,15 @@ const resizePlugin = () => {
   }
 }
 
+const refreshToken = async () => {
+  try {
+    const newToken = await axiosInstance.refreshAccessToken()
+    console.log('Token refreshed madafaka:', newToken)
+  } catch (error) {
+    console.error('Failed to refresh token:', error)
+  }
+}
+
 // Lifecycle hooks for component mount and unmount
 onMounted(() => {
   // Add the event listener when the component is mounted
@@ -61,6 +72,9 @@ onMounted(() => {
     resizePlugin()
   }, 200)
   store.setSetting()
+
+  //call the refrsh token function from store
+  refreshToken()
 })
 
 // onUnmounted(() => {

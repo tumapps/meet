@@ -120,24 +120,7 @@ const sortTable = (key) => {
 //     });
 // };
 
-const levels = ref([])
 
-const getLevels = async () => {
-  try {
-    const response = await axiosInstance.get('v1/scheduler/levels')
-    levels.value = response.data.dataPayload.data
-    console.log(levels.value)
-  } catch (error) {
-    // console.error(error);
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
-
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
-  }
-}
 
 const getSpaces = async (page) => {
   try {
@@ -410,7 +393,6 @@ const toggleLock = async (id) => {
 
 onMounted(async () => {
   getSpaces(1)
-  getLevels()
 })
 </script>
 
@@ -535,18 +517,6 @@ onMounted(async () => {
         </div>
         <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
       </b-col>
-      <b-col md="12">
-        <div class="mb-3">
-          <label for="levelDropdown" class="form-label">Level </label>
-          <!-- Dropdown populated with levels -->
-          <select v-model="SpaceDetails.level_id" class="form-control" id="levelDropdown">
-            <option v-for="level in levels" :key="level.id" :value="level.id">
-              {{ level.name }}
-            </option>
-          </select>
-        </div>
-        <div v-if="errors.level_id" class="error" aria-live="polite">{{ errors.level_id }}</div>
-      </b-col>
     </b-row>
     <b-row>
       <b-col md="6">
@@ -582,17 +552,7 @@ onMounted(async () => {
         </div>
         <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
       </b-col>
-      <b-col md="12">
-        <div class="mb-3">
-          <label for="level" class="form-label">Level</label>
-          <select v-model="SpaceDetails.level_id" class="form-control" id="levelDropdown">
-            <option v-for="level in levels" :key="level.id" :value="level.id">
-              {{ level.name }}
-            </option>
-          </select>
-        </div>
-        <div v-if="errors.level_id" class="error" aria-live="polite">{{ errors.level_id }}</div>
-      </b-col>
+
     </b-row>
     <b-row>
       <b-col md="6">

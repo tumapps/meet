@@ -80,7 +80,7 @@ const removeFile = () => {
 }
 
 const flatPickrConfig = {
-  dateFormat: 'd M Y',
+  dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'F j, Y',
   minDate: 'today'
@@ -409,7 +409,7 @@ const getAppointment = async (id) => {
       console.log('attendees me', attendees.value)
       //convert start created at to yyyy-mm-dd
       //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
-      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id || null
+      //appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id
       // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
       space.value = appointmentDetails.value.space
@@ -1105,14 +1105,16 @@ onUnmounted(() => {
                   <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
                 </b-col>
                 <b-col lg="4" md="12" sm="12">
-                  <label for="input-107" class="form-label">Space</label>
+                  <label for="space" class="form-label">Space</label>
                   <select v-model="space.id" name="space" class="form-select" id="space">
                     <!-- Default option -->
-                    <option value="" disabled selected>
+                    <option :value="null" disabled>
                       {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
                     </option>
                     <!-- Loop through spaces array -->
-                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.name }}</option>
+                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">
+                      {{ space.name }}
+                    </option>
                   </select>
                   <div v-if="errorDetails.space" class="error">
                     {{ errorDetails.space }}

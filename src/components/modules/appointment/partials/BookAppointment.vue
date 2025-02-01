@@ -70,7 +70,6 @@ const flatPickrConfig = {
 const today = ref(new Date().toLocaleDateString())
 // console.log(today.value)
 const selectedUser_id = ref(null) // To store the corresponding user_id
-const selectedPriority = ref(null) // To store the corresponding priority
 const selectedSpaceName = ref(null) // To store the corresponding space name
 
 //get user id from session storage
@@ -94,7 +93,6 @@ const initialAppointmentData = {
   description: '',
   appointment_type: '',
   space_id: selectedSpaceName.value,
-  priority: '1',
   file: null,
   attendees: attendees.value
 }
@@ -300,7 +298,6 @@ const getAppointmentType = async () => {
 }
 
 const UsersOptions = ref([])
-const PriorityOptions = ref([])
 const selectedUsername = ref('') // To hold the selected username
 
 const getusers_booked = async () => {
@@ -324,26 +321,6 @@ const getusers_booked = async () => {
   }
 }
 
-const getPriority = async () => {
-  try {
-    const response = await axiosInstance.get('/v1/scheduler/priorities')
-    PriorityOptions.value = response.data.dataPayload.data
-    // console.log("Priority data:", PriorityOptions.value);
-  } catch (error) {
-    if (error.response && error.response.data && error.response.data.errorPayload) {
-      // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors
-    } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
-
-      proxy.$showToast({
-        title: errorMessage,
-        text: errorMessage,
-        icon: 'error'
-      })
-    }
-  }
-}
 
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
@@ -360,10 +337,7 @@ watch(selectedUsername, (newUsername) => {
   // getSlots()
 })
 
-watch(selectedPriority, (newPriority) => {
-  const selectedPriority = PriorityOptions.value.find((priority) => priority.code === newPriority)
-  appointmentData.value.priority = selectedPriority ? selectedPriority.code : null
-})
+
 
 onMounted(() => {
   slotsData.value.date = today.value
@@ -371,7 +345,6 @@ onMounted(() => {
   getAppointmentType()
   getAppointmentType()
   getusers_booked()
-  getPriority()
   //clear errors
   errors.value = {}
 })
@@ -490,6 +463,8 @@ onMounted(() => {
                     </span>
                   </div>
                   <p v-if="fileName" class="text-primary">{{ fileName }}</p>
+                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile}}</div>
+
                 </b-form-group>
               </b-col>
             </b-row>
