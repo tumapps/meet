@@ -25,6 +25,10 @@
         {
             "url": "https://endpoints.afya365.com/v1",
             "description": "API Production Server"
+        },
+        {
+            "url": "http://127.0.0.1:8088/v1/",
+            "description": "API Production Server for Tummeet"
         }
     ],
     "paths": {
@@ -58,6 +62,3078 @@
                     {}
                 ]
             }
+        },
+        "/auth/assign-permission": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Assign Permissions to Role",
+                "parameters": [
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all assigned items",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/bulk-assign": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Bulk Assign Permissions to Roles",
+                "parameters": [
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/manage-role": {
+            "get": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Manage Roles",
+                "parameters": [
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/manage-user-roles/{id}": {
+            "get": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Manage User Roles",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/assignment roles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/assign-role": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Assign Role to another Role",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sync-permissions": {
+            "get": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Sync Permissions",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/assign-role-user/{id}": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Assign Role to User",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/revoke-user-roles/{id}": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Revoke Roles from User",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/remove": {
+            "post": {
+                "tags": [
+                    "Assignment"
+                ],
+                "summary": "Remove Role or Permission from Parent Role",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/assignments": {
+            "get": {
+                "tags": [
+                    "Assignments"
+                ],
+                "summary": "List All Assignments",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/assignments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/auth": {
+            "get": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Lists all Appointments models",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_user_id",
+                        "in": "query",
+                        "description": "User Id",
+                        "schema": {
+                            "type": "bigint"
+                        }
+                    },
+                    {
+                        "name": "_date",
+                        "in": "query",
+                        "description": "Date",
+                        "schema": {
+                            "type": "date"
+                        }
+                    },
+                    {
+                        "name": "_start_time",
+                        "in": "query",
+                        "description": "Start Time",
+                        "schema": {
+                            "type": "time"
+                        }
+                    },
+                    {
+                        "name": "_end_time",
+                        "in": "query",
+                        "description": "End Time",
+                        "schema": {
+                            "type": "time"
+                        }
+                    },
+                    {
+                        "name": "_contact_name",
+                        "in": "query",
+                        "description": "Contact Name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_email_address",
+                        "in": "query",
+                        "description": "Email Address",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_mobile_number",
+                        "in": "query",
+                        "description": "Mobile Number",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_subject",
+                        "in": "query",
+                        "description": "Subject",
+                        "schema": {
+                            "type": "text"
+                        }
+                    },
+                    {
+                        "name": "_appointment_type",
+                        "in": "query",
+                        "description": "Appointment Type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_status",
+                        "in": "query",
+                        "description": "Status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "timestamp"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "timestamp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/appointments?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/appointments?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/appointments?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/appointments?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/appointments?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a specific user",
+                "responses": {
+                    "200": {
+                        "description": "Returns a user object",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": "1"
+                                                        },
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/lock-account/{id}": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Lock or unlock a user account",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Account status toggled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Account locked/unlocked successfully"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticates user based on the credentials provided",
+                "requestBody": {
+                    "description": "Provide Username & Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Access Granted"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "requestBody": {
+                    "description": "Provide Username, Password, and Confirm Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "User registered successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password-reset-request": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request a password reset for a user",
+                "requestBody": {
+                    "description": "Provide Username",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password reset request successful"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset user password",
+                "requestBody": {
+                    "description": "Provide Password and Confirm Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password reset successful"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "password": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/update-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update user password",
+                "requestBody": {
+                    "description": "Provide Old Password and New Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "old_password",
+                                    "new_password"
+                                ],
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password updated successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "old_password": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get the currently logged-in user profile details",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update the currently logged-in user profile details",
+                "requestBody": {
+                    "description": "Provide updated profile details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/update-user/{id}": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a specific user",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Provide updated user details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh the authentication token",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "token": {
+                                                            "type": "string",
+                                                            "example": "xxx.xxx.xxx"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out the currently logged-in user",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Logged out successfully"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/system-settings": {
+            "get": {
+                "tags": [
+                    "SystemSettings"
+                ],
+                "summary": "Lists all SystemSettings models ",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_app_name",
+                        "in": "query",
+                        "description": "App Name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_system_email",
+                        "in": "query",
+                        "description": "System Email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_category",
+                        "in": "query",
+                        "description": "Category",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_email_scheme",
+                        "in": "query",
+                        "description": "Email Scheme",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_email_smtps",
+                        "in": "query",
+                        "description": "Email Smtps",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_email_port",
+                        "in": "query",
+                        "description": "Email Port",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_email_encryption",
+                        "in": "query",
+                        "description": "Email Encryption",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_email_password",
+                        "in": "query",
+                        "description": "Email Password",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_description",
+                        "in": "query",
+                        "description": "Description",
+                        "schema": {
+                            "type": "text"
+                        }
+                    },
+                    {
+                        "name": "_email_username",
+                        "in": "query",
+                        "description": "Email Username",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_is_deleted",
+                        "in": "query",
+                        "description": "Is Deleted",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/system-settings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/system-settings?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/system-settings?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/system-settings?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/system-settings?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/system-settings?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/permission": {
+            "get": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Lists all Permissions models",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_user_id",
+                        "in": "query",
+                        "description": "User Id",
+                        "schema": {
+                            "type": "bigint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all permissions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/permissions?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/permissions?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/permissions?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/permissions?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/permissions?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Permissions"
+                ],
+                "summary": "Create a new permission",
+                "requestBody": {
+                    "description": "Provide permission details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "create-user"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Permission to create a user"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "create-user"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Permission to create a user"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Permission created successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "create-user"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": "Permission to create a user"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register/user": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user",
+                "requestBody": {
+                    "description": "Provide Username, Password, and Confirm Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "User registered successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/password-reset-request/password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Request a password reset for a user",
+                "requestBody": {
+                    "description": "Provide Username",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password reset request successful"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password/{username}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset user password",
+                "requestBody": {
+                    "description": "Provide Password and Confirm Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password",
+                                    "confirm_password"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password reset successful"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "password": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/update-password/{username}": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update user password",
+                "requestBody": {
+                    "description": "Provide Old Password and New Password",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "old_password",
+                                    "new_password"
+                                ],
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "new_password": {
+                                        "type": "string",
+                                        "example": "newpassword"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Password updated successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "old_password": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get the currently logged-in user profile details",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me/update": {
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update the currently logged-in user profile details",
+                "requestBody": {
+                    "description": "Provide updated profile details",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh the authentication token",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "token": {
+                                                            "type": "string",
+                                                            "example": "xxx.xxx.xxx"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh/delete": {
+            "delete": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Log out the currently logged-in user",
+                "responses": {
+                    "200": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Logged out successfully"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/roles": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Lists all Roles models",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_user_id",
+                        "in": "query",
+                        "description": "User Id",
+                        "schema": {
+                            "type": "bigint"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all roles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/roles?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/roles?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/roles?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/roles?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/roles?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/role": {
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "requestBody": {
+                    "description": "Provide name and type",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "Name",
+                                    "Type"
+                                ],
+                                "properties": {
+                                    "Name": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "Type": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "Name": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        },
+                                                        "Type": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Role created successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "properties": {
+                                                        "Name": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        },
+                                                        "Type": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/role/{name}": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Displays a single role model",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "Role unique name to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single role model",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/role/{id}": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Displays a single role model by ID",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Role unique ID to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single role model",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Updates an existing role model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Role unique ID to load and update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Finds the role model to be updated based on its primary key value",
+                    "required": true
+                },
+                "responses": {
+                    "202": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Role updated successfully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Deletes an existing role model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Role unique ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Restores a deleted role model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Role unique ID to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -73,6 +3149,116 @@
                         "title": "Module Name",
                         "type": "string",
                         "example": "AUTH Module"
+                    }
+                },
+                "type": "object"
+            },
+            "PasswordHistory": {
+                "properties": {
+                    "user_id": {
+                        "title": "User id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "old_password": {
+                        "title": "Old password",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "integer",
+                        "example": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "RefreshToken": {
+                "properties": {
+                    "token_id": {
+                        "title": "Token id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "user_id": {
+                        "title": "User id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "token": {
+                        "title": "Token",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "ip": {
+                        "title": "Ip",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "user_agent": {
+                        "title": "User agent",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "data": {
+                        "title": "Data",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "integer",
+                        "example": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "Tokens": {
+                "properties": {
+                    "token_id": {
+                        "title": "Token id",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "user_id": {
+                        "title": "User id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "token": {
+                        "title": "Token",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "token_type": {
+                        "title": "Token type",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "integer",
+                        "example": "integer"
                     }
                 },
                 "type": "object"
@@ -95,6 +3281,10 @@
         {
             "name": "AUTH",
             "description": "Endpoints for the AUTH module"
+        },
+        {
+            "name": "Appointments",
+            "description": "Available endpoints for Appointments model"
         }
     ]
 }
