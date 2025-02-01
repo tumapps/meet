@@ -251,12 +251,17 @@ async function fetchEvents() {
   try {
     const response = await axiosInstance.get('/v1/scheduler/events')
 
-    apiData.value = response.data.dataPayload.data
+    // Ensure apiData is always an array
+    apiData.value = Array.isArray(response.data.dataPayload.data)
+      ? response.data.dataPayload.data
+      : []
+
+    console.log('Raw API Data:', apiData.value) // Debugging to check API response
+
     // Filter and map API data to FullCalendar's required format
     events.value = apiData.value
-      .filter((item) => item.recordStatus.label === 'ACTIVE') // Filter only ACTIVE events
+      .filter((item) => item?.recordStatus?.label === 'ACTIVE') // Ensure safe access
       .map((item) => {
-        // Combine date and time for FullCalendar's `start` and `end` fields
         const start = `${item.start_date}T${item.start_time}`
         const end = `${item.end_date}T${item.end_time}`
 
@@ -264,20 +269,20 @@ async function fetchEvents() {
           title: item.title,
           start,
           end,
-          backgroundColor: item.recordStatus.theme || '#d33', // Default color if not provided
-          display: 'block', // Ensures the event is shown as a block
-          borderColor: 'transparent', // Removes borders
+          backgroundColor: item.recordStatus?.theme || '#d33', // Default color
+          display: 'block',
+          borderColor: 'transparent',
           initialView: 'timeGridMonth',
           extendedProps: {
             start_time: item.start_time,
             end_time: item.end_time,
             description: item.description,
-            status: item.recordStatus.label // Include additional info for later use
+            status: item.recordStatus?.label || 'UNKNOWN' // Default status
           }
         }
       })
 
-    console.log('Mapped Events:', events.value) // Debug the mapped events
+    console.log('Mapped Events:', events.value) // Debugging to verify mapped data
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
     console.error('Error fetching events:', error)
@@ -285,6 +290,7 @@ async function fetchEvents() {
     isLoading.value = false
   }
 }
+
 
 // Add class to grey out past dates
 function handleDayCellClassNames(arg) {

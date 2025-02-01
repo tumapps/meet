@@ -406,37 +406,15 @@ const getAppointment = async (id) => {
     if (response.data.dataPayload && !response.data.errorPayload) {
       appointmentDetails.value = response.data.dataPayload.data
       attendees.value = response.data.dataPayload.data.attendees
-      console.log('attendees me', attendees.value)
-      //convert start created at to yyyy-mm-dd
-      //appointmentDetails.value.created_at = globalUtils.convertToDate(appointmentDetails.value.created_at)
-      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
-      // console.log('space_id', appointmentDetails.value.space_id)
       recordStatus.value = appointmentDetails.value.recordStatus
       space.value = appointmentDetails.value.space ?? 'no space here'
       selectedAppointmentId.value = id
+            appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
 
       //set user id depending on the user role
       setUserId()
-      // console.log("user_id", slotsData.value.user_id);
       downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
-      // const formattedAppointmentDate = computed({
-      //   get() {
-      //     if (!appointmentDetails.value.appointment_date) return null
-      //     const date = new Date(appointmentDetails.value.appointment_date)
-      //     if (isNaN(date)) return null // Handle invalid dates
-      //     return date.toISOString().split('T')[0] // Returns 'YYYY-MM-DD'
-      //   },
-      //   set(value) {
-      //     appointmentDetails.value.appointment_date = value // Set the input value
-      //     console.log('formattedAppointmentDate', appointmentDetails.value.appointment_date)
-      //   }
-      // })
-
-      // appointmentDetails.value.appointment_date = formattedAppointmentDate.value
-
       console.log('new date ', appointmentDetails.value.appointment_date)
-
-      // Convert the date to 'YYYY-MM-DD' format
     }
   } catch (error) {
     console.log('error', error)
