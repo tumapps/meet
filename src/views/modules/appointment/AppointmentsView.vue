@@ -231,7 +231,6 @@ const deleteAppointment = async (id) => {
 
   try {
     const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`)
-    getAppointment(id)
     getAppointments(1)
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
@@ -278,7 +277,6 @@ const restoreAppointment = async (id) => {
     const response = await axiosInstance.delete(`v1/scheduler/appointments/${id}`)
 
     // Refresh the appointments after restoring
-    getAppointment(id)
     getAppointments(1)
 
     // Check if toastPayload exists in the response and update it
@@ -398,97 +396,99 @@ const setUserId = () => {
   }
 }
 
-const spaces = ref([]); // Initialize as an empty array
+const spaces = ref([]) // Initialize as an empty array
 
 const getAppointment = async (id) => {
   try {
-    errorDetails.value = {};
-    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`);
+    errorDetails.value = {}
+    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`)
 
     if (response.data.dataPayload && !response.data.errorPayload) {
-      appointmentDetails.value = response.data.dataPayload.data;
-      attendees.value = response.data.dataPayload.data.attendees;
-      recordStatus.value = appointmentDetails.value.recordStatus;
-      space.value = appointmentDetails.value.space ?? 'no space here';
-      selectedAppointmentId.value = id;
-      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space';
+      appointmentDetails.value = response.data.dataPayload.data
+      attendees.value = response.data.dataPayload.data.attendees
+      recordStatus.value = appointmentDetails.value.recordStatus
+      space.value = appointmentDetails.value.space ?? 'no space here'
+      selectedAppointmentId.value = id
+      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
 
       // Ensure spaces.value is an array
       if (!Array.isArray(spaces.value)) {
-        spaces.value = []; // Initialize as an empty array if it's not already
+        spaces.value = [] // Initialize as an empty array if it's not already
       }
 
       // Check if the space from the appointment exists in the spaces array
-      if (appointmentDetails.value.space && !spaces.value.some(s => s.id === appointmentDetails.value.space.id)) {
+      if (appointmentDetails.value.space && !spaces.value.some((s) => s.id === appointmentDetails.value.space.id)) {
         // If the space doesn't exist in the spaces array, add it
-        spaces.value.push(appointmentDetails.value.space);
+        spaces.value.push(appointmentDetails.value.space)
       }
 
       // Set user id depending on the user role
-      setUserId();
-      downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null;
+      setUserId()
+      downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
     }
   } catch (error) {
-    console.log('error', error);
+    console.log('error', error)
     const errorMessage =
       error.response?.data?.errorPayload?.errors?.message ||
       error.message || // Fallback to generic error message from the error object
-      'An unknown error occurred there';
+      'An unknown error occurred there'
 
     proxy.$showToast({
       title: 'An error occurred 23',
       text: errorMessage,
-      icon: 'error',
-    });
+      icon: 'error'
+    })
   }
-};
+}
 
 const getSpaces = async () => {
   try {
-    const response = await axiosInstance.get('/v1/scheduler/spaces');
+    const response = await axiosInstance.get('/v1/scheduler/spaces')
     // Ensure spaces.value is always an array
-    spaces.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : [];
-    console.log('Spaces data:', spaces.value);
+    spaces.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
+    console.log('Getting spaces...')
+
+    console.log('Spaces data:', spaces.value)
   } catch (error) {
     if (error.response && error.response.data && error.response.data.errorPayload) {
       // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors;
+      errors.value = error.response.data.errorPayload.errors
     } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred';
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
 
       proxy.$showToast({
         title: errorMessage,
         text: errorMessage,
-        icon: 'error',
-      });
+        icon: 'error'
+      })
     }
   }
-};
+}
 
 // Watch for changes in appointmentDetails.value.space
 watch(
   () => appointmentDetails.value.space, // Watch the space object in appointmentDetails
   (newSpace) => {
     if (newSpace) {
-      console.log('New found:', newSpace);
-      console.log('Spaces1:', spaces.value);
+      console.log('New found:', newSpace)
+      console.log('Spaces1:', spaces.value)
       // Ensure spaces.value is an array
       if (!Array.isArray(spaces.value)) {
-        spaces.value = []; // Initialize as an empty array if it's not already
+        spaces.value = [] // Initialize as an empty array if it's not already
       }
-      console.log('Spaces2:', spaces.value);
+      console.log('Spaces2:', spaces.value)
       // Check if the new space already exists in the spaces array
-      const spaceExists = spaces.value.some((space) => space.id === newSpace.id);
-      console.log('Space exists:', spaceExists);
+      const spaceExists = spaces.value.some((space) => space.id === newSpace.id)
+      console.log('Space exists:', spaceExists)
       // If the space doesn't exist, add it to the spaces array
       if (!spaceExists) {
-        spaces.value.push(newSpace);
-        console.log('New space added to spaces array:', spaces.value);
+        spaces.value.push(newSpace)
+        console.log('New space added to spaces array:', spaces.value)
       }
     }
   },
   { immediate: true, deep: true } // immediate: true ensures the watcher runs on initialization
-);
+)
 
 // Function to open modal
 const selectedAppointmentId = ref('')
@@ -672,7 +672,6 @@ const suggestSlots = async (id) => {
 const toggleCheckIn = async (id) => {
   try {
     const response = await axiosInstance.put(`/v1/scheduler/checkin/${id}`)
-    getAppointment(id)
     getAppointments(1)
 
     if (response.data.toastPayload) {
@@ -886,7 +885,7 @@ onUnmounted(() => {
       <b-row class="mb-4">
         <b-col lg="6">
           <div>
-            <h2>Appointments</h2>
+            <h2>Meetings</h2>
           </div>
         </b-col>
         <b-col lg="6" md="12" sm="12" class="mb-3">

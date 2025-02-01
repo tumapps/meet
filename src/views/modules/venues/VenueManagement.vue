@@ -121,8 +121,6 @@ const sortTable = (key) => {
 //     });
 // };
 
-
-
 const getSpaces = async (page) => {
   try {
     console.log(selectedPerPage.value)
@@ -447,7 +445,7 @@ onMounted(async () => {
               <th @click="sortTable('description')">Name <i class="fas fa-sort"></i></th>
               <th @click="sortTable('start_date')">Opening Hours <i class="fas fa-sort"></i></th>
               <th @click="sortTable('end_date')">Closing Hours <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('start_time')">level <i class="fas fa-sort"></i></th>
+              <th @click="sortTable('start_time')">Capacity <i class="fas fa-sort"></i></th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -458,7 +456,7 @@ onMounted(async () => {
                 <td>{{ item.name }}</td>
                 <td>{{ item.opening_time }}</td>
                 <td>{{ item.closing_time }}</td>
-                <td>{{ item.level_id }}</td>
+                <td>{{ item.capacity }}</td>
                 <td>
                   <button :class="['btn', item.is_locked ? 'btn-danger' : 'btn-success']" @click="toggleLock(item.id)">
                     {{ item.is_locked ? 'Locked' : 'Unlocked' }}
@@ -562,7 +560,6 @@ onMounted(async () => {
         </div>
         <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
       </b-col>
-
     </b-row>
     <b-row>
       <b-col md="6">

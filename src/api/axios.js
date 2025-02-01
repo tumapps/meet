@@ -264,7 +264,6 @@ const AxiosInstance = () => {
       } catch (refreshError) {
         if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
           refreshAndRetryQueue.length = 0 // Clear queue
-          logout()
           router.push({ path: `/auth/login` })
           localStorage.clear()
         } else {
@@ -291,8 +290,8 @@ const AxiosInstance = () => {
         if (statusCode === TOKEN_EXPIRED_CODE) {
           // Handle session expiration
           localStorage.removeItem('user.token')
-          logout()
-          // router.push({ path: `/auth/login` })
+          router.push({ path: `/auth/login` })
+          localStorage.clear()
           return Promise.reject(error)
         }
 

@@ -5,12 +5,15 @@ import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlo
 import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
 import AttendeesComponent from './AttendeesComponent.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // import AttendeesComponent from './AttendeesComponent.vue'
 
 const authStore = useAuthStore()
 const axiosInstance = createAxiosInstance()
-const { proxy, emit } = getCurrentInstance()
+const { proxy } = getCurrentInstance()
 //get can be booked status from store
 
 // Problem: Many ref initializations are single-purpose and can be grouped.
@@ -116,18 +119,6 @@ const removeFile = () => {
   fileInput.value.value = ''
 }
 
-// const closeModal = () => {
-//   //clear errors
-//   resetErrors()
-//   appointmentData.value = { ...initialAppointmentData }
-//   selectedDate.value = null
-//   timeSlots.value = []
-//   apiResponse.value = []
-//   selectedUsername.value = []
-//   // appointmentData.value = { ...initialAppointmentData }
-//   // selectedDate.value = null
-//   // appointmentModal.value.hide() // Close the modal using the hide() method
-// }
 // //handle date change
 const handleDateChange = (newValue) => {
   appointmentData.value.appointment_date = newValue
@@ -251,7 +242,8 @@ const submitAppointment = async () => {
         showCancelButton: false,
         showprogressBar: true
       })
-      emit('appointment-created')
+      //push to the dashboard
+      router.push({ name: 'home' })
     } else {
       proxy.$showToast({
         title: 'Success',
@@ -264,9 +256,15 @@ const submitAppointment = async () => {
   } catch (error) {
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       errors.value = error.response.data.errorPayload.errors
-    } else {
-      console.error('Error:', error)
-      proxy.$showToast({ title: 'An error occurred', icon: 'error' })
+
+      proxy.$showAlert({
+        title: error.response.data.errorPayload.errors?.message,
+        // text: error.response.data.errorPayload.errors?.message,
+        icon: 'error',
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 2000
+      })
     }
   } finally {
     uploading.value = false
@@ -321,7 +319,6 @@ const getusers_booked = async () => {
   }
 }
 
-
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
   console.log('newUsername:', newUsername)
@@ -336,8 +333,6 @@ watch(selectedUsername, (newUsername) => {
   }
   // getSlots()
 })
-
-
 
 onMounted(() => {
   slotsData.value.date = today.value
@@ -417,6 +412,7 @@ onMounted(() => {
                 <b-form-group label="Date:" label-for="input-1">
                   <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername && role === 'su'" v-b-tooltip.hover="{ title: 'Chair must be selected', disabled: !!selectedUsername }" />
                 </b-form-group>
+                <div v-if="errors.appointment_date" class="error" aria-live="polite">{{ errors.appointment_date }}</div>
               </b-col>
               <b-col v-if="role !== 'su'" cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Meeting Type:" label-for="input-1">
@@ -463,8 +459,7 @@ onMounted(() => {
                     </span>
                   </div>
                   <p v-if="fileName" class="text-primary">{{ fileName }}</p>
-                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile}}</div>
-
+                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile }}</div>
                 </b-form-group>
               </b-col>
             </b-row>

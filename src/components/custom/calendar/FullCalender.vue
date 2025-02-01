@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, watch, getCurrentInstance, defineProps } from 'vue'
+import { useRouter } from 'vue-router'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -8,6 +9,8 @@ import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
 import { usePreferencesStore } from '../../../store/preferences'
 import { parse, format } from 'date-fns'
+
+const router = useRouter()
 
 const props = defineProps({
   dashType: {
@@ -58,7 +61,7 @@ function handleDateClick(info) {
       icon: 'info',
       timer: 5000,
       showConfirmButton: false,
-      showCancelButton: false,
+      showCancelButton: true,
       timerProgressBar: true
       // confirmButton:false,
     })
@@ -66,7 +69,9 @@ function handleDateClick(info) {
     //show booking modal
     //pass clicked date to selecedDate
     selectedDate.value = clickedDate
-    // console.log("Selected date:", selectedDate.value);
+    console.log('Selected date:', selectedDate.value)
+    //push to booking
+    router.push({ name: 'booking' })
     // console.log(typeof(selectedDate.value));
     //pass the selected date to the modal
 
@@ -192,7 +197,7 @@ async function fetchAppointments() {
         // Assign background color based on recordStatus.label
         switch (item.recordStatus.label) {
           case 'ACTIVE':
-            backgroundColor = '#86deb7'
+            backgroundColor = '#C056C6'
             break
           case 'CANCELLED':
             backgroundColor = '#E05263'
@@ -252,9 +257,7 @@ async function fetchEvents() {
     const response = await axiosInstance.get('/v1/scheduler/events')
 
     // Ensure apiData is always an array
-    apiData.value = Array.isArray(response.data.dataPayload.data)
-      ? response.data.dataPayload.data
-      : []
+    apiData.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
 
     console.log('Raw API Data:', apiData.value) // Debugging to check API response
 
@@ -291,7 +294,6 @@ async function fetchEvents() {
   }
 }
 
-
 // Add class to grey out past dates
 function handleDayCellClassNames(arg) {
   const cellDate = new Date(arg.date).toISOString().split('T')[0]
@@ -311,7 +313,7 @@ watch(
 // FullCalendar options
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  // initialView: 'timeGridWeek',
+  initialView: 'timeGridWeek',
   height: 'auto',
   events: events.value,
   weekends: preferences.weekend,
@@ -399,7 +401,6 @@ onMounted(async () => {
 })
 </script>
 <template>
-
   <!-- Skeleton Loader or Spinner -->
   <div v-if="isLoading" class="loading-spinner">
     <div class="skeleton-calendar">
