@@ -398,71 +398,103 @@ const setUserId = () => {
   }
 }
 
+const spaces = ref([]); // Initialize as an empty array
+
 const getAppointment = async (id) => {
   try {
-    errorDetails.value = {}
-    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`)
+    errorDetails.value = {};
+    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`);
 
     if (response.data.dataPayload && !response.data.errorPayload) {
-      appointmentDetails.value = response.data.dataPayload.data
-      attendees.value = response.data.dataPayload.data.attendees
-      recordStatus.value = appointmentDetails.value.recordStatus
-      space.value = appointmentDetails.value.space ?? 'no space here'
-      selectedAppointmentId.value = id
-            appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
+      appointmentDetails.value = response.data.dataPayload.data;
+      attendees.value = response.data.dataPayload.data.attendees;
+      recordStatus.value = appointmentDetails.value.recordStatus;
+      space.value = appointmentDetails.value.space ?? 'no space here';
+      selectedAppointmentId.value = id;
+      appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space';
 
-      //set user id depending on the user role
-      setUserId()
-      downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
-      console.log('new date ', appointmentDetails.value.appointment_date)
+      // Ensure spaces.value is an array
+      if (!Array.isArray(spaces.value)) {
+        spaces.value = []; // Initialize as an empty array if it's not already
+      }
+
+      // Check if the space from the appointment exists in the spaces array
+      if (appointmentDetails.value.space && !spaces.value.some(s => s.id === appointmentDetails.value.space.id)) {
+        // If the space doesn't exist in the spaces array, add it
+        spaces.value.push(appointmentDetails.value.space);
+      }
+
+      // Set user id depending on the user role
+      setUserId();
+      downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null;
     }
   } catch (error) {
-    console.log('error', error)
-    // Check if error.response is defined before accessing it
+    console.log('error', error);
     const errorMessage =
       error.response?.data?.errorPayload?.errors?.message ||
       error.message || // Fallback to generic error message from the error object
-      'An unknown error occurred there'
+      'An unknown error occurred there';
 
     proxy.$showToast({
       title: 'An error occurred 23',
       text: errorMessage,
-      icon: 'error'
-    })
+      icon: 'error',
+    });
   }
-}
-
-//funtion to get spaces
-const spaces = ref([]) // To store the spaces from the API
+};
 
 const getSpaces = async () => {
   try {
-    const response = await axiosInstance.get('/v1/scheduler/spaces')
-    spaces.value = response.data.dataPayload.data
-    console.log('Spaces data:', response.data.dataPayload.data)
+    const response = await axiosInstance.get('/v1/scheduler/spaces');
+    // Ensure spaces.value is always an array
+    spaces.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : [];
+    console.log('Spaces data:', spaces.value);
   } catch (error) {
-    // console.error('Error fetching spaces:', error);
-
     if (error.response && error.response.data && error.response.data.errorPayload) {
       // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors
+      errors.value = error.response.data.errorPayload.errors;
     } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred';
 
       proxy.$showToast({
         title: errorMessage,
         text: errorMessage,
-        icon: 'error'
-      })
+        icon: 'error',
+      });
     }
   }
-}
+};
+
+// Watch for changes in appointmentDetails.value.space
+watch(
+  () => appointmentDetails.value.space, // Watch the space object in appointmentDetails
+  (newSpace) => {
+    if (newSpace) {
+      console.log('New found:', newSpace);
+      console.log('Spaces1:', spaces.value);
+      // Ensure spaces.value is an array
+      if (!Array.isArray(spaces.value)) {
+        spaces.value = []; // Initialize as an empty array if it's not already
+      }
+      console.log('Spaces2:', spaces.value);
+      // Check if the new space already exists in the spaces array
+      const spaceExists = spaces.value.some((space) => space.id === newSpace.id);
+      console.log('Space exists:', spaceExists);
+      // If the space doesn't exist, add it to the spaces array
+      if (!spaceExists) {
+        spaces.value.push(newSpace);
+        console.log('New space added to spaces array:', spaces.value);
+      }
+    }
+  },
+  { immediate: true, deep: true } // immediate: true ensures the watcher runs on initialization
+);
 
 // Function to open modal
 const selectedAppointmentId = ref('')
 const openModal = (id) => {
-  getAppointment(id)
   getSpaces()
+  getAppointment(id)
   getAppointmentType()
   selectedAppointmentId.value = id
   myModal.value.show() // Open the modal
@@ -722,6 +754,7 @@ const handleModalClose = () => {
   //   console.log('Modal has been closed');
   appointmentDetails.value = { ...InitialappointmentDetails }
   errors.value = {}
+  space.value = ''
   getAppointments(1) // Refresh the appointments after closing the modal
 }
 

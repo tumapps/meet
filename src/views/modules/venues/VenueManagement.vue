@@ -36,7 +36,8 @@ const InitialSpaceDetails = {
   name: '',
   level_id: '',
   opening_time: '',
-  closing_time: ''
+  closing_time: '',
+  capacity: ''
 }
 
 const SpaceDetails = ref({ ...InitialSpaceDetails })
@@ -510,12 +511,21 @@ onMounted(async () => {
   <!-- //modal -->
   <b-modal ref="newSpace" title="New Space" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
-      <b-col md="12">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">Name</label>
           <input type="text" v-model="SpaceDetails.name" class="form-control" id="name" />
         </div>
         <div v-if="errors.name" class="error" aria-live="polite">{{ errors.name }}</div>
+      </b-col>
+
+      <!-- //add capacity -->
+      <b-col md="12" lg="6">
+        <div class="mb-3">
+          <label for="spacecapacity" class="form-label">Capacity</label>
+          <input type="text" v-model="SpaceDetails.capacity" class="form-control" id="capacity" />
+        </div>
+        <div v-if="errors.capacity" class="error" aria-live="polite">{{ errors.capacity }}</div>
       </b-col>
     </b-row>
     <b-row>
