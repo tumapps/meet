@@ -29,7 +29,6 @@ return [
      *     description="Returns a data payload object for all scheduler/system-settings",
      *      @OA\JsonContent(
      *          @OA\Property(property="dataPayload", type="object",
-     *              @OA\Property(property="data", type="array",@OA\Items(ref="#/components/schemas/SystemSettings")),
      *              @OA\Property(property="countOnPage", type="integer", example="25"),
      *              @OA\Property(property="totalCount", type="integer",example="50"),
      *              @OA\Property(property="perPage", type="integer",example="25"),
