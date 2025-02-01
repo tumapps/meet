@@ -75,6 +75,9 @@ class AppointmentsController extends \helpers\ApiController
             if ($space && isset($space['space_id'])) {
                 $spaceDetails = Space::getSpaceNameDetails($space['space_id']);
                 $appointmentData['space'] = $spaceDetails;
+            } elseif (empty($space)) {
+                $spaceDetails = Space::getSpaceNameDetails($appointment['user_id']);
+                $appointmentData['space'] = $spaceDetails;
             } else {
                 $appointmentData['space'] = null;
             }
