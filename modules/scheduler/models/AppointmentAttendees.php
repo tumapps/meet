@@ -47,6 +47,13 @@ class AppointmentAttendees extends BaseModel
     {
         return '{{%appointment_attendees}}';
     }
+
+    protected static $statusLabels = [
+        self::STATUS_DECLINED => 'DECLINED',
+        self::STATUS_CONFIRMED => 'CONFIRMED',
+        self::STATUS_PENDING => 'PENDING',
+        self::STATUS_REMOVED => 'REMOVED',
+    ];
     /**
      * list of fields to output by the payload.
      */
@@ -108,6 +115,11 @@ class AppointmentAttendees extends BaseModel
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    public static function getStatusLabel($status)
+    {
+        return self::$statusLabels[$status] ?? 'Unknown';
     }
 
 
