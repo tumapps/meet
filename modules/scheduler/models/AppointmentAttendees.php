@@ -36,6 +36,8 @@ class AppointmentAttendees extends BaseModel
 
     const SCENARIO_REMOVE = 'removed';
 
+    public $attendees = [];
+
 
 
     /**
@@ -109,18 +111,18 @@ class AppointmentAttendees extends BaseModel
     }
 
 
-    public function sendAttendeeUpdateEvent($appointmentId, $attendeeId, $reason = '', $is_removed = false)
+    public function sendAttendeeUpdateEvent($appointment_id, $attendee_id, $reason = '', $is_removed = false)
     {
         $event = new Event();
         $event->sender = $this;
         $subject = $is_removed ? 'Meeting Updates' : 'Meeting Invitation';
 
-        $user = User::find()->where(['username' => $attendeeId])->one();
+        $user = User::find()->where(['username' => $attendee_id])->one();
         $email = $user->profile->email_address;
 
         $appointmentData = Appointments::find()
             ->select(['subject', 'appointment_date', 'start_time', 'end_time'])
-            ->where(['id' => $appointmentId])
+            ->where(['id' => $appointment_id])
             ->one();
 
         $eventData = [
