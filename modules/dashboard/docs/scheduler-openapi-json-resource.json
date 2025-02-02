@@ -1302,18 +1302,38 @@
                 "tags": [
                     "Appointments"
                 ],
-                "summary": "Deletes an existing Appointments Attendee model.",
+                "summary": "Removes attendees associated with the specified appointment ID",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Appointments unique ID to delete",
+                        "description": "Appointment's unique ID",
                         "required": true,
                         "schema": {
                             "type": "string"
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "attendees"
+                                ],
+                                "properties": {
+                                    "attendees": {
+                                        "description": "An array of attendees to remove, where the key is the attendee ID and the value is the removal reason",
+                                        "type": "object",
+                                        "additionalProperties": {}
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "202": {
                         "description": "Deletion successful",
@@ -1329,6 +1349,9 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Invalid request"
                     }
                 }
             }
