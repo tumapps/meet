@@ -127,7 +127,6 @@ class Appointments extends BaseModel
                 'contact_name',
                 'email_address',
                 'mobile_number',
-                'cancellation_reason',
                 'subject',
                 'appointment_type',
                 'status',
