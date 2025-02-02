@@ -96,7 +96,8 @@ class AppointmentsController extends \helpers\ApiController
                         'attendee_id' => $attendee['attendee_id'],
                         'email' => $user ? $user->profile->email_address : '',
                         'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
-                        'status' => $attendee['status']
+                        // 'status' => $attendee['status']
+                        'status' =>  AppointmentAttendees::getStatusLabel($attendee['status'])
                     ];
                 }
             }
