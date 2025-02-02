@@ -590,7 +590,7 @@ Object.keys(appointmentDetails.value).forEach((key) => {
 
   if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordstatus' && value.toString().trim() !== '') {
     // if (key === 'attendees' && Array.isArray(value)) {
-      formData.append(key, JSON.stringify(value))
+      // formData.append(key, JSON.stringify(value))
     // } else{
        formData.append(key, value)
     // }
