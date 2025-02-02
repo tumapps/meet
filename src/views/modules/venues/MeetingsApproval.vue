@@ -305,7 +305,7 @@ onMounted(() => {
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td>{{ item.space_name }}</td>
                 <td>{{ item.subject }}</td>
-<td>{{ item.appointment_date }}</td>
+                <td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }}- {{ item.end_time }}</td>
                 <td>{{ item.contact_name }}</td>
                 <td>{{ item.userName }}</td>

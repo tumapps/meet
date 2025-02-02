@@ -15,12 +15,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="app_name" class="form-label">App Name</label>
-            <b-form-input
-              id="app_name"
-              v-model="settings.app_name"
-              type="text"
-              placeholder="Enter App Name"
-            ></b-form-input>
+            <b-form-input id="app_name" v-model="settings.app_name" type="text" placeholder="Enter App Name"></b-form-input>
           </div>
           <div v-if="errors.app_name" class="error" aria-live="polite">
             {{ errors.app_name }}
@@ -31,12 +26,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="system_email" class="form-label">System Email</label>
-            <b-form-input
-              id="system_email"
-              v-model="settings.system_email"
-              type="text"
-              placeholder="Enter System Email"
-            ></b-form-input>
+            <b-form-input id="system_email" v-model="settings.system_email" type="text" placeholder="Enter System Email"></b-form-input>
           </div>
           <div v-if="errors.system_email" class="error" aria-live="polite">
             {{ errors.system_email }}
@@ -47,12 +37,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="category" class="form-label">Category</label>
-            <b-form-input
-              id="category"
-              v-model="settings.category"
-              type="text"
-              placeholder="Enter Category"
-            ></b-form-input>
+            <b-form-input id="category" v-model="settings.category" type="text" placeholder="Enter Category"></b-form-input>
           </div>
           <div v-if="errors.category" class="error" aria-live="polite">
             {{ errors.category }}
@@ -63,12 +48,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_scheme" class="form-label">Email Scheme</label>
-            <b-form-input
-              id="email_scheme"
-              v-model="settings.email_scheme"
-              type="text"
-              placeholder="Enter Email Scheme"
-            ></b-form-input>
+            <b-form-input id="email_scheme" v-model="settings.email_scheme" type="text" placeholder="Enter Email Scheme"></b-form-input>
           </div>
           <div v-if="errors.email_scheme" class="error" aria-live="polite">
             {{ errors.email_scheme }}
@@ -79,12 +59,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_smtps" class="form-label">Email SMTPs</label>
-            <b-form-input
-              id="email_smtps"
-              v-model="settings.email_smtps"
-              type="text"
-              placeholder="Enter Email SMTPs"
-            ></b-form-input>
+            <b-form-input id="email_smtps" v-model="settings.email_smtps" type="text" placeholder="Enter Email SMTPs"></b-form-input>
           </div>
           <div v-if="errors.email_smtps" class="error" aria-live="polite">
             {{ errors.email_smtps }}
@@ -95,12 +70,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_port" class="form-label">Email Port</label>
-            <b-form-input
-              id="email_port"
-              v-model="settings.email_port"
-              type="text"
-              placeholder="Enter Email Port"
-            ></b-form-input>
+            <b-form-input id="email_port" v-model="settings.email_port" type="text" placeholder="Enter Email Port"></b-form-input>
           </div>
           <div v-if="errors.email_port" class="error" aria-live="polite">
             {{ errors.email_port }}
@@ -111,12 +81,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_encryption" class="form-label">Email Encryption</label>
-            <b-form-input
-              id="email_encryption"
-              v-model="settings.email_encryption"
-              type="text"
-              placeholder="Enter Email Encryption"
-            ></b-form-input>
+            <b-form-input id="email_encryption" v-model="settings.email_encryption" type="text" placeholder="Enter Email Encryption"></b-form-input>
           </div>
           <div v-if="errors.email_encryption" class="error" aria-live="polite">
             {{ errors.email_encryption }}
@@ -127,12 +92,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_password" class="form-label">Email Password</label>
-            <b-form-input
-              id="email_password"
-              v-model="settings.email_password"
-              type="password"
-              placeholder="Enter Email Password"
-            ></b-form-input>
+            <b-form-input id="email_password" v-model="settings.email_password" type="password" placeholder="Enter Email Password"></b-form-input>
           </div>
           <div v-if="errors.email_password" class="error" aria-live="polite">
             {{ errors.email_password }}
@@ -143,12 +103,7 @@
         <b-col md="12" lg="6">
           <div class="mb-3">
             <label for="email_username" class="form-label">Email Username</label>
-            <b-form-input
-              id="email_username"
-              v-model="settings.email_username"
-              type="text"
-              placeholder="Enter Email Username"
-            ></b-form-input>
+            <b-form-input id="email_username" v-model="settings.email_username" type="text" placeholder="Enter Email Username"></b-form-input>
           </div>
           <div v-if="errors.email_username" class="error" aria-live="polite">
             {{ errors.email_username }}
@@ -159,12 +114,7 @@
         <b-col md="12">
           <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <b-form-textarea
-              id="description"
-              v-model="settings.description"
-              placeholder="Enter Description"
-              rows="5"
-            ></b-form-textarea>
+            <b-form-textarea id="description" v-model="settings.description" placeholder="Enter Description" rows="5"></b-form-textarea>
           </div>
           <div v-if="errors.description" class="error" aria-live="polite">
             {{ errors.description }}

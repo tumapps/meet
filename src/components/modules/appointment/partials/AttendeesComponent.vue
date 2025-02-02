@@ -8,6 +8,10 @@ const props = defineProps({
   attendees: {
     type: Array,
     default: () => []
+  },
+  meetingId: {
+    type: Number,
+    required: true
   }
 })
 
@@ -35,6 +39,17 @@ watch(
   { immediate: true }
 )
 
+//watch for changes in ptrops.meetingId
+const meetingId = ref(null)
+watch(
+  () => props.meetingId,
+  (newMeetingId) => {
+    // Add a `fromBackend` flag to distinguish backend-loaded attendees
+    meetingId.value = newMeetingId
+  },
+  { immediate: true }
+)
+
 // Fetch and filter search results
 const handleSearch = async () => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -53,7 +68,15 @@ const handleSearch = async () => {
 // Add a search result to the table
 const addAttendeeToTable = (user) => {
   // Add a flag `fromBackend` set to false for search-added attendees
+
+  const duplicate = attendees.value.some((attendee) => attendee.attendee_id === user.id)
+
+  if(!duplicate){
   attendees.value.push({ ...user, fromBackend: false, removed: false })
+  }else{
+    Swal.fire('Error!', 'Attendee already added.', 'error')
+  }
+
   searchQuery.value = ''
   searchResults.value = []
 }
@@ -105,11 +128,9 @@ const confirmRemoval = () => {
       console.log('Removed Attendees:', removedAttendees.value)
 
       //backedn call to remove the user
-      submitRemovedAttendees()
     }
   })
 }
-
 
 // Restore a removed attendee
 const restoreAttendee = (index) => {
@@ -120,8 +141,18 @@ const restoreAttendee = (index) => {
 }
 
 // Submit removed attendees
-const submitRemovedAttendees = () => {
- //call to backend
+const submitRemovedAttendees = async () => {
+  try {
+    const response = await axiosInstance.put(`/v1/scheduler/remove-attendee/${meetingId.value}`, removedAttendees.value)
+    if (response.data?.dataPayload) {
+      Swal.fire('Success!', 'Removed attendees have been submitted successfully.', 'success')
+    }
+    console.log('Removed Attendees:', removedAttendees.value)
+  } catch (error) {
+console.log('meetingId:', meetingId.value)
+
+    console.error('Error submitting removed attendees:', error)
+  }
 }
 </script>
 
@@ -141,7 +172,6 @@ const submitRemovedAttendees = () => {
             {{ result.username }}
           </li>
         </ul>
-
         <!-- No Results Message -->
         <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
       </div>

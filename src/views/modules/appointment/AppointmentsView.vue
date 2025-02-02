@@ -398,9 +398,10 @@ const setUserId = () => {
 }
 
 const spaces = ref([]) // Initialize as an empty array
-
+const meetingId = ref(null)
 const getAppointment = async (id) => {
   try {
+    meetingId.value = id
     errorDetails.value = {}
     const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`)
 
@@ -1194,7 +1195,7 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
-                  <AttendeesComponent :attendees="attendees" />
+                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">
