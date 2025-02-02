@@ -290,26 +290,25 @@ onMounted(() => {
         <table class="table table-hover">
           <thead>
             <tr>
-              <th @click="sortTable('start_time')">Time <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('contact_name')">Contact Name <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('userName')">Recipient <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('email_address')">Email <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('mobile_number')">Mobile Number <i class="fas fa-sort"></i></th>
+              <th>Space</th>
               <th @click="sortTable('subject')">Subject <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('appointment_type')">Appointment Type <i class="fas fa-sort"></i></th>
+              <th>Date</th>
+              <th @click="sortTable('start_time')">Time <i class="fas fa-sort"></i></th>
+              <th @click="sortTable('userName')">Recipient <i class="fas fa-sort"></i></th>
+
+              <th @click="sortTable('contact_name')">Contact Name <i class="fas fa-sort"></i></th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
+                <td>{{ item.space_name }}</td>
+                <td>{{ item.subject }}</td>
+<td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }}- {{ item.end_time }}</td>
                 <td>{{ item.contact_name }}</td>
                 <td>{{ item.userName }}</td>
-                <td>{{ item.email_address }}</td>
-                <td>{{ item.mobile_number }}</td>
-                <td>{{ item.subject }}</td>
-                <td>{{ item.appointment_type }}</td>
                 <td>
                   <!-- Actions -->
                   <button class="btn btn-outline-primary btn-sm me-3" @click="confirmApprove(item.id)">

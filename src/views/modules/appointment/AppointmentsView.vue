@@ -80,11 +80,12 @@ const removeFile = () => {
 }
 
 const flatPickrConfig = {
-  dateFormat: 'Y-m-d',
+  dateFormat: 'd M Y',
   altInput: true,
-  altFormat: 'F j, Y',
+  altFormat: 'd M Y',
   minDate: 'today'
 }
+
 
 const myModal = ref(null)
 
@@ -835,6 +836,8 @@ const handleDateChange = (newValue) => {
   // Call the debounced getSlots
   debouncedGetSlots()
 }
+
+
 
 //watch for changes in appointmentDetails.appointment_date and call getSlots
 

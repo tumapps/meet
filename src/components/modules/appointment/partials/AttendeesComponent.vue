@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, defineProps } from 'vue'
 import createAxiosInstance from '@/api/axios'
+import Swal from 'sweetalert2'
 
 // Props
 const props = defineProps({
@@ -14,10 +15,8 @@ const props = defineProps({
 const searchQuery = ref('')
 const searchResults = ref([])
 const attendees = ref([]) // Holds all attendees (from backend and added via search)
-const rejectionReason = ref('')
-const rejectionModal = ref(null)
 const currentRemovalIndex = ref(null) // Tracks the index of the attendee being removed
-const removedAttendees = ref([]) // Stores removed attendees and their reasons
+const removedAttendees = ref({}) // Stores removed attendees and their reasons
 
 // Axios Instance
 const axiosInstance = createAxiosInstance()
@@ -62,34 +61,55 @@ const addAttendeeToTable = (user) => {
 // Remove an attendee from the table
 const removeAttendee = (index, fromBackend) => {
   if (fromBackend) {
-    // If attendee is from the backend, show the rejection modal
+    // If attendee is from the backend, show the Removal modal
     currentRemovalIndex.value = index
-    rejectionModal.value.show()
+    confirmRemoval()
   } else {
-    // If attendee is added via search, mark as removed directly
-    attendees.value[index].removed = true
-    removedAttendees.value.push({
-      ...attendees.value[index],
-      reason: 'No reason required (added via search)'
-    })
+    attendees.value.splice(index, 1)
   }
 }
 
-// Confirm rejection and mark the attendee as removed
-const confirmRejection = () => {
-  if (rejectionReason.value) {
-    const removedUser = attendees.value[currentRemovalIndex.value]
-    removedUser.removed = true
-    removedAttendees.value.push({
-      ...removedUser,
-      reason: rejectionReason.value
-    })
-    rejectionReason.value = ''
-    rejectionModal.value.hide()
-  } else {
-    alert('Please provide a reason for rejection.')
-  }
+const confirmRemoval = () => {
+  Swal.fire({
+    title: 'Provide a reason for Removal',
+    input: 'textarea',
+    inputLabel: 'Removal Reason',
+    inputPlaceholder: 'Please type your reason here...',
+    inputAttributes: {
+      'aria-label': 'Please type your reason here'
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: 'primary',
+    cancelButtonColor: '#d33',
+    preConfirm: (inputValue) => {
+      if (!inputValue) {
+        Swal.showValidationMessage('Reason is required!')
+        return false // Prevents the alert from closing
+      }
+      return inputValue // Pass the input value to the `then` block
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const reason = result.value
+      console.log('Removal Reason:', attendees.value[currentRemovalIndex.value])
+      // Proceed with the removal process
+      const removedUser = attendees.value[currentRemovalIndex.value]
+      removedUser.removed = true
+      // removedAttendees.value.push({
+      //   ...removedUser,
+      //   reason
+      // })
+      removedAttendees.value[removedUser.attendee_id] = reason
+      console.log('Removed Attendees:', removedAttendees.value)
+
+      //backedn call to remove the user
+      submitRemovedAttendees()
+    }
+  })
 }
+
 
 // Restore a removed attendee
 const restoreAttendee = (index) => {
@@ -101,9 +121,7 @@ const restoreAttendee = (index) => {
 
 // Submit removed attendees
 const submitRemovedAttendees = () => {
-  console.log('Removed Attendees:', removedAttendees.value)
-  alert('Removed attendees submitted successfully!')
-  // You can now send `removedAttendees.value` to your backend API
+ //call to backend
 }
 </script>
 
@@ -168,18 +186,18 @@ const submitRemovedAttendees = () => {
       </table>
     </div>
 
-    <!-- Rejection Reasons Modal -->
-    <b-modal ref="rejectionModal" title="Provide Rejection Reason" size="lg" hide-footer>
+    <!-- Removal Reasons Modal -->
+    <!-- <b-modal ref="RemovalModal" title="Provide Reason for Removal" size="lg" hide-footer>
       <template #default>
         <div>
-          <label for="rejectionReason">Reason for rejection:</label>
-          <input v-model="rejectionReason" type="text" class="form-control mb-3" id="rejectionReason" placeholder="Enter rejection reason" />
+          <label for="Reason for Removal">Reason:</label>
+          <input v-model="RemovalReason" type="text" class="form-control mb-3" id="RemovalReason" placeholder="Enter Reason for Removal" />
         </div>
         <div class="mt-3 mb-4">
-          <b-button @click="confirmRejection" variant="primary" class="mr-2">Submit</b-button>
+          <b-button @click="confirmRemoval" variant="primary" class="mr-2">Submit</b-button>
         </div>
       </template>
-    </b-modal>
+    </b-modal> -->
 
     <!-- Submit Removed Attendees Button -->
     <div class="mt-4">
