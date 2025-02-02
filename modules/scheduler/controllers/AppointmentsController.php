@@ -67,20 +67,7 @@ class AppointmentsController extends \helpers\ApiController
             $appointmentData = $appointment->toArray();
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
 
-            $space = SpaceAvailability::find()
-                ->where(['appointment_id' => $appointment->id])
-                ->asArray()
-                ->one();
-
-            if ($space && isset($space['space_id'])) {
-                $spaceDetails = Space::getSpaceNameDetails($space['space_id']);
-                $appointmentData['space'] = $spaceDetails;
-            } elseif (empty($space)) {
-                $spaceDetails = Space::getSpaceNameDetails($appointment['user_id']);
-                $appointmentData['space'] = $spaceDetails;
-            } else {
-                $appointmentData['space'] = null;
-            }
+            $appointmentData['space'] = $this->getSpaceDetails($appointment);
 
             $attendees = AppointmentAttendees::find()
                 ->select(['attendee_id', 'status'])
@@ -112,6 +99,8 @@ class AppointmentsController extends \helpers\ApiController
         return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
+
+
     public function actionPendingAppointments()
     {
         Yii::$app->user->can('registrar');
@@ -129,6 +118,7 @@ class AppointmentsController extends \helpers\ApiController
         foreach ($appointments as &$appointment) {
             $appointmentData = $appointment->toArray();
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
+            $appointmentData['space'] = $this->getSpaceDetails($appointment);
             $appointment = $appointmentData;
         }
 
@@ -226,20 +216,7 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData = $appointment->toArray();
         $appointmentData['statusLabel'] = $statusLabel;
 
-        $space = SpaceAvailability::find()
-            ->where(['appointment_id' => $appointment->id])
-            ->asArray()
-            ->one();
-
-        if ($space && isset($space['space_id'])) {
-            $spaceDetails = Space::getSpaceNameDetails($space['space_id']);
-            $appointmentData['space'] = $spaceDetails;
-        } elseif (empty($space)) {
-            $spaceDetails = Space::getSpaceNameDetails($appointment['user_id']);
-            $appointmentData['space'] = $spaceDetails;
-        } else {
-            $appointmentData['space'] = null;
-        }
+        $appointmentData['space'] = $this->getSpaceDetails($appointment);
 
         $attendees = AppointmentAttendees::find()
             ->select(['attendee_id', 'status'])
@@ -265,6 +242,22 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData['attendees'] =  $attendeeDetails;
 
         return $this->payloadResponse($appointmentData);
+    }
+
+    private function getSpaceDetails($appointment)
+    {
+        $space = SpaceAvailability::find()
+            ->where(['appointment_id' => $appointment->id])
+            ->asArray()
+            ->one();
+
+        if ($space && isset($space['space_id'])) {
+            return Space::getSpaceNameDetails($space['space_id']);
+        } elseif (empty($space)) {
+            return Space::getSpaceNameDetails($appointment->user_id);
+        } else {
+            return null;
+        }
     }
 
     public function actionMeetingTypes()
