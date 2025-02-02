@@ -127,11 +127,10 @@ class AppointmentAttachments extends BaseModel
             $this->file_name = $uploadedFile->name;
             $this->file_url = $object->info()['mediaLink'];
             $this->self_link = $object->info()['selfLink'];
-
-            if (!$this->validate()) {
-                Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
-                return ['status' => 'error', 'message' => $this->getErrors()];
-            }
+            // if (!$this->validate()) {
+            //     Yii::error('Validation failed: ' . json_encode($this->getErrors()), __METHOD__);
+            //     return ['status' => 'error', 'message' => $this->getErrors()];
+            // }
 
             if (!$this->save()) {
                 Yii::error('Save failed: ' . json_encode($this->getErrors()), __METHOD__);
@@ -141,7 +140,7 @@ class AppointmentAttachments extends BaseModel
             return true;
         } catch (\Exception $e) {
             Yii::error('Google Cloud upload failed: ' . $e->getMessage(), __METHOD__);
-            return ['status' => 'error', 'message' => 'Failed to upload file to Google Cloud.'];
+            return ['status' => 'error', 'message' => 'Failed to upload file This may be caused by network issues check your internet connection' .  $e->getMessage()];
         }
     }
 
