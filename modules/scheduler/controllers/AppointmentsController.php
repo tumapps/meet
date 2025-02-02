@@ -357,7 +357,7 @@ class AppointmentsController extends \helpers\ApiController
                     $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
 
                     if ($uploadResult !== true) {
-                        return $this->errorResponse(['message' => $uploadResult['message']]);
+                        return $this->errorResponse(['message' => [$uploadResult['message']]]);
                     }
 
 
@@ -757,18 +757,20 @@ class AppointmentsController extends \helpers\ApiController
     // }
     public function actionRemoveAttendee($id)
     {
+        Yii::$app->user->can('schedulerAppointmentsCreate');
+        $model = new AppointmentAttendees();
+        $model->loadDefaultValues();
         $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
         $attendees = $dataRequest['Attendee']['Attendees'] ?? [];
 
-        $model = new AppointmentAttendees();
-
-        if (!$model->load($dataRequest, 'Attendees') || !$model->validate()) {
+        if (!$model->validate()) {
             return $this->errorResponse($model->getErrors());
         }
 
         $appointment = Appointments::findOne($id);
+
         if (!$appointment) {
-            return $this->errorResponse(['message' => ['Appointment not found']]);
+            return $this->errorResponse(['message' => ['Meeting does not exist']]);
         }
 
         $transaction = Yii::$app->db->beginTransaction();
@@ -779,7 +781,7 @@ class AppointmentsController extends \helpers\ApiController
             foreach ($attendees as $attendeeId => $removalReason) {
                 $attendee = AppointmentAttendees::findOne([
                     'appointment_id' => $id,
-                    'staff_id' => $attendeeId,
+                    'attendee_id' => $attendeeId,
                 ]);
 
                 if (!$attendee) {
@@ -807,7 +809,7 @@ class AppointmentsController extends \helpers\ApiController
 
                     $attendee->sendAttendeeUpdateEvent(
                         $attendee->appointment_id,
-                        $attendee->id,
+                        $attendee->attendee_id,
                         $removalReason,
                         true
                     );
