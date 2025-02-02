@@ -460,8 +460,31 @@ return [
      * @OA\Put(
      *     path="/scheduler/remove-attendee/{id}",
      *     tags={"Appointments"},
-     *     summary="Deletes an existing Appointments Attendee model.",
-     *     @OA\Parameter(description="Appointments unique ID to delete",in="path",name="id",required=true,@OA\Schema(type="string",)),
+     *     summary="Removes attendees associated with the specified appointment ID", 
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Appointment's unique ID",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="string"
+     *         )
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             required={"attendees"},
+     *             @OA\Property(
+     *                 property="attendees",
+     *                 type="object",
+     *                 description="An array of attendees to remove, where the key is the attendee ID and the value is the removal reason",
+     *                 @OA\AdditionalProperties(
+     *                     @OA\Schema(type="string")
+     *                 )
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
      *         response=202,
      *         description="Deletion successful",
@@ -469,8 +492,13 @@ return [
      *             @OA\Property(property="dataPayload", type="object")
      *         )
      *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid request"
+     *     )
      * )
      */
+
     'PUT remove-attendee/{id}' => 'appointments/remove-attendee',
 
     /**
