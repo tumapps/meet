@@ -365,25 +365,24 @@ const toggleLock = async (id) => {
       getSpaces(1)
       // Show toast notification using the response data
 
-      proxy.$showToast({
-        title: toastPayload.value.toastMessage || 'Space Deleted successfully',
-        // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
-        icon: 'success'
-      })
-    } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
-        title: 'Space Deleted successfully',
-        icon: 'success'
+      proxy.$showAlert({
+        title: toastPayload.value.toastTheme,
+        text: toastPayload.value.toastMessage,
+        icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 1500
       })
     }
   } catch (error) {
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message || 'An unknown error occurred'
 
-    proxy.$showToast({
+    proxy.$showAlert({
       title: 'An error occurred',
       text: errorMessage,
-      icon: 'error'
+      icon: 'error',
+      showCancelButton: true,
+      showConfirmButton: false
     })
 
     console.error('Failed to update lock status:', error)

@@ -560,20 +560,39 @@ const updateAppointment = async () => {
     errorDetails.value = {}
 
     // Create a new FormData object
+    // const formData = new FormData()
+
+    // for (const key in appointmentDetails.value) {
+    //   if (key === 'file' && appointmentDetails.value[key]) {
+    //     formData.append(key, appointmentDetails.value[key])
+    //   } else if (appointmentDetails.value[key] !== null && appointmentDetails.value[key] !== undefined) {
+    //     // ✅ Convert `attendees` to JSON only if it's an array
+    //     if (key === 'attendees' && Array.isArray(appointmentDetails.value[key])) {
+    //       formData.append(key, JSON.stringify(appointmentDetails.value[key]))
+    //     } else {
+    //       formData.append(key, appointmentDetails.value[key])
+    //     }
+    //   }
+    // }
+
     const formData = new FormData()
 
-    for (const key in appointmentDetails.value) {
-      if (key === 'file' && appointmentDetails.value[key]) {
-        formData.append(key, appointmentDetails.value[key])
-      } else if (appointmentDetails.value[key] !== null && appointmentDetails.value[key] !== undefined) {
-        // ✅ Convert `attendees` to JSON only if it's an array
-        if (key === 'attendees' && Array.isArray(appointmentDetails.value[key])) {
-          formData.append(key, JSON.stringify(appointmentDetails.value[key]))
-        } else {
-          formData.append(key, appointmentDetails.value[key])
-        }
-      }
-    }
+// Append file separately
+if (appointmentDetails.value.file) {
+  formData.append('file', appointmentDetails.value.file)
+}
+
+// Append other fields
+Object.keys(appointmentDetails.value).forEach((key) => {
+  const value = appointmentDetails.value[key]
+
+  console.log('key:', key, ':', value)
+
+  if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordstatus' && value.toString().trim() !== '') {
+    formData.append(key, value)
+  }
+})
+
 
     // / ✅ Convert attendees array to a JSON string before appending
     // formData.append('attendees', JSON.stringify(attendees.value))
@@ -1246,7 +1265,7 @@ onUnmounted(() => {
                 <b-row class="m-5">
                   <b-col>
                     <div class="d-flex justify-content-center">
-                      <b-button variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE'"> Update </b-button>
+                      <b-button variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING'"> Update </b-button>
                     </div>
                   </b-col>
                 </b-row>

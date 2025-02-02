@@ -57,17 +57,19 @@ const onModalShow = () => {
   if (props.user_id && props.roleName) {
     custompath.value = `/v1/auth/assign-role-user/${props.user_id}`
     custompath2.value = `/v1/auth/revoke-user-roles/${props.user_id}`
+    getUserRoles()
   } else if (props.roleName) {
     custompath.value = `/v1/auth/assign?role=${props.roleName}`
     custompath2.value = `/v1/auth/remove?id=${props.roleName}`
+    getRoleDetails()
   }
 
-  if (!props.user_id) {
-    getRoleDetails()
-  } else if (props.user_id) {
-    console.log('Getting user roles')
-    getUserRoles()
-  }
+  // if (!props.user_id) {
+  //   getRoleDetails()
+  // } else if (props.user_id) {
+  //   console.log('Getting user roles')
+  //   // getUserRoles()
+  // }
 }
 
 const handleclose = () => {
@@ -272,7 +274,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <b-modal ref="roleModal" @show="onModalShow" :title="rolename" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleclose">
+  <b-modal ref="roleModal" @show="onModalShow" :title="rolename" class="modal-fullscreen modal rounded-3" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleclose">
     <!-- Page Content -->
     <div class="row" style="max-height: 70vh; display: flex; overflow: hidden">
       <!-- Available Items Column -->
@@ -342,6 +344,10 @@ onMounted(() => {
 </template>
 
 <style>
+.modal .modal-content {
+  border-radius: 8px !important; /* Ensures the modal content is also rounded */
+}
+
 /* Styling for borders */
 .border {
   border: 2px solid #ddd;

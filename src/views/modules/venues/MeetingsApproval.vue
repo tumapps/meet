@@ -291,10 +291,11 @@ onMounted(() => {
           <thead>
             <tr>
               <th>Space</th>
-              <th @click="sortTable('subject')">Subject <i class="fas fa-sort"></i></th>
-              <th>Date</th>
+              <th @click="sortTable('appointment_date')">Date</th>
               <th @click="sortTable('start_time')">Time <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('userName')">Recipient <i class="fas fa-sort"></i></th>
+              <th @click="sortTable('subject')">Subject <i class="fas fa-sort"></i></th>
+
+              <th @click="sortTable('userName')">ChairPerson <i class="fas fa-sort"></i></th>
 
               <th @click="sortTable('contact_name')">Contact Name <i class="fas fa-sort"></i></th>
               <th>Actions</th>
@@ -303,10 +304,11 @@ onMounted(() => {
           <tbody>
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
-                <td>{{ item.space_name }}</td>
-                <td>{{ item.subject }}</td>
+                <td>{{ item.space.name }}</td>
                 <td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }}- {{ item.end_time }}</td>
+                <td>{{ item.subject }}</td>
+
                 <td>{{ item.contact_name }}</td>
                 <td>{{ item.userName }}</td>
                 <td>
