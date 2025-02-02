@@ -71,9 +71,9 @@ const addAttendeeToTable = (user) => {
 
   const duplicate = attendees.value.some((attendee) => attendee.attendee_id === user.id)
 
-  if(!duplicate){
-  attendees.value.push({ ...user, fromBackend: false, removed: false })
-  }else{
+  if (!duplicate) {
+    attendees.value.push({ ...user, fromBackend: false, removed: false })
+  } else {
     Swal.fire('Error!', 'Attendee already added.', 'error')
   }
 
@@ -149,7 +149,7 @@ const submitRemovedAttendees = async () => {
     }
     console.log('Removed Attendees:', removedAttendees.value)
   } catch (error) {
-console.log('meetingId:', meetingId.value)
+    console.log('meetingId:', meetingId.value)
 
     console.error('Error submitting removed attendees:', error)
   }

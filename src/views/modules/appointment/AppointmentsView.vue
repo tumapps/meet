@@ -80,9 +80,9 @@ const removeFile = () => {
 }
 
 const flatPickrConfig = {
-  dateFormat: 'd M Y',
+  dateFormat: 'Y m d',
   altInput: true,
-  altFormat: 'd M Y',
+  altFormat: 'd-M-Y',
   minDate: 'today'
 }
 
