@@ -86,7 +86,6 @@ const flatPickrConfig = {
   minDate: 'today'
 }
 
-
 const myModal = ref(null)
 
 const goToPage = (page) => {
@@ -554,23 +553,33 @@ const openModal = (id) => {
 // }
 
 const updateAppointment = async () => {
-  console.log(appointmentDetails.value.checked_in)
+  console.log(appointmentDetails.value)
+  //map only the attendee_id to the attendees array
+  appointmentDetails.value.attendees = attendees.value.map((attendee) => attendee.attendee_id)
   try {
     errorDetails.value = {}
 
     // Create a new FormData object
     const formData = new FormData()
 
-    // Append all appointment details to the FormData object
     for (const key in appointmentDetails.value) {
       if (key === 'file' && appointmentDetails.value[key]) {
-        // Append the file
         formData.append(key, appointmentDetails.value[key])
       } else if (appointmentDetails.value[key] !== null && appointmentDetails.value[key] !== undefined) {
-        // Append other fields
-        formData.append(key, appointmentDetails.value[key])
+        // ✅ Convert `attendees` to JSON only if it's an array
+        if (key === 'attendees' && Array.isArray(appointmentDetails.value[key])) {
+          formData.append(key, JSON.stringify(appointmentDetails.value[key]))
+        } else {
+          formData.append(key, appointmentDetails.value[key])
+        }
       }
     }
+
+    // / ✅ Convert attendees array to a JSON string before appending
+    // formData.append('attendees', JSON.stringify(attendees.value))
+
+    console.log('attendees', attendees.value)
+    console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, formData, {
@@ -837,8 +846,6 @@ const handleDateChange = (newValue) => {
   // Call the debounced getSlots
   debouncedGetSlots()
 }
-
-
 
 //watch for changes in appointmentDetails.appointment_date and call getSlots
 
