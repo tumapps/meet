@@ -333,16 +333,25 @@ return [
 
     /**
      * @OA\Get(
-     *     path="/scheduler/space-details",
+     *     path="/scheduler/space-details/{space_id}/{date}",
      *     summary="Get space details",
      *     tags={"Appointments"},
+     *   @OA\RequestBody(
+     *     required=true,
+     *     description="Provide space id & date",
+     *     @OA\JsonContent(
+     *       required={"space_id", "date"},
+     *       @OA\Property(property="space_id", type="string", example="6554"),
+     *       @OA\Property(property="date", type="string", example="2025-05-15")
+     *     )
+     *   ),
      *     @OA\Response(
      *         response=200,
      *         description="Returns space details",
      *     )
      * )
      */
-    'GET space-details' => 'appointments/space-details',
+    'GET space-details/{space_id}/{date}' => 'appointments/space-details',
 
     /**
      * @OA\Put(
@@ -430,31 +439,32 @@ return [
 
     /**
      * @OA\Put(
-     *     path="/scheduler/cancel/{id}",
+     *     path="/scheduler/cancel-meeting/{id}",
      *     tags={"Appointments"},
-     *     summary="Cancel an existing Appointments model",
+     *     summary="Cancel an existing Appointment",
      *     @OA\Parameter(description="Appointments unique ID to load and update",in="path",name="id",required=true,@OA\Schema(type="string",)),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         description="Finds the Appointments model to be canceled based on its primary key value",
-     *         @OA\JsonContent(
-     *             ref="#/components/schemas/Appointments",
-     *         ),
-     *     ),
+     *   @OA\RequestBody(
+     *     required=true,
+     *     description="Cancellation Reason",
+     *     @OA\JsonContent(
+     *       required={"cancellation_reason",},
+     *       @OA\Property(property="cancellation_reason", type="string", example="the meeting has been cancelled due to ...")
+     *     )
+     *   ),
      *     @OA\Response(
      *         response=202,
      *         description="Data payload",
      *         @OA\JsonContent(
      *             @OA\Property(property="dataPayload", type="object",
      *                 @OA\Property(property="data", type="object",ref="#/components/schemas/Appointments"),
-     *                 @OA\Property(property="toastMessage", type="string", example="appointments canceled successfully"),
+     *                 @OA\Property(property="toastMessage", type="string", example="appointments rejected successfully"),
      *                 @OA\Property(property="toastTheme", type="string",example="success"),
      *             )
      *         )
      *     ),
      * )
      */
-    'PUT cancel/{id}'     => 'appointments/cancel',
+    'PUT cancel-meeting/{id}' => 'appointments/cancel-meeting',
 
     /**
      * @OA\Put(
