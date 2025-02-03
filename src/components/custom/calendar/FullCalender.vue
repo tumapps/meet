@@ -18,6 +18,7 @@ const props = defineProps({
     required: true
   }
 })
+//wooah
 
 console.log('dashType:', props.dashType)
 
@@ -310,10 +311,17 @@ watch(
   }
 )
 
-// FullCalendar options
+// Watch for dashType changes and update initialView
+watch(
+  () => props.dashType,
+  (newDashType) => {
+    calendarOptions.value.initialView = newDashType === 'Registrar' ? 'timeGridMonth' : 'timeGridWeek'
+  }
+)
+
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
+  initialView: props.dashType === 'Registrar' ? 'dayGridMonth' : 'timeGridWeek',
   height: 'auto',
   events: events.value,
   weekends: preferences.weekend,

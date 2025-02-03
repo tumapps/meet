@@ -575,42 +575,38 @@ const updateAppointment = async () => {
     //   }
     // }
 
-    const formData = new FormData()
+    // const formData = new FormData()
 
-// Append file separately
-if (appointmentDetails.value.file) {
-  formData.append('file', appointmentDetails.value.file)
-}
+// // Append file separately
+// if (appointmentDetails.value.file) {
+//   formData.append('file', appointmentDetails.value.file)
+// }
 
-// Append other fields
-Object.keys(appointmentDetails.value).forEach((key) => {
-  const value = appointmentDetails.value[key]
+// // Append other fields
+// Object.keys(appointmentDetails.value).forEach((key) => {
+//   const value = appointmentDetails.value[key]
 
-  console.log('key:', key, ':', value)
+//   console.log('key:', key, ':', value)
 
-  if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordStatus' && value.toString().trim() !== '') {
-    // if (key === 'attendees' && Array.isArray(value)) {
-      // formData.append(key, JSON.stringify(value))
-    // } else{
-       formData.append(key, value)
-    // }
+//   if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordStatus' && value.toString().trim() !== '') {
+//     // if (key === 'attendees' && Array.isArray(value)) {
+//       // formData.append(key, JSON.stringify(value))
+//     // } else{
+//        formData.append(key, value)
+//     // }
    
-  }
-})
+//   }
+// })
 
 
     // / ✅ Convert attendees array to a JSON string before appending
     // formData.append('attendees', JSON.stringify(attendees.value))
 
-    console.log('attendees', attendees.value)
-    console.log('Form data:', formData) // Log the FormData object for debugging
+    // console.log('attendees', attendees.value)
+    // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
-    const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data' // Set the content type to multipart/form-data
-      }
-    })
+    const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
 
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
