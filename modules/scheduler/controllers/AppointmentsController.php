@@ -630,13 +630,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionSpaceDetails($space_id, $date)
     {
-        // $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        // $space_id = $dataRequest['Appointments']['space_id'];
-        // $date = $dataRequest['Appointments']['date'];
-
-        // if (empty($space_id) || empty($date)) {
-        //     return $this->errorResponse(['message' => ['space id and date is required']]);
-        // }
+        
 
         $space = Space::findOne($space_id);
         if (!$space) {

@@ -1104,14 +1104,14 @@
                 }
             }
         },
-        "/scheduler/space-details/{space_id}/{date}": {
+        "/scheduler/space-details/{id}/{date}": {
             "get": {
                 "tags": [
                     "Appointments"
                 ],
                 "summary": "Get space details",
                 "requestBody": {
-                    "description": "Provide space id & date",
+                    "description": "Provide space_id & date",
                     "required": true,
                     "content": {
                         "application/json": {
