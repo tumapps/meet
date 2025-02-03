@@ -87,23 +87,6 @@ class Appointments extends BaseModel
     public $cancellation_reason;
     public $rejection_reason;
 
-
-    public function init()
-    {
-        parent::init();
-    }
-
-    public function behaviors()
-    {
-        return [
-            BlameableBehavior::class,
-            TimeStampBehavior::class,
-            \helpers\behaviors\Delete::class,
-            \helpers\behaviors\Creator::class,
-            // \helpers\behaviors\DateFormatter::class,
-        ];
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -135,7 +118,12 @@ class Appointments extends BaseModel
                 },
                 'created_by',
                 'updated_by',
-                'created_at',
+                'created_at' => function () {
+                    return $this->created_at? Yii::$app->formatter->asDateTime($this->created_at) : null;
+                },
+                'relative_time' => function () {
+                    return $this->created_at ? Yii::$app->formatter->asRelativeTime($this->created_at) : null;
+                },
                 'updated_at',
             ]
         );
