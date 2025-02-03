@@ -99,8 +99,6 @@ class AppointmentsController extends \helpers\ApiController
         return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
-
-
     public function actionPendingAppointments()
     {
         Yii::$app->user->can('registrar');
@@ -300,12 +298,13 @@ class AppointmentsController extends \helpers\ApiController
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
+        return $dataRequest['Appointments'];
+
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
         }
 
         $transaction = Yii::$app->db->beginTransaction();
-
 
         try {
 
@@ -391,20 +390,24 @@ class AppointmentsController extends \helpers\ApiController
 
         $model = $this->findModel($id);
 
-        // getting initial appointments data
         $initial_date = $model->appointment_date;
         $initial_start_time =  $model->start_time;
         $initial_end_time = $model->end_time;
 
         $attendees = AppointmentAttendees::findAll(['appointment_id' => $id]);
+        $spaceType = Space::find()
+            ->select(['space_type'])
+            ->where(['id' => $dataRequest['Appointments']['space_id']])
+            ->scalar();
+
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
 
+        $model->uploadedFile = UploadedFile::getInstanceByName('file');
 
         if ($model->load($dataRequest)) {
 
-            $model->uploadedFile = UploadedFile::getInstanceByName('file');
-
             if (!$model->validate()) {
+                Yii::debug($model->getErrors(), 'Validation Errors');
                 return $this->errorResponse($model->getErrors());
             }
 
@@ -416,14 +419,18 @@ class AppointmentsController extends \helpers\ApiController
 
             try {
                 if ($model->save()) {
-                    $this->updateAttendees($dataRequest, $attendees);
-                    $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
-                    $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
 
-                    if ($uploadResult !== true) {
-                        //todo: use toast response instead
-                        return $this->errorResponse(['message' => $uploadResult['message']]);
+                    $this->updateAttendees($dataRequest, $attendees);
+                    if ($spaceType === Space::SPACE_TYPE_MANAGED) {
+                        $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
                     }
+
+                    // $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
+
+                    // if ($uploadResult !== true) {
+                    //     //todo: use toast response instead
+                    //     return $this->errorResponse(['message' => $uploadResult['message']]);
+                    // }
 
                     if ($model->status === Appointments::STATUS_RESCHEDULED) {
                         $model->sendAppointmentRescheduledEvent(
@@ -436,7 +443,6 @@ class AppointmentsController extends \helpers\ApiController
                         );
                     }
 
-                    // Send notifications if the appointment date has been updated
                     if (
                         $model->appointment_date !== $initial_date ||
                         $model->start_time !== $initial_start_time ||
@@ -694,61 +700,8 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    // public function actionRemoveAttendee($id)
-    // {
-    //     $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
-    //     $attendees = $dataRequest['Attendee']['Attendees'] ?? [];
 
-    //     $model = new AppointmentAttendees();
-    //     $model->scenario = AppointmentAttendees::SCENARIO_REMOVE;
 
-    //     if (!$model->load($dataRequest, 'Attendees') || !$model->validate()) {
-    //         return $this->errorResponse($model->getErrors());
-    //     }
-
-    //     $appointment = Appointments::findOne($id);
-    //     if (!$appointment) {
-    //         return $this->errorResponse(['message' => ['Appointment not found']]);
-    //     }
-
-    //     foreach ($attendees as $attendeeId => $removalReason) {
-    //         $attendee = AppointmentAttendees::findOne([
-    //             'appointment_id' => $id,
-    //             'attendee_id' => $attendeeId,
-    //         ]);
-
-    //         if (!$attendee) {
-    //             continue; 
-    //         }
-
-    //         $attendee->is_removed = AppointmentAttendees::STATUS_REMOVED;
-
-    //         if ($attendee->save(false)) {
-    //             $operationReason = new OperationReasons();
-
-    //             $saved = $operationReason->saveActionReason($id, $removalReason,'REMOVED', 'APPOINTMENTS', $attendeeId, Yii::$app->user->id);
-
-    //             if (!$saved) {
-    //                 // Yii::error("Failed to save operation reason for attendee ID: {$attendeeId}");
-    //                 return $this->errorResponse(['message' => ['Failed to save operation reason for attendee ID: {$attendeeId}']]);
-    //             }
-
-    //             // Send update notification/event
-    //             $attendee->sendAttendeeUpdateEvent(
-    //                 $attendee->appointment_id,
-    //                 $attendee->id,
-    //                 $removalReason,
-    //                 true
-    //             );
-    //         } else {
-    //             // Yii::error("Failed to remove attendee ID: {$attendeeId}");
-    //             return $this->errorResponse(['message' => ['Failed to remove attendee ID: {$attendeeId}']]);
-
-    //         }
-    //     }
-
-    //     return $this->toastResponse(['message' => ['Attendees processed successfully.']]);
-    // }
     public function actionRemoveAttendee($id)
     {
         Yii::$app->user->can('schedulerAppointmentsCreate');
@@ -757,9 +710,7 @@ class AppointmentsController extends \helpers\ApiController
         $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
         $attendees = $dataRequest['Attendee']['Attendees'] ?? [];
 
-        if (!$model->validate()) {
-            return $this->errorResponse($model->getErrors());
-        }
+        $model->appointment_id = $id;
 
         $appointment = Appointments::findOne($id);
 
@@ -769,8 +720,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $successCount = 0;
-            $failureCount = 0;
+            $failedUpdates = [];
 
             foreach ($attendees as $attendeeId => $removalReason) {
                 $attendee = AppointmentAttendees::findOne([
@@ -779,50 +729,66 @@ class AppointmentsController extends \helpers\ApiController
                 ]);
 
                 if (!$attendee) {
-                    $failureCount++;
+                    $failedUpdates[] = [
+                        'attendee_id' => $attendeeId,
+                        'reason' => 'Attendee not found'
+                    ];
                     continue;
                 }
 
                 $attendee->is_removed = AppointmentAttendees::STATUS_REMOVED;
 
-                if ($attendee->save(false)) {
-                    $operationReason = new OperationReasons();
-                    $saved = $operationReason->saveActionReason(
-                        $id,
-                        $removalReason,
-                        'REMOVED',
-                        'APPOINTMENTS',
-                        $attendeeId,
-                        Yii::$app->user->id
-                    );
-
-                    if (!$saved) {
-                        $transaction->rollBack();
-                        return $this->errorResponse(['message' => ["Failed to save operation reason for attendee ID: $attendeeId"]]);
-                    }
-
-                    $attendee->sendAttendeeUpdateEvent(
-                        $attendee->appointment_id,
-                        $attendee->attendee_id,
-                        $removalReason,
-                        true
-                    );
-                    $successCount++;
-                } else {
-                    $failureCount++;
+                if (!$attendee->save(false)) {
+                    $failedUpdates[] = [
+                        'attendee_id' => $attendeeId,
+                        'reason' => 'Failed to update attendee status'
+                    ];
+                    continue;
                 }
+
+                $operationReason = new OperationReasons();
+                $saved = $operationReason->saveActionReason(
+                    $id,
+                    $removalReason,
+                    'REMOVED',
+                    'APPOINTMENTS',
+                    $attendeeId,
+                    Yii::$app->user->id
+                );
+
+                if (!$saved) {
+                    $transaction->rollBack();
+                    return $this->errorResponse([
+                        'message' => ["Failed to save operation reason for attendee ID: $attendeeId"]
+                    ]);
+                }
+
+                $attendee->sendAttendeeUpdateEvent(
+                    $attendee->appointment_id,
+                    $attendee->attendee_id,
+                    $removalReason,
+                    true
+                );
+            }
+
+            if (!empty($failedUpdates)) {
+                $transaction->rollBack();
+                return $this->errorResponse([
+                    'message' => 'Some attendees failed to be removed.',
+                    'failed_updates' => $failedUpdates
+                ]);
             }
 
             $transaction->commit();
             return $this->toastResponse([
-                'message' => [
-                    "$successCount attendees processed successfully.",
-                    "$failureCount attendees failed to be processed."
-                ]
+                'message' => 'All attendees removed successfully.'
             ]);
         } catch (\Exception $e) {
             $transaction->rollBack();
-            return $this->errorResponse(['message' => ['An unexpected error occurred.']]);
+            return $this->errorResponse([
+                'message' => ['An unexpected error occurred.'],
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -842,13 +808,13 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    protected function updateAttendees($dataRequest, $currentAttendees)
+    protected function updateAttendees3($dataRequest, $currentAttendees)
     {
         if ($dataRequest['Appointments']['attendees'] === 'null') {
             $dataRequest['Appointments']['attendees'] = null;
         }
 
-        $newAttendeesData = $dataRequest['Appointments']['attendees'];
+        $newAttendeesData = $dataRequest['Appointments']['attendees'] ?? [];
 
         if (empty($newAttendeesData) || $newAttendeesData === null) {
             return;
@@ -881,10 +847,64 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
+    protected function updateAttendees($dataRequest, $currentAttendees)
+    {
+        if (isset($dataRequest['Appointments']['attendees'])) {
+            $attendeesRaw = $dataRequest['Appointments']['attendees'];
+
+            if (is_string($attendeesRaw)) {
+                $attendeesRaw = explode(',', $attendeesRaw);
+            }
+
+            $dataRequest['Appointments']['attendees'] = $attendeesRaw;
+        } else {
+            $dataRequest['Appointments']['attendees'] = [];
+        }
+
+        $newAttendeesData = $dataRequest['Appointments']['attendees'];
+
+        if (empty($newAttendeesData)) {
+            return;
+        }
+
+        $existingAttendeesIds = array_column($currentAttendees, 'id');
+
+        foreach ($newAttendeesData as $attendeeId) {
+            $attendeeId = intval($attendeeId);
+
+            if (in_array($attendeeId, $existingAttendeesIds)) {
+                $attendee = AppointmentAttendees::findOne($attendeeId);
+                if (!$attendee) {
+                    continue;
+                }
+
+                unset($attendee->appointment_id);
+
+                if (!$attendee->validate() || !$attendee->save()) {
+                    return $this->errorResponse($attendee->getErrors());
+                }
+            } else {
+                $newAttendee = new AppointmentAttendees();
+                $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
+                $newAttendee->staff_id = $attendeeId; // Save staff_id correctly
+
+                if (!$newAttendee->validate() || !$newAttendee->save()) {
+                    return $this->errorResponse($newAttendee->getErrors());
+                }
+
+                $newAttendee->sendAttendeeUpdateEvent($newAttendee->appointment_id, $newAttendee->id);
+            }
+        }
+    }
+
+
     protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability)
     {
-        if (empty($dataRequest['Appointments']['space_id'] === 'null')) {
-            $dataRequest['Appointments']['space_id'] === null;
+        if (isset($dataRequest['Appointments']['space_id'])) {
+            $space_id = $dataRequest['Appointments']['space_id'];
+            $dataRequest['Appointments']['space_id'] = $space_id;
+        } else {
+            $dataRequest['Appointments']['space_id'] = null;
         }
 
         $space_id = $dataRequest['Appointments']['space_id'];
