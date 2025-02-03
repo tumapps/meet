@@ -1104,12 +1104,37 @@
                 }
             }
         },
-        "/scheduler/space-details": {
+        "/scheduler/space-details/{space_id}/{date}": {
             "get": {
                 "tags": [
                     "Appointments"
                 ],
                 "summary": "Get space details",
+                "requestBody": {
+                    "description": "Provide space id & date",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "space_id",
+                                    "date"
+                                ],
+                                "properties": {
+                                    "space_id": {
+                                        "type": "string",
+                                        "example": "6554"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "example": "2025-05-15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Returns space details"
@@ -1237,12 +1262,12 @@
                 }
             }
         },
-        "/scheduler/cancel/{id}": {
+        "/scheduler/cancel-meeting/{id}": {
             "put": {
                 "tags": [
                     "Appointments"
                 ],
-                "summary": "Cancel an existing Appointments model",
+                "summary": "Cancel an existing Appointment",
                 "parameters": [
                     {
                         "name": "id",
@@ -1255,12 +1280,21 @@
                     }
                 ],
                 "requestBody": {
-                    "description": "Finds the Appointments model to be canceled based on its primary key value",
+                    "description": "Cancellation Reason",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Appointments"
+                                "required": [
+                                    "cancellation_reason"
+                                ],
+                                "properties": {
+                                    "cancellation_reason": {
+                                        "type": "string",
+                                        "example": "the meeting has been cancelled due to ..."
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
@@ -1279,7 +1313,7 @@
                                                 },
                                                 "toastMessage": {
                                                     "type": "string",
-                                                    "example": "appointments canceled successfully"
+                                                    "example": "appointments rejected successfully"
                                                 },
                                                 "toastTheme": {
                                                     "type": "string",
