@@ -39,6 +39,9 @@ class ConfigWrapper
             '{attendee_id}' => '<attendee_id:[a-zA-Z0-9_\\-]+>',
             '{key}' => '<key:[a-zA-Z0-9_\-\/]+>',
             '{crypt_id}' => '<crypt_id:[a-zA-Z0-9\\-]+>',
+            '{space_id}' => '<space_id:[a-zA-Z0-9_\\-]+>',
+            '{date}' => '<date:[0-9]{4}-[0-9]{2}-[0-9]{2}>',
+            '{time}' => '<time:[0-9]{2}:[0-9]{2}>',
         ];
         $this->_params = [
             'pageSize' => [10 => 10, 25 => 25, 50 => 50, 100 => 100],
