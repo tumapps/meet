@@ -333,12 +333,12 @@ return [
 
     /**
      * @OA\Get(
-     *     path="/scheduler/space-details/{space_id}/{date}",
+     *     path="/scheduler/space-details/{id}/{date}",
      *     summary="Get space details",
      *     tags={"Appointments"},
      *   @OA\RequestBody(
      *     required=true,
-     *     description="Provide space id & date",
+     *     description="Provide space_id & date",
      *     @OA\JsonContent(
      *       required={"space_id", "date"},
      *       @OA\Property(property="space_id", type="string", example="6554"),
@@ -351,7 +351,7 @@ return [
      *     )
      * )
      */
-    'GET space-details/{space_id}/{date}' => 'appointments/space-details',
+    'GET space-details/{id}/{date}' => 'appointments/space-details',
 
     /**
      * @OA\Put(
