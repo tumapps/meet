@@ -22,18 +22,17 @@ const role = ref('')
 role.value = authStore.getRole()
 const userId = ref('')
 const spaces = ref([]) // To store the spaces from the API
-const attendees = ref([]) // To store the attendees from the API
+// const attendees = ref([]) // To store the attendees from the API
 const uploadProgress = ref(0) // Holds the upload progress
 const uploading = ref(false) // Holds the upload status
 
-// /mergePropsI
-// defineProps({
-//   name: String
+// watch attendees
+// watch(attendees,(newValue) => {
+//   console.log('attendees in parent', newValue)
 // })
-//CLEAR ERRORS
 
 const resetErrors = () => {
-  attendees.value = []
+  // attendees.value = []
   errors.value = {}
   //clear form data
 }
@@ -97,7 +96,7 @@ const initialAppointmentData = {
   appointment_type: '',
   space_id: selectedSpaceName.value,
   file: null,
-  attendees: attendees.value
+  attendees: ''
 }
 
 const appointmentData = ref({ ...initialAppointmentData })
@@ -319,6 +318,12 @@ const getusers_booked = async () => {
   }
 }
 
+//get attendees from component  via emits
+const updateAttendees = (attendeesId) => {
+  appointmentData.value.attendees = attendeesId
+  console.log('form data attend', appointmentData.value.attendees)
+}
+
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
   console.log('newUsername:', newUsername)
@@ -518,7 +523,7 @@ onMounted(() => {
                   <p v-else-if="searchQuery && !searchResults.length" class="text-muted mt-2">No results found.</p>
                 </div>
               </b-col> -->
-              <AttendeesComponent />
+              <AttendeesComponent @newAttendee="updateAttendees" />
             </b-row>
           </div>
         </div>

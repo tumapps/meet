@@ -203,7 +203,7 @@ const confirmCancel = (id) => {
 const cancelAppointment = async (id, reason) => {
   try {
     // console.log("reasinsnius", reason);
-    const response = await axiosInstance.put(`v1/scheduler/cancel/${id}`, { cancellation_reason: reason })
+    const response = await axiosInstance.put(`v1/scheduler/cancel-meeting/${id}`, { cancellation_reason: reason })
     getAppointment(id)
     getAppointments(1)
     toastPayload.value = response.data.toastPayload
@@ -416,7 +416,7 @@ const getAppointment = async (id) => {
       if (!Array.isArray(spaces.value)) {
         spaces.value = [] // Initialize as an empty array if it's not already
       }
-console.log('Spaces here:', appointmentDetails.value.space)
+      console.log('Spaces here:', appointmentDetails.value.space)
       // Check if the space from the appointment exists in the spaces array
       if (appointmentDetails.value.space && !spaces.value.some((s) => s.id === appointmentDetails.value.space.id)) {
         // If the space doesn't exist in the spaces array, add it
@@ -555,7 +555,6 @@ const openModal = (id) => {
 const updateAppointment = async () => {
   console.log(appointmentDetails.value)
   //map only the attendee_id to the attendees array
-  appointmentDetails.value.attendees = attendees.value.map((attendee) => attendee.attendee_id)
   try {
     errorDetails.value = {}
 
@@ -895,6 +894,12 @@ const toggletimeSlotShow = () => {
   timeSlotShow.value = !timeSlotShow.value
 }
 
+//get attendees from component  via emits
+const updateAttendees = (attendeesId) => {
+  appointmentDetails.value.attendees = attendeesId
+  console.log('form data attending', appointmentDetails.value.attendees)
+}
+
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getAppointments(1)
@@ -908,8 +913,6 @@ onUnmounted(() => {
 })
 </script>
 <template>
-  <Pdfview :pdfUrl="downloadLink"></Pdfview>
-
   <b-col lg="12">
     <b-card>
       <b-row class="mb-4">
@@ -998,7 +1001,7 @@ onUnmounted(() => {
                   <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item)" />
                     <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
-                      {{ item.checked_in ? 'Checked In' : 'Check In' }}
+                      {{ item.checked_in }}
                     </label>
                   </div>
 
@@ -1221,7 +1224,7 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
-                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" />
+                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">

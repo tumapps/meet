@@ -1,7 +1,11 @@
 <script setup>
-import { ref, watch, defineProps } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 import createAxiosInstance from '@/api/axios'
 import Swal from 'sweetalert2'
+
+const emits = defineEmits(['newAttendee'])
+
+// add props
 
 // Props
 const props = defineProps({
@@ -26,14 +30,27 @@ const removedAttendees = ref({}) // Stores removed attendees and their reasons
 const axiosInstance = createAxiosInstance()
 
 // Watch for changes in props.attendees
+// watch(
+//   () => props.attendees,
+//   (newAttendees) => {
+//     // Add a `fromBackend` flag to distinguish backend-loaded attendees
+//     attendees.value = newAttendees.map((user) => ({
+//       ...user,
+//       fromBackend: true,
+//       removed: false // Initialize `removed` flag
+//     }))
+//   },
+//   { immediate: true }
+// )
+
 watch(
   () => props.attendees,
   (newAttendees) => {
-    // Add a `fromBackend` flag to distinguish backend-loaded attendees
     attendees.value = newAttendees.map((user) => ({
       ...user,
+      id: user.attendee_id ?? user.id, // Normalize attendee_id to id
       fromBackend: true,
-      removed: false // Initialize `removed` flag
+      removed: false
     }))
   },
   { immediate: true }
@@ -49,6 +66,10 @@ watch(
   },
   { immediate: true }
 )
+// watch searchQuery and call handleSearch
+watch(searchQuery, () => {
+  handleSearch()
+})
 
 // Fetch and filter search results
 const handleSearch = async () => {
@@ -65,6 +86,15 @@ const handleSearch = async () => {
   }
 }
 
+const attendeesId = ref([])
+
+watch(attendeesId, (newValue) => {
+  emits('newAttendee', newValue)
+  console.log('watcher att', newValue)
+})
+
+// emits('attendeesId', attendeesId.value)
+
 // Add a search result to the table
 const addAttendeeToTable = (user) => {
   // Add a flag `fromBackend` set to false for search-added attendees
@@ -73,9 +103,15 @@ const addAttendeeToTable = (user) => {
 
   if (!duplicate) {
     attendees.value.push({ ...user, fromBackend: false, removed: false })
+    //push only id from attendees to attendeesId
+    attendeesId.value = attendees.value.map((attendee) => attendee.id)
+    searchResults.value = ''
   } else {
     Swal.fire('Error!', 'Attendee already added.', 'error')
   }
+
+  console.log('final attendees', attendees.value)
+  console.log('final attendeesId', attendeesId.value)
 
   searchQuery.value = ''
   searchResults.value = []
@@ -126,6 +162,7 @@ const confirmRemoval = () => {
       // })
       removedAttendees.value[removedUser.attendee_id] = reason
       console.log('Removed Attendees:', removedAttendees.value)
+      submitRemovedAttendees()
 
       //backedn call to remove the user
     }
@@ -160,10 +197,10 @@ const submitRemovedAttendees = async () => {
   <div>
     <!-- Search and Add Attendees Section -->
     <b-col cols="12">
-      <div class="search-form shadow-sm">
+      <div class="search-form">
         <!-- Search Input -->
         <b-form-group label="Attendees:" label-for="input-1">
-          <input v-model="searchQuery" @input="handleSearch" type="text" class="form-control mb-2" placeholder="Search username..." aria-label="Search for a username" />
+          <input v-model="searchQuery" type="text" class="form-control mb-2" placeholder="Search using username..." aria-label="Search for a username" />
         </b-form-group>
 
         <!-- Search Results -->
@@ -178,7 +215,7 @@ const submitRemovedAttendees = async () => {
     </b-col>
 
     <!-- Attendees Table Section -->
-    <div class="table-responsive mt-4">
+    <div v-if="attendees.length > 0" class="table-responsive">
       <table class="table table-striped table-bordered">
         <thead>
           <tr class="mytr">
@@ -230,9 +267,6 @@ const submitRemovedAttendees = async () => {
     </b-modal> -->
 
     <!-- Submit Removed Attendees Button -->
-    <div class="mt-4">
-      <button type="button" class="btn btn-primary" @click="submitRemovedAttendees">Submit Removed Attendees</button>
-    </div>
   </div>
 </template>
 
