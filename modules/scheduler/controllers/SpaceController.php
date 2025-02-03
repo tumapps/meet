@@ -104,7 +104,7 @@ class SpaceController extends \helpers\ApiController
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
 
-        $roleFlags = $this->getRoleFlags(Yii::$app->user->user_id);
+        $roleFlags = $this->getRoleFlags(Yii::$app->user->id);
 
         if ($roleFlags['isUser']) {
             if ($model->id !== Yii::$app->user->user_id || $model->space_type !== Space::SPACE_TYPE_UNMANAGED) {
