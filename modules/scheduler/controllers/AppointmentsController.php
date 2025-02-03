@@ -366,6 +366,11 @@ class AppointmentsController extends \helpers\ApiController
         try {
 
             if ($model->load($dataRequest)) {
+
+                if (!$model->validate()) {
+                    return $this->errorResponse($model->getErrors());
+                }
+
                 $model->uploadedFile = UploadedFile::getInstanceByName('file');
                 $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
 
@@ -390,12 +395,6 @@ class AppointmentsController extends \helpers\ApiController
 
                     $model->status = Appointments::STATUS_ACTIVE;
                 }
-
-
-                if (!$model->validate()) {
-                    return $this->errorResponse($model->getErrors());
-                }
-
 
                 if ($model->save()) {
 
