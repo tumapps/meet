@@ -879,7 +879,7 @@ class AppointmentsController extends \helpers\ApiController
             } else {
                 $newAttendee = new AppointmentAttendees();
                 $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
-                $newAttendee->staff_id = $attendeeId; // Save staff_id correctly
+                $newAttendee->attendee_id = $attendeeId;
 
                 if (!$newAttendee->validate() || !$newAttendee->save()) {
                     return $this->errorResponse($newAttendee->getErrors());
