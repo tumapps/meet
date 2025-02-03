@@ -203,6 +203,64 @@ class AppointmentsController extends \helpers\ApiController
         return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to reject appointment.']);
     }
 
+    public function actionCancelMeeting($id)
+    {
+        Yii::$app->user->can('registrar');
+
+        $request = Yii::$app->request;
+
+        $model = $this->findModel($id);
+        if (empty($model)) {
+            return $this->errorResponse(['message' => ['provided meeting id does not exist']]);
+        }
+
+        $contact_email = $model->email_address;
+        $contact_name = $model->contact_name;
+        $date = $model->appointment_date;
+        $starTime = $model->start_time;
+        $endTime = $model->end_time;
+
+        $user = User::findOne($model->user_id);
+
+        if ($user && $user->profile) {
+            $chairPersonEmail = $user->profile->email_address;
+        } else {
+            return $this->errorResponse(['message' => ['User profile or email not found']]);
+        }
+
+        // Set scenario to 'cancel' for validation
+        $model->scenario = Appointments::SCENARIO_CANCEL;
+
+        if ($request->isPut) {
+            $putParams = $request->getBodyParams();
+            $reason = isset($putParams['cancellation_reason']) ? $putParams['cancellation_reason'] : null;
+        }
+
+        $model->cancellation_reason = $reason;
+
+        // Validate cancellation reason
+        if (!$model->validate()) {
+            return $this->errorResponse($model->getErrors());
+        }
+
+        $model->status = Appointments::STATUS_CANCELLED;
+
+        if ($model->save(false)) {
+
+            $operationReason = new OperationReasons();
+
+            if (!$operationReason->saveActionReason($model->id,  $model->cancellation_reason, 'CANCELLED', 'APPOINTMENTS', $model->user_id, Yii::$app->user->id)) {
+                return $this->errorResponse(['message' => ['Unable to save cacelation reason. Please try again later.']]);
+            }
+
+            $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $chairPersonEmail, $model->user_id);
+
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments CANCELLED successfully']);
+        }
+
+        return $this->errorResponse($model->getErrors());
+    }
+
     public function actionView($id)
     {
         Yii::$app->user->can('schedulerAppointmentsList');
@@ -505,60 +563,6 @@ class AppointmentsController extends \helpers\ApiController
         return $this->errorResponse($model->getErrors());
     }
 
-    public function actionCancel($id)
-    {
-        Yii::$app->user->can('schedulerAppointmentsCancel');
-
-        $request = Yii::$app->request;
-
-        $model = $this->findModel($id);
-        $contact_email = $model->email_address;
-        $contact_name = $model->contact_name;
-        $date = $model->appointment_date;
-        $starTime = $model->start_time;
-        $endTime = $model->end_time;
-
-        $user = User::findOne($model->user_id);
-
-        if ($user && $user->profile) {
-            $chairPersonEmail = $user->profile->email_address;
-        } else {
-            return $this->errorResponse(['message' => ['User profile or email not found']]);
-        }
-
-        // Set scenario to 'cancel' for validation
-        $model->scenario = Appointments::SCENARIO_CANCEL;
-
-        if ($request->isPut) {
-            $putParams = $request->getBodyParams();
-            $reason = isset($putParams['cancellation_reason']) ? $putParams['cancellation_reason'] : null;
-        }
-
-        $model->cancellation_reason = $reason;
-
-        // Validate cancellation reason
-        if (!$model->validate()) {
-            return $this->errorResponse($model->getErrors());
-        }
-
-        $model->status = Appointments::STATUS_CANCELLED;
-
-        if ($model->save(false)) {
-
-            $operationReason = new OperationReasons();
-
-            if (!$operationReason->saveActionReason($model->id,  $model->cancellation_reason, 'CANCELLED', 'APPOINTMENTS', $model->user_id, Yii::$app->user->id)) {
-                return $this->errorResponse(['message' => ['Unable to save rejection reason. Please try again later.']]);
-            }
-
-            $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $chairPersonEmail, $model->user_id);
-
-            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments CANCELLED successfully']);
-        }
-
-        return $this->errorResponse($model->getErrors());
-    }
-
     protected function findModel($id)
     {
         if (($model = Appointments::findOne(['id' => $id])) !== null) {
@@ -624,15 +628,15 @@ class AppointmentsController extends \helpers\ApiController
         return $this->payloadResponse(['suggestions' => $suggestions]);
     }
 
-    public function actionSpaceDetails($space_id = null, $date = null)
+    public function actionSpaceDetails($space_id, $date)
     {
-        $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        $space_id = $dataRequest['Appointments']['space_id'];
-        $date = $dataRequest['Appointments']['date'];
+        // $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
+        // $space_id = $dataRequest['Appointments']['space_id'];
+        // $date = $dataRequest['Appointments']['date'];
 
-        if (empty($space_id) || empty($date)) {
-            return $this->errorResponse(['message' => ['space id and date is required']]);
-        }
+        // if (empty($space_id) || empty($date)) {
+        //     return $this->errorResponse(['message' => ['space id and date is required']]);
+        // }
 
         $space = Space::findOne($space_id);
         if (!$space) {
@@ -699,8 +703,6 @@ class AppointmentsController extends \helpers\ApiController
             }
         }
     }
-
-
 
     public function actionRemoveAttendee($id)
     {
@@ -791,7 +793,6 @@ class AppointmentsController extends \helpers\ApiController
             ]);
         }
     }
-
 
     protected function saveSpaceAvailability($dataRequest, $appointmentId)
     {
@@ -896,7 +897,6 @@ class AppointmentsController extends \helpers\ApiController
             }
         }
     }
-
 
     protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability)
     {
