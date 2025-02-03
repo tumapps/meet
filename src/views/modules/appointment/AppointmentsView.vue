@@ -80,7 +80,7 @@ const removeFile = () => {
 }
 
 const flatPickrConfig = {
-  dateFormat: 'Y m d',
+  dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'd-M-Y',
   minDate: 'today'
@@ -416,7 +416,7 @@ const getAppointment = async (id) => {
       if (!Array.isArray(spaces.value)) {
         spaces.value = [] // Initialize as an empty array if it's not already
       }
-
+console.log('Spaces here:', appointmentDetails.value.space)
       // Check if the space from the appointment exists in the spaces array
       if (appointmentDetails.value.space && !spaces.value.some((s) => s.id === appointmentDetails.value.space.id)) {
         // If the space doesn't exist in the spaces array, add it
@@ -577,27 +577,26 @@ const updateAppointment = async () => {
 
     // const formData = new FormData()
 
-// // Append file separately
-// if (appointmentDetails.value.file) {
-//   formData.append('file', appointmentDetails.value.file)
-// }
+    // // Append file separately
+    // if (appointmentDetails.value.file) {
+    //   formData.append('file', appointmentDetails.value.file)
+    // }
 
-// // Append other fields
-// Object.keys(appointmentDetails.value).forEach((key) => {
-//   const value = appointmentDetails.value[key]
+    // // Append other fields
+    // Object.keys(appointmentDetails.value).forEach((key) => {
+    //   const value = appointmentDetails.value[key]
 
-//   console.log('key:', key, ':', value)
+    //   console.log('key:', key, ':', value)
 
-//   if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordStatus' && value.toString().trim() !== '') {
-//     // if (key === 'attendees' && Array.isArray(value)) {
-//       // formData.append(key, JSON.stringify(value))
-//     // } else{
-//        formData.append(key, value)
-//     // }
-   
-//   }
-// })
+    //   if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordStatus' && value.toString().trim() !== '') {
+    //     // if (key === 'attendees' && Array.isArray(value)) {
+    //       // formData.append(key, JSON.stringify(value))
+    //     // } else{
+    //        formData.append(key, value)
+    //     // }
 
+    //   }
+    // })
 
     // / ✅ Convert attendees array to a JSON string before appending
     // formData.append('attendees', JSON.stringify(attendees.value))
