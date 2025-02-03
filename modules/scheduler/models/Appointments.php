@@ -119,7 +119,7 @@ class Appointments extends BaseModel
                 'created_by',
                 'updated_by',
                 'created_at' => function () {
-                    return $this->created_at? Yii::$app->formatter->asDateTime($this->created_at) : null;
+                    return $this->created_at? Yii::$app->formatter->asDateTime($this->created_at) : null;                    
                 },
                 'relative_time' => function () {
                     return $this->created_at ? Yii::$app->formatter->asRelativeTime($this->created_at) : null;
@@ -137,7 +137,7 @@ class Appointments extends BaseModel
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'status'], 'integer'],
             [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
-            [['appointment_date', 'start_time', 'end_time', 'created_at', 'updated_at', 'created_by', 'updated_by', 'attendees', 'space_id'], 'safe'],
+            [['appointment_date', 'start_time', 'end_time', 'attendees', 'space_id'], 'safe'],
 
             // Custom inline validators as separate rules
             [['start_time', 'end_time'], 'validateTimeRange'],
