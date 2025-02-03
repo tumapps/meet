@@ -112,7 +112,7 @@ class Availability extends BaseModel
      */
     public function getUser()
     {
-        return $this->hasOne(User::class, ['user_id' => 'user_id']);
+        return $this->hasOne(\auth\models\User::class, ['user_id' => 'user_id']);
     }
 
     private static function getUnavailableSlotsQuery($user_id, $appointment_date, $start_time, $end_time)
