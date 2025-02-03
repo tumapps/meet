@@ -90,8 +90,8 @@ class OperationReasons extends BaseModel
         $this->created_by = $createdBy;
 
         if (!$this->save()) {
-            // throw new \Exception('Failed to save the reason for the action.');
-            return false;
+            throw new \Exception('Failed to save the reason for the action.');
+            // return false;
         }
 
         return true;
