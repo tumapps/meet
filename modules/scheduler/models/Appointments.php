@@ -224,7 +224,7 @@ class Appointments extends BaseModel
         );
 
         if ($hasOverlappingEvents) {
-            $this->addError($attribute, 'The selected time overlaps with another event.');
+            $this->addError($attribute, 'The selected time or date overlaps with another event.');
         }
     }
 
