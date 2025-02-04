@@ -83,6 +83,7 @@ class Appointments extends BaseModel
     const SCENARIO_REJECT = 'reject';
     const SCENARIO_DECLINE = 'reject';
 
+
     public $attendees = [];
     public $space_id;
     public $uploadedFile;

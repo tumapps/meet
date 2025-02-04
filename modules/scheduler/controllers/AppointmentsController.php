@@ -230,6 +230,7 @@ class AppointmentsController extends \helpers\ApiController
         // Set scenario for validation
         $model->scenario = Appointments::SCENARIO_CANCEL;
 
+
         if ($request->isPut) {
             $putParams = $request->getBodyParams();
             $reason = $putParams['cancellation_reason'] ?? null;
@@ -483,13 +484,6 @@ class AppointmentsController extends \helpers\ApiController
                         $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
                     }
 
-                    // $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
-
-                    // if ($uploadResult !== true) {
-                    //     //todo: use toast response instead
-                    //     return $this->errorResponse(['message' => $uploadResult['message']]);
-                    // }
-
                     if ($model->status === Appointments::STATUS_RESCHEDULED) {
                         $model->sendAppointmentRescheduledEvent(
                             $model->user_id,
@@ -561,6 +555,25 @@ class AppointmentsController extends \helpers\ApiController
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments deleted successfully']);
         }
         return $this->errorResponse($model->getErrors());
+    }
+
+    public function actionUploadMeetingAgenda($id)
+    {
+        $model = $this->findModel($id);
+
+        $model->uploadedFile = UploadedFile::getInstanceByName('file');
+
+        if(!$model->uploadedFile){
+            return $this->errorResponse(['message' => ['Select filr to upload']]);
+        }
+
+        $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
+
+        if ($uploadResult !== true) {
+            return $this->toastResponse(['statusCode' => 202, 'message' => $uploadResult['message']]);
+        } else {
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Meeting Agenda uploaded successfully']);
+        }
     }
 
     protected function findModel($id)
@@ -772,7 +785,6 @@ class AppointmentsController extends \helpers\ApiController
                     $removalReason,
                     true
                 );
-
             }
 
             if (!empty($failedUpdates)) {
@@ -810,7 +822,7 @@ class AppointmentsController extends \helpers\ApiController
             throw new \Exception('Failed to save space availability: ' . implode(', ', $model->getErrorSummary(true)));
         }
     }
-   
+
     protected function updateAttendees($dataRequest, $currentAttendees)
     {
         if (isset($dataRequest['Appointments']['attendees'])) {
