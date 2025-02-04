@@ -175,7 +175,8 @@ class RoleController extends \helpers\ApiController
         $protectedRoles = ['user', 'su', 'api'];
         
         if (in_array($model->name, $protectedRoles)) {
-            return $this->errorResponse(['message' => ['This is a system defined Role and cannot be deleted.']]);
+            // return $this->errorResponse(['message' => ['This is a system defined Role and cannot be deleted.']]);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'This is a system defined role, cannot be deleted.']);
         }
 
         $assignedUsers = $this->getUsersByRole($model->name);
