@@ -409,9 +409,8 @@ class AppointmentsController extends \helpers\ApiController
                     $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
 
                     if ($uploadResult !== true) {
-                        return $this->errorResponse(['message' => [$uploadResult['message']]]);
+                        return $this->toastResponse(['statusCode' => 202, 'message' => $uploadResult['message']]);
                     }
-
 
                     if ($model->status === Appointments::STATUS_ACTIVE) {
 
@@ -698,16 +697,15 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-
     public function actionRemoveAttendee($id)
     {
         Yii::$app->user->can('schedulerAppointmentsCreate');
-        $model = new AppointmentAttendees();
-        $model->loadDefaultValues();
-        // $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
-        // $attendees = $dataRequest['Attendee']['attendees'] ?? [];
         $dataRequest = Yii::$app->request->getBodyParams();
         $attendees = $dataRequest['attendees'] ?? [];
+
+
+        $model = new AppointmentAttendees();
+        $model->loadDefaultValues();
 
         $model->appointment_id = $id;
 
@@ -723,6 +721,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
+
             $failedUpdates = [];
 
             foreach ($attendees as $attendeeId => $removalReason) {
@@ -773,6 +772,7 @@ class AppointmentsController extends \helpers\ApiController
                     $removalReason,
                     true
                 );
+
             }
 
             if (!empty($failedUpdates)) {
@@ -791,7 +791,7 @@ class AppointmentsController extends \helpers\ApiController
             $transaction->rollBack();
             return $this->errorResponse([
                 'message' => ['An unexpected error occurred.'],
-                'error' => $e->getMessage()
+                'error' => [$e->getMessage()]
             ]);
         }
     }
@@ -810,46 +810,7 @@ class AppointmentsController extends \helpers\ApiController
             throw new \Exception('Failed to save space availability: ' . implode(', ', $model->getErrorSummary(true)));
         }
     }
-
-    protected function updateAttendees3($dataRequest, $currentAttendees)
-    {
-        if ($dataRequest['Appointments']['attendees'] === 'null') {
-            $dataRequest['Appointments']['attendees'] = null;
-        }
-
-        $newAttendeesData = $dataRequest['Appointments']['attendees'] ?? [];
-
-        if (empty($newAttendeesData) || $newAttendeesData === null) {
-            return;
-        }
-
-        $existingAttendeesIds = array_column($currentAttendees, 'id');
-
-        foreach ($newAttendeesData as $attendeeData) {
-            if (in_array($attendeeData['staff_id'], $existingAttendeesIds)) {
-                $attendee = AppointmentAttendees::findOne($attendeeData['staff_id']);
-                $attendee->attributes = $attendeeData;
-
-                return $attendee;
-
-                unset($attendee->appointment_id);
-
-                if (!$attendee->validate() || !$attendee->save()) {
-                    return $this->errorResponse($attendee->getErrors());
-                }
-            } else {
-                $newAttendee = new AppointmentAttendees();
-                $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
-                $newAttendee->attributes = $attendeeData;
-                if (!$newAttendee->validate() || !$newAttendee->save()) {
-                    return $this->errorResponse($newAttendee->getErrors());
-                }
-
-                $newAttendee->sendAttendeeUpdateEvent($newAttendee->appointment_id, $newAttendee->id);
-            }
-        }
-    }
-
+   
     protected function updateAttendees($dataRequest, $currentAttendees)
     {
         if (isset($dataRequest['Appointments']['attendees'])) {
