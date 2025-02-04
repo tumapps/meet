@@ -129,7 +129,7 @@ class AppointmentAttendees extends BaseModel
         $event->sender = $this;
         $subject = $is_removed ? 'Meeting Updates' : 'Meeting Invitation';
 
-        $user = User::find()->where(['username' => $attendee_id])->one();
+        $user = User::find()->where(['user_id' => $attendee_id])->one();
         $email = $user->profile->email_address;
 
         $appointmentData = Appointments::find()
