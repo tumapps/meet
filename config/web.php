@@ -102,11 +102,6 @@ $config = [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        // 'mailer' => [
-        //     'class' => \yii\symfonymailer\Mailer::class,
-        //     'viewPath' => '@app/mail',
-        //     'useFileTransport' => false,
-        // ],
         'mailer' => [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
@@ -125,16 +120,8 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'info', 'warning',],
+                    'levels' => ['error', 'warning'],
                 ],
-                // [
-                //     'class' => 'yii\log\FileTarget',
-                //     'levels' => ['error', 'info', 'warning',],
-                //     'categories' => ['email_worker'],
-                //     'logFile' => '@app/providers/bin/logs/worker.log',
-                //     'maxFileSize' => 1024 * 2,
-                //     'maxLogFiles' => 5,
-                // ],
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['info'],
