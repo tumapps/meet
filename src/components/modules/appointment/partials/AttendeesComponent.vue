@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineProps, defineEmits } from 'vue'
+import { ref, watch, defineProps, defineEmits, computed } from 'vue'
 import createAxiosInstance from '@/api/axios'
 import Swal from 'sweetalert2'
 
@@ -15,6 +15,10 @@ const props = defineProps({
   },
   meetingId: {
     type: Number,
+    required: true
+  },
+  submitSignal: {
+    type: String,
     required: true
   }
 })
@@ -92,7 +96,7 @@ const attendeesId = ref([])
 
 watch(attendeesId, (newValue) => {
   emits('newAttendee', newValue)
-  console.log('watcher att', newValue)
+  console.log('watcher atterarera', newValue)
 })
 
 // emits('attendeesId', attendeesId.value)
@@ -127,6 +131,8 @@ const removeAttendee = (index, fromBackend) => {
     confirmRemoval()
   } else {
     attendees.value.splice(index, 1)
+  attendeesId.value = attendees.value.map((attendee) => attendee.id)
+  console.log('final attendees removed from table', attendees.value)
   }
 }
 
@@ -157,13 +163,14 @@ const confirmRemoval = () => {
       console.log('Removal Reason:', attendees.value[currentRemovalIndex.value])
       // Proceed with the removal process
       const removedUser = attendees.value[currentRemovalIndex.value]
+      attendees.value.splice(currentRemovalIndex.value, 1)
+      attendeesId.value = attendees.value.map((attendee) => attendee.id)
       removedUser.removed = true
-      // removedAttendees.value.push({
-      //   ...removedUser,
-      //   reason
-      // })
       removedAttendees.value.attendees[removedUser.attendee_id] = reason
+      //remove id of  user being removed from the attendeesid
+      // attendeesId.value.splice
       console.log('Removed Attendees:', removedAttendees.value)
+      console.log('new attendeesids', attendeesId.value)
       //backedn call to remove the user
     }
   })
@@ -191,6 +198,22 @@ const submitRemovedAttendees = async () => {
     console.error('Error submitting removed attendees:', error)
   }
 }
+
+// Function to check if attendees is not null, undefined, or empty
+const hasAttendees = computed(() => {
+  return removedAttendees.value.attendees && Object.keys(removedAttendees.value.attendees).length > 0;
+});
+
+
+watch(
+  () => props.submitSignal,
+  (newSubmitSignal) => {
+    if (newSubmitSignal === 'submit') {
+      submitRemovedAttendees()
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

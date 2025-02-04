@@ -593,6 +593,9 @@ const openModal = (id) => {
 //   }
 // }
 
+//submit attendeess signail 
+const submitSignal = ref(false)
+
 const updateAppointment = async () => {
   console.log(appointmentDetails.value)
   //map only the attendee_id to the attendees array
@@ -645,7 +648,12 @@ const updateAppointment = async () => {
     // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
+    // uploadFile()
+    submitSignal.value = 'submit'
+
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
+
+    
 
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
@@ -938,7 +946,7 @@ const toggletimeSlotShow = () => {
 //get attendees from component  via emits
 const updateAttendees = (attendeesId) => {
   appointmentDetails.value.attendees = attendeesId
-  console.log('form data attending', appointmentDetails.value.attendees)
+  console.log('form data attending mangai', appointmentDetails.value.attendees)
 }
 
 onMounted(async () => {
@@ -1265,7 +1273,7 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
-                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" />
+                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" :submitSignal="submitSignal"/>
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">
