@@ -24,7 +24,7 @@ class Events extends BaseModel
     const STATUS_PASSED = 7;
     const STATUS_ACTIVE = 10;
     const STATUS_CANCELLED = 4;
-    const STATUS_DELETED = 0;
+    const STATUS_UNDELETED = 0;
 
     const SCENARIO_CANCEL = 'cancel';
 
@@ -141,8 +141,7 @@ class Events extends BaseModel
     public static function getOverlappingEvents($date, $start_time, $end_time)
     {
         $overlappingEvents = self::find()
-            ->where(['is_deleted' => self::STATUS_DELETED])
-            ->where(['status' => self::STATUS_ACTIVE])
+            ->where(['is_deleted' => self::STATUS_UNDELETED, 'status' => self::STATUS_ACTIVE])
             ->andWhere(['or',
                 ['and',
                     ['<=', 'start_date', $date],
