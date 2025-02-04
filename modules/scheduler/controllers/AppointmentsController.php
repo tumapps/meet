@@ -208,10 +208,10 @@ class AppointmentsController extends \helpers\ApiController
         Yii::$app->user->can('registrar');
 
         $request = Yii::$app->request;
-
         $model = $this->findModel($id);
+
         if (empty($model)) {
-            return $this->errorResponse(['message' => ['provided meeting id does not exist']]);
+            return $this->errorResponse(['message' => ['Provided meeting ID does not exist']]);
         }
 
         $contact_email = $model->email_address;
@@ -219,7 +219,6 @@ class AppointmentsController extends \helpers\ApiController
         $date = $model->appointment_date;
         $starTime = $model->start_time;
         $endTime = $model->end_time;
-
         $user = User::findOne($model->user_id);
 
         if ($user && $user->profile) {
@@ -228,37 +227,42 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse(['message' => ['User profile or email not found']]);
         }
 
-        // Set scenario to 'cancel' for validation
+        // Set scenario for validation
         $model->scenario = Appointments::SCENARIO_CANCEL;
 
         if ($request->isPut) {
             $putParams = $request->getBodyParams();
-            $reason = isset($putParams['cancellation_reason']) ? $putParams['cancellation_reason'] : null;
+            $reason = $putParams['cancellation_reason'] ?? null;
         }
 
         $model->cancellation_reason = $reason;
 
-        // Validate cancellation reason
         if (!$model->validate()) {
             return $this->errorResponse($model->getErrors());
         }
 
-        $model->status = Appointments::STATUS_CANCELLED;
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $model->status = Appointments::STATUS_CANCELLED;
 
-        if ($model->save(false)) {
+            if (!$model->save(false)) {
+                throw new \Exception('Failed to update appointment status.');
+            }
 
             $operationReason = new OperationReasons();
-
-            if (!$operationReason->saveActionReason($model->id,  $model->cancellation_reason, 'CANCELLED', 'APPOINTMENTS', $model->user_id, Yii::$app->user->id)) {
-                return $this->errorResponse(['message' => ['Unable to save cacelation reason. Please try again later.']]);
+            if (!$operationReason->saveActionReason($model->id, $model->cancellation_reason, 'CANCELLED', 'APPOINTMENTS', $model->user_id, Yii::$app->user->id)) {
+                throw new \Exception('Unable to save cancellation reason. Please try again later.');
             }
+
+            $transaction->commit();
 
             $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $chairPersonEmail, $model->user_id);
 
-            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointments CANCELLED successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment CANCELLED successfully']);
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            return $this->errorResponse(['message' => [$e->getMessage()]]);
         }
-
-        return $this->errorResponse($model->getErrors());
     }
 
     public function actionView($id)
@@ -376,7 +380,6 @@ class AppointmentsController extends \helpers\ApiController
 
                 $model->space_id = $dataRequest['Appointments']['space_id'];
 
-
                 if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
                     $space = Space::findOne(['id' => $model->space_id]);
 
@@ -398,7 +401,7 @@ class AppointmentsController extends \helpers\ApiController
 
                 if ($model->save()) {
 
-                    $this->saveAttendees($dataRequest, $model->id);
+                    $this->saveAttendees($model);
                     if (!empty($dataRequest['Appointments']['space_id'])) {
                         $this->saveSpaceAvailability($dataRequest, $model->id);
                     }
@@ -628,7 +631,7 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionSpaceDetails($space_id, $date)
     {
-        
+
 
         $space = Space::findOne($space_id);
         if (!$space) {
@@ -661,14 +664,13 @@ class AppointmentsController extends \helpers\ApiController
         return true;
     }
 
-    protected function saveAttendees($dataRequest, $id)
+    protected function saveAttendees($model)
     {
-        $attendees = $dataRequest['Appointments']['attendees'] ?? [];
-        $date = $dataRequest['Appointments']['appointment_date'];
-        $startTime = $dataRequest['Appointments']['start_time'];
-        $endTime = $dataRequest['Appointments']['end_time'];
-
-        $userId = $dataRequest['Appointments']['user_id'] ?? null;
+        $attendees = $model->attendees;
+        $date = $model->appointment_date;
+        $startTime = $model->start_time;
+        $endTime = $model->end_time;
+        $userId = $model->user_id;
 
         if (is_string($attendees)) {
             $attendees = explode(',', $attendees);
@@ -691,18 +693,21 @@ class AppointmentsController extends \helpers\ApiController
             foreach ($attendees as $attendeeId) {
                 $attendee_id = trim($attendeeId);
                 $addAttendee = new AppointmentAttendees();
-                $addAttendee->addAttendee($id, $attendee_id, $date, $startTime, $endTime);
+                $addAttendee->addAttendee($model->id, $attendee_id, $date, $startTime, $endTime);
             }
         }
     }
+
 
     public function actionRemoveAttendee($id)
     {
         Yii::$app->user->can('schedulerAppointmentsCreate');
         $model = new AppointmentAttendees();
         $model->loadDefaultValues();
-        $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
-        $attendees = $dataRequest['Attendee']['Attendees'] ?? [];
+        // $dataRequest['Attendee'] = Yii::$app->request->getBodyParams();
+        // $attendees = $dataRequest['Attendee']['attendees'] ?? [];
+        $dataRequest = Yii::$app->request->getBodyParams();
+        $attendees = $dataRequest['attendees'] ?? [];
 
         $model->appointment_id = $id;
 
@@ -712,11 +717,16 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse(['message' => ['Meeting does not exist']]);
         }
 
+        if (empty($attendees)) {
+            return $this->errorResponse(['message' => ['Atleast one or more attendees are required']]);
+        }
+
         $transaction = Yii::$app->db->beginTransaction();
         try {
             $failedUpdates = [];
 
             foreach ($attendees as $attendeeId => $removalReason) {
+
                 $attendee = AppointmentAttendees::findOne([
                     'appointment_id' => $id,
                     'attendee_id' => $attendeeId,
