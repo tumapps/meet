@@ -58,25 +58,66 @@ const InitialappointmentDetails = {
   updated_at: '',
   statusLabel: '',
   user_id: '',
-  space_id: '',
-  file: null
+  space_id: ''
 }
 
 const appointmentDetails = ref({ ...InitialappointmentDetails })
 const fileName = ref(null)
 const fileInput = ref(null)
+
+//file upload
+const agenda = ref(null)
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
-    appointmentDetails.value.file = file
+    agenda.value = file
     fileName.value = file.name
   }
 }
 
+//function to upload file
+const uploadFile = async () => {
+  const formData = new FormData()
+  formData.append('file', agenda.value)
+  try {
+    const response = await axiosInstance.post('v1/scheduler/upload-file', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    if (response.data.toastPayload) {
+      toastPayload.value = response.data.toastPayload
+      proxy.$showAlert({
+        title: toastPayload.value.toastMessage || 'File uploaded successfully',
+        icon: toastPayload.value.toastTheme || 'success',
+        timer: 3000,
+        timerProgressBar: true,
+        showCancelButton: false,
+        showConfirmButton: false
+      })
+    }
+
+    console.log('response', response)
+  } catch (error) {
+    console.log('error', error)
+    const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+    proxy.$showAlert({
+      title: 'An error occurred',
+      text: errorMessage,
+      icon: 'error',
+      showCancelButton: false,
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    })
+  }
+}
+
 const removeFile = () => {
-  appointmentDetails.value.file = null
+  agenda.value = null
   fileName.value = null
-  fileInput.value.value = ''
+  fileInput.value = ''
 }
 
 const flatPickrConfig = {

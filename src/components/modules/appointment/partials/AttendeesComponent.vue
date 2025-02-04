@@ -24,7 +24,9 @@ const searchQuery = ref('')
 const searchResults = ref([])
 const attendees = ref([]) // Holds all attendees (from backend and added via search)
 const currentRemovalIndex = ref(null) // Tracks the index of the attendee being removed
-const removedAttendees = ref({}) // Stores removed attendees and their reasons
+const removedAttendees = ref({
+  attendees: {} // This will hold the key-value pairs for attendees
+}) // Stores removed attendees and their reasons
 
 // Axios Instance
 const axiosInstance = createAxiosInstance()
@@ -160,7 +162,7 @@ const confirmRemoval = () => {
       //   ...removedUser,
       //   reason
       // })
-      removedAttendees.value[removedUser.attendee_id] = reason
+      removedAttendees.value.attendees[removedUser.attendee_id] = reason
       console.log('Removed Attendees:', removedAttendees.value)
       submitRemovedAttendees()
 
@@ -174,7 +176,7 @@ const restoreAttendee = (index) => {
   const restoredUser = attendees.value[index]
   restoredUser.removed = false
   // Remove the user from the `removedAttendees` array
-  removedAttendees.value = removedAttendees.value.filter((user) => user.staff_id !== restoredUser.staff_id)
+  removedAttendees.value.attendees = removedAttendees.value.attendees.filter((user) => user.staff_id !== restoredUser.staff_id)
 }
 
 // Submit removed attendees
