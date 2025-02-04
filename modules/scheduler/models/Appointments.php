@@ -349,8 +349,6 @@ class Appointments extends BaseModel
         }
     }
 
-
-
     /**
      * {@inheritdoc}
      */

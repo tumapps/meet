@@ -54,6 +54,7 @@ class Register extends Model
             [['email_address'], 'string', 'max' => 128],
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
+            [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => '/^\S+$/', 'message' => 'Whitespace is not'],
             [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
             [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
 
