@@ -48,6 +48,8 @@ class Appointments extends BaseModel
     const STATUS_RESCHEDULED = 5;
     const STATUS_DELETED = 0;
     const STATUS_REJECTED = 2;
+    const STATUS_CHECKED_IN = 1;
+
 
     // appointment priorities
 
@@ -119,7 +121,7 @@ class Appointments extends BaseModel
                 'created_by',
                 'updated_by',
                 'created_at' => function () {
-                    return $this->created_at? Yii::$app->formatter->asDateTime($this->created_at) : null;                    
+                    return $this->created_at ? Yii::$app->formatter->asDateTime($this->created_at) : null;
                 },
                 'relative_time' => function () {
                     return $this->created_at ? Yii::$app->formatter->asRelativeTime($this->created_at) : null;
@@ -331,6 +333,10 @@ class Appointments extends BaseModel
     {
         $space = Space::findOne($this->space_id);
 
+        if (is_string($this->attendees)) {
+            $this->attendees = explode(',', $this->attendees);
+        }
+
         if ($space) {
             $capacity = $space->capacity;
             $attendeesCount = count($this->attendees);
@@ -423,7 +429,7 @@ class Appointments extends BaseModel
 
         // $appointment->checked_in = !$appointment->checked_in;
 
-        $appointment->checked_in = true;
+        $appointment->checked_in = self::STATUS_CHECKED_IN;
         // $appointment->appointment_date = date('Y-m-d', strtotime($appointment->appointment_date));
         $appointment->status = self::STATUS_ATTENDED;
 
