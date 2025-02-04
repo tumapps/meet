@@ -3,7 +3,6 @@ namespace helpers\behaviors;
 
 use yii\base\Behavior;
 use yii\db\ActiveRecord;
-use Yii;
 
 class DateFormatter extends Behavior
 {
