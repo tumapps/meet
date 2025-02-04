@@ -1,16 +1,4 @@
- FROM vaultke/php8-fpm-nginx
-
-# Install packages
-RUN apk update && apk add --no-cache \
-    supervisor \
-    bash \
-    nano \
-    && rm -rf /var/cache/apk/*
-
-RUN export EDITOR=nano
-
-# Supervisor configuration directory
-RUN mkdir -p /etc/supervisor/conf.d/
+FROM vaultke/php8.3-fpm-nginx
 
 COPY . /var/www/html
 # COPY supervisor/email_queue.conf /etc/supervisor/conf.d/email_queue.conf
@@ -22,8 +10,12 @@ RUN chmod 0644 /etc/cron.d/app-cron && crontab /etc/cron.d/app-cron
 
 WORKDIR /var/www/html
 
-# RUN chmod -R 777 /var/www/html
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+
+COPY ./supervisor/email_queue.conf /etc/supervisor/conf.d/email_queue.conf
+
+# Set Supervisor as the container's main process
+# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
 
-
-
+RUN chmod -R 777 /var/www/html
