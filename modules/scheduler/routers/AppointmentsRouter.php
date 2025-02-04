@@ -280,6 +280,30 @@ return [
     'POST attendance-confirmation/{appointment_id}/{attendee_id}' => 'appointments/confirm-attendance',
 
     /**
+     * @OA\Post(
+     *     path="/scheduler/upload-meeting-agenda/{id}",
+     *     summary="Upload meeting agenda file for the current meeting",
+     *     tags={"Appointments"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="passs meeting id",
+     *         @OA\JsonContent(
+     *             required={"id"},
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Meeting Agenda uploaded successfully",
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="select a file to upload",
+     *     )
+     * )
+     */
+    'POST upload-meeting-agenda/{id}' => 'appointments/upload-meeting-agenda',
+
+    /**
      * @OA\Put(path="/scheduler/checkin/{id}",
      *   summary="Mark an appointment as Attended",
      *   tags={"Appointments"},
