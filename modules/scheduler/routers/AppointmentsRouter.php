@@ -281,14 +281,15 @@ return [
 
     /**
      * @OA\Post(
-     *     path="/scheduler/upload-meeting-agenda/{id}",
+     *     path="/scheduler/upload-file/{id}",
      *     summary="Upload meeting agenda file for the current meeting",
      *     tags={"Appointments"},
+     *   @OA\Parameter(description="Pass Appointments unique ID",in="path",name="id",required=true,@OA\Schema(type="string",)),
      *     @OA\RequestBody(
      *         required=true,
-     *         description="passs meeting id",
+     *         description="Provide file to upload",
      *         @OA\JsonContent(
-     *             required={"id"},
+     *             required={"file"},
      *         ),
      *     ),
      *     @OA\Response(
@@ -299,9 +300,11 @@ return [
      *         response=422,
      *         description="select a file to upload",
      *     )
+     *         )
+     *     )
      * )
      */
-    'POST upload-meeting-agenda/{id}' => 'appointments/upload-meeting-agenda',
+    'POST upload-file/{id}' => 'appointments/upload-file',
 
     /**
      * @OA\Put(path="/scheduler/checkin/{id}",
