@@ -293,7 +293,7 @@ class AppointmentsController extends \helpers\ApiController
                     'attendee_id' => $attendee['attendee_id'],
                     'email' => $user ? $user->profile->email_address : '',
                     'fullname' => $user ? $user->profile->first_name . ' ' . $user->profile->last_name : '',
-                    'status' => $attendee['status'],
+                    'status' =>  AppointmentAttendees::getStatusLabel($attendee['status']),
                 ];
             }
         }
@@ -361,7 +361,6 @@ class AppointmentsController extends \helpers\ApiController
         $model->loadDefaultValues();
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
 
-
         if ($dataRequest['Appointments']['space_id'] === 'null') {
             $dataRequest['Appointments']['space_id'] = null;
         }
@@ -381,24 +380,25 @@ class AppointmentsController extends \helpers\ApiController
 
                 $model->space_id = $dataRequest['Appointments']['space_id'];
 
-                if (!empty($dataRequest['Appointments']['space_id']) || $dataRequest['Appointments']['space_id'] !== null) {
-                    $space = Space::findOne(['id' => $model->space_id]);
+                $space = Space::findOne(['id' => $model->space_id]);
 
-                    if (!$space) {
-                        return $this->errorResponse(['message' => ['The specified space does not exist']]);
-                    }
-
-                    $model->status = Appointments::STATUS_PENDING;
-                } else {
-                    $user_id =  $dataRequest['Appointments']['user_id'];
-                    $space = Space::findOne(['id' => $user_id]);
-
-                    if (!$space) {
-                        return $this->errorResponse(['message' => ['User-specific office space is not configured']]);
-                    }
-
-                    $model->status = Appointments::STATUS_ACTIVE;
+                if (!$space) {
+                    return $this->errorResponse(['message' => ['The specified space does not exist']]);
                 }
+
+                if ($space->space_type === Space::SPACE_TYPE_MANAGED) {
+                    $model->status = Appointments::STATUS_PENDING;
+                }
+
+                $user_id =  $dataRequest['Appointments']['user_id'];
+                $space = Space::findOne(['id' => $user_id]);
+
+                if (!$space) {
+                    return $this->errorResponse(['message' => ['User-specific office space is not configured']]);
+                }
+
+                $model->status = Appointments::STATUS_ACTIVE;
+
 
                 if ($model->save()) {
 
@@ -452,8 +452,8 @@ class AppointmentsController extends \helpers\ApiController
         $initial_date = $model->appointment_date;
         $initial_start_time =  $model->start_time;
         $initial_end_time = $model->end_time;
+        $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
 
-        $attendees = AppointmentAttendees::findAll(['appointment_id' => $id]);
         $spaceType = Space::find()
             ->select(['space_type'])
             ->where(['id' => $dataRequest['Appointments']['space_id']])
@@ -466,7 +466,6 @@ class AppointmentsController extends \helpers\ApiController
         if ($model->load($dataRequest)) {
 
             if (!$model->validate()) {
-                Yii::debug($model->getErrors(), 'Validation Errors');
                 return $this->errorResponse($model->getErrors());
             }
 
@@ -479,7 +478,8 @@ class AppointmentsController extends \helpers\ApiController
             try {
                 if ($model->save()) {
 
-                    $this->updateAttendees($dataRequest, $attendees);
+                    $this->updateAttendees($model->id, $model->attendees, $model->appointment_date, $model->start_time, $model->end_time);
+
                     if ($spaceType === Space::SPACE_TYPE_MANAGED) {
                         $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
                     }
@@ -563,7 +563,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $model->uploadedFile = UploadedFile::getInstanceByName('file');
 
-        if(!$model->uploadedFile){
+        if (!$model->uploadedFile) {
             return $this->errorResponse(['message' => ['Select filr to upload']]);
         }
 
@@ -823,55 +823,39 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    protected function updateAttendees($dataRequest, $currentAttendees)
+    protected function updateAttendees($appointment_id, $newAttendees, $date, $start_time, $end_time)
     {
-        if (isset($dataRequest['Appointments']['attendees'])) {
-            $attendeesRaw = $dataRequest['Appointments']['attendees'];
-
-            if (is_string($attendeesRaw)) {
-                $attendeesRaw = explode(',', $attendeesRaw);
-            }
-
-            $dataRequest['Appointments']['attendees'] = $attendeesRaw;
-        } else {
-            $dataRequest['Appointments']['attendees'] = [];
-        }
-
-        $newAttendeesData = $dataRequest['Appointments']['attendees'];
-
-        if (empty($newAttendeesData)) {
+        if (empty($newAttendees)) {
             return;
         }
 
-        $existingAttendeesIds = array_column($currentAttendees, 'id');
+        $existingAttendeesIds = AppointmentAttendees::find()
+            ->select(['attendee_id'])
+            ->where(['appointment_id' => $appointment_id])
+            ->column();
 
-        foreach ($newAttendeesData as $attendeeId) {
+        foreach ($newAttendees as $attendeeId) {
             $attendeeId = intval($attendeeId);
 
             if (in_array($attendeeId, $existingAttendeesIds)) {
-                $attendee = AppointmentAttendees::findOne($attendeeId);
-                if (!$attendee) {
-                    continue;
-                }
-
-                unset($attendee->appointment_id);
-
-                if (!$attendee->validate() || !$attendee->save()) {
-                    return $this->errorResponse($attendee->getErrors());
-                }
-            } else {
-                $newAttendee = new AppointmentAttendees();
-                $newAttendee->appointment_id = $dataRequest['Appointments']['id'];
-                $newAttendee->attendee_id = $attendeeId;
-
-                if (!$newAttendee->validate() || !$newAttendee->save()) {
-                    return $this->errorResponse($newAttendee->getErrors());
-                }
-
-                $newAttendee->sendAttendeeUpdateEvent($newAttendee->appointment_id, $newAttendee->id);
+                continue;
             }
+
+            $newAttendee = new AppointmentAttendees();
+            $newAttendee->appointment_id = $appointment_id;
+            $newAttendee->attendee_id = $attendeeId;
+            $newAttendee->date = $date;
+            $newAttendee->start_time = $start_time;
+            $newAttendee->end_time = $end_time;
+
+            if (!$newAttendee->validate() || !$newAttendee->save()) {
+                throw new \Exception(json_encode($newAttendee->getErrors()));
+            }
+
+            $newAttendee->sendAttendeeUpdateEvent($newAttendee->appointment_id, $newAttendee->attendee_id);
         }
     }
+
 
     protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability)
     {
