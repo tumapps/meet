@@ -82,7 +82,7 @@ class AppointmentAttendees extends BaseModel
         return [
             [['appointment_id', 'attendee_id', 'date', 'start_time', 'end_time'], 'required'],
             [['appointment_id', 'attendee_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['appointment_id', 'attendee_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
+            [['appointment_id', 'attendee_id', 'is_deleted',], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
             [['appointment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Appointments::class, 'targetAttribute' => ['appointment_id' => 'id']],
 
