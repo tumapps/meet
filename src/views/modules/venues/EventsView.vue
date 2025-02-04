@@ -516,14 +516,14 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <b-row>
-      <b-col md="12">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="levelDropdown" class="form-label">Start Date </label>
           <flat-pickr v-model="eventDetails.start_date" class="form-control" :config="config" id="startDatePicker" />
         </div>
         <div v-if="errors.date" class="error" aria-live="polite">{{ errors.start_date }}</div>
       </b-col>
-      <b-col md="12">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="levelDropdown" class="form-label">End Date </label>
           <flat-pickr v-model="eventDetails.end_date" class="form-control" :config="config" id="startDatePicker" />

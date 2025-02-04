@@ -171,6 +171,50 @@ const performSearch = async () => {
   }
 }
 
+const confirmDelete = async (id) => {
+  const confirm = await proxy.$showAlert({
+    title: 'Delete Role',
+    text: 'Are you sure you want to delete this role?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'No, cancel'
+  })
+
+  if (confirm.isConfirmed) {
+    try {
+      const response = await axiosInstance.delete(`v1/auth/role/${id}`)
+      if (response.data.toastPayload) {
+        proxy.$showAlert({
+          title: response.data.toastPayload.toastTheme,
+          icon: response.data.toastPayload.toastTheme, // You can switch this back to use the theme from the response
+          text: response.data.toastPayload.toastMessage,
+          timer: 2000,
+          showConfirmButton: false,
+          showCancelButton: false
+        })
+        getRoles()
+      } else {
+        // Fallback if toastPayload is not provided in the response
+        proxy.$showToast({
+          title: 'Role Deleted successfully',
+          icon: 'success'
+        })
+      }
+    } catch (error) {
+      // console.error(error);
+      errors.value = error.response.data.errorPayload.errors
+      const errorMessage = error.response.data.errorPayload.errors?.message || error.response.errorPayload.message || 'An unknown error occurred'
+
+      proxy.$showToast({
+        title: 'An error occurred',
+        text: errorMessage,
+        icon: 'error'
+      })
+    }
+  }
+}
+
 onMounted(() => {
   getRoles()
 })
@@ -241,7 +285,7 @@ onMounted(() => {
                   <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="showRoleModal(item.name)">
                     <i class="fa-solid fa-shield" style="color: #076232"></i>
                   </button>
-                  <button type="button" class="btn btn-outline-danger btn-sm" @click="confirmDelete(item.id)">
+                  <button type="button" class="btn btn-outline-danger btn-sm" @click="confirmDelete(item.name)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
                 </td>

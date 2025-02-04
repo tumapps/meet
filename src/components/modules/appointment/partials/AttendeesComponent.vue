@@ -164,8 +164,6 @@ const confirmRemoval = () => {
       // })
       removedAttendees.value.attendees[removedUser.attendee_id] = reason
       console.log('Removed Attendees:', removedAttendees.value)
-      submitRemovedAttendees()
-
       //backedn call to remove the user
     }
   })

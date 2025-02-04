@@ -243,6 +243,7 @@ const updateSpaceDetails = async (id) => {
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       //close the modal
+      getSpaces(1)
       editSpace.value.hide()
       toastPayload.value = response.data.toastPayload
       // Show toast notification using the response data
