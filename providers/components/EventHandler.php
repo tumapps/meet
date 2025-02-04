@@ -195,17 +195,17 @@ class EventHandler
 		$email = $event->data['email'];
 
 		$commonData = [
-			'appointment_name' => $event->data['date'],
+			'appointment_name' => $event->data['appointment_subject'],
 			'date' => $event->data['appointment_date'],
 			'start_time' => $event->data['start_time'],
-			'end_time' => $event->data['endtime'],
+			'end_time' => $event->data['end_time'],
 			'subject' => $event->data['subject'],
 		];
 
 		$attendeeName = substr($email, 0, strpos($email, '@'));
 
 		$body = Yii::$app->view->render('@ui/views/emails/attendeeUpdate', array_merge($commonData, [
-			'name' => $attendeeName,
+			'contact_name' => $attendeeName,
 			'reason' => $event->data['reason'] ?? '',
 			'is_removed' => $event->data['is_removed']
 		]));
