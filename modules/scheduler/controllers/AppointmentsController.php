@@ -557,7 +557,7 @@ class AppointmentsController extends \helpers\ApiController
         return $this->errorResponse($model->getErrors());
     }
 
-    public function actionUploadMeetingAgenda($id)
+    public function actionUploadFile($id)
     {
         $model = $this->findModel($id);
 
