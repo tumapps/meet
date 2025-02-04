@@ -105,7 +105,6 @@ class m240808_213712_create_scheduler_tables extends Migration
             'start_time' => $this->time()->notNull(),
             'end_time' => $this->time()->notNull(),
             'status' => $this->integer()->notNull()->defaultValue(10),
-            // 'cancellation_reason' => $this->string(255)->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
