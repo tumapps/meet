@@ -856,6 +856,46 @@
                 }
             }
         },
+        "/scheduler/upload-file/{id}": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Upload meeting agenda file for the current meeting",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Pass Appointments unique ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Provide file to upload",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Meeting Agenda uploaded successfully"
+                    },
+                    "422": {
+                        "description": "select a file to upload"
+                    }
+                }
+            }
+        },
         "/scheduler/checkin/{id}": {
             "put": {
                 "tags": [
