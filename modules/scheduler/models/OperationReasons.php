@@ -54,7 +54,7 @@ class OperationReasons extends BaseModel
     public function rules()
     {
         return [
-            [['entity_id', 'entity_type', 'created_by', 'created_at', 'updated_at'], 'required'],
+            [['entity_id', 'entity_type', 'created_by'], 'required'],
             [['entity_id', 'entity_type', 'is_deleted', 'created_by', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['entity_id', 'entity_type', 'is_deleted', 'created_by', 'created_at', 'updated_at'], 'integer'],
             [['type', 'reason'], 'string', 'max' => 255],
@@ -80,6 +80,23 @@ class OperationReasons extends BaseModel
         ];
     }
 
+    // public function saveActionReason($entityId, $reason, $type, $entityType, $affectedUserId, $createdBy)
+    // {
+    //     $this->entity_id = $entityId;
+    //     $this->reason = $reason;
+    //     $this->type = $type;
+    //     $this->entity_type = $entityType;
+    //     $this->affected_user_id = $affectedUserId;
+    //     $this->created_by = $createdBy;
+
+    //     if (!$this->save()) {
+    //         throw new \Exception('Failed to save the reason for the action.');
+    //         // return false;
+    //     }
+
+    //     return true;
+    // }
+
     public function saveActionReason($entityId, $reason, $type, $entityType, $affectedUserId, $createdBy)
     {
         $this->entity_id = $entityId;
@@ -89,13 +106,19 @@ class OperationReasons extends BaseModel
         $this->affected_user_id = $affectedUserId;
         $this->created_by = $createdBy;
 
+        if (!$this->validate()) {
+            Yii::error("Validation failed: " . json_encode($this->getErrors()), __METHOD__);
+            return false;
+        }
+
         if (!$this->save()) {
-            throw new \Exception('Failed to save the reason for the action.');
-            // return false;
+            Yii::error("Failed to save action reason for entity {$entityId}", __METHOD__);
+            return false;
         }
 
         return true;
     }
+
 
     public static function getActionReason($entityId, $user_id)
     {
