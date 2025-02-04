@@ -147,6 +147,7 @@ class Appointments extends BaseModel
             [['start_time', 'end_time'], 'validateAdvanceBooking'],
             [['start_time', 'end_time'], 'validateAvailability'],
             [['start_time', 'end_time'], 'validateOverlappingAppointment'],
+            [['start_time', 'end_time'], 'validateMeetingTime'],
 
             [['appointment_date'], 'validateOverlappingEvents'],
             [['appointment_date'], 'validateBookingWindow'],
@@ -346,6 +347,25 @@ class Appointments extends BaseModel
             }
         } else {
             $this->addError('space_id', 'The specified space does not exist.');
+        }
+    }
+
+    public function validateMeetingTime($attribute, $params)
+    {
+        $space = Space::findOne($this->space_id);
+
+        if (!$space) {
+            $this->addError('space_id', 'The specified space does not exist.');
+            return;
+        }
+
+        $spaceOpenTime = strtotime($space->opening_time);
+        $spaceCloseTime = strtotime($space->closing_time);
+        $meetingStartTime = strtotime($this->start_time);
+        $meetingEndTime = strtotime($this->end_time);
+
+        if ($meetingStartTime < $spaceOpenTime || $meetingEndTime > $spaceCloseTime) {
+            $this->addError($attribute, "The meeting time ({$this->start_time} - {$this->end_time}) must be within the venue operating hours ({$space->opening_time} - {$space->closing_time}).");
         }
     }
 
