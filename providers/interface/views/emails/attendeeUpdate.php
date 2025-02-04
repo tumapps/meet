@@ -88,19 +88,19 @@
                 <p>We regret to inform you that you have been removed from the following appointment:</p>
                 <div class="appointment-details">
                     <p><strong>Appointment Name:</strong> <?= htmlspecialchars($appointment_name) ?></p>
-                    <p><strong>Date:</strong> <?= htmlspecialchars($appointment_date) ?></p>
-                    <p><strong>Start Time:</strong> <?= htmlspecialchars($appointment_start_time) ?></p>
-                    <p><strong>End Time:</strong> <?= htmlspecialchars($appointment_end_time) ?></p>
+                    <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
+                    <p><strong>Start Time:</strong> <?= htmlspecialchars($start_time) ?></p>
+                    <p><strong>End Time:</strong> <?= htmlspecialchars($end_time) ?></p>
                 </div>
-                <p><strong>Reason for Removal:</strong> <?= htmlspecialchars($removal_reason) ?></p>
+                <p><strong>Reason for Removal:</strong> <?= htmlspecialchars($reason) ?></p>
                 <p>If you have any questions or concerns, please feel free to contact us.</p>
             <?php else: ?>
                 <p>You have been added as an attendee to the following appointment:</p>
                 <div class="appointment-details">
                     <p><strong>Appointment Name:</strong> <?= htmlspecialchars($appointment_name) ?></p>
-                    <p><strong>Date:</strong> <?= htmlspecialchars($appointment_date) ?></p>
-                    <p><strong>Start Time:</strong> <?= htmlspecialchars($appointment_start_time) ?></p>
-                    <p><strong>End Time:</strong> <?= htmlspecialchars($appointment_end_time) ?></p>
+                    <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
+                    <p><strong>Start Time:</strong> <?= htmlspecialchars($start_time) ?></p>
+                    <p><strong>End Time:</strong> <?= htmlspecialchars($end_time) ?></p>
                 </div>
                 <p>We look forward to your participation. Please contact us if you have any questions.</p>
             <?php endif; ?>
