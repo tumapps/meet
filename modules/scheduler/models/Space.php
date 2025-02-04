@@ -87,7 +87,7 @@ class Space extends BaseModel
     public function beforeSave($insert)
     {
         if ($insert && empty($this->id)) {
-            $this->id = $this->uid('SPACE', true);
+            $this->id = $this->uid('SPACE', true, 'cmyd');
         }
 
         return parent::beforeSave($insert);
