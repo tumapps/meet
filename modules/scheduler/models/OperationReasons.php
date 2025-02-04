@@ -56,8 +56,8 @@ class OperationReasons extends BaseModel
         return [
             [['entity_id', 'entity_type', 'created_by'], 'required'],
             [['entity_id', 'entity_type', 'is_deleted', 'created_by', 'created_at', 'updated_at'], 'default', 'value' => null],
-            [['entity_id', 'entity_type', 'is_deleted', 'created_by', 'created_at', 'updated_at'], 'integer'],
-            [['type', 'reason'], 'string', 'max' => 255],
+            [['entity_id', 'is_deleted'], 'integer'],
+            [['type', 'reason', 'entity_type'], 'string', 'max' => 255],
         ];
     }
 
