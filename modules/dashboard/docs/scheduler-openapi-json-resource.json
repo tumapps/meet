@@ -843,12 +843,61 @@
                 }
             }
         },
-        "/scheduler/attendance-confirmation/{appointment_id}/{attendee_id}": {
+        "/scheduler/confirm-attendance/{appointment_id}/{attendee_id}": {
             "post": {
                 "tags": [
                     "Appointments"
                 ],
-                "summary": "Confirm attendance for an appointment",
+                "summary": "Confirm attendance of a given meeting id provide feedback as request  body as an integer either 1 or 0",
+                "parameters": [
+                    {
+                        "name": "appointment_id",
+                        "in": "path",
+                        "description": "Pass Appointments unique ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "attendee_id",
+                        "in": "path",
+                        "description": "Pass Attendees unique ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Provide feedback as an integer: 1 (confirmed) or 0 (declined). If declined, 'declined_reason' is required.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "feedback"
+                                ],
+                                "properties": {
+                                    "feedback": {
+                                        "description": "1 when confirmed, 0 when declined",
+                                        "type": "integer",
+                                        "enum": [
+                                            0,
+                                            1
+                                        ]
+                                    },
+                                    "decline_reason": {
+                                        "description": "Required if feedback is 0",
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Attendance confirmed successfully"
