@@ -447,6 +447,9 @@ const setUserId = () => {
 
 const spaces = ref([]) // Initialize as an empty array
 const meetingId = ref(null)
+// create attendeesId array
+
+const attendeesId = ref([])
 const getAppointment = async (id) => {
   try {
     meetingId.value = id
@@ -456,6 +459,8 @@ const getAppointment = async (id) => {
     if (response.data.dataPayload && !response.data.errorPayload) {
       appointmentDetails.value = response.data.dataPayload.data
       attendees.value = response.data.dataPayload.data.attendees
+      attendeesId.value = response.data.dataPayload.data.attendees.map((attendee) => attendee.id)
+      appointmentDetails.value.attendees = attendeesId.value
       recordStatus.value = appointmentDetails.value.recordStatus
       space.value = appointmentDetails.value.space ?? 'no space here'
       selectedAppointmentId.value = id
