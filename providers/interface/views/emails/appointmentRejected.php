@@ -1,11 +1,3 @@
-/* @var $this yii\web\View */
-/* @var $username string */  // The user's name (e.g., VC)
-/* @var $appointmentDate string */  // Appointment date
-/* @var $startTime string */  // Appointment start time
-/* @var $endTime string */  // Appointment end time
-/* @var $vcName string */  // VC's name
-/* @var $rejectionReason string */  // Reason for rejection
-?>
 <!DOCTYPE html>
 <html>
 <head>
