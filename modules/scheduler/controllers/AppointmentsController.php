@@ -448,11 +448,21 @@ class AppointmentsController extends \helpers\ApiController
         // $dataRequest['Appointments']['appointment_date'] = date('Y-m-d', strtotime($dataRequest['Appointments']['appointment_date']));
 
         $model = $this->findModel($id);
+        $user_id = $model->user_id;
 
         $initial_date = $model->appointment_date;
         $initial_start_time =  $model->start_time;
         $initial_end_time = $model->end_time;
         $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
+
+        // if (!empty($model->attendees)) {
+        //     $attendees = is_array($model->attendees) ? $model->attendees : json_decode($model->attendees, true);
+        //     if (is_array($attendees)) {
+        //         $model->attendees = array_values(array_diff($attendees, [$user_id]));
+        //     }
+        // }
+        
+        // return $model->attendees;
 
         $spaceType = Space::find()
             ->select(['space_type'])
@@ -460,8 +470,6 @@ class AppointmentsController extends \helpers\ApiController
             ->scalar();
 
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
-
-        $model->uploadedFile = UploadedFile::getInstanceByName('file');
 
         if ($model->load($dataRequest)) {
 
@@ -478,7 +486,7 @@ class AppointmentsController extends \helpers\ApiController
             try {
                 if ($model->save()) {
 
-                    $this->updateAttendees($model->id, $model->attendees, $model->appointment_date, $model->start_time, $model->end_time);
+                    $this->updateAttendees($model->user_id, $model->id, $model->attendees, $model->appointment_date, $model->start_time, $model->end_time);
 
                     if ($spaceType === Space::SPACE_TYPE_MANAGED) {
                         $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
@@ -823,10 +831,14 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    protected function updateAttendees($appointment_id, $newAttendees, $date, $start_time, $end_time)
+    protected function updateAttendees($user_id = null, $appointment_id, $newAttendees, $date, $start_time, $end_time)
     {
         if (empty($newAttendees)) {
             return;
+        }
+
+        if($user_id !== null) {
+            $newAttendees[] = $user_id;
         }
 
         $existingAttendeesIds = AppointmentAttendees::find()
