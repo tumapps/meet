@@ -371,40 +371,37 @@ class AppointmentsController extends \helpers\ApiController
 
             if ($model->load($dataRequest)) {
 
-                if (!$model->validate()) {
-                    return $this->errorResponse($model->getErrors());
+                $model->space_id = $dataRequest['Appointments']['space_id'] ?? $model->user_id;
+                $spaceId = $model->space_id;
+                
+                $space = Space::findOne(['id' => $spaceId]);
+
+                if (!$space) {
+                    return $this->errorResponse([
+                        'message' => [$spaceId === $model->user_id
+                            ? 'User-specific office space is not configured'
+                            : 'The specified space does not exist']
+                    ]);
                 }
 
                 $model->uploadedFile = UploadedFile::getInstanceByName('file');
                 $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
 
-                $model->space_id = $dataRequest['Appointments']['space_id'];
-
-                $space = Space::findOne(['id' => $model->space_id]);
-
-                if (!$space) {
-                    return $this->errorResponse(['message' => ['The specified space does not exist']]);
+                if (!$model->validate()) {
+                    return $this->errorResponse($model->getErrors());
                 }
 
                 if ($space->space_type === Space::SPACE_TYPE_MANAGED) {
                     $model->status = Appointments::STATUS_PENDING;
+                } else {
+                    $model->status = Appointments::STATUS_ACTIVE;
                 }
-
-                $user_id =  $dataRequest['Appointments']['user_id'];
-                $space = Space::findOne(['id' => $user_id]);
-
-                if (!$space) {
-                    return $this->errorResponse(['message' => ['User-specific office space is not configured']]);
-                }
-
-                $model->status = Appointments::STATUS_ACTIVE;
-
 
                 if ($model->save()) {
 
                     $this->saveAttendees($model);
-                    if (!empty($dataRequest['Appointments']['space_id'])) {
-                        $this->saveSpaceAvailability($dataRequest, $model->id);
+                    if ($space->space_type === Space::SPACE_TYPE_MANAGED) {
+                        $this->saveSpaceAvailability($model->id, $model->space_id, $model->appointment_date, $model->start_time, $model->end_time);
                     }
 
                     $uploadResult = $this->handleFileUpload($model->uploadedFile, $model->id);
@@ -455,14 +452,13 @@ class AppointmentsController extends \helpers\ApiController
         $initial_end_time = $model->end_time;
         $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
 
-        // if (!empty($model->attendees)) {
-        //     $attendees = is_array($model->attendees) ? $model->attendees : json_decode($model->attendees, true);
-        //     if (is_array($attendees)) {
-        //         $model->attendees = array_values(array_diff($attendees, [$user_id]));
-        //     }
-        // }
-        
-        // return $model->attendees;
+        if (!empty($model->attendees)) {
+            $attendees = is_array($model->attendees) ? $model->attendees : json_decode($model->attendees, true);
+            if (is_array($attendees)) {
+                $model->attendees = array_values(array_diff($attendees, [$user_id]));
+            }
+        }
+
 
         $spaceType = Space::find()
             ->select(['space_type'])
@@ -472,6 +468,13 @@ class AppointmentsController extends \helpers\ApiController
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
 
         if ($model->load($dataRequest)) {
+
+            if (!empty($model->attendees)) {
+                $attendees = is_array($model->attendees) ? $model->attendees : json_decode($model->attendees, true);
+                if (is_array($attendees)) {
+                    $model->attendees = array_values(array_diff($attendees, [$user_id]));
+                }
+            }
 
             if (!$model->validate()) {
                 return $this->errorResponse($model->getErrors());
@@ -816,28 +819,28 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-    protected function saveSpaceAvailability($dataRequest, $appointmentId)
+    protected function saveSpaceAvailability($appointmentId, $space_id, $appointment_date, $start_time, $end_time)
     {
         $model = new SpaceAvailability();
 
-        $model->space_id = $dataRequest['Appointments']['space_id'];
+        $model->space_id = $space_id;
         $model->appointment_id =  $appointmentId;
-        $model->date = $dataRequest['Appointments']['appointment_date'];
-        $model->start_time = $dataRequest['Appointments']['start_time'];
-        $model->end_time = $dataRequest['Appointments']['end_time'];
+        $model->date = $appointment_date;
+        $model->start_time = $start_time;
+        $model->end_time = $end_time;
 
         if (!$model->save()) {
             throw new \Exception('Failed to save space availability: ' . implode(', ', $model->getErrorSummary(true)));
         }
     }
 
-    protected function updateAttendees($user_id = null, $appointment_id, $newAttendees, $date, $start_time, $end_time)
+    protected function updateAttendees($user_id, $appointment_id, $newAttendees, $date, $start_time, $end_time)
     {
         if (empty($newAttendees)) {
             return;
         }
 
-        if($user_id !== null) {
+        if ($user_id !== null) {
             $newAttendees[] = $user_id;
         }
 
