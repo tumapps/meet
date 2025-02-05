@@ -665,6 +665,8 @@ const updateAppointment = async () => {
     // if (fileInput.value !== null) {
     //   uploadFile()
     // }
+
+    console.log('file dealer', fileInput.value)
     submitSignal.value = 'submit'
 
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
@@ -1067,7 +1069,7 @@ onUnmounted(() => {
                   <div v-if="item.recordStatus.label === 'ACTIVE'" class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked-{{ item.id }}" :checked="item.checked_in" :disabled="item.checked_in" @change="confirmCheckIn(item)" />
                     <label class="form-check-label" :for="'flexSwitchCheckChecked-' + item.id">
-                      {{ item.checked_in }}
+                      {{ item.checked_in === 1 ? 'Checked In' : 'Check In' }}
                     </label>
                   </div>
 
