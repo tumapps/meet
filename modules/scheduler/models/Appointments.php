@@ -50,6 +50,9 @@ class Appointments extends BaseModel
     const STATUS_REJECTED = 2;
     const STATUS_CHECKED_IN = 1;
 
+    const COMFIRMED_ATTENDANCE = 1;
+    const DECLINED_ATTENDANCE = 0;
+
 
     // appointment priorities
 
