@@ -164,7 +164,7 @@ const routes = [
     }
   },
   {
-    path: '/confirm/:meetingId', // Dynamic parameter `meetingId`
+    path: '/confirm/:meetingId/:atteendeeId', // Dynamic parameter `meetingId`
     name: 'AttendanceConfirmation',
     component: () => import('@/views/modules/appointment/AttendanceConfirmationView.vue')
   },
