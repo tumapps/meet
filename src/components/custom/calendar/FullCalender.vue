@@ -8,7 +8,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
 import { usePreferencesStore } from '../../../store/preferences'
-import { parse, format } from 'date-fns'
+import { format } from 'date-fns' // read comment on line 107
 
 const router = useRouter()
 
@@ -103,10 +103,12 @@ const apiData = ref([])
 const isLoading = ref(false)
 const fetchError = ref(null)
 
-function parseCustomDate(dateString) {
-  // Parse the new format "14 Dec 2024"
-  return parse(dateString, 'dd MMM yyyy', new Date())
-}
+//update on this .. i stoppee dusing it since date coming form the backend changed format to yyyy-MM-dd
+
+// function parseCustomDate(dateString) {
+//   // Parse the new format "14 Dec 2024"
+//   return parse(dateString, 'dd MMM yyyy', new Date())
+// }
 
 // async function fetchAppointments() {
 //   isLoading.value = true
@@ -420,7 +422,7 @@ onMounted(async () => {
   <!-- FullCalendar -->
   <FullCalendar v-else :options="calendarOptions" class="main-cont" />
   <!-- Modal for event details -->
-  <b-modal v-model="isModalOpen" title="Appointment Details" dialog-class="centered-modal">
+  <b-modal v-model="isModalOpen" title="Summary" dialog-class="centered-modal">
     <p><strong>Title:</strong> {{ selectedEvent.title }}</p>
     <p><strong>Start:</strong> {{ selectedEvent.start_time }}</p>
     <p><strong>End:</strong> {{ selectedEvent.end_time }}</p>
