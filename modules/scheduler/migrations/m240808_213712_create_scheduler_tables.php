@@ -81,7 +81,7 @@ class m240808_213712_create_scheduler_tables extends Migration
 
         $this->createTable('{{%space_availability}}', [
             'id' => $this->primaryKey(),
-            'space_id' => $this->integer()->notNull(),
+            'space_id' => $this->bigInteger()->notNull(),
             'appointment_id' => $this->integer()->notNull(),
             'date' => $this->date()->notNull(),
             'start_time' => $this->time()->notNull(),
@@ -125,7 +125,6 @@ class m240808_213712_create_scheduler_tables extends Migration
             'start_time' => $this->time()->notNull(),
             'status' => $this->integer()->notNull()->defaultValue(11), //pending status
             'end_time' => $this->time()->notNull(),
-            // 'removal_reason' => $this->string()->null(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'is_removed' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer()->notNull(),
@@ -136,7 +135,7 @@ class m240808_213712_create_scheduler_tables extends Migration
 
         $this->createTable('operation_reasons', [
             'id' => $this->primaryKey(),
-            'entity_id' => $this->integer()->notNull(),
+            'entity_id' => $this->bigInteger()->notNull(),
             'type' => $this->string(),
             'entity_type' => $this->string()->notNull(),
             'reason' => $this->string(),
