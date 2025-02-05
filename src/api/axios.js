@@ -346,6 +346,8 @@ const AxiosInstance = () => {
 
   const logout = async () => {
     authStore.removeToken() // Update the store
+    router.push({ path: '/auth/login' })
+
     authStore.remove
     localStorage.setItem('loggedIn', false)
 
@@ -354,7 +356,9 @@ const AxiosInstance = () => {
     } catch (error) {
       console.error('Error during logout:', error)
     } finally {
-      router.push({ path: '/auth/login' })
+      //you can decide to wait for the backend to respond and logout or  logout on frontend and backend left doing its thing
+      // router.push({ path: '/auth/login' })
+      localStorage.clear()
     }
   }
 
