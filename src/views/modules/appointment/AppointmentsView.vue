@@ -459,7 +459,7 @@ const getAppointment = async (id) => {
     if (response.data.dataPayload && !response.data.errorPayload) {
       appointmentDetails.value = response.data.dataPayload.data
       attendees.value = response.data.dataPayload.data.attendees
-      attendeesId.value = response.data.dataPayload.data.attendees.map((attendee) => attendee.id)
+      attendeesId.value = response.data.dataPayload.data.attendees.map((attendee) => attendee.attendee_id)
       appointmentDetails.value.attendees = attendeesId.value
       recordStatus.value = appointmentDetails.value.recordStatus
       space.value = appointmentDetails.value.space ?? 'no space here'
