@@ -268,16 +268,27 @@ return [
 
     /**
      * @OA\Post(
-     *     path="/scheduler/attendance-confirmation/{appointment_id}/{attendee_id}",
-     *     summary="Confirm attendance for an appointment",
+     *     path="/scheduler/confirm-attendance/{appointment_id}/{attendee_id}",
+     *     summary="Confirm attendance of a given meeting id provide feedback as request  body as an integer either 1 or 0",
      *     tags={"Appointments"},
+     *   @OA\Parameter(description="Pass Appointments unique ID",in="path",name="appointment_id",required=true,@OA\Schema(type="string",)),
+     *   @OA\Parameter(description="Pass Attendees unique ID",in="path",name="attendee_id",required=true,@OA\Schema(type="string",)),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Provide feedback as an integer: 1 (confirmed) or 0 (declined). If declined, 'declined_reason' is required.",
+     *         @OA\JsonContent(
+     *             required={"feedback"},
+     *             @OA\Property(property="feedback", type="integer", enum={0,1}, description="1 when confirmed, 0 when declined"),
+     *             @OA\Property(property="decline_reason", type="string", nullable=true, description="Required if feedback is 0")
+     *         )
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Attendance confirmed successfully",
      *     )
      * )
      */
-    'POST attendance-confirmation/{appointment_id}/{attendee_id}' => 'appointments/confirm-attendance',
+    'POST confirm-attendance/{appointment_id}/{attendee_id}' => 'appointments/confirm-attendance',
 
     /**
      * @OA\Post(
