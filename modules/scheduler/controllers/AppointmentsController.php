@@ -192,7 +192,7 @@ class AppointmentsController extends \helpers\ApiController
                 $model->email_address,
                 $model->contact_name,
                 $model->user_id,
-                $model->date,
+                $model->appointment_date,
                 $model->start_time,
                 $model->end_time
             );
