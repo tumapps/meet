@@ -278,6 +278,8 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData['statusLabel'] = $statusLabel;
 
         $appointmentData['space'] = $this->getSpaceDetails($appointment);
+        $appointmentData['rejection_reason'] = OperationReasons::find()->select(['reason'])->where(['entity_id' => $appointment->id])->scalar() ?? null;
+
 
         $attendees = AppointmentAttendees::find()
             ->select(['attendee_id', 'status'])
@@ -373,7 +375,7 @@ class AppointmentsController extends \helpers\ApiController
 
                 $model->space_id = $dataRequest['Appointments']['space_id'] ?? $model->user_id;
                 $spaceId = $model->space_id;
-                
+
                 $space = Space::findOne(['id' => $spaceId]);
 
                 if (!$space) {
@@ -933,10 +935,10 @@ class AppointmentsController extends \helpers\ApiController
     {
         $dataRequest['Attendance'] = Yii::$app->request->getBodyParams();
 
-        $confirmationAnswer = $dataRequest['Attendance']['confirmation_answer'];
-        $declineReason = $dataRequest['Attendance']['decline_reason'];
+        $feedback = $dataRequest['Attendance']['feedback'];
+        $declineReason = isset($dataRequest['Attendance']['decline_reason']) ? $dataRequest['Attendance']['decline_reason'] : null;
 
-        if (!isset($confirmationAnswer)) {
+        if (!isset($feedback) || !is_int($feedback)) {
             return $this->errorResponse(['message' => ['Invalid data submitted.']]);
         }
 
@@ -957,8 +959,7 @@ class AppointmentsController extends \helpers\ApiController
 
         // Check if the attendee is the chairperson
         $isChairperson = $appointment->user_id == $attendee_id;
-        $statusMessage = $this->processConfirmation($confirmationAnswer, $attendee, $appointment, $isChairperson, $declineReason);
-
+        $statusMessage = $this->processConfirmation($feedback, $attendee, $appointment, $isChairperson, $declineReason);
 
         if ($attendee->save()) {
             return $this->toastResponse([
@@ -978,20 +979,25 @@ class AppointmentsController extends \helpers\ApiController
         ]);
     }
 
-    private function processConfirmation($confirmationAnswer, $attendee, $appointment, $isChairperson, $declineReason)
+    private function processConfirmation($feedback, $attendee, $appointment, $isChairperson, $declineReason)
     {
-        if ($confirmationAnswer === true) {
+        if ($feedback === Appointments::COMFIRMED_ATTENDANCE) {
             $attendee->status = AppointmentAttendees::STATUS_CONFIRMED;
             $attendee->save(false);
             return 'Your attendance has been confirmed. Thank you!';
-        } else {
+        } else if ($feedback == Appointments::DECLINED_ATTENDANCE){
+
+            if (empty($declineReason)) {
+                return 'Please provide a decline reason for this meeting';
+            }
+
             $attendee->status = AppointmentAttendees::STATUS_DECLINED;
 
             $statusMessage = 'Your attendance has been declined. Thank you for your response!';
 
             $operationalReason = new OperationReasons();
 
-            if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'DECLINED', 'APPOINTMENTS', $$attendee->id, $attendee->id)) {
+            if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'DECLINED', 'APPOINTMENTS', $attendee->id, $attendee->id)) {
                 return $this->errorResponse(['message' => ['Unable to save decline reason. Please try again later.']]);
             }
 
@@ -1000,14 +1006,14 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendee->save(false);
-            return $statusMessage;
+            return $this->toastResponse([$statusMessage]);
         }
     }
 
     private function handleChairpersonDecline($appointment, $declineReason, $attendeeId)
     {
         $appointment->status = Appointments::STATUS_CANCELLED;
-        $appointment->cancelation_reason = $declineReason;
+        $appointment->cancellation_reason = $declineReason;
 
         if (!$appointment->save(false)) {
             return false;
@@ -1015,7 +1021,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $operationalReason = new OperationReasons();
 
-        if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'CANCELLED', 'APPOINTMENTS', $$attendeeId, $attendeeId)) {
+        if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'CANCELLED', 'APPOINTMENTS', $attendeeId, $attendeeId)) {
             return $this->errorResponse(['message' => ['Unable to save decline reason. Please try again later.']]);
         }
 
