@@ -224,7 +224,7 @@ onMounted(() => {
           <ul class="list-unstyled">
             <li><strong>Date:</strong> {{ meetingDetails.appointment_date }}</li>
             <li><strong>Time:</strong> {{ meetingDetails.start_time }} to {{ meetingDetails.end_time }}</li>
-            <li><strong>Location:</strong> {{ meetingDetails.space.name }}</li>
+            <li><strong>Location:</strong> {{ meetingDetails?.space?.name }}</li>
             <li>
               <strong>Agenda:</strong>
               <a class="m-3" :href="meetingDetails.attachment?.downloadLink || '#'" target="_blank" rel="noopener noreferrer">
