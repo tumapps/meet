@@ -126,7 +126,7 @@ class OperationReasons extends BaseModel
             ->select('reason')
             ->where([
                 'entity_id' => $entityId,
-                'affected_user' => $user_id,
+                'affected_user_id' => $user_id,
             ])
             ->scalar();
 
