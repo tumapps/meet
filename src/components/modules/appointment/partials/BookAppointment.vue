@@ -256,14 +256,16 @@ const submitAppointment = async () => {
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       errors.value = error.response.data.errorPayload.errors
 
-      proxy.$showAlert({
-        title: error.response.data.errorPayload.errors?.message,
-        // text: error.response.data.errorPayload.errors?.message,
-        icon: 'error',
-        showCancelButton: false,
-        showConfirmButton: false,
-        timer: 2000
-      })
+      if (error.response.data.errorPayload.errors.message) {
+        proxy.$showAlert({
+          title: error.response.data.errorPayload.errors?.message,
+          // text: error.response.data.errorPayload.errors?.message,
+          icon: 'error',
+          showCancelButton: false,
+          showConfirmButton: false,
+          timer: 2000
+        })
+      }
     }
   } finally {
     uploading.value = false
@@ -524,6 +526,8 @@ onMounted(() => {
                 </div>
               </b-col> -->
               <AttendeesComponent @newAttendee="updateAttendees" />
+              <div v-if="errors.attendees" class="error"  aria-live="polite">{{ errors.attendees }}</div>
+              
             </b-row>
           </div>
         </div>

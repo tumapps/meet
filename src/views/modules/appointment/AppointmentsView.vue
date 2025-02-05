@@ -61,6 +61,8 @@ const InitialappointmentDetails = {
   space_id: ''
 }
 
+const uploading = ref(false) // Holds the upload status
+
 const appointmentDetails = ref({ ...InitialappointmentDetails })
 const fileName = ref(null)
 const fileInput = ref(null)
@@ -77,10 +79,11 @@ const handleFileUpload = (event) => {
 
 //function to upload file
 const uploadFile = async () => {
+  uploading.value = true
   const formData = new FormData()
   formData.append('file', agenda.value)
   try {
-    const response = await axiosInstance.post('v1/scheduler/upload-file', formData, {
+    const response = await axiosInstance.post(`v1/scheduler/upload-file/${meetingId.value}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -111,13 +114,18 @@ const uploadFile = async () => {
       timer: 3000,
       timerProgressBar: true
     })
+  } finally {
+    uploading.value = false
   }
 }
 
 const removeFile = () => {
   agenda.value = null
   fileName.value = null
-  fileInput.value = ''
+  // Check if fileInput.value exists before accessing `.value`
+  if (fileInput.value) {
+    fileInput.value.value = null
+  }
 }
 
 const flatPickrConfig = {
@@ -593,10 +601,11 @@ const openModal = (id) => {
 //   }
 // }
 
-//submit attendeess signail 
+//submit attendeess signail
 const submitSignal = ref(false)
 
 const updateAppointment = async () => {
+  uploading.value = true
   console.log(appointmentDetails.value)
   //map only the attendee_id to the attendees array
   try {
@@ -648,12 +657,12 @@ const updateAppointment = async () => {
     // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
-    // uploadFile()
+    if (fileInput.value !== null) {
+      uploadFile()
+    }
     submitSignal.value = 'submit'
 
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
-
-    
 
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
@@ -693,6 +702,8 @@ const updateAppointment = async () => {
         icon: 'error'
       })
     }
+  } finally {
+    uploading.value = false
   }
 }
 
@@ -833,6 +844,7 @@ const handleModalClose = () => {
   errors.value = {}
   space.value = ''
   getAppointments(1) // Refresh the appointments after closing the modal
+  removeFile()
 }
 
 const appointmentTypeOptions = ref([])
@@ -972,7 +984,7 @@ onUnmounted(() => {
         </b-col>
         <b-col lg="6" md="12" sm="12" class="mb-3">
           <div class="d-flex justify-content-end">
-            <b-button variant="primary" @click="showModal"> New Appointment </b-button>
+            <b-button variant="primary" @click="showModal"> New Meeting </b-button>
           </div>
         </b-col>
       </b-row>
@@ -1273,7 +1285,7 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="12" md="12" class="mb-3">
-                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" :submitSignal="submitSignal"/>
+                  <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" :submitSignal="submitSignal" />
                 </b-col>
 
                 <b-row v-if="recordStatus.label === 'RESCHEDULE'">
@@ -1317,7 +1329,11 @@ onUnmounted(() => {
                 <b-row class="m-5">
                   <b-col>
                     <div class="d-flex justify-content-center">
-                      <b-button variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING'"> Update </b-button>
+                      <b-button v-if="uploading === false" variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING'"> Update </b-button>
+                      <button v-else class="btn btn-primary" type="button" disabled>
+                        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                        Submitting...
+                      </button>
                     </div>
                   </b-col>
                 </b-row>

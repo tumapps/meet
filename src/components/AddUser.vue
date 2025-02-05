@@ -178,7 +178,7 @@ const submitForm = async () => {
           </b-col>
         </b-row>
 
-        <div class="text-end mt-4">
+        <div class="text-center mt-4">
           <button v-if="!submitted" type="submit" class="btn btn-primary">Submit</button>
           <button v-else class="btn btn-primary" disabled>
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

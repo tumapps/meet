@@ -191,8 +191,8 @@ async function fetchAppointments() {
       .map((item) => {
         console.log('Item:', item)
 
-        const parsedDate = parseCustomDate(item.appointment_date)
-        const formattedDate = format(parsedDate, 'yyyy-MM-dd')
+        // const parsedDate = parseCustomDate(item.appointment_date)
+        const formattedDate = format(item.appointment_date, 'yyyy-MM-dd')
         let backgroundColor
 
         // Assign background color based on recordStatus.label

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, defineProps, defineEmits, computed } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 import createAxiosInstance from '@/api/axios'
 import Swal from 'sweetalert2'
 
@@ -131,8 +131,8 @@ const removeAttendee = (index, fromBackend) => {
     confirmRemoval()
   } else {
     attendees.value.splice(index, 1)
-  attendeesId.value = attendees.value.map((attendee) => attendee.id)
-  console.log('final attendees removed from table', attendees.value)
+    attendeesId.value = attendees.value.map((attendee) => attendee.id)
+    console.log('final attendees removed from table', attendees.value)
   }
 }
 
@@ -186,6 +186,10 @@ const restoreAttendee = (index) => {
 
 // Submit removed attendees
 const submitRemovedAttendees = async () => {
+  if (Object.keys(removedAttendees.value.attendees).length === 0) {
+    console.warn('No attendees to remove') // Optional: Log a warning
+    return // Stop the function if no attendees
+  }
   try {
     const response = await axiosInstance.put(`/v1/scheduler/remove-attendee/${meetingId.value}`, removedAttendees.value)
     if (response.data?.dataPayload) {
@@ -200,10 +204,9 @@ const submitRemovedAttendees = async () => {
 }
 
 // Function to check if attendees is not null, undefined, or empty
-const hasAttendees = computed(() => {
-  return removedAttendees.value.attendees && Object.keys(removedAttendees.value.attendees).length > 0;
-});
-
+// const hasAttendees = computed(() => {
+//   return removedAttendees.value.attendees && Object.keys(removedAttendees.value.attendees).length > 0;
+// });
 
 watch(
   () => props.submitSignal,
