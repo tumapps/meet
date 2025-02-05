@@ -662,9 +662,9 @@ const updateAppointment = async () => {
     // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
-    if (fileInput.value !== null) {
-      uploadFile()
-    }
+    // if (fileInput.value !== null) {
+    //   uploadFile()
+    // }
     submitSignal.value = 'submit'
 
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
