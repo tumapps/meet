@@ -217,6 +217,11 @@ class Appointments extends BaseModel
             return;
         }
 
+        if (!$this->isValidTime($this->start_time) || !$this->isValidTime($this->end_time)) {
+            $this->addError($attribute, 'Start time and End time must be in the format HH:MM.');
+            return;
+        }
+
         $hasOverlappingEvents = Events::getOverlappingEvents(
             $this->appointment_date,
             $this->start_time,
@@ -226,6 +231,11 @@ class Appointments extends BaseModel
         if ($hasOverlappingEvents) {
             $this->addError($attribute, 'The selected time or date overlaps with another event.');
         }
+    }
+
+    private function isValidTime($time)
+    {
+        return preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time);
     }
 
     protected function isValidDate($date)
