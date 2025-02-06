@@ -4,12 +4,13 @@ namespace helpers;
 
 use Yii;
 use yii\base\Event;
-// use helpers\traits\Mail;
+use helpers\traits\Keygen;
 use app\providers\components\MailQueueManager;
 
 class EventHandler
 {
-	// use Mail;
+	use Keygen;
+
 	private static $mailQueue;
 
 	public function __construct()
@@ -68,16 +69,16 @@ class EventHandler
 		if (!empty($attendeesDetails)) {
 			foreach ($attendeesDetails as $attendeeDetail) {
 				$attendeeEmail = $attendeeDetail['email'];
-				$staffId = $attendeeDetail['staff_id'];
+				$attendee_id = $attendeeDetail['staff_id'];
 				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
 				$confirmationBaseUrl = Yii::$app->params['confirmationLink'];
-				// $confirmationLink = $confirmationBaseUrl . $appointmentId . '?' . http_build_query([
-				// 	// 'email' => base64_encode($attendeeEmail),
-				// 	'appointmentId' => $appointmentId,
-				// 	'staff_id' => $staffId
-				// ]);
+				// $appointmentHash = hash_hmac('sha256', $appointmentId, Yii::$app->params['secret_key']);
+				// $attendeeHash = hash_hmac('sha256', $attendee_id, Yii::$app->params['secret_key']);
 
-				$confirmationLink = $confirmationBaseUrl . '/'. $appointmentId . '/' . $staffId;
+				$appointmentEnc = self::encryptData($appointmentId);
+				$attendeeIdEnc = self::encryptData($attendee_id);
+
+				$confirmationLink = $confirmationBaseUrl . '/' . $appointmentEnc . '/' . $attendeeIdEnc;
 
 				$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
 					'recipientType' => 'attendee',
