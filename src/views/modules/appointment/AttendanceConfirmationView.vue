@@ -17,7 +17,7 @@ const responseMessage = ref('')
 
 const fetchMeetingDetails = async (id) => {
   try {
-    const response = await axiosInstance.get(`/v1/scheduler/appointments/${id}`)
+    const response = await axiosInstance.get(`/v1/scheduler/meeting-info/${id}`)
     meetingDetails.value = response.data.dataPayload.data
   } catch (error) {
     console.error('Error fetching meeting details:', error)
