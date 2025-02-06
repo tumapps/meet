@@ -34,8 +34,8 @@ class ConfigWrapper
         $this->_tokens = [
             // '{id}' => '<id:\\d[\\d,]*>',
             '{id}' => '<id:[a-zA-Z0-9_\\-]+>',
-            '{appointment_id}' => '<appointment_id:\\d[\\d,]*>',
-            '{attendee_id}' => '<attendee_id:\\d[\\d,]*>',
+            '{appointment_id}' => '<appointment_id:[a-zA-Z0-9_\-\/]+>',
+            '{attendee_id}' => '<attendee_id:[a-zA-Z0-9_\-\/]+>',
             '{key}' => '<key:[a-zA-Z0-9_\-\/]+>',
             '{crypt_id}' => '<crypt_id:[a-zA-Z0-9\\-]+>',
             '{space_id}' => '<space_id:[a-zA-Z0-9_\\-]+>',
@@ -51,6 +51,7 @@ class ConfigWrapper
             'jwt.audience' => 'http://example.org',
             'jwt.id' => '4f1g23a12aa',
             'jwt_secret' => getenv('JWT_SECRET'),
+            'secret_key' => '8213515c4730e7ca9ee8e8135a2f4e87180f8882a324299a057a8deafcd1d028',
             'adminEmail' => $_SERVER['SYSTEM_ADMIN_EMAIL'] ?? 'francisyuppie@gmail.com',
             'user.passwordResetTokenExpire' => 900,
             'allowedDomains' => '*',
