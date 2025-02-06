@@ -947,17 +947,24 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse(['message' => ['Invalid confirmation link.']]);
         }
 
+        if ($attendee->is_removed === AppointmentAttendees::STATUS_REMOVED) {
+            return $this->toastResponse(['message' => ['You are no longer a member of this meeting']]);
+        }
+
+        if ($attendee->status !== AppointmentAttendees::STATUS_PENDING) {
+            return $this->toastResponse(['message' => ['You have already responded to this meeting invitation.']]);
+        }
+
         $appointment = Appointments::findOne($appointment_id);
 
         if (!$appointment) {
             return $this->errorResponse(['message' => ['Meeting not found.']]);
         }
 
-        if ($appointment->status == Appointments::STATUS_CANCELLED) {
-            return $this->toastResponse(['message' => ['This meeting has already been cancelled.']]);
+        if ($appointment->status !== Appointments::STATUS_ACTIVE) {
+            return $this->toastResponse(['message' => ['This meeting does not exist.']]);
         }
 
-        // Check if the attendee is the chairperson
         $isChairperson = $appointment->user_id == $attendee_id;
         $statusMessage = $this->processConfirmation($feedback, $attendee, $appointment, $isChairperson, $declineReason);
 
@@ -985,7 +992,7 @@ class AppointmentsController extends \helpers\ApiController
             $attendee->status = AppointmentAttendees::STATUS_CONFIRMED;
             $attendee->save(false);
             return 'Your attendance has been confirmed. Thank you!';
-        } else if ($feedback == Appointments::DECLINED_ATTENDANCE){
+        } else if ($feedback == Appointments::DECLINED_ATTENDANCE) {
 
             if (empty($declineReason)) {
                 return 'Please provide a decline reason for this meeting';
@@ -1006,7 +1013,7 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             $attendee->save(false);
-            return $this->toastResponse([$statusMessage]);
+            return $statusMessage;
         }
     }
 
