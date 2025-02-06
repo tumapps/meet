@@ -856,7 +856,7 @@
                         "description": "Pass Appointments unique ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     },
                     {
@@ -865,7 +865,7 @@
                         "description": "Pass Attendees unique ID",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
                         }
                     }
                 ],
