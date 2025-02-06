@@ -13,6 +13,10 @@ const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 // Default routes
 export const defaultChildRoutes = (prefix) => [
   {
+    path: '', // Empty path makes this the default child
+    redirect: 'home' // Redirect to the home child route
+  },
+  {
     path: '/home',
     name: 'home', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'Home', isBanner: false },
@@ -88,7 +92,7 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true }
   },
   {
-    path: '/:catchAll(.*)', // Update the wildcard route
+    path: '/:pathMatch(.*)*', // Update the wildcard route
     name: 'Error404',
     component: Error404
   },
@@ -114,7 +118,6 @@ export const defaultChildRoutes = (prefix) => [
   },
   {
     path: '/permissions',
-    name: 'permissions',
     meta: { requiresAuth: true },
     component: () => import('@/views/iam-admin/admin/PermissionsView.vue')
   },
@@ -130,6 +133,10 @@ export const defaultChildRoutes = (prefix) => [
 
 const routes = [
   // Default Pages
+  {
+    path: '/',
+    redirect: '/auth/login' // Redirect '/' to a valid route
+  },
   {
     path: '',
     name: 'dashboard',
@@ -176,14 +183,14 @@ const router = createRouter({
   linkActiveClass: 'active',
   linkExactActiveClass: 'exact-active',
   history: createWebHistory(import.meta.env.BASE_URL),
-  base: import.meta.env.BASE_URL,
+  // base: import.meta.env.BASE_URL,
   routes
 })
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
   const user = localStorage.getItem('user.username')
-  const fallbackRoute = '/home'
+  const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
 
   console.log('Fallback Route:', fallbackRoute)
   console.log('to path:', to.path)
@@ -218,13 +225,13 @@ router.beforeEach((to, from, next) => {
   const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen']
 
   if (unauthenticatedRoutes.includes(to.path)) {
-    // if (token && user) {
-    //   // Authenticated user, redirect to previous route
-    //   return next(`${fallbackRoute}`)
-    // } else if (!token && user) {
-    //   // Session locked, redirect to lockscreen
-    //   return next('/lockscreen')
-    // }
+    if (token && user) {
+      // Authenticated user, redirect to previous route
+      return next(`${fallbackRoute}`)
+    } else if (!token && user) {
+      // Session locked, redirect to lockscreen
+      return next('/lockscreen')
+    }
     // Allow unauthenticated users to proceed
     return next()
   }

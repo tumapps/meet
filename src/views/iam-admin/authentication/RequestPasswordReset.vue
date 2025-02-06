@@ -10,7 +10,7 @@ const email = ref('')
 const username = ref('')
 const axiosInstance = createAxiosInstance()
 const errors = ref({ email: '', username: '' })
-const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
+const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : ''
 
 const onSubmit = async () => {
   errors.value = { email: '', username: '' } // Reset errors
@@ -40,7 +40,7 @@ const onSubmit = async () => {
         timerProgressBar: true,
         willClose: () => {
           // After the alert is dismissed, redirect to the login page
-          router.push('/')
+          router.push('/auth/login')
         }
       })
     }
