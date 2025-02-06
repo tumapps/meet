@@ -24,26 +24,36 @@ const fetchMeetingDetails = async (id) => {
     responseMessage.value = 'Failed to load meeting details.'
   }
 }
-
-const handleResponse = async (responseType) => {
+const meetingId = route.params.meetingId
+const attendeeId = route.params.attendeeId
+const answer = ref({
+  feedback: '',
+  decline_reason: ''
+})
+const handleResponse = async () => {
   isSubmitting.value = true
   try {
-    await axiosInstance.post(`/api/meeting/response`, { response: responseType })
-    responseMessage.value = `You have successfully ${responseType === 'confirm' ? 'confirmed' : 'declined'} the meeting.`
+    const response = await axiosInstance.post(`/v1/scheduler/confirm-attendance/${meetingId}/${attendeeId}`, answer.value)
 
-    proxy.$showToast({
-      title: 'Success',
-      text: 'You have successfully ',
-      icon: 'success'
+    proxy.$showAlert({
+      title: response.data.toastPayload.toastTheme,
+      text: response.data.toastPayload.toastMessage,
+      icon: response.data.toastPayload.toastTheme,
+      showCancelButton: false,
+      showConfirmButton: false
     })
   } catch (error) {
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
+    if (errorMessage) {
+      proxy.$showAlert({
+        title: error.response.data.errorPayload?.toastTheme || 'Error',
+        text: error.response.data.errorPayload?.toastMessage || errorMessage,
+        icon: error.response.data.errorPayload?.toastTheme || 'error',
+        showCancelButton: false,
+        showConfirmButton: false
+      })
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -56,12 +66,12 @@ const handleResponse = async (responseType) => {
 // Utility function for formatting dates
 // const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString()
 
+// console.log("id", id);
 const confirmResponse = (scene) => {
-  // console.log("id", id);
   proxy
     .$showAlert({
       title: 'Are you sure?',
-      text: 'You are about to' + ' ' + scene + ' ' + 'your invitation to this meeting. This action cannot be undone.',
+      text: `You are about to ${scene} your invitation to this meeting. This action cannot be undone.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Confirm',
@@ -71,7 +81,29 @@ const confirmResponse = (scene) => {
     })
     .then((result) => {
       if (result.isConfirmed) {
-        handleResponse(scene)
+        if (scene === 'Accept') {
+          answer.value.feedback = 1
+          handleResponse()
+        } else {
+          // Pop up to ask for reason, and reason is required
+          proxy
+            .$showAlert({
+              title: 'Reason for Declining',
+              text: 'Please provide a reason for declining this invitation.',
+              input: 'text',
+              inputPlaceholder: 'Enter your reason here...',
+              inputValidator: (value) => {
+                return !value ? 'Reason is required!' : null
+              }
+            })
+            .then((reason) => {
+              if (reason.value) {
+                answer.value.feedback = 0
+                answer.value.decline_reason = reason.value
+                handleResponse()
+              }
+            })
+        }
       }
     })
 }

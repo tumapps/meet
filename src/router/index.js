@@ -164,7 +164,7 @@ const routes = [
     }
   },
   {
-    path: '/confirm/:meetingId/:atteendeeId', // Dynamic parameter `meetingId`
+    path: '/confirm/:meetingId/:attendeeId', // Dynamic parameter `meetingId`
     name: 'AttendanceConfirmation',
     component: () => import('@/views/modules/appointment/AttendanceConfirmationView.vue')
   },
@@ -183,7 +183,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
   const user = localStorage.getItem('user.username')
-  const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
+  const fallbackRoute = '/home'
 
   console.log('Fallback Route:', fallbackRoute)
   console.log('to path:', to.path)
@@ -193,7 +193,7 @@ router.beforeEach((to, from, next) => {
     if (token) {
       console.log('Token fu kind hd:', token)
       // Redirect authenticated users away from lockscreen
-      return next(`/${fallbackRoute}`)
+      return next(`${fallbackRoute}`)
     }
     console.log('kung fu hustle:', token)
     // Allow unauthenticated users to proceed
@@ -218,13 +218,13 @@ router.beforeEach((to, from, next) => {
   const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen']
 
   if (unauthenticatedRoutes.includes(to.path)) {
-    if (token && user) {
-      // Authenticated user, redirect to fallback route
-      return next(`/${fallbackRoute}`)
-    } else if (!token && user) {
-      // Session locked, redirect to lockscreen
-      return next('/lockscreen')
-    }
+    // if (token && user) {
+    //   // Authenticated user, redirect to previous route
+    //   return next(`${fallbackRoute}`)
+    // } else if (!token && user) {
+    //   // Session locked, redirect to lockscreen
+    //   return next('/lockscreen')
+    // }
     // Allow unauthenticated users to proceed
     return next()
   }
