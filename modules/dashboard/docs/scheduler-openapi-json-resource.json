@@ -856,7 +856,7 @@
                         "description": "Pass Appointments unique ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     },
                     {
@@ -865,7 +865,7 @@
                         "description": "Pass Attendees unique ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         }
                     }
                 ],
@@ -901,6 +901,67 @@
                 "responses": {
                     "200": {
                         "description": "Attendance confirmed successfully"
+                    }
+                }
+            }
+        },
+        "/scheduler/meeting-info/{appointment_id}": {
+            "get": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Displays a single Appointments model",
+                "parameters": [
+                    {
+                        "name": "appointment_id",
+                        "in": "path",
+                        "description": "Pass Appointments unique ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single Appointments model.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "$ref": "#/components/schemas/Appointments"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
