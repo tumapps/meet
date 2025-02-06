@@ -271,8 +271,8 @@ return [
      *     path="/scheduler/confirm-attendance/{appointment_id}/{attendee_id}",
      *     summary="Confirm attendance of a given meeting id provide feedback as request  body as an integer either 1 or 0",
      *     tags={"Appointments"},
-     *   @OA\Parameter(description="Pass Appointments unique ID",in="path",name="appointment_id",required=true,@OA\Schema(type="integer",)),
-     *   @OA\Parameter(description="Pass Attendees unique ID",in="path",name="attendee_id",required=true,@OA\Schema(type="integer",)),
+     *   @OA\Parameter(description="Pass Appointments unique ID",in="path",name="appointment_id",required=true,@OA\Schema(type="string",)),
+     *   @OA\Parameter(description="Pass Attendees unique ID",in="path",name="attendee_id",required=true,@OA\Schema(type="string",)),
      *     @OA\RequestBody(
      *         required=true,
      *         description="Provide feedback as an integer: 1 (confirmed) or 0 (declined). If declined, 'declined_reason' is required.",
@@ -289,6 +289,34 @@ return [
      * )
      */
     'POST confirm-attendance/{appointment_id}/{attendee_id}' => 'appointments/confirm-attendance',
+
+
+
+    /**
+     * @OA\Get(path="/scheduler/meeting-info/{appointment_id}",
+     *   summary="Displays a single Appointments model",
+     *   tags={"Appointments"},
+     *   @OA\Parameter(description="Pass Appointments unique ID",in="path",name="appointment_id",required=true,@OA\Schema(type="string",)),
+     *   @OA\Response(
+     *     response=200,
+     *     description="Displays a single Appointments model.",
+     *     @OA\JsonContent(
+     *         @OA\Property(property="dataPayload", type="object", ref="#/components/schemas/Appointments")
+     *     )
+     *   ),
+     *   @OA\Response(
+     *     response=404,
+     *     description="Resource not found",
+     *     @OA\JsonContent(
+     *         @OA\Property(property="errorPayload", type="object",
+     *             @OA\Property(property="statusCode", type="integer", example=404),
+     *             @OA\Property(property="errorMessage", type="string", example="Not found")
+     *         )
+     *     )
+     *   ),
+     * )
+     */
+    'GET meeting-info/{appointment_id}' => 'appointments/meeting-info',
 
     /**
      * @OA\Post(
