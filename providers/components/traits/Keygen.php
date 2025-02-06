@@ -9,8 +9,7 @@ trait Keygen
 {
 	public  function uid($type, $save = false, $codeType = 'cym')
 	{
-		return AutoIncrement::generate($type,$save,$codeType);
-
+		return AutoIncrement::generate($type, $save, $codeType);
 	}
 	public  function cryptID($numerical = false, $randandomStringLength = 15)
 	{
@@ -76,5 +75,18 @@ trait Keygen
 		$dash_str .= $password;
 		return $dash_str;
 	}
-	
+
+	public static function encryptData($data)
+	{
+		$key = \Yii::$app->params['secret_key'];
+		$iv = substr($key, 0, 16); // Initialization Vector
+		return base64_encode(openssl_encrypt($data, 'AES-256-CBC', $key, 0, $iv));
+	}
+
+	public static function decryptData($data)
+	{
+		$key = \Yii::$app->params['secret_key'];
+		$iv = substr($key, 0, 16);
+		return openssl_decrypt(base64_decode($data), 'AES-256-CBC', $key, 0, $iv);
+	}
 }
