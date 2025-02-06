@@ -3,6 +3,7 @@
 namespace scheduler\controllers;
 
 use Yii;
+use helpers\traits\Keygen;
 use yii\web\UploadedFile;
 use scheduler\models\Appointments;
 use scheduler\models\searches\AppointmentsSearch;
@@ -27,6 +28,7 @@ use app\providers\components\SmsComponent;
  */
 class AppointmentsController extends \helpers\ApiController
 {
+    use Keygen;
 
     public $permissions = [
         'schedulerAppointmentsList' => 'View Appointments List',
@@ -303,6 +305,31 @@ class AppointmentsController extends \helpers\ApiController
         $file = AppointmentAttachments::getAppointmentAttachment($appointment->id);
         $appointmentData['attachment'] = $file;
         $appointmentData['attendees'] =  $attendeeDetails;
+
+        return $this->payloadResponse($appointmentData);
+    }
+
+    public function actionMeetingInfo($appointment_id)
+    {
+        $appointmentId = self::decryptData($appointment_id);
+
+        if (!$appointmentId) {
+            return $this->errorResponse(['message' => ['Invalid meeting ID']]);
+        }
+
+        $appointment = $this->findModel($appointmentId);
+
+        $statusLabel = Appointments::getStatusLabel($appointment->status);
+
+        $appointmentData = $appointment->toArray();
+        $appointmentData['statusLabel'] = $statusLabel;
+
+        $appointmentData['space'] = $this->getSpaceDetails($appointment);
+        $appointmentData['rejection_reason'] = OperationReasons::find()->select(['reason'])->where(['entity_id' => $appointment->id])->scalar() ?? null;
+
+
+        $file = AppointmentAttachments::getAppointmentAttachment($appointment->id);
+        $appointmentData['attachment'] = $file;
 
         return $this->payloadResponse($appointmentData);
     }
@@ -933,6 +960,13 @@ class AppointmentsController extends \helpers\ApiController
 
     public function actionConfirmAttendance($appointment_id, $attendee_id)
     {
+        $appointment_id = self::decryptData($appointment_id);
+        $attendee_id = self::decryptData($attendee_id);
+
+        if (!$appointment_id || !$attendee_id) {
+            return $this->errorResponse(['message' => ['Invalid confirmation link.']]);
+        }
+
         $dataRequest['Attendance'] = Yii::$app->request->getBodyParams();
 
         $feedback = $dataRequest['Attendance']['feedback'];
