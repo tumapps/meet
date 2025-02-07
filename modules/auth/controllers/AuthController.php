@@ -32,7 +32,7 @@ class AuthController extends \helpers\ApiController
 		$appointmentDate = $queryParams['appointment_date'] ?? null;
 		$startTime = $queryParams['start_time'] ?? null;
 		$endTime = $queryParams['end_time'] ?? null;
-		
+
 
 		$filteredUsers = [];
 		foreach ($users as $user) {
@@ -142,7 +142,7 @@ class AuthController extends \helpers\ApiController
 
 	public function actionGetUser($id)
 	{
-		
+
 		if (!$id) {
 			return $this->errorResponse(['message' => ['User ID is required']]);
 		}
@@ -273,20 +273,22 @@ class AuthController extends \helpers\ApiController
 
 		$filteredMenus = [];
 
+		$removeRoles = function ($menu) use (&$removeRoles) {
+			unset($menu['roles']);
+			if (isset($menu['children'])) {
+				$menu['children'] = array_map($removeRoles, $menu['children']);
+			}
+			return $menu;
+		};
+
 		if (in_array('su', $roleNames)) {
-			$filteredMenus = array_map(function ($menu) {
-				unset($menu['roles']);
-				return $menu;
-			}, array_values(array_filter($menus, function ($menu) {
+			$filteredMenus = array_map($removeRoles, array_values(array_filter($menus, function ($menu) {
 				return isset($menu['route']) && !in_array($menu['route'], ['availability', 'home']);
 			})));
 
 			if (isset($menus['iam'])) {
 				$filteredMenus[] = [
-					'IAM' => array_map(function ($iamMenu) {
-						unset($iamMenu['roles']);
-						return $iamMenu;
-					}, $menus['iam']),
+					'IAM' => array_map($removeRoles, $menus['iam']),
 				];
 			}
 
@@ -306,13 +308,11 @@ class AuthController extends \helpers\ApiController
 			return isset($menu['route']) && in_array($menu['route'], $allowedRoutes);
 		}));
 
-		$filteredMenus = array_map(function ($menu) {
-			unset($menu['roles']);
-			return $menu;
-		}, $filteredMenus);
+		$filteredMenus = array_map($removeRoles, $filteredMenus);
 
 		return $filteredMenus;
 	}
+
 
 
 	public function actionRegister()
@@ -334,7 +334,7 @@ class AuthController extends \helpers\ApiController
 
 		if ($model->load($dataRequest) && $model->validate()) {
 			if ($model->sendEmail()) {
-				return $this->payloadResponse(['message' => 'Password reset link has been sent to your email']);
+				return $this->toastResponse(['message' => ['Password reset link has been sent to your email']]);
 			} else {
 				return $this->errorResponse(['message' => ['Unable to send password reset email. Please try again later.']]);
 			}
@@ -360,7 +360,7 @@ class AuthController extends \helpers\ApiController
 
 		if ($model->load($dataRequest) && $model->validate()) {
 			if ($model->resetPassword()) {
-				return $this->payloadResponse(['message' => 'Password updated successfully']);
+				return $this->toastResponse(['message' => ['Password updated successfully']]);
 			}
 		}
 
