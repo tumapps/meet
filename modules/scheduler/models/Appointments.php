@@ -281,8 +281,14 @@ class Appointments extends BaseModel
             $this->appointment_date
         );
 
+        $bookingWindow = Settings::find()
+            ->select('booking_window')
+            ->where(['user_id' => $this->user_id])
+            ->scalar();
+        $month = $validateBookingWindow > 1 ? 'months' : 'month';
+
         if (!$validateBookingWindow) {
-            $this->addError($attribute, 'The appointment is outside the allowed booking window.');
+            $this->addError($attribute, "The appointment is outside the allowed booking window. Booking for this user is only allowed up to {$bookingWindow} {$month} in advance.");
         }
     }
 
