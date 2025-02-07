@@ -3,8 +3,8 @@
 require_once __DIR__ . '/wrapper.php';
 $wrapper = new ConfigWrapper();
 $config = [
-    'id' => $_ENV['APP_CODE'] . '-console',
-    'name' => $_ENV['APP_NAME'] . ' Terminal',
+    'id' => $_SERVER['APP_CODE'] . '-console',
+    'name' => $_SERVER['APP_NAME'] . ' Terminal',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'cmd\controllers',
@@ -55,9 +55,9 @@ $config = [
         ],
         'redis' => [
             'class' => 'yii\redis\Connection',
-            'hostname' => $_ENV['HOST_NAME'],
-            'port' => $_ENV['REDIS_PORT'],
-            'database' => $_ENV['DATABASE'],
+            'hostname' => $_SERVER['HOST_NAME'],
+            'port' => $_SERVER['REDIS_PORT'],
+            'database' => $_SERVER['DATABASE'],
             'on afterOpen' => function($event) {
                 Yii::info('Connected to Redis', __METHOD__);
             },
@@ -67,12 +67,12 @@ $config = [
             'viewPath' => '@app/mail',
             'useFileTransport' => false,
             'transport' => [
-                'scheme' => $_ENV['SCHEME'],
-                'host' => $_ENV['HOST'],
-                'username' => $_ENV['USERNAME'],
-                'password' => $_ENV['PASSWORD'],
-                'port' =>$_ENV['MAIL_PORT'],
-                'encryption' => $_ENV['ENCRYPTION'],
+                'scheme' => $_SERVER['SCHEME'],
+                'host' => $_SERVER['HOST'],
+                'username' => $_SERVER['USERNAME'],
+                'password' => $_SERVER['PASSWORD'],
+                'port' =>$_SERVER['MAIL_PORT'],
+                'encryption' => $_SERVER['ENCRYPTION'],
             ],
         ],
         'backup' => [
