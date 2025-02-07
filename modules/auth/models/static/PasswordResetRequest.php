@@ -14,12 +14,12 @@ use helpers\EventHandler;
 
 class PasswordResetRequest extends Model
 {
-	// use Mail;
+    // use Mail;
 
-	public $username;
+    public $username;
     const EVENT_PASSWORD_RESET_REQUEST = 'passwordResetRequest';
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public function rules()
@@ -28,7 +28,9 @@ class PasswordResetRequest extends Model
             ['username', 'trim'],
             ['username', 'required'],
             ['username', 'string'],
-            ['username', 'exist',
+            [
+                'username',
+                'exist',
                 'targetClass' => '\auth\models\User',
                 'message' => 'The provided username does not exists.'
             ],
@@ -39,7 +41,8 @@ class PasswordResetRequest extends Model
     {
 
         $userId = User::find()->select('user_id')->where([
-            'username' => $this->username, 'status'=> User::STATUS_ACTIVE
+            'username' => $this->username,
+            'status' => User::STATUS_ACTIVE
         ])->scalar();
 
         if (!$userId) {
@@ -63,13 +66,11 @@ class PasswordResetRequest extends Model
         $tokens->token_id = $tokens->uid('TOKENS', true);
         $tokens->save();
 
+        $resetLink = Yii::$app->params['passwordResetLink'] . $password_reset_token;
 
-        // $resetLink = Yii::$app->urlManager->createAbsoluteUrl(['site/reset-password', 'token' => $password_reset_token]);
-        $resetLink = Yii::$app->params['passwordResetLink'].$password_reset_token;
-         
         // Email subject and body
         $subject = 'Password Reset Request';
-      
+
         $body = Yii::$app->view->render('@ui/views/emails/passwordReset', [
             'username' => $this->username,
             'resetLink' => $resetLink,
@@ -80,7 +81,7 @@ class PasswordResetRequest extends Model
             'subject' => $subject,
             'body' => $body
         ];
-       
+
         $this->on(self::EVENT_PASSWORD_RESET_REQUEST, [EventHandler::class, 'handlePasswordResetRequest'], $eventData);
 
         $event = new Event();
@@ -90,11 +91,6 @@ class PasswordResetRequest extends Model
             return true;
         }
 
-        // if (self::send($email->email_address, $subject, $body)) {
-        //     return true;
-        // }
-
         return false;
     }
-
 }
