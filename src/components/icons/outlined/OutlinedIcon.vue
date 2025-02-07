@@ -58,6 +58,7 @@ import DocumentXIcon from './svg-icons/DocumentXIcon'
 import DocumentCodeIcon from './svg-icons/DocumentCodeIcon.vue'
 import DotsCircleHorizontalIcon from './svg-icons/DotsCircleHorizontalIcon'
 import DotsSquareHorizontalIcon from './svg-icons/DotsSquareHorizontalIcon'
+import EmailMultipleIcon from './svg-icons/EmailMultipleIcon'
 import ExclamationCircleIcon from './svg-icons/ExclamationCircleIcon'
 import ExclamationTriangleIcon from './svg-icons/ExclamationTriangleIcon'
 import EyeFishIcon from './svg-icons/EyeFishIcon'
@@ -183,6 +184,7 @@ export default {
     DocumentXIcon,
     DotsCircleHorizontalIcon,
     DotsSquareHorizontalIcon,
+    EmailMultipleIcon,
     ExclamationCircleIcon,
     ExclamationTriangleIcon,
     EyeFishIcon,

@@ -46,14 +46,14 @@ const resetPassword = async () => {
       errors.value.password = errorDetails.password || ''
       errors.value.repeatPassword = errorDetails.repeatPassword || ''
       errors.value.general = errorDetails.message || ''
-
+    }
+    if (error.response.status !== 422) {
       proxy.$showAlert({
-        title: 'An error occurred ',
-        text: 'Ooops! an error has occured while resetting your password!',
-        icon: 'error',
-        showConfirmButton: false,
+        title: error.response.data.errorPayload.toastTheme,
+        text: error.response.data.errorPayload.toastMessage,
+        icon: error.response.data.errorPayload.toastTheme,
         showCancelButton: false,
-        timer: 4000
+        showConfirmButton: false
       })
     }
   } finally {

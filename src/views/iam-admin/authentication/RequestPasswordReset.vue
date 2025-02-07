@@ -30,11 +30,10 @@ const onSubmit = async () => {
 
     if (response.data.dataPayload && !response.data.dataPayload.error) {
       proxy.$showAlert({
-        title: 'Success',
-        text: 'An email has been sent to you with instructions to reset your password!',
-        icon: 'success',
+        title: response.data.toastPayload.toastTheme,
+        text: response.data.toastPayload.toastMessage,
+        icon: response.data.toastPayload.toastTheme,
         //remove the confirm button and add a timer
-        timer: 5000,
         showConfirmButton: false,
         showCancelButton: false,
         timerProgressBar: true,
@@ -45,14 +44,15 @@ const onSubmit = async () => {
       })
     }
   } catch (error) {
-    proxy.$showAlert({
-      title: 'Oops!',
-      text: 'An error occurred while sending the password reset email!',
-      icon: 'error',
-      showCancelButton: false,
-      showConfirmButton: false,
-      timer: 5000
-    })
+    if (error.response.status !== 422) {
+      proxy.$showAlert({
+        title: error.response.data.errorPayload.toastTheme,
+        text: error.response.data.errorPayload.toastMessage,
+        icon: error.response.data.errorPayload.toastTheme,
+        showCancelButton: false,
+        showConfirmButton: false
+      })
+    }
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors

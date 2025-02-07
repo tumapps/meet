@@ -203,7 +203,6 @@ export default {
     LocationIcon,
     LockClosedIcon,
     LockOpenIcon,
-
     MessageIcon,
     OfferIcon,
     MicrophoneIcon,

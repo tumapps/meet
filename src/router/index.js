@@ -34,12 +34,12 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true, name: 'settings' },
     component: settings
   },
-  {
-    path: '/new-user',
-    name: prefix + '.adduser',
-    meta: { requiresAuth: true, name: 'Add User', isBanner: true },
-    component: () => import('@/views/iam-admin/AddUser.vue')
-  },
+  // {
+  //   path: '/new-user',
+  //   name: prefix + '.adduser',
+  //   meta: { requiresAuth: true, name: 'Add User', isBanner: true },
+  //   component: () => import('@/views/iam-admin/AddUser.vue')
+  // },
   {
     path: '/profile',
     name: 'profile',
@@ -80,14 +80,14 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/modules/venues/MeetingsApproval.vue')
   },
   {
-    path: '/events',
-    name: 'events',
+    path: '/all-events',
+    name: 'all-events',
     meta: { requiresAuth: true },
     component: () => import('@/views/modules/venues/EventsView.vue')
   },
   {
     path: '/home/events',
-    name: 'venues',
+    name: 'eventscalendar',
     component: RegistrarDashView,
     meta: { requiresAuth: true }
   },

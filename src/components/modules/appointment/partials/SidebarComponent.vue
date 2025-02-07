@@ -61,30 +61,85 @@ const sidebarConfig = [
     route: { to: 'appointments' }
   },
   {
-    title: 'IAM Admin',
-    icon: 'adjustment',
-    toggleId: 'settings',
-    caretIcon: true,
-    route: { popup: 'false', to: 'settings' },
+    title: 'Events',
+    icon: 'calendar',
+    route: { popup: 'false', to: 'all-events' },
     children: [
       {
-        title: 'Add User',
-        icon: 'user',
-        // iconSize: 10,
-        iconType: 'solid',
-        miniTitle: 'A',
-        route: { to: 'default.adduser' }
+        title: 'Calendar',
+        icon: 'calendar',
+        route: { to: 'eventscalendar' }
       },
       {
+        title: 'All Events',
+        icon: 'calendar',
+        route: { to: 'all-events' }
+      }
+    ]
+  },
+  {
+    title: 'Spaces',
+    icon: 'user-group',
+    route: { popup: 'false', to: 'spaces' },
+    children: [
+      {
+        title: 'Space Requests',
+        icon: 'message',
+        route: { to: 'meetings-approval' }
+      },
+      {
+        title: 'All Spaces',
+        icon: 'view-grid',
+        route: { to: 'venue-management' }
+      }
+    ]
+  },
+  {
+    isTag: 'router-link',
+    title: 'Availability',
+    icon: 'calendar',
+    route: { to: 'availability' }
+  },
+  {
+    title: 'IAM',
+    icon: 'shield-check',
+    toggleId: 'iam',
+    // caretIcon: true,
+    route: { popup: 'false', to: 'iam' },
+    children: [
+      {
         title: 'Users',
-        icon: 'users',
+        icon: 'user-group',
         // iconSize: 10,
         iconType: 'solid',
         miniTitle: 'U',
         route: { to: 'default.users' }
+      },
+      {
+        title: 'Roles',
+        icon: 'adjustment',
+        // iconSize: 10,
+        iconType: 'solid',
+        miniTitle: 'R',
+        route: { to: 'default.roles' }
+      },
+      {
+        title: 'Permissions',
+        icon: 'lock-closed',
+        // iconSize: 10,
+        iconType: 'solid',
+        miniTitle: 'P',
+        route: { to: 'default.permissions' }
       }
       // Add more children as needed
     ]
+  },
+  {
+    isTag: 'router-link',
+    title: 'Settings',
+    icon: 'cog',
+    iconType: 'solid',
+    route: { to: 'settings' }
   }
   // Add more menu items as needed
 ]
