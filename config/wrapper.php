@@ -58,23 +58,43 @@ class ConfigWrapper
             'passwordResetLink' => $_SERVER['FRONTEND_BASE_URL'] . $_SERVER['PASSWORD_RESET_LINK'],
             'confirmationLink' => $_SERVER['FRONTEND_BASE_URL'] . $_SERVER['CONFIRMATION_LINK'],
             'loginUrl' => $_SERVER['FRONTEND_BASE_URL'],
-            
+
             'menus' => [
                 ['route' => 'home', 'label' => 'Dashboard', 'icon' => 'home', 'roles' => ['*']],
-                ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'calendar', 'roles' => ['user', 'registrar']],
-                ['route' => 'availability', 'label' => 'Availability', 'icon' => 'clock', 'roles' => ['user']],
-                ['route' => 'meetings-approval', 'label' => 'Pending', 'icon' => 'inbox', 'roles' => ['registrar']],
-                ['route' => 'venues', 'label' => 'Venues', 'icon' => 'location-dot', 'roles' => ['registrar']],
-                ['route' => 'events', 'label' => 'Events', 'icon' => 'calendar', 'roles' => ['registrar']],
-                ['route' => 'venue-management', 'label' => 'Spaces', 'icon' => 'location-dot', 'roles' => ['registrar']],
-                ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield', 'roles' => ['su']],
-                ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears', 'roles' => ['su']],
-                ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user', 'roles' => ['su']],
-                'iam2' => [
-                    ['route' => 'roles', 'label' => 'Roles', 'icon' => 'shield', 'roles' => ['su']],
-                    ['route' => 'permissions', 'label' => 'Permissions', 'icon' => 'gears', 'roles' => ['su']],
-                    ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user', 'roles' => ['su']],
+                ['route' => 'appointments', 'label' => 'Appointments', 'icon' => 'table', 'roles' => ['user', 'registrar']],
+                [
+                    'route' => 'all-events',
+                    'label' => 'Events',
+                    'icon' => 'calendar',
+                    'roles' => ['registrar'],
+                    'children' => [
+                        ['route' => 'eventscalendar', 'label' => 'Calendar', 'icon' => 'calendar', 'roles' => ['registrar']],
+                        ['route' => 'all-events', 'label' => 'All Events', 'icon' => 'calendar', 'roles' => ['registrar']]
+                    ]
                 ],
+                [
+                    'route' => 'spaces',
+                    'label' => 'Spaces',
+                    'icon' => 'user-group',
+                    'roles' => ['registrar'],
+                    'children' => [
+                        ['route' => 'meetings-approval', 'label' => 'Space Requests', 'icon' => 'message', 'roles' => ['registrar']],
+                        ['route' => 'venue-management', 'label' => 'All Spaces', 'icon' => 'view-grid', 'roles' => ['registrar']]
+                    ]
+                ],
+                ['route' => 'availability', 'label' => 'Availability', 'icon' => 'calendar', 'roles' => ['user']],
+                [
+                    'route' => 'iam',
+                    'label' => 'IAM',
+                    'icon' => 'shield-check',
+                    'roles' => ['su'],
+                    'children' => [
+                        ['route' => 'default.users', 'label' => 'Users', 'icon' => 'user-group', 'roles' => ['su']],
+                        ['route' => 'default.roles', 'label' => 'Roles', 'icon' => 'adjustment', 'roles' => ['su']],
+                        ['route' => 'default.permissions', 'label' => 'Permissions', 'icon' => 'lock-closed', 'roles' => ['su']]
+                    ]
+                ],
+                ['route' => 'settings', 'label' => 'Settings', 'icon' => 'cog', 'roles' => ['su']]
             ],
 
             'africasTalkingApi' => $_SERVER['AT_API_KEY'],
