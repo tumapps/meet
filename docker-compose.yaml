@@ -1,0 +1,121 @@
+# version: "3.7"
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=kevoh
+      - POSTGRES_DB=uni_schedule
+    ports:
+      - "9000:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      shared:
+        ipv4_address: 172.19.0.2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d uni_schedule -h postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+  frontend:
+    container_name: scheduler-front_end
+    build:
+      context: ./scheduler-front_end
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9001:80"
+    depends_on:
+      - backend
+    volumes:
+    - ./scheduler-front_end/dist:/usr/share/nginx/html:rw
+    networks:
+      shared:
+        ipv4_address: 172.19.0.3
+
+  backend:
+    container_name: scheduler-back_end
+    build:
+      context: ./vc_scheduler
+      dockerfile: Dockerfile
+    ports:
+      - "9002:80"
+      - "9005:8080"
+    environment:
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379  # You can also add the port if needed
+      # - REDIS_PASSWORD=kevoh 
+    restart: always
+    volumes:
+      - ./vc_scheduler:/var/www/html
+    depends_on:
+      # redis:
+      #   condition: service_healthy
+      postgres:
+        condition: service_healthy
+      
+    networks:
+      shared:
+        ipv4_address: 172.19.0.4 # Assign a static IP from the subnet
+
+
+
+  rabbitmq:
+        image: 'rabbitmq:3-management'
+        restart: always
+        container_name: rabbitmq
+        environment:
+            - RABBITMQ_DEFAULT_PASS=password
+            - RABBITMQ_DEFAULT_USER=user
+        hostname: my-rabbit
+        ports:
+            - "5672:5672"  # AMQP port for client connections
+            - "9003:15672" # Management UI port for web access    
+        networks:
+            shared:
+                ipv4_address: 172.19.0.5
+
+  pgadmin:
+      container_name: mypgadmin
+      image: dpage/pgadmin4:latest
+      restart: always
+      ports:
+          - "9004:80"
+      environment:
+          - PGADMIN_DEFAULT_EMAIL=admin@crackit.co.ke
+          - PGADMIN_DEFAULT_PASSWORD=kevoh
+      networks:
+          shared:
+              ipv4_address: 172.19.0.6
+
+  redis-stack:
+        image: 'redis/redis-stack:latest'
+        ports:
+            - '9006:8001'
+            - '6378:6379'
+        container_name: redis-stack
+        restart: always
+        networks:
+            shared:
+                ipv4_address: 172.19.0.7            
+
+networks:
+  shared:
+    name: vc_shared # Explicitly set the name to avoid prefixing
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
+
+
+volumes:
+  # mysql-data:
+  # redis-data:
+  postgres-data:
+  frontend:
