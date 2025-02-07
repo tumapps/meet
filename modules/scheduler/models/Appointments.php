@@ -174,7 +174,7 @@ class Appointments extends BaseModel
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
             ['cancellation_reason', 'string', 'max' => 255],
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
-            ['rejection_reason', 'string', 'max' => 255],
+            ['rejection_reason', 'string', 'on' => self::SCENARIO_REJECT, 'max' => 255],
 
 
             // file upload
