@@ -64,7 +64,7 @@ class SettingsSearch extends Settings
             'end_time' => $this->end_time,
             'slot_duration' => $this->slot_duration,
             'booking_window' => $this->booking_window,
-            'is_deleted' => false,
+            'is_deleted' => 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ]);
