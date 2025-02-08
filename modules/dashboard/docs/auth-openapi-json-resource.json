@@ -1060,28 +1060,38 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Register a new user",
+                "summary": "Creates an account for  a new user",
                 "requestBody": {
-                    "description": "Provide Username, Password, and Confirm Password",
+                    "description": "Provide Username, Email, FirstName, LastName, MiddleName and Mobile Number",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
                                     "username",
-                                    "password",
-                                    "confirm_password"
+                                    "email_address",
+                                    "first_name",
+                                    "last_name",
+                                    "mobile_number"
                                 ],
                                 "properties": {
                                     "username": {
                                         "type": "string",
                                         "example": "admin"
                                     },
-                                    "password": {
+                                    "email_address": {
+                                        "type": "string",
+                                        "example": "example@gmail.com"
+                                    },
+                                    "first_name": {
                                         "type": "string",
                                         "example": "admin"
                                     },
-                                    "confirm_password": {
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "admin"
+                                    },
+                                    "middle_name": {
                                         "type": "string",
                                         "example": "admin"
                                     }
@@ -1371,23 +1381,28 @@
                 ],
                 "summary": "Update user password",
                 "requestBody": {
-                    "description": "Provide Old Password and New Password",
+                    "description": "Provide Old Password and New Password and Comfirm password",
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
                                 "required": [
                                     "old_password",
-                                    "new_password"
+                                    "new_password",
+                                    "confirm_password"
                                 ],
                                 "properties": {
-                                    "old_password": {
+                                    "oldPassword": {
                                         "type": "string",
                                         "example": "admin"
                                     },
-                                    "new_password": {
+                                    "newPassword": {
                                         "type": "string",
                                         "example": "newpassword"
+                                    },
+                                    "confirm_password": {
+                                        "type": "string",
+                                        "example": "confirm_password"
                                     }
                                 },
                                 "type": "object"
@@ -2919,17 +2934,17 @@
                 }
             }
         },
-        "/auth/role/{name}": {
+        "/auth/get-role/{role_name}": {
             "get": {
                 "tags": [
                     "Roles"
                 ],
-                "summary": "Displays a single role model",
+                "summary": "Displays a single role model by ID",
                 "parameters": [
                     {
-                        "name": "name",
+                        "name": "role_name",
                         "in": "path",
-                        "description": "Role unique name to load",
+                        "description": "Role unique ID to load",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -2974,58 +2989,6 @@
             }
         },
         "/auth/role/{id}": {
-            "get": {
-                "tags": [
-                    "Roles"
-                ],
-                "summary": "Displays a single role model by ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Role unique ID to load",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Displays a single role model",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Resource not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errorPayload": {
-                                            "properties": {
-                                                "statusCode": {
-                                                    "type": "integer",
-                                                    "example": 404
-                                                },
-                                                "errorMessage": {
-                                                    "type": "string",
-                                                    "example": "Not found"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "put": {
                 "tags": [
                     "Roles"
