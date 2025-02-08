@@ -138,16 +138,18 @@ return [
     /**
      * @OA\Post(
      *   path="/auth/register",
-     *   summary="Register a new user",
+     *   summary="Creates an account for  a new user",
      *   tags={"Authentication"},
      *   @OA\RequestBody(
      *     required=true,
-     *     description="Provide Username, Password, and Confirm Password",
+     *     description="Provide Username, Email, FirstName, LastName, MiddleName and Mobile Number",
      *     @OA\JsonContent(
-     *       required={"username", "password", "confirm_password"},
+     *       required={"username", "email_address", "first_name", "last_name", "mobile_number"},
      *       @OA\Property(property="username", type="string", example="admin"),
-     *       @OA\Property(property="password", type="string", example="admin"),
-     *       @OA\Property(property="confirm_password", type="string", example="admin")
+     *       @OA\Property(property="email_address", type="string", example="example@gmail.com"),
+     *       @OA\Property(property="first_name", type="string", example="admin"),
+     *       @OA\Property(property="last_name", type="string", example="admin"),
+     *       @OA\Property(property="middle_name", type="string", example="admin")
      *     )
      *   ),
      *   @OA\Response(
@@ -274,11 +276,12 @@ return [
      *   tags={"Authentication"},
      *   @OA\RequestBody(
      *     required=true,
-     *     description="Provide Old Password and New Password",
+     *     description="Provide Old Password and New Password and Comfirm password",
      *     @OA\JsonContent(
-     *       required={"old_password", "new_password"},
-     *       @OA\Property(property="old_password", type="string", example="admin"),
-     *       @OA\Property(property="new_password", type="string", example="newpassword")
+     *       required={"old_password", "new_password", "confirm_password"},
+     *       @OA\Property(property="oldPassword", type="string", example="admin"),
+     *       @OA\Property(property="newPassword", type="string", example="newpassword"),
+     *       @OA\Property(property="confirm_password", type="string", example="confirm_password")
      *     )
      *   ),
      *   @OA\Response(
