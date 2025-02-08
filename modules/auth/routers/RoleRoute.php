@@ -82,45 +82,13 @@ return [
 
     /**
      * @OA\Get(
-     *   path="/auth/role/{name}",
-     *   summary="Displays a single role model",
-     *   tags={"Roles"},
-     *   @OA\Parameter(
-     *     description="Role unique name to load",
-     *     in="path",
-     *     name="name",
-     *     required=true,
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="Displays a single role model",
-     *     @OA\JsonContent(
-     *     )
-     *   ),
-     *   @OA\Response(
-     *     response=404,
-     *     description="Resource not found",
-     *     @OA\JsonContent(
-     *       @OA\Property(property="errorPayload", type="object",
-     *         @OA\Property(property="statusCode", type="integer", example=404),
-     *         @OA\Property(property="errorMessage", type="string", example="Not found")
-     *       )
-     *     )
-     *   )
-     * )
-     */
-    'GET role-view' => 'role/view',
-
-    /**
-     * @OA\Get(
-     *   path="/auth/role/{id}",
+     *   path="/auth/get-role/{role_name}",
      *   summary="Displays a single role model by ID",
      *   tags={"Roles"},
      *   @OA\Parameter(
      *     description="Role unique ID to load",
      *     in="path",
-     *     name="id",
+     *     name="role_name",
      *     required=true,
      *     @OA\Schema(type="string")
      *   ),
@@ -142,7 +110,7 @@ return [
      *   )
      * )
      */
-    'GET get-role' => 'role/get-role',
+    'GET get-role/{role_name}' => 'role/get-role',
 
     /**
      * @OA\Put(
