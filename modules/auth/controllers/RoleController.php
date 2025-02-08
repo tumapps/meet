@@ -59,24 +59,24 @@ class RoleController extends \helpers\ApiController
         return $this->payloadResponse($assignments);
     }
 
-    public function actionGetRole($name)
+    public function actionGetRole($role_name)
     {
         $auth = Yii::$app->authManager;
 
-        $role = $auth->getRole($name);
+        $role = $auth->getRole($role_name);
 
         $assignments = [];
 
         if (!$role) {
-            return $this->toastResponse(['statusCode' => 202, 'message' => "Role Name '{$name}' does not exists"]);
+            return $this->toastResponse(['statusCode' => 202, 'message' => "Role Name '{$role_name}' does not exists"]);
         }
 
-        $rolePermissions = $auth->getPermissionsByRole($name);
-        $userAssignments = $auth->getUserIdsByRole($name);
+        $rolePermissions = $auth->getPermissionsByRole($role_name);
+        $userAssignments = $auth->getUserIdsByRole($role_name);
 
-        $childRoles = $auth->getChildRoles($name);
+        $childRoles = $auth->getChildRoles($role_name);
         $childRoleNames = array_keys($childRoles);
-        $childRoleNames = array_filter($childRoleNames, fn($childRole) => $childRole !== $name);
+        $childRoleNames = array_filter($childRoleNames, fn($childRole) => $childRole !== $role_name);
 
         $assignments[] = [
             'role' => $role,
