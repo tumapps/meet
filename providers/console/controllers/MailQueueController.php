@@ -25,14 +25,40 @@ class MailQueueController extends Controller
 		$this->stdout("Mail queue is up");
 	}
 
+	// public function actionRun()
+	// {
+	// 	while (true) {
+	// 		$this->queue->processQueue();
+	// 		$this->queue->retryFailedEmails();
+	// 		sleep(10);
+	// 	}
+	// }
+
+
 	public function actionRun()
 	{
 		while (true) {
-			$this->queue->processQueue();
-			$this->queue->retryFailedEmails();
-			sleep(1);
+			try {
+				echo "[" . date('Y-m-d H:i:s') . "] Processing email queue...\n";
+				\Yii::info('Processing email queue...', 'mail-queue');
+
+				$this->queue->processQueue();
+				$this->queue->retryFailedEmails();
+
+				// Handle termination signals from Supervisor
+				if (function_exists('pcntl_signal_dispatch')) {
+					pcntl_signal_dispatch();
+				}
+
+				sleep(1);
+			} catch (\Throwable $e) {
+				\Yii::error("MailQueue Error: " . $e->getMessage(), 'mail-queue');
+				echo "Error: " . $e->getMessage() . "\n";
+				sleep(5); // Prevent rapid crash loops
+			}
 		}
 	}
+
 
 	public function actionViewQueue()
 	{
