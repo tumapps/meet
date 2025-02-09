@@ -3569,7 +3569,7 @@
                 }
             }
         },
-        "/scheduler/settings/{id}/view": {
+        "/scheduler/setting/{id}": {
             "get": {
                 "tags": [
                     "Settings"
