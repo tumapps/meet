@@ -82,7 +82,7 @@ return [
     'POST settings'         => 'settings/create',
 
     /**
-     * @OA\Get(path="/scheduler/settings/{id}/view",
+     * @OA\Get(path="/scheduler/setting/{id}",
      *   summary="Displays a single Settings model",
      *   tags={"Settings"},
      *   @OA\Parameter(description="Settings unique ID to load",in="path",name="id",required=true,@OA\Schema(type="string",)),
@@ -105,7 +105,7 @@ return [
      *   ),
      * )
      */
-    'GET settings/{id}'     => 'settings/view',
+    'GET setting/{id}'     => 'settings/view',
 
     /**
      * @OA\Put(
