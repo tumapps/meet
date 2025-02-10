@@ -41,15 +41,7 @@ $config = [
                 ],
             ],
         ],
-        'rabbitmq' => [
-            'class' => \helpers\RabbitMqComponent::class,
-            'host' => $_SERVER['_HOST'],
-            'port' => $_SERVER['_PORT'],
-            'user' => $_SERVER['_USER'],
-            'password' => $_SERVER['_PASSWORD'],
-            'vhost' => $_SERVER['V_HOST'],
-            'logFile' => '@app/providers/bin/logs/worker.log'
-        ],
+        
         'redis' => [
             'class' => 'yii\redis\Connection',
             'hostname' => $_SERVER['HOST_NAME'],
