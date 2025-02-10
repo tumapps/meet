@@ -39,8 +39,8 @@ class MailQueueController extends Controller
 	{
 		while (true) {
 			try {
-				echo "[" . date('Y-m-d H:i:s') . "] Processing email queue...\n";
-				\Yii::info('Processing email queue...', 'mail-queue');
+				// echo "[" . date('Y-m-d H:i:s') . "] Processing email queue...\n";
+				// \Yii::info('Processing email queue...', 'mail-queue');
 
 				$this->queue->processQueue();
 				$this->queue->retryFailedEmails();
@@ -54,7 +54,7 @@ class MailQueueController extends Controller
 			} catch (\Throwable $e) {
 				\Yii::error("MailQueue Error: " . $e->getMessage(), 'mail-queue');
 				echo "Error: " . $e->getMessage() . "\n";
-				sleep(5); // Prevent rapid crash loops
+				sleep(5);
 			}
 		}
 	}
