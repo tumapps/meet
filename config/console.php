@@ -23,15 +23,11 @@ $config = [
         'appointment' => [
             'class' => 'cmd\controllers\AppointmentController',
         ],
-        'email-worker' => [
-            'class' => 'cmd\controllers\EmailWorkerController',
-        ],
+
         'mail-queue' => [
             'class' => 'cmd\controllers\MailQueueController',
         ],
-        'test-rabbitmq' => [
-            'class' => 'cmd\controllers\TestRabbitmqController',
-        ],
+
         'db-backup' => [
             'class' => 'cmd\controllers\BackupController',
         ],
@@ -44,21 +40,12 @@ $config = [
             'class' => \helpers\auth\AuthManager::class,
             'cache' => 'cache',
         ],
-        'rabbitmq' => [
-            'class' => \helpers\RabbitMqComponent::class,
-            'host' => 'localhost',
-            'port' => 5672,
-            'user' => 'root',
-            'password' => 'toor',
-            'vhost' => '/yii_vhost',
-            'logFile' => '@app/providers/bin/logs/worker.log'
-        ],
         'redis' => [
             'class' => 'yii\redis\Connection',
             'hostname' => $_SERVER['HOST_NAME'],
             'port' => $_SERVER['REDIS_PORT'],
             'database' => $_SERVER['DATABASE'],
-            'on afterOpen' => function($event) {
+            'on afterOpen' => function ($event) {
                 Yii::info('Connected to Redis', __METHOD__);
             },
         ],
@@ -71,7 +58,7 @@ $config = [
                 'host' => $_SERVER['HOST'],
                 'username' => $_SERVER['USERNAME'],
                 'password' => $_SERVER['PASSWORD'],
-                'port' =>$_SERVER['MAIL_PORT'],
+                'port' => $_SERVER['MAIL_PORT'],
                 'encryption' => $_SERVER['ENCRYPTION'],
             ],
         ],
@@ -86,7 +73,7 @@ $config = [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
-                     // for mail worker
+                    // for mail worker
                     'categories' => ['email_worker'],
                     'logFile' => '@app/providers/bin/logs/worker.log',
                     'maxFileSize' => 1024 * 2,
