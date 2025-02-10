@@ -662,9 +662,9 @@ const updateAppointment = async () => {
     // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
-    // if (fileInput.value !== null) {
-    //   uploadFile()
-    // }
+    if (agenda.value !== null) {
+      uploadFile()
+    }
 
     console.log('file dealer', fileInput.value)
     submitSignal.value = 'submit'

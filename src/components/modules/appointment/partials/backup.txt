@@ -1,0 +1,130 @@
+
+<template>
+  <default-sidebar>
+    <ul class="navbar-nav iq-main-menu" id="e-commerce">
+      <hr class="hr-horizontal" />
+      <side-menu 
+        v-for="(menu, index) in menus" 
+        :key="index" 
+        :title="menu.title" 
+        :icon="menu.icon" 
+        :miniTitle="getMiniTitle(menu.title)" 
+        :route="{ to: menu.route }"
+      >
+        <!-- Dropdown for nested menus -->
+        <b-collapse 
+          v-if="menu.children" 
+          tag="ul" 
+          class="sub-nav" 
+          :id="'submenu-' + index" 
+          accordion="sidebar-menu" 
+          :visible="isSubmenuOpen(menu.route)"
+        >
+          <side-menu 
+            v-for="(child, childIndex) in menu.children" 
+            :key="childIndex" 
+            :title="child.title" 
+            :icon="child.icon" 
+            :miniTitle="getMiniTitle(child.title)" 
+            :route="{ to: child.route }"
+          />
+        </b-collapse>
+      </side-menu>
+    </ul>
+  </default-sidebar>
+</template>
+
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import DefaultSidebar from '@/components/custom/sidebar/DefaultSidebar.vue'
+import SideMenu from '@/components/custom/nav/SideMenu.vue'
+import { useMenuStore } from '@/store/menuStore'
+
+const route = useRoute()
+const menuStore = useMenuStore()
+// const menus = computed(() => menuStore.menus)
+
+const currentRoute = ref(route.name)
+
+// Function to toggle submenu visibility
+const toggle = (route) => {
+  if (currentRoute.value === route) {
+    currentRoute.value = ''
+  } else {
+    currentRoute.value = route
+  }
+}
+
+// Function to check if submenu is open
+const isSubmenuOpen = (menuRoute) => {
+  return currentRoute.value === menuRoute
+}
+
+// Watch for route changes and update currentRoute
+watch(() => route.name, (newRoute) => {
+  currentRoute.value = newRoute
+})
+
+// Function to get mini title
+function getMiniTitle(label) {
+  return typeof label === 'string' && label.length > 0 ? label.charAt(0).toUpperCase() : 'MT'
+}
+ const menus = [
+  {
+    label: 'Dashboard',
+    icon: 'home',
+    route: '/'
+  },
+  {
+    label: 'Authentication',
+    icon: 'lock',
+    children: [
+      {
+        label: 'Login',
+        icon: 'sign-in',
+        route: '/auth/login'
+      },
+      {
+        label: 'Request Password Reset',
+        icon: 'key',
+        route: 'request-password-reset'
+      },
+      {
+        label: 'Reset Password',
+        icon: 'refresh',
+        route: '/reset-password'
+      },
+      {
+        label: 'Email Confirmed',
+        icon: 'envelope',
+        route: '/email-confirmed'
+      },
+      {
+        label: 'Lockscreen',
+        icon: 'lock',
+        route: '/lockscreen'
+      }
+    ]
+  },
+  {
+    label: 'Appointments',
+    icon: 'calendar',
+    route: 'appointments'
+  },
+  // {
+  //   label: 'Attendance Confirmation',
+  //   icon: 'check-circle',
+  //   route: '/confirm/:meetingId/:attendeeId'
+  // }
+]
+
+</script>
+
+
+<style scoped>
+/* Add your custom styles here */
+.sub-nav {
+  padding-left: 20px;
+}
+</style>

@@ -119,6 +119,7 @@ export const defaultChildRoutes = (prefix) => [
   {
     path: '/permissions',
     meta: { requiresAuth: true },
+    name: 'permissions',
     component: () => import('@/views/iam-admin/admin/PermissionsView.vue')
   },
   {

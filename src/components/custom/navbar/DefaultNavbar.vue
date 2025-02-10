@@ -48,7 +48,7 @@ export default {
     const logOut = async () => {
       try {
         await axiosInstance.logout()
-        router.push({ path: '/auth/login' })
+        router.push('/auth/login' )
       } catch (error) {
         console.error('Error during logout:', error)
       }
