@@ -193,7 +193,7 @@ const updateSettings = async (id) => {
   message.value = null
 
   try {
-    const response = await axiosInstance.put(`/scheduler/system-settings/${id}`, settings.value)
+    const response = await axiosInstance.put(`/v1/scheduler/system-settings/${id}`, settings.value)
 
     if (response.data?.dataPayload?.data) {
       settings.value = {
