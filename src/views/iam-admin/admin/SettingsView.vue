@@ -4,11 +4,6 @@
       <h4 class="card-title">App Settings</h4>
     </b-card-header>
     <b-card-body>
-      <!-- Message Display -->
-      <b-alert v-if="message" :variant="message.type" show>
-        {{ message.text }}
-      </b-alert>
-
       <!-- Form Fields -->
       <b-row>
         <!-- App Name -->
@@ -134,10 +129,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import AxiosInstance from '@/api/axios'
 
 const axiosInstance = AxiosInstance()
+const { proxy } = getCurrentInstance()
+
 
 // Reactive state
 const settings = ref({
@@ -201,27 +198,29 @@ const updateSettings = async (id) => {
         ...response.data.dataPayload.data
       }
 
-      message.value = {
-        type: 'success',
-        text: 'Settings updated successfully!'
-      }
-    } else {
-      console.warn('Unexpected API response structure:', response.data)
-      message.value = {
-        type: 'error',
-        text: 'Unexpected API response structure. Please contact support.'
-      }
-    }
+   proxy.$showAlert({
+        title: response.data.toastPayload.toastMessage,
+        icon: response.data.toastPayload.toastTheme,
+        text: response.data.toastPayload.toastMessage,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 4000
+      })
+    } 
   } catch (error) {
     if (error.response && error.response.status === 422) {
       // Validation errors
-      errors.value = error.response.data.errors
+      errors.value = error.response.data.errorPayload.errors
     } else {
       console.error('Failed to update settings:', error)
-      message.value = {
-        type: 'error',
-        text: 'Failed to update settings. Please try again.'
-      }
+    proxy.$showAlert({
+        title: 'error',
+        icon: 'error',
+        text: error.response.data.errorPayload.errors?.message ,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 4000
+      })
     }
   } finally {
     loading.value = false
