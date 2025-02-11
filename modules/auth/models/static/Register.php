@@ -48,7 +48,7 @@ class Register extends Model
             // ['confirm_password', 'compare', 'compareAttribute' => 'password', 'message' => "Passwords don't match"],
 
             //profile validation
-            [['first_name', 'last_name', 'email_address'], 'required'],
+            [['first_name', 'last_name', 'email_address', 'mobile_number'], 'required'],
             [['first_name', 'last_name'], 'string', 'max' => 50, 'min' => 3],
             [['middle_name'], 'string', 'max' => 50, 'min' => 1],
             [['email_address'], 'string', 'max' => 128],
