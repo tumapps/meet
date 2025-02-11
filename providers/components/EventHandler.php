@@ -32,7 +32,9 @@ class EventHandler
 		$subject = $event->data['subject'];
 		$body = $event->data['body'];
 
-		self::addEmailToQueue($email, $subject, $body);
+		// self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
+
 		$event->handled = true;
 	}
 
@@ -58,13 +60,16 @@ class EventHandler
 			'recipientType' => 'contact_person',
 		]));
 
-		self::addEmailToQueue($contactPersonEmail, $subject, $contactPersonEmailBody);
+		// self::addEmailToQueue($contactPersonEmail, $subject, $contactPersonEmailBody);
+		self::queueEmail($contactPersonEmail, $subject, $contactPersonEmailBody);
 
 		$chairPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
 			'recipientType' => 'chair_person',
 		]));
 
-		self::addEmailToQueue($chairPersonEmail, $subject, $chairPersonEmailBody);
+		// self::addEmailToQueue($chairPersonEmail, $subject, $chairPersonEmailBody);
+		self::queueEmail($chairPersonEmail, $subject, $chairPersonEmailBody);
+
 
 		if (!empty($attendeesDetails)) {
 			foreach ($attendeesDetails as $attendeeDetail) {
@@ -85,7 +90,8 @@ class EventHandler
 					'attendeeName' => $attendeeName,
 					'confirmationLink' => $confirmationLink,
 				]));
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				// self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeEmailBody);
 			}
 		}
 	}
@@ -104,7 +110,8 @@ class EventHandler
 			'contact_name' => $name,
 		]);
 
-		self::addEmailToQueue($email, $subject, $body);
+		// self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
 	}
 
 	public static function onAppointmentRejected(Event $event)
@@ -127,13 +134,17 @@ class EventHandler
 			'recipientType' => 'contactPerson',
 		]));
 
-		self::addEmailToQueue($email, $subject, $contactPerson);
+		// self::addEmailToQueue($email, $subject, $contactPerson);
+		self::queueEmail($email, $subject, $contactPerson);
+
 
 		$chairPerson = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
 			'recipientType' => 'chairPerson',
 		]));
 
 		self::addEmailToQueue($bookedUserEmail, $subject, $chairPerson);
+		self::queueEmail($bookedUserEmail, $subject, $chairPerson);
+
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -142,7 +153,8 @@ class EventHandler
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				// self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeEmailBody);
 			}
 		}
 	}
@@ -167,16 +179,18 @@ class EventHandler
 			'recipientType' => 'user',
 		]));
 
-		// self::send($contactEmail, $event->data['subject'], $userBody);
-		self::addEmailToQueue($contactEmail, $event->data['subject'], $userBody);
+		// self::addEmailToQueue($contactEmail, $event->data['subject'], $userBody);
+		self::queueEmail($contactEmail, $event->data['subject'], $userBody);
+
 
 		$vcBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
 			'name' => $event->data['contact_name'],
 			'recipientType' => 'vc', // Specify the recipient type
 		]));
 
-		// self::send($bookedUserEmail, $event->data['subject'], $vcBody);
-		self::addEmailToQueue($bookedUserEmail, $event->data['subject'], $vcBody);
+		// self::addEmailToQueue($bookedUserEmail, $event->data['subject'], $vcBody);
+		self::queueEmail($bookedUserEmail, $event->data['subject'], $vcBody);
+
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -185,7 +199,8 @@ class EventHandler
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
-				self::addEmailToQueue($attendeeEmail, $event->data['subject'], $attendeeEmailBody);
+				// self::addEmailToQueue($attendeeEmail, $event->data['subject'], $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, $event->data['subject'], $attendeeEmailBody);
 			}
 		}
 	}
@@ -211,7 +226,8 @@ class EventHandler
 			'is_removed' => $event->data['is_removed']
 		]));
 
-		self::addEmailToQueue($email, $event->data['subject'], $body);
+		// self::addEmailToQueue($email, $event->data['subject'], $body);
+		self::queueEmail($$email, $event->data['subject'], $body);
 	}
 
 	public static function onAppointmentReschedule(Event $event)
@@ -233,8 +249,9 @@ class EventHandler
 			])
 		);
 
-		// self::send($email, $subject, $body);
-		self::addEmailToQueue($email, $subject, $body);
+		// self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
+
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -243,7 +260,8 @@ class EventHandler
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				// self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeEmailBody);
 			}
 		}
 	}
@@ -269,7 +287,9 @@ class EventHandler
 			])
 		);
 
-		self::addEmailToQueue($email, $subject, $body);
+		// self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
+
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -278,7 +298,7 @@ class EventHandler
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeBody);
 			}
 		}
 	}
@@ -305,7 +325,7 @@ class EventHandler
 			])
 		);
 
-		self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -314,7 +334,7 @@ class EventHandler
 					'recipientType' => 'attendee',
 					'attendeeName' => $attendeeName
 				]));
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeBody);
 			}
 		}
 	}
@@ -329,7 +349,7 @@ class EventHandler
 		]);
 
 		// self::send($email, $subject, $body);
-		self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
 	}
 
 	public static function onAppointmentReminder(Event $event)
@@ -356,7 +376,7 @@ class EventHandler
 		);
 
 		// self::send($email, $subject, $body);
-		self::addEmailToQueue($email, $subject, $body, 'reminder', $id);
+		self::queueEmail($email, $subject, $body, 'reminder', $id);
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -369,7 +389,7 @@ class EventHandler
 						'recipientType' => 'attendee'
 					])
 				);
-				self::addEmailToQueue($attendeeEmail, $subject, $attendeeBody, 'reminder', $id);
+				self::queueEmail($attendeeEmail, $subject, $attendeeBody, 'reminder', $id);
 			}
 		}
 	}
@@ -388,7 +408,20 @@ class EventHandler
 		$body .= "Self Link: {$self_link}\n\n";
 		$body .= "Thank you for managing the system backup.";
 
-		self::addEmailToQueue($email, $subject, $body);
+		self::queueEmail($email, $subject, $body);
+	}
+
+	public static function queueEmail($email, $subject, $body, $type = null, $id = null)
+	{
+		Yii::$app->queue->push(new \cmd\controllers\MailJob([
+			'email' => $email,
+			'subject' => $subject,
+			'body' => $body,
+			'type' => $type,
+			'id' => $id,
+		]));
+
+		Yii::info("Email queued for: {$email}", 'mailQueue');
 	}
 
 	public static function addEmailToQueue($email, $subject, $body, $type = null, $id = null)
