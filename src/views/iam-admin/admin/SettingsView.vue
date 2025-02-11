@@ -124,7 +124,7 @@
 
       <!-- Save Button -->
       <div class="text-center mt-5">
-        <b-button @click="updateSettings" :disabled="loading" variant="primary">
+        <b-button @click="updateSettings(settings.id)" :disabled="loading" variant="primary">
           <b-spinner v-if="loading" small />
           <span v-else>Save</span>
         </b-button>
@@ -187,13 +187,13 @@ const fetchSettings = async () => {
 }
 
 // Update settings
-const updateSettings = async () => {
+const updateSettings = async (id) => {
   loading.value = true
   errors.value = {}
   message.value = null
 
   try {
-    const response = await axiosInstance.put('/v1/scheduler/system-settings', settings.value)
+    const response = await axiosInstance.put(`/scheduler/system-settings/${id}`, settings.value)
 
     if (response.data?.dataPayload?.data) {
       settings.value = {
