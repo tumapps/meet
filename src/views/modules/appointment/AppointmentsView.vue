@@ -662,12 +662,10 @@ const updateAppointment = async () => {
     // console.log('Form data:', formData) // Log the FormData object for debugging
 
     // Send the FormData object in the PUT request
-    if (agenda.value !== null) {
-      uploadFile()
-    }
 
     console.log('file dealer', fileInput.value)
     submitSignal.value = 'submit'
+    const buttonText = ref(null)
 
     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
 
@@ -676,19 +674,24 @@ const updateAppointment = async () => {
       toastPayload.value = response.data.toastPayload
 
       getAppointments(1)
+      if (agenda.value !== null) {
+        buttonText.value = 'Uploading File ...'
+        uploadFile()
+      } else {
+        proxy.$showAlert({
+          title: toastPayload.value.toastMessage,
+          icon: toastPayload.value.toastTheme,
+          showCancelButton: false,
+          showConfirmButton: false,
+          timer: 4000
+        })
+
+        // Close the modal
+        handleModalClose()
+        myModal.value.hide()
+      }
 
       // Show toast notification using the response data
-      proxy.$showAlert({
-        title: toastPayload.value.toastMessage,
-        icon: toastPayload.value.toastTheme,
-        showCancelButton: false,
-        showConfirmButton: false,
-        timer: 4000
-      })
-
-      // Close the modal
-      handleModalClose()
-      myModal.value.hide()
     } else {
       // Fallback if toastPayload is not provided in the response
       proxy.$showToast({
@@ -1344,7 +1347,7 @@ onUnmounted(() => {
                       <b-button v-if="uploading === false" variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING'"> Update </b-button>
                       <button v-else class="btn btn-primary" type="button" disabled>
                         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                        Submitting...
+                        {{ buttonText.value !== null ? buttonText.value : 'Submitting...' }}
                       </button>
                     </div>
                   </b-col>

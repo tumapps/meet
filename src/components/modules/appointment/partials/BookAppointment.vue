@@ -397,18 +397,26 @@ onMounted(() => {
               </b-col>
 
               <!-- Venue Field -->
-              <b-col cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
-                <b-form-group label="Venue:" label-for="input-1">
-                  <select v-model="appointmentData.space_id" name="space" class="form-select" id="space">
-                    <!-- Default option -->
-                    <option value="" disabled selected>
-                      {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
-                    </option>
-                    <!-- Loop through spaces array -->
-                    <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">{{ space.name }}</option>
-                  </select>
-                </b-form-group>
-                <!-- Display errors if there are any -->
+              <b-col cols="12" lg="4" class="mb-4 mb-lg-0">
+  <b-form-group label="Venue:" label-for="space">
+    <div class="position-relative d-flex align-items-center">
+      <select v-model="appointmentData.space_id" name="space" class="form-select pe-5" id="space">
+        <option value="" disabled>Choose Space</option>
+        <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">
+          {{ space.name }}
+        </option>
+      </select>
+      
+      <!-- Show "X" button at the end of the field -->
+      <span 
+        v-if="appointmentData.space_id" 
+        class="clear-btn" 
+        @click="appointmentData.space_id = ''">
+        <i class="fas fa-times"></i>
+      </span>
+    </div>
+  </b-form-group>
+
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
                 </div>
@@ -526,8 +534,7 @@ onMounted(() => {
                 </div>
               </b-col> -->
               <AttendeesComponent @newAttendee="updateAttendees" />
-              <div v-if="errors.attendees" class="error"  aria-live="polite">{{ errors.attendees }}</div>
-              
+              <div v-if="errors.attendees" class="error" aria-live="polite">{{ errors.attendees }}</div>
             </b-row>
           </div>
         </div>
@@ -572,4 +579,20 @@ onMounted(() => {
   color: #3d4453;
   /* Icon color on hover */
 }
+
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: -50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1rem;
+  color: #118820;
+  background: none;
+  border: none;
+}
+.clear-btn:hover {
+  color: #000;
+}
+
 </style>
