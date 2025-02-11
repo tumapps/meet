@@ -180,6 +180,8 @@ class AuthController extends \helpers\ApiController
 	public function actionUpdateUser($id)
 	{
 		Yii::$app->user->can('su');
+		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
+
 
 		$user = User::findOne($id);
 		if (!$user) {
@@ -191,7 +193,6 @@ class AuthController extends \helpers\ApiController
 			return $this->errorResponse(['message' => ['User Profile not found']]);
 		}
 
-		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
 
 		$transaction = Yii::$app->db->beginTransaction();
 
@@ -214,8 +215,6 @@ class AuthController extends \helpers\ApiController
 			return $this->errorResponse(['message' => $e->getMessage()]);
 		}
 	}
-
-	public function actionSearchUser() {}
 
 	public function actionLogin()
 	{
@@ -247,7 +246,7 @@ class AuthController extends \helpers\ApiController
 	// 	$roleNames = array_keys($roles);
 
 	// 	if (in_array('su', $roleNames)) {
-	// 		// return $menus;
+	// return $menus;
 	// 		$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
 	// 	} elseif (in_array('secretary', $roleNames)) {
 	// 		$allowedRoutes = ['home', 'appointments'];
@@ -312,8 +311,6 @@ class AuthController extends \helpers\ApiController
 
 		return $filteredMenus;
 	}
-
-
 
 	public function actionRegister()
 	{
@@ -408,7 +405,7 @@ class AuthController extends \helpers\ApiController
 		return $this->payloadResponse($user->profile, ['statusCode' => 201]);
 	}
 
-	public function actionRefresh($logOut = false)
+	public function actionRefresh()
 	{
 		$refreshToken = Yii::$app->request->cookies->getValue('refresh-token', false);
 		if (!$refreshToken) {
