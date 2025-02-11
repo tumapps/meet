@@ -135,7 +135,6 @@ import AxiosInstance from '@/api/axios'
 const axiosInstance = AxiosInstance()
 const { proxy } = getCurrentInstance()
 
-
 // Reactive state
 const settings = ref({
   app_name: '',
@@ -198,7 +197,7 @@ const updateSettings = async (id) => {
         ...response.data.dataPayload.data
       }
 
-   proxy.$showAlert({
+      proxy.$showAlert({
         title: response.data.toastPayload.toastMessage,
         icon: response.data.toastPayload.toastTheme,
         text: response.data.toastPayload.toastMessage,
@@ -206,17 +205,17 @@ const updateSettings = async (id) => {
         showConfirmButton: false,
         timer: 4000
       })
-    } 
+    }
   } catch (error) {
     if (error.response && error.response.status === 422) {
       // Validation errors
       errors.value = error.response.data.errorPayload.errors
     } else {
       console.error('Failed to update settings:', error)
-    proxy.$showAlert({
+      proxy.$showAlert({
         title: 'error',
         icon: 'error',
-        text: error.response.data.errorPayload.errors?.message ,
+        text: error.response.data.errorPayload.errors?.message,
         showCancelButton: false,
         showConfirmButton: false,
         timer: 4000

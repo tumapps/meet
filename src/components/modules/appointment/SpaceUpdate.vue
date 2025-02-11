@@ -104,8 +104,9 @@ const updateSpaceDetails = async (id) => {
 
 onMounted(() => {
   role.value = authStore.getRole()
+  console.log("here daddy", role.value)
 
-  if (role.value !== 'su' || role.value !== 'registrar') {
+  if (role.value !== 'su') {
     getSpace(user_id.value)
   }
 })
