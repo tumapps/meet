@@ -62,10 +62,9 @@ class ConfigWrapper
 
             'menus' => [
                 ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'home',   'roles' => ['user']],
+                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'admin', 'roles' => ['su']],
                 ['title' => 'Appointments', 'icon' => 'table', 'route' => 'appointments', 'roles' => ['user']],
                 ['title' => 'Availability', 'icon' => 'calendar', 'route' => 'availability', 'roles' => ['user']],
-                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'admin', 'roles' => ['su']],
-
                 [
                     'title' => 'Spaces',
                     'icon' => 'building',
