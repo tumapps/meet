@@ -2,13 +2,6 @@
 
 namespace scheduler\models;
 
-use Symfony\Component\Mailer\Transport;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use helpers\traits\Mail;
-
-
 /**
  *@OA\Schema(
  *  schema="SystemSettings",
@@ -31,7 +24,6 @@ use helpers\traits\Mail;
 
 class SystemSettings extends BaseModel
 {
-    use Mail;
     /**
      * {@inheritdoc}
      */
