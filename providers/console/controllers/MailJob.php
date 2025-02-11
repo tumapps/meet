@@ -23,7 +23,7 @@ class MailJob extends BaseObject implements JobInterface
         $date = date('Y-m-d H:i:s');
 
         if (self::send($this->email, $this->subject, $this->body)) {
-            if ($this->type === 'reminder' && $this->id !== null) {
+            if ($this->type === 'reminder' && $this->id !== null || !empty($this->id)) {
                 Appointments::updateReminder($this->id);
             }
             Yii::info("Email sent to {$this->email} at: {$date}", 'mailQueue');
