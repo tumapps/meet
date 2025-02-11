@@ -5,9 +5,9 @@ import FlatPickr from 'vue-flatpickr-component'
 import { useAuthStore } from '@/store/auth.store.js'
 
 const authStore = useAuthStore()
+const role = ref('')
 
 const toastPayload = ref({})
-
 const { proxy } = getCurrentInstance()
 const axiosInstance = AxiosInstance()
 
@@ -103,7 +103,11 @@ const updateSpaceDetails = async (id) => {
 }
 
 onMounted(() => {
-  getSpace(user_id.value)
+  role.value = authStore.getRole()
+
+  if (role.value !== 'su' || role.value !== 'registrar') {
+    getSpace(user_id.value)
+  }
 })
 </script>
 <template>
