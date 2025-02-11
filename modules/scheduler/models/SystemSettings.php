@@ -6,6 +6,8 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use helpers\traits\Mail;
+
 
 /**
  *@OA\Schema(
@@ -29,6 +31,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class SystemSettings extends BaseModel
 {
+    use Mail;
     /**
      * {@inheritdoc}
      */
@@ -39,56 +42,56 @@ class SystemSettings extends BaseModel
     /**
      * list of fields to output by the payload.
      */
-    // public function fields()
-    // {
-    //     return array_merge(
-    //         parent::fields(),
-    //         [
-    //             'id',
-    //             'app_name',
-    //             'system_email',
-    //             'category',
-    //             'email_scheme',
-    //             'email_smtps',
-    //             'email_port',
-    //             'email_encryption',
-    //             'email_password',
-    //             'description',
-    //             'email_username',
-    //             'updated_at',
-    //             'created_at',
-    //             'is_deleted',
-    //         ]
-    //     );
-    // }
     public function fields()
     {
-        $fields = parent::fields();
-
-        $customFields = [
-            'id',
-            'app_name',
-            'system_email',
-            'category',
-            'email_scheme',
-            'email_smtps',
-            'email_port',
-            'email_encryption',
-            'description',
-            'email_username',
-            'updated_at',
-            'created_at',
-            'is_deleted',
-        ];
-
-        unset($fields['email_password']);
-
-        $customFields['decrypted_email_password'] = function () {
-            return '[PROTECTED]';
-        };
-
-        return array_merge($fields, $customFields);
+        return array_merge(
+            parent::fields(),
+            [
+                'id',
+                'app_name',
+                'system_email',
+                'category',
+                'email_scheme',
+                'email_smtps',
+                'email_port',
+                'email_encryption',
+                'email_password',
+                'description',
+                'email_username',
+                'updated_at',
+                'created_at',
+                'is_deleted',
+            ]
+        );
     }
+    // public function fields()
+    // {
+    //     $fields = parent::fields();
+
+    //     $customFields = [
+    //         'id',
+    //         'app_name',
+    //         'system_email',
+    //         'category',
+    //         'email_scheme',
+    //         'email_smtps',
+    //         'email_port',
+    //         'email_encryption',
+    //         'description',
+    //         'email_username',
+    //         'updated_at',
+    //         'created_at',
+    //         'is_deleted',
+    //     ];
+
+    //     unset($fields['email_password']);
+
+    //     $customFields['decrypted_email_password'] = function () {
+    //         return '[PROTECTED]';
+    //     };
+
+    //     return array_merge($fields, $customFields);
+    // }
 
     /**
      * {@inheritdoc}
@@ -149,28 +152,18 @@ class SystemSettings extends BaseModel
     public function validateSmtpConnection($attribute, $params)
     {
         try {
-            $dsn = sprintf(
-                '%s://%s:%s@%s:%d',
-                $this->email_scheme,
-                $this->email_username,
-                $this->email_password,
-                $this->email_smtps,
-                $this->email_port
-            );
+            $mailer = \Yii::$app->mailer;
 
-            // Create Symfony Mailer Transport
-            $transport = Transport::fromDsn($dsn);
-            $mailer = new Mailer($transport);
+            $message = $mailer->compose()
+                ->setTo($this->system_email)
+                ->setFrom([$this->system_email])
+                ->setSubject('SMTP Validation Test')
+                ->setTextBody('Testing SMTP credentials.');
 
-            // Try sending a test email (does not actually send, but validates credentials)
-            $testEmail = (new Email())
-                ->from($this->system_email)
-                ->to($this->system_email) // Self-test
-                ->subject('SMTP Validation Test')
-                ->text('Testing SMTP credentials.');
-
-            $mailer->send($testEmail);
-        } catch (TransportExceptionInterface $e) {
+            if (!$message->send()) {
+                throw new \Exception('SMTP validation failed. Unable to send test email.');
+            }
+        } catch (\Throwable $e) {
             $this->addError($attribute, 'SMTP connection failed: ' . $e->getMessage());
         }
     }
