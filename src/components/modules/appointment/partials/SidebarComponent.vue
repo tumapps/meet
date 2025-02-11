@@ -21,11 +21,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import DefaultSidebar from '@/components/custom/sidebar/DefaultSidebar.vue'
 import SideMenu from '@/components/custom/nav/SideMenu.vue'
 import ProfileCard from '@/components/custom/sidebar/ProfileCard.vue'
 import { useRoute } from 'vue-router'
+//use menu store to get menus
+import { useMenuStore } from '@/store/menuStore'
+
+const menuStore = useMenuStore()
+const rawMenus = computed(() => menuStore.menus)
 const currentRoute = ref('')
 const route = useRoute()
 const toggle = (route) => {
@@ -47,88 +52,7 @@ const toggle = (route) => {
 toggle(route.name)
 
 const menuItems = ref([])
-
-const rawMenus = ref([
-  {
-    title: 'Dashboard',
-    icon: 'home',
-    route: 'home'
-  },
-  {
-    title: 'Appointments',
-    icon: 'table',
-    route: 'appointments'
-  },
-  {
-    title: 'Availability',
-    icon: 'calendar',
-    route: 'availability'
-  },
-  {
-    title: 'Spaces',
-    icon: 'building',
-    route: 'spaces',
-    children: [
-      {
-        title: 'Space Requests',
-        icon: 'message',
-        route: 'meetings-approval'
-      },
-      {
-        title: 'All Spaces',
-        icon: 'building',
-        route: 'venue-management'
-      }
-    ]
-  },
-  {
-    title: 'Events',
-    icon: 'calendar-days',
-    route: 'all-events',
-    children: [
-      {
-        title: 'Calendar',
-        icon: 'calendar',
-        route: 'eventscalendar'
-      },
-      {
-        title: 'All Events',
-        icon: 'calendar',
-        route: 'all-events'
-      }
-    ]
-  },
-
-  {
-    title: 'IAM',
-    icon: 'shield-halved',
-    route: 'iam',
-    children: [
-      {
-        title: 'Users',
-        icon: 'users',
-        route: 'default.users'
-      },
-      {
-        title: 'Roles',
-        icon: 'shield',
-        route: 'roles'
-      },
-      {
-        title: 'Permissions',
-        icon: 'lock',
-        route: 'permissions'
-      }
-      // Add more children as needed
-    ]
-  },
-
-  {
-    title: 'Settings',
-    icon: 'gear',
-    route: 'settings'
-  }
-])
+// Transform the backend menu items into a format that the Sidebar component can use.
 
 function transformMenuItem(backendItem) {
   // Default assignment for properties if missing in backend data.
