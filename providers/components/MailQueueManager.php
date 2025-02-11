@@ -48,6 +48,7 @@ class MailQueueManager extends Component
 
 			$date = date('Y-m-d H:i:s');
 
+
 			if (self::send($email, $subject, $body)) {
 				if ($type !== null && $type === 'reminder') {
 					Appointments::updateReminder($id);
@@ -55,7 +56,9 @@ class MailQueueManager extends Component
 				echo "Email sent to {$email} at: {$date}\n";
 				$this->logEmailStatus($email, true);
 			} else {
-				echo "Failed to send email to {$email}\n";
+				echo "Failed to send email to {$email}" . "\n";
+
+				Yii::error("Failed to send email to {$email}" . 'mail-queue');
 				$this->logEmailStatus($email, false);
 				$this->queueForRetry($emailData, 30);
 			}
