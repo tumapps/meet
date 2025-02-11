@@ -265,7 +265,7 @@ watch(
             </td>
             <td>
               <span :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
-                {{ user.status }}
+                {{ user.status === 9 ? 'Pending' : 'Active' }}
               </span>
             </td>
             <td>

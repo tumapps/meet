@@ -398,24 +398,21 @@ onMounted(() => {
 
               <!-- Venue Field -->
               <b-col cols="12" lg="4" class="mb-4 mb-lg-0">
-  <b-form-group label="Venue:" label-for="space">
-    <div class="position-relative d-flex align-items-center">
-      <select v-model="appointmentData.space_id" name="space" class="form-select pe-5" id="space">
-        <option value="" disabled>Choose Space</option>
-        <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">
-          {{ space.name }}
-        </option>
-      </select>
-      
-      <!-- Show "X" button at the end of the field -->
-      <span 
-        v-if="appointmentData.space_id" 
-        class="clear-btn" 
-        @click="appointmentData.space_id = ''">
-        <i class="fas fa-times"></i>
-      </span>
-    </div>
-  </b-form-group>
+                <b-form-group label="Venue:" label-for="space">
+                  <div class="position-relative d-flex align-items-center">
+                    <select v-model="appointmentData.space_id" name="space" class="form-select pe-5" id="space">
+                      <option value="" disabled>Choose Space</option>
+                      <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">
+                        {{ space.name }}
+                      </option>
+                    </select>
+
+                    <!-- Show "X" button at the end of the field -->
+                    <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = ''">
+                      <i class="fas fa-times"></i>
+                    </span>
+                  </div>
+                </b-form-group>
 
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
@@ -594,5 +591,4 @@ onMounted(() => {
 .clear-btn:hover {
   color: #000;
 }
-
 </style>
