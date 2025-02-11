@@ -45,6 +45,7 @@ $config = [
             'class' => \yii\queue\amqp_interop\Queue::class,
             'driver' => yii\queue\amqp_interop\Queue::ENQUEUE_AMQP_BUNNY,
             'dsn' => 'amqp://' . $_SERVER['BROKER_USERNAME'] . ':' . $_SERVER['BROKER_PASSWORD'] . '@' . $_SERVER['BROKER_HOST'] . ':' . $_SERVER['BROKER_PORT'] . '/' . $_SERVER['BROKER_VHOST'],
+            // 'dsn' => 'amqp://' . 'guest' . ':' . 'guest' . '@' . 'localhost' . ':' . '5672'. '/' . '%2F',
             'as log' => \yii\queue\LogBehavior::class,
             'heartbeat' => 60,
             'queueName' => $_SERVER['APP_CODE'] . '-queue',
