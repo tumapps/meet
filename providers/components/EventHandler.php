@@ -411,7 +411,7 @@ class EventHandler
 		self::queueEmail($email, $subject, $body);
 	}
 
-	public static function queueEmail($email, $subject, $body, $type = null, $id = null)
+	public static function queueEmail($email, $subject, $body, $type = '', $id = '')
 	{
 		Yii::$app->queue->push(new \cmd\controllers\MailJob([
 			'email' => $email,
