@@ -190,7 +190,7 @@ const saveSpace = async () => {
         text: toastPayload.value.toastMessage,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 1500
+        timer: 4000
       })
 
       // Clear the form fields after successful submission
@@ -259,7 +259,7 @@ const updateSpaceDetails = async (id) => {
         icon: 'success',
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 1500
+        timer: 4000
       })
     }
   } catch (error) {
@@ -372,7 +372,7 @@ const toggleLock = async (id) => {
         icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 1500
+        timer: 4000
       })
     }
   } catch (error) {
@@ -569,12 +569,21 @@ onMounted(async () => {
         </div>
         <div v-if="errors.opening_time" class="error" aria-live="polite">{{ errors.opening_time }}</div>
       </b-col>
-      <b-col md="5">
+      <b-col md="6">
         <div class="mb-3">
           <label for="endTimePicker" class="form-label">Closing Hours</label>
           <flat-pickr v-model="SpaceDetails.closing_time" class="form-control" :config="config2" id="endTimePicker" />
         </div>
         <div v-if="errors.closing_time" class="error" aria-live="polite">{{ errors.closing_time }}</div>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col md="12">
+        <div class="mb-3">
+          <label for="capacity" class="form-label">Capacity</label>
+          <input type="text" v-model="SpaceDetails.capacity" class="form-control" id="capacity" />
+        </div>
+        <div v-if="errors.capacity" class="error" aria-live="polite">{{ errors.capacity }}</div>
       </b-col>
     </b-row>
     <div class="d-flex justify-content-center mt-5">

@@ -82,7 +82,7 @@ const NewRole = async () => {
         title: toastPayload.value.toastTheme,
         icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
         text: toastPayload.value.toastMessage,
-        timer: 2000,
+        timer: 4000,
         showConfirmButton: false,
         showCancelButton: false
       })
@@ -189,7 +189,7 @@ const confirmDelete = async (id) => {
           title: response.data.toastPayload.toastTheme,
           icon: response.data.toastPayload.toastTheme, // You can switch this back to use the theme from the response
           text: response.data.toastPayload.toastMessage,
-          timer: 2000,
+          timer: 4000,
           showConfirmButton: false,
           showCancelButton: false
         })

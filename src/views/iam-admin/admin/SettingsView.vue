@@ -140,7 +140,18 @@ import AxiosInstance from '@/api/axios'
 const axiosInstance = AxiosInstance()
 
 // Reactive state
-const settings = ref({})
+const settings = ref({
+  app_name: '',
+  system_email: '',
+  category: '',
+  email_scheme: '',
+  email_smtps: '',
+  email_port: '',
+  email_encryption: '',
+  email_password: '',
+  email_username: '',
+  description: ''
+})
 
 const errors = ref({})
 const loading = ref(false)
@@ -155,10 +166,8 @@ const fetchSettings = async () => {
 
     console.log('API Response:', response.data) // Debugging
 
-    if (response.data?.dataPayload?.data) {
-      settings.value = {
-        ...response.data.dataPayload.data
-      }
+    if (response.data?.dataPayload?.data?.length) {
+      settings.value = response.data.dataPayload.data[0] // Extract first object
     } else {
       console.warn('Unexpected API response structure:', response.data)
       message.value = {

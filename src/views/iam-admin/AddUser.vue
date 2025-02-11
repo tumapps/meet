@@ -40,10 +40,10 @@ const submitForm = async () => {
     const response = await axiosInstance.post('/v1/auth/register', formData.value)
     // Handle success
     proxy.$showAlert({
-      title: 'Account created successfully',
-      text: 'account has been created successfully!',
-      icon: 'success',
-      timer: 5000,
+      title: response.data.dataPayload.data.toastTheme,
+      text: response.data.dataPayload.data.toastMessage,
+      icon: response.data.dataPayload.data.toastTheme,
+      timer: 4000,
       showConfirmButton: false,
       showCancelButton: false
     })
@@ -56,7 +56,7 @@ const submitForm = async () => {
       title: 'An error occurred ',
       text: 'Ooops! an error has occured while creating the account!',
       icon: 'error',
-      timer: 5000,
+      timer: 4000,
       showConfirmButton: false,
       showCancelButton: false
     })

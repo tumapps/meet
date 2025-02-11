@@ -157,7 +157,7 @@ const toggleStatus = async (id) => {
       proxy.$showAlert({
         icon: toastPayload.value.toastTheme || 'success',
         text: toastPayload.value.toastMessage || 'Status updated',
-        timer: 3000,
+        timer: 4000,
         showCancelButton: false,
         showConfirmButton: false,
         timerProgressBar: true
@@ -168,7 +168,7 @@ const toggleStatus = async (id) => {
         icon: 'success',
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 3000,
+        timer: 4000,
         timerProgressBar: true
       })
     }
@@ -238,7 +238,7 @@ const UpdateUser = async () => {
         icon: response.data.dataPayload.data.toastTheme || 'success',
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 3000,
+        timer: 4000,
         timerProgressBar: true
       })
     }

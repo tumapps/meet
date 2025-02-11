@@ -362,8 +362,40 @@ const AxiosInstance = () => {
     }
   }
 
+  //replica refresh token function but to be used to know where the refresh token is valid or not on app load
+  const RunAccessToken = async () => {
+    if (isRefreshing) {
+      return refreshPromise // Return the existing refresh promise
+    }
+
+    isRefreshing = true
+    refreshPromise = (async () => {
+      try {
+        const response = await axiosInstance.post('/v1/auth/refresh')
+        const newToken = response.data?.dataPayload.data.token
+        authStore.setToken(newToken, response.data.dataPayload.data.username)
+        // redirect to first page in the menus use menus store here
+        router.push({ path: '/dashboard' })
+      } catch (refreshError) {
+        if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
+          refreshAndRetryQueue.length = 0 // Clear queue
+          router.push({ path: `/auth/login` })
+          localStorage.clear()
+        } else {
+          console.error('refresh token is not valid')
+        }
+        throw refreshError
+      } finally {
+        isRefreshing = false
+        refreshPromise = null
+      }
+    })()
+
+    return refreshPromise
+  }
+
   axiosInstance.logout = logout
-  axiosInstance.refreshAccessToken = refreshAccessToken // Expose the refreshAccessToken function
+  axiosInstance.RunAccessToken = RunAccessToken // Expose the refreshAccessToken function
   return axiosInstance
 }
 

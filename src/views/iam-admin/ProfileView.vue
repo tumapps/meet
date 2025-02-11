@@ -2,6 +2,7 @@
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import CreateAxiosInstance from '@/api/axios.js'
 import UserSettings from '@/components/UserSettings.vue'
+import SpaceUpdate from '@/components/modules/appointment/SpaceUpdate.vue'
 import { useAuthStore } from '@/store/auth.store.js'
 
 const authStore = useAuthStore()
@@ -150,18 +151,19 @@ const updatePassword = async () => {
 </script>
 
 <template>
-  <div class="bd-example">
+  <div class="bd-example bg-white">
     <nav>
-      <div class="mb-3 nav nav-tabs" id="nav-tab" role="tablist">
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button class="nav-link active d-flex align-items-center" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="true">Profile</button>
         <button v-if="role !== 'su'" class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Settings</button>
         <button class="nav-link" id="nav-password-tab" data-bs-toggle="tab" data-bs-target="#nav-password" type="button" role="tab" aria-controls="nav-password" aria-selected="false">Password</button>
+        <button v-if="role !== 'su'" class="nav-link" id="nav-office-tab" data-bs-toggle="tab" data-bs-target="#nav-office" type="button" role="tab" aria-controls="nav-office" aria-selected="false">My Office</button>
       </div>
     </nav>
     <div class="tab-content iq-tab-fade-up" id="simple-tab-content">
       <div class="tab-pane fade show active" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
         <!-- //account -->
-        <b-card>
+        <b-card class="mb-3 p-3 shadow">
           <b-row>
             <div class="col-xl-12 col-lg-12">
               <div>
@@ -211,7 +213,7 @@ const updatePassword = async () => {
       </div>
       <div class="tab-pane fade" id="nav-password" role="tabpanel" aria-labelledby="nav-password-tab">
         <!-- //password -->
-        <b-card
+        <b-card class="mb-3 p-3 shadow"
           ><b-row class="mt-5">
             <div class="col-xl-12 col-lg-12">
               <div>
@@ -251,6 +253,9 @@ const updatePassword = async () => {
       </div>
       <div v-if="role !== 'su'" class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
         <UserSettings :user_id="user_id" />
+      </div>
+      <div v-if="role !== 'su'" class="tab-pane fade" id="nav-office" role="tabpanel" aria-labelledby="nav-office-tab">
+        <SpaceUpdate />
       </div>
     </div>
   </div>

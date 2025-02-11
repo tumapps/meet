@@ -161,7 +161,7 @@ const saveEvent = async (isUpdate = false) => {
         icon: toastPayload.value.toastTheme,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 2000,
+        timer: 4000,
         timerProgressBar: true
       })
     } else {
@@ -281,7 +281,7 @@ const RejectBooking = async (id, rejection_reason) => {
         text: toastPayload.value.toastMessage,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 1500,
+        timer: 4000,
         timerProgressBar: true
       })
     } else {

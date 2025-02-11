@@ -79,7 +79,7 @@ const saveEvent = async () => {
         icon: toastPayload.value.toastTheme,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 2000,
+        timer: 4000,
         timerProgressBar: true
       })
     } else {

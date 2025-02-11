@@ -147,11 +147,11 @@ const saveSettings = async () => {
 </script>
 <template>
   <div>
-    <b-card class="">
-      <h2 class="text-center mb-2">Scheduler Settings</h2>
+    <b-card>
+      <!-- <h2 class=" mb-2">Scheduler Settings</h2> -->
       <b-form @submit.prevent="saveSettings">
         <!-- Section: Working Hours -->
-        <b-card>
+        <b-card class="mb-3 p-3 shadow">
           <h4 class="text-green">Working Hours</h4>
           <b-row class="">
             <b-col md="12">
@@ -218,7 +218,7 @@ const saveSettings = async () => {
           </div>
         </b-card> -->
         <!-- Section: Booking Settings -->
-        <b-card>
+        <b-card class="mb-3 p-3 shadow">
           <h4>Booking Settings</h4>
           <b-row>
             <b-col md="12" class="mb-4">

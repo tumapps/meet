@@ -99,7 +99,7 @@ const ApproveBooking = async (id) => {
         text: toastPayload.value.toastMessage,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 15000,
+        timer: 4000,
         timerProgressBar: true
         // icon: 'success',
       })
@@ -155,7 +155,7 @@ const RejectBooking = async (id, rejection_reason) => {
         text: toastPayload.value.toastMessage,
         showCancelButton: false,
         showConfirmButton: false,
-        timer: 1500,
+        timer: 4000,
         timerProgressBar: true
       })
     } else {

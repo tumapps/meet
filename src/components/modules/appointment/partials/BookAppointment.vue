@@ -236,7 +236,7 @@ const submitAppointment = async () => {
         title: toastPayload.value.toastTheme || 'Success',
         icon: toastPayload.value.toastTheme || 'success',
         text: toastPayload.value.toastMessage || 'Appointment created successfully',
-        timer: 3000,
+        timer: 4000,
         showConfirmButton: false,
         showCancelButton: false,
         showprogressBar: true
@@ -263,7 +263,7 @@ const submitAppointment = async () => {
           icon: 'error',
           showCancelButton: false,
           showConfirmButton: false,
-          timer: 2000
+          timer: 4000
         })
       }
     }

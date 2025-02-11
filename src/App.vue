@@ -54,9 +54,9 @@ const resizePlugin = () => {
   }
 }
 
-const refreshToken = async () => {
+const RunrefreshToken = async () => {
   try {
-    const newToken = await axiosInstance.refreshAccessToken()
+    const newToken = await axiosInstance.RunAccessToken()
     router.push({ name: 'home' }) 
     console.log('Token refreshed madafaka:', newToken)
   } catch (error) {
@@ -75,7 +75,7 @@ onMounted(() => {
   store.setSetting()
 
   //call the refrsh token function from store
-  // refreshToken()
+  RunrefreshToken()
 })
 
 // onUnmounted(() => {

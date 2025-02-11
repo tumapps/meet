@@ -60,7 +60,7 @@ function handleDateClick(info) {
       title: 'Info',
       text: 'Please Click Today or a later Date',
       icon: 'info',
-      timer: 5000,
+      timer: 4000,
       showConfirmButton: false,
       showCancelButton: true,
       timerProgressBar: true

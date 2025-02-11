@@ -32,7 +32,7 @@ const resetPassword = async () => {
         title: 'success',
         text: 'Password reset successfully!',
         icon: 'success',
-        timer: 5000,
+        timer: 4000,
         showConfirmButton: false,
         showCancelButton: false
       })
