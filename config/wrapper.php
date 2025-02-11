@@ -61,9 +61,9 @@ class ConfigWrapper
             'loginUrl' => $_SERVER['FRONTEND_BASE_URL'],
 
             'menus' => [
-                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'home',   'roles' => ['user']],
+                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'home',   'roles' => ['user', 'secretary']],
                 ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'admin', 'roles' => ['su']],
-                ['title' => 'Appointments', 'icon' => 'table', 'route' => 'appointments', 'roles' => ['user']],
+                ['title' => 'Appointments', 'icon' => 'table', 'route' => 'appointments', 'roles' => ['user', 'secretary']],
                 ['title' => 'Availability', 'icon' => 'calendar', 'route' => 'availability', 'roles' => ['user']],
                 [
                     'title' => 'Spaces',
