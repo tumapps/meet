@@ -58,7 +58,7 @@ class m240808_210420_default_setting_presets extends Migration
             'system_email' => 'francisyuppie@gmail.com',
             'email_scheme' => 'smtp',
             'email_smtps' => 'smtp.gmail.com',
-            'email_port' => 587,
+            'email_port' => 465,
             'email_encryption' => 'tls',
             'email_password' => 'utws lgpt hsjr jdec',
             'description' => 'Default system settings for Tummeet Scheduler',

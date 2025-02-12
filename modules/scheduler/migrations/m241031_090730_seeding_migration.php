@@ -16,7 +16,7 @@ class m241031_090730_seeding_migration extends Migration
 
         // $this->seedLevel();
         $this->insert('{{%meeting_types}}', [
-            'type' => 'Appintment',
+            'type' => 'Appointment',
             'created_at' => time(),
             'updated_at' => time(),
         ]);
