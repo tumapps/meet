@@ -115,6 +115,9 @@ $config = [
                 'port' => $_SERVER['MAIL_PORT'],
                 'encryption' => $_SERVER['ENCRYPTION'],
             ],
+            // 'transport' => function () {
+            //     return \auth\hooks\MailConfig::getMailConfig();
+            // },
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
