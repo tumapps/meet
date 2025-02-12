@@ -134,12 +134,6 @@ class SystemSettings extends BaseModel
         try {
             $result = parent::beforeSave($insert);
 
-            // if (!empty($this->email_password)) {
-            //     if (!password_get_info($this->email_password)['algo']) {
-            //         $this->email_password = password_hash($this->email_password, PASSWORD_BCRYPT);
-            //     }
-            // }
-
             if (!$this->hasErrors()) {
                 return $result;
             } else {
