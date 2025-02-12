@@ -66,7 +66,7 @@ export default {
     },
     icon: {
       type: String,
-      default: 'home'
+      default: ''
     },
     caretIcon: {
       type: Boolean,
