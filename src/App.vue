@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed,  watch } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
 import { useRoute, useRouter } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
@@ -57,7 +57,7 @@ const resizePlugin = () => {
 const RunrefreshToken = async () => {
   try {
     const newToken = await axiosInstance.RunAccessToken()
-    router.push({ name: 'home' }) 
+    router.push({ name: 'home' })
     console.log('Token refreshed madafaka:', newToken)
   } catch (error) {
     console.error('Failed to refresh token:', error)
@@ -92,6 +92,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+.table tbody tr td {
+  /* background-color: rgb(96, 96, 177) !important; */
+  padding: 8px !important;
+}
 @import '@/assets/scss/hope-ui.scss';
 @import '@/assets/scss/pro.scss';
 @import '@/assets/scss/custom.scss';

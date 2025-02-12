@@ -1363,7 +1363,7 @@ onUnmounted(() => {
 <style scoped>
 .table tbody tr td {
   /* background-color: rgb(96, 96, 177) !important; */
-  padding: 10px !important;
+  padding: 8px !important;
 }
 
 .error {

@@ -182,66 +182,76 @@ async function fetchAppointments() {
   fetchError.value = null
 
   try {
-    const response = await axiosInstance.get('/v1/scheduler/appointments')
+    const params = {}
+
+    // Include search query if it's not empty
+    if (selectedUser.value) {
+      params._search = selectedUser.value
+    }
+
+    const response = await axiosInstance.get('/v1/scheduler/appointments', { params })
 
     apiData.value = response.data.dataPayload.data
-    events.value = apiData.value
-      .filter((item) => {
-        // Ensure the event is ACTIVE
-        return item.recordStatus.label === 'ACTIVE'
-      })
-      .map((item) => {
-        console.log('Item:', item)
+    console.log('Raw API Data:', typeof apiData.value) // Debugging to check API response
+    if (Array.isArray(apiData.value)) {
+      events.value = apiData.value
+        .filter((item) => {
+          // Ensure the event is ACTIVE
+          return item.recordStatus?.label === 'ACTIVE'
+        })
+        .map((item) => {
+          console.log('Item:', item)
 
-        // const parsedDate = parseCustomDate(item.appointment_date)
-        const formattedDate = format(item.appointment_date, 'yyyy-MM-dd')
-        let backgroundColor
+          // const parsedDate = parseCustomDate(item.appointment_date)
+          const formattedDate = format(item.appointment_date, 'yyyy-MM-dd')
+          let backgroundColor
 
-        // Assign background color based on recordStatus.label
-        switch (item.recordStatus.label) {
-          case 'ACTIVE':
-            backgroundColor = '#C056C6'
-            break
-          case 'CANCELLED':
-            backgroundColor = '#E05263'
-            break
-          case 'DELETED':
-            backgroundColor = '#dc3545'
-            break
-          case 'PENDING':
-            backgroundColor = '#b8e1ff'
-            break
-          case 'RESCHEDULE':
-            backgroundColor = '#FFCAB1'
-            break
-          default:
-            backgroundColor = '#FFB2E6'
-        }
-
-        // Construct the event object
-        const event = {
-          title: item.subject,
-          start: `${formattedDate}T${item.start_time}`,
-          end: `${formattedDate}T${item.end_time}`,
-          backgroundColor: item.recordStatus.themeColor || backgroundColor,
-          display: 'block',
-          borderColor: 'transparent',
-          initialView: 'timeGridWeek',
-
-          extendedProps: {
-            start_time: item.start_time,
-            end_time: item.end_time,
-            description: item.description,
-            contact_name: item.contact_name,
-            status: item.recordStatus.label
+          // Assign background color based on recordStatus.label
+          switch (item.recordStatus.label) {
+            case 'ACTIVE':
+              backgroundColor = '#C056C6'
+              break
+            case 'CANCELLED':
+              backgroundColor = '#E05263'
+              break
+            case 'DELETED':
+              backgroundColor = '#dc3545'
+              break
+            case 'PENDING':
+              backgroundColor = '#b8e1ff'
+              break
+            case 'RESCHEDULE':
+              backgroundColor = '#FFCAB1'
+              break
+            default:
+              backgroundColor = '#FFB2E6'
           }
-        }
 
-        // Log the constructed event
-        console.log('Event main Action :', event)
+          // Construct the event object
+          const event = {
+            title: item.subject,
+            start: `${formattedDate}T${item.start_time}`,
+            end: `${formattedDate}T${item.end_time}`,
+            backgroundColor: item.recordStatus.themeColor || backgroundColor,
+            display: 'block',
+            borderColor: 'transparent',
+            initialView: 'timeGridWeek',
 
-        return event
-      })
+            extendedProps: {
+              start_time: item.start_time,
+              end_time: item.end_time,
+              description: item.description,
+              contact_name: item.contact_name,
+              status: item.recordStatus.label
+            }
+          }
+
+          // Log the constructed event
+          console.log('Event main Action :', event)
+
+          return event
+        })
+    }
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
     console.error('Error fetching appointments:', error)
@@ -262,31 +272,33 @@ async function fetchEvents() {
     // Ensure apiData is always an array
     apiData.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
 
-    console.log('Raw API Data:', apiData.value) // Debugging to check API response
+    console.log('Raw API Data:', typeof apiData.value) // Debugging to check API response
 
     // Filter and map API data to FullCalendar's required format
-    events.value = apiData.value
-      .filter((item) => item?.recordStatus?.label === 'ACTIVE') // Ensure safe access
-      .map((item) => {
-        const start = `${item.start_date}T${item.start_time}`
-        const end = `${item.end_date}T${item.end_time}`
+    if (Array.isArray(apiData.value)) {
+      events.value = apiData.value
+        .filter((item) => item?.recordStatus?.label === 'ACTIVE') // Ensure safe access
+        .map((item) => {
+          const start = `${item.start_date}T${item.start_time}`
+          const end = `${item.end_date}T${item.end_time}`
 
-        return {
-          title: item.title,
-          start,
-          end,
-          backgroundColor: item.recordStatus?.theme || '#d33', // Default color
-          display: 'block',
-          borderColor: 'transparent',
-          initialView: 'timeGridMonth',
-          extendedProps: {
-            start_time: item.start_time,
-            end_time: item.end_time,
-            description: item.description,
-            status: item.recordStatus?.label || 'UNKNOWN' // Default status
+          return {
+            title: item.title,
+            start,
+            end,
+            backgroundColor: item.recordStatus?.theme || '#d33', // Default color
+            display: 'block',
+            borderColor: 'transparent',
+            initialView: 'timeGridMonth',
+            extendedProps: {
+              start_time: item.start_time,
+              end_time: item.end_time,
+              description: item.description,
+              status: item.recordStatus?.label || 'UNKNOWN' // Default status
+            }
           }
-        }
-      })
+        })
+    }
 
     console.log('Mapped Events:', events.value) // Debugging to verify mapped data
   } catch (error) {
@@ -402,25 +414,65 @@ watch(events, (newEvents) => {
 //   console.log('events ata mount:', events.value)
 // })
 
+//filter meetings for secretary
+// const searchQuery = ref('');
+
+const UsersOptions = ref([])
+const selectedUser = ref('') // To hold the selected username
+
+//filter appointments by user
+const getusers_booked = async () => {
+  try {
+    const response = await axiosInstance.get('/v1/auth/users')
+    UsersOptions.value = response.data.dataPayload.data
+    console.log('Users data:', UsersOptions.value)
+    // console.log("Users data:", UsersOptions.value);
+  } catch (error) {
+    proxy.$showToast({
+      title: 'An error occurred',
+      text: 'Oops! An error has occurred',
+      icon: 'error'
+    })
+  }
+}
+
+watch(selectedUser, (newselectedUser) => {
+  if (newselectedUser === '') {
+    fetchAppointments()
+  } else {
+    // fetchAppointmentsByUser(selectedUser.value)
+    console.log('Selected User:', selectedUser.value)
+    fetchAppointments()
+  }
+})
+
 onMounted(async () => {
   if (props.dashType === 'user') {
     await fetchAppointments()
-  } else {
+  } else if (props.dashType === 'secretary') {
+    await getusers_booked()
+  } else if (props.dashType === 'Registrar') {
     await fetchEvents()
   }
 })
 </script>
 <template>
-  <!-- Skeleton Loader or Spinner -->
-  <div v-if="isLoading" class="loading-spinner">
-    <div class="skeleton-calendar">
-      <div class="skeleton-header"></div>
-      <div class="skeleton-day" v-for="n in 35" :key="n"></div>
-    </div>
-  </div>
-
-  <!-- FullCalendar -->
-  <FullCalendar v-else :options="calendarOptions" class="main-cont" />
+  <b-row>
+    <b-col lg="2" class="d-flex justify-content-lg-end mb-3 mb-5">
+      <div v-if="role === 'su' || role === 'secretary'" class="w-100 w-lg-auto">
+        <div class="dropdown w-100 w-lg-auto" style="float: right">
+          <select v-model="selectedUser" name="service" class="form-select form-select-sm" id="addappointmenttype">
+            <option value="">All</option>
+            <option v-for="user in UsersOptions" :key="user.user_id" :value="user.id">
+              {{ user.fullname }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </b-col>
+    <!-- FullCalendar -->
+    <FullCalendar :options="calendarOptions" class="main-cont" />
+  </b-row>
   <!-- Modal for event details -->
   <b-modal v-model="isModalOpen" title="Summary" dialog-class="centered-modal">
     <p><strong>Title:</strong> {{ selectedEvent.title }}</p>

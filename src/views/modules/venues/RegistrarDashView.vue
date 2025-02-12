@@ -239,5 +239,4 @@ h1 {
 .fc-toolbar-chunk {
   margin-bottom: 20px !important;
 }
-
 </style>

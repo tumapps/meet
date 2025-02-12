@@ -421,14 +421,12 @@ onMounted(() => {
                     <!-- Search Input -->
                     <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2"></b-form-input>
                     <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2"></b-form-input>
-                    <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpace = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
+                    <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
                     </span>
                     <!-- Search Results -->
                     <ul v-if="filteredSpaces.length && appointmentData.space_id === null" class="mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
-                      <li v-for="space in filteredSpaces" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">
-                        {{ space.name }}
-                      </li>
+                      <li v-for="space in filteredSpaces" :class="{ disabled: space.is_locked }" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">{{ space.name }}</li>
                     </ul>
                     <!-- No Results Message -->
                     <p v-else-if="searchQuery && !filteredSpaces.length" class="text-muted mt-2">No results found.</p>
