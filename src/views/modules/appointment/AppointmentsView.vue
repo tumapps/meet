@@ -1034,7 +1034,7 @@ onUnmounted(() => {
                 Subject
                 <i class="fas fa-sort"></i>
               </th>
-              <th v-if="role === 'su'">ChairPerson</th>
+              <th v-if="role === 'su' || role === 'secretary'">ChairPerson</th>
 
               <th @click="sortTable('appointment_date')">
                 Date

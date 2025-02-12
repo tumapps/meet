@@ -398,7 +398,7 @@ onMounted(() => {
             </b-row>
 
             <b-row class="align-items-center form-group">
-              <b-col v-if="role === 'su'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="ChairPerson:" label-for="input-1">
                   <select v-model="selectedUsername" name="service" class="form-select" id="receipent">
                     <!-- Show this option if UsersOptions is null or empty -->
@@ -415,7 +415,7 @@ onMounted(() => {
               </b-col>
 
               <!-- Venue Field -->
-              <b-col cols="12" lg="4" class="mb-4 mb-lg-0">
+              <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-4 mb-lg-0">
                 <b-form-group label="Venue:" label-for="space">
                   <div class="position-relative d-flex flex-column">
                     <!-- Search Input -->
@@ -442,15 +442,18 @@ onMounted(() => {
                   {{ errors.space_id }}
                 </div>
               </b-col>
+         
 
               <!-- Date Field -->
-              <b-col cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Date:" label-for="input-1">
                   <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername && role === 'su'" v-b-tooltip.hover="{ title: 'Chair must be selected', disabled: !!selectedUsername }" />
                 </b-form-group>
                 <div v-if="errors.appointment_date" class="error" aria-live="polite">{{ errors.appointment_date }}</div>
               </b-col>
-              <b-col v-if="role !== 'su'" cols="12" lg="4" class="mb-sm-3 mb-md-3 mb-lg-0">
+            </b-row>
+            <b-row class="align-items-center form-group">
+              <b-col  cols="12" lg="6"  class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Meeting Type:" label-for="input-1">
                   <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
                     <!-- Default placeholder option -->
@@ -463,30 +466,7 @@ onMounted(() => {
                 </b-form-group>
                 <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
               </b-col>
-            </b-row>
-            <b-row class="g-3 align-items-center form-group mt-3 p-2">
-              <b-row>
-                <b-col md="12" lg="12" sm="12">
-                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                </b-col>
-              </b-row>
-              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
-            </b-row>
-            <b-row class="align-items-center form-group mb-5">
-              <b-col v-if="role === 'su'" cols="12" :lg="role === 'su' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <b-form-group label="Meeting Type:" label-for="input-1">
-                  <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
-                    <!-- Default placeholder option -->
-                    <option value="">Meeting Type</option>
-                    <!-- Dynamically populated options from API -->
-                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
-                      {{ type }}
-                    </option>
-                  </select>
-                </b-form-group>
-                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
-              </b-col>
-              <b-col cols="12" :lg="role === 'su' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col cols="12" lg="6" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
                   <div class="file-input-container position-relative d-flex align-items-center">
                     <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" ref="fileInput" />
@@ -498,6 +478,41 @@ onMounted(() => {
                   <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile }}</div>
                 </b-form-group>
               </b-col>
+            </b-row>
+            <b-row class="g-3 align-items-center form-group mt-3 p-2">
+              <b-row>
+                <b-col md="12" lg="12" sm="12">
+                  <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
+                </b-col>
+              </b-row>
+              <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
+            </b-row>
+            <b-row class="align-items-center form-group mb-5">
+              <!-- <b-col v-if="role === 'su' || role === 'secretary'" cols="12" :lg="role === 'su' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Meeting Type:" label-for="input-1">
+                  <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                    Default placeholder option
+                    <option value="">Meeting Type</option>
+                    Dynamically populated options from API
+                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
+                      {{ type }}
+                    </option>
+                  </select>
+                </b-form-group>
+                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+              </b-col> -->
+              <!-- <b-col cols="12" :lg="role === 'su' ? 6 : role === 'secretary' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Agenda:" label-for="input-1">
+                  <div class="file-input-container position-relative d-flex align-items-center">
+                    <input type="file" class="form-control" id="fileUpload" @change="handleFileUpload" aria-label="Small file input" ref="fileInput" />
+                    <span v-if="fileName" class="clear-file ms-2" @click="removeFile">
+                      <i class="fas fa-times"></i>
+                    </span>
+                  </div>
+                  <p v-if="fileName" class="text-primary">{{ fileName }}</p>
+                  <div v-if="errors.uploadedFile" class="error" aria-live="polite">{{ errors.uploadedFile }}</div>
+                </b-form-group>
+              </b-col> -->
             </b-row>
             <b-row class="align-items-center form-group">
               <b-col cols="12" lg="4">
