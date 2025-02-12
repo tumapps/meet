@@ -325,6 +325,24 @@ const updateAttendees = (attendeesId) => {
   appointmentData.value.attendees = attendeesId
   console.log('form data attend', appointmentData.value.attendees)
 }
+//search for spaces
+const searchQuery = ref('')
+const filteredSpaces = ref([])
+
+watch(searchQuery, (newSearchQuery) => {
+  if(newSearchQuery === '') {
+    filteredSpaces.value = []
+    return
+  }
+  filteredSpaces.value = spaces.value.filter((space) => space.name.toLowerCase().includes(newSearchQuery.toLowerCase()))
+})
+
+//click on space assing space id to appointment data space id
+watch(selectedSpaceName, (newSpaceName) => {
+  const selectedSpace = spaces.value.find((space) => space.name === newSpaceName)
+  appointmentData.value.space_id = selectedSpace ? selectedSpace.id : null
+  console.log('selectedSpace:', selectedSpace)
+})
 
 // Watch for changes in the selected username to update selectedUser_id
 watch(selectedUsername, (newUsername) => {
@@ -399,20 +417,28 @@ onMounted(() => {
               <!-- Venue Field -->
               <b-col cols="12" lg="4" class="mb-4 mb-lg-0">
                 <b-form-group label="Venue:" label-for="space">
-                  <div class="position-relative d-flex align-items-center">
-                    <select v-model="appointmentData.space_id" name="space" class="form-select pe-5" id="space">
-                      <option value="" disabled>Choose Space</option>
-                      <option v-for="space in spaces" :key="space.id" :value="space.id" :disabled="space.is_locked">
-                        {{ space.name }}
-                      </option>
-                    </select>
-
-                    <!-- Show "X" button at the end of the field -->
-                    <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = ''">
+                  <div class="position-relative d-flex flex-column">
+                    <!-- Search Input -->
+                    <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2"></b-form-input>
+                    <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2"></b-form-input>
+                    <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = '', selectedSpace= '', selectedSpaceName = '', filteredSpaces = []">
                       <i class="fas fa-times"></i>
                     </span>
+                    <!-- Search Results -->
+                    <ul v-if="filteredSpaces.length && appointmentData.space_id === null" class="mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
+                      <li v-for="space in filteredSpaces" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">
+                        {{ space.name }}
+                      </li>
+                    </ul>
+                    <!-- No Results Message -->
+                    <p v-else-if="searchQuery && !filteredSpaces.length" class="text-muted mt-2">No results found.</p>
                   </div>
                 </b-form-group>
+
+                <!-- Clear Button -->
+                <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = ''">
+                  <i class="fas fa-times"></i>
+                </span>
 
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}

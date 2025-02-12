@@ -52,38 +52,34 @@ const toggle = (route) => {
 toggle(route.name)
 
 const menuItems = ref([])
-// Transform the backend menu items into a format that the Sidebar component can use.
 
 function transformMenuItem(backendItem) {
-  // Default assignment for properties if missing in backend data.
   const transformed = {
-    // If a route exists, we assume it should use a router-link
-    isTag: backendItem.route ? 'router-link' : undefined,
+    // Only assign 'router-link' if there's a route and it's not a parent with children
+    isTag: backendItem.route && !backendItem.children ? 'router-link' : undefined,
     title: backendItem.title,
     icon: backendItem.icon,
-    // Use backend's miniTitle if provided, otherwise default to an empty string
     miniTitle: backendItem.miniTitle || '',
-    // If there are children, use a toggleId (fallback: a slugified title)
     toggleId: backendItem.children ? backendItem.toggleId || backendItem.title.toLowerCase().replace(/\s+/g, '-') : undefined,
-    // Use the route directly
     route: backendItem.route,
-    // You might have a popup flag; if not, default to 'false'
     popup: backendItem.popup || 'false',
-    // If children exist, we want to show the caret icon
     caretIcon: backendItem.children ? true : false
-  }
+  };
 
-  // If the backend provides children, recursively transform them.
+  // Recursively transform children if they exist
   if (backendItem.children && Array.isArray(backendItem.children)) {
-    transformed.children = backendItem.children.map((child) => transformMenuItem(child))
+    transformed.children = backendItem.children.map((child) => transformMenuItem(child));
   }
 
-  return transformed
+  return transformed;
 }
+
 
 onMounted(() => {
   console.log('Fetching menu items from backend...', rawMenus.value)
   menuItems.value = rawMenus.value.map((item) => transformMenuItem(item))
-  console.log('Transformed menu items:', menuItems.value)
+  // console.log('Transformed menu items:', menuItems.value)
+  console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2));
+
 })
 </script>
