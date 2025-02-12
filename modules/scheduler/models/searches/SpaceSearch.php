@@ -42,7 +42,7 @@ class SpaceSearch extends Space
      */
     public function search($params)
     {
-        $query = Space::find()->where(['is_deleted' => 0]);
+        $query = Space::find();
         //$query->with('level'); // eager loading
 
         // add conditions that should always apply here
