@@ -28,12 +28,12 @@ class MailConfig
             \Yii::error('Failed to fetch mail configuration: ' . $e->getMessage());
 
             return [
-                'scheme' => $_SERVER['EMAIL_SCHEME'] ?? 'smtp',
-                'host' => $_SERVER['EMAIL_HOST'] ?? 'smtp.gmail.com',
-                'username' => $_SERVER['EMAIL_USERNAME'] ?? 'your-email@gmail.com',
-                'password' => $_SERVER['EMAIL_PASSWORD'] ?? 'utws lgpt hsjr jdec',
-                'port' => (int) ($_SERVER['EMAIL_PORT'] ?? 465),
-                'encryption' => $_SERVER['EMAIL_ENCRYPTION'] ?? 'tls',
+                'scheme' => 'smtp',
+                'host' => 'smtp.gmail.com',
+                'username' => 'your-email@gmail.com',
+                'password' => 'utws lgpt hsjr jdec',
+                'port' =>  465,
+                'encryption' => 'tls',
             ];
         }
     }
