@@ -21,7 +21,8 @@
   </li>
   <router-link :to="{ name: route.to }" v-else v-slot="{ navigate, isExactActive }">
     <li :class="navItemClass + ' ' + (isExactActive ? 'active' : '')">
-      <a ref="elem" :class="navLinkClass + ' ' + ' ' + (isExactActive && isChild ? 'mychild' : isExactActive ? 'active' : '')" aria-current="page" @click="navigate">
+      <a ref="elem" :class="navLinkClass + ' ' + (isExactActive && isChild === 'false' ? 'mychild' : isExactActive && isChild !== 'true' ? 'active' : '')"
+      aria-current="page" @click="navigate">
         <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
           <font-awesome-icon :icon="['fas', icon]" />
         </i>
@@ -137,10 +138,16 @@ watch(
   },
   { deep: true }
 )
+
+watch(() => props,isChild, (newVal) => {
+  if (newVal) {
+    navLinkClass.value.push('mychild')
+  }
+})
 </script>
 <style scoped>
 .mychild {
-  color: #D89837 !important;
+  color: #d89837 !important;
   font-weight: 800 !important;
 }
 </style>

@@ -7,9 +7,9 @@
     <hr class="hr-horizontal" />
     <ul class="navbar-nav iq-main-menu" id="e-commerce">
       <template v-for="(item, index) in menuItems" :key="index">
-        <side-menu v-if="!item.children" :isTag="item.isTag" :title="item.title" :icon="item.icon" :miniTitle="item.miniTitle" :route="{ to: item.route }" :static-item="item.static" />
+        <side-menu v-if="!item.children" :isTag="item.isTag" :isChild="false" :title="item.title" :icon="item.icon" :miniTitle="item.miniTitle" :route="{ to: item.route }" :static-item="item.static" />
 
-        <side-menu v-else :title="item.title" :class="mychildren" :icon="item.icon" :miniTitle="item.miniTitle" :toggle-id="item.toggleId" :caret-icon="true" :route="{ popup: 'false', to: item.route }" @onClick="toggle" :active="currentRoute.includes(item.route)">
+        <side-menu v-else :title="item.title" :isChild="true" :icon="item.icon" :miniTitle="item.miniTitle" :toggle-id="item.toggleId" :caret-icon="true" :route="{ popup: 'false', to: item.route }" @onClick="toggle" :active="currentRoute.includes(item.route)">
           <b-collapse tag="ul" class="sub-nav" :id="item.toggleId" accordion="e-commerce" :visible="currentRoute.includes(item.route)">
             <side-menu v-for="(subItem, subIndex) in item.children" :key="subIndex" isTag="router-link" :title="subItem.title" :icon="subItem.icon" :icon-size="subItem.iconSize" icon-type="solid" :miniTitle="subItem.miniTitle" :route="{ to: subItem.route }" />
           </b-collapse>
