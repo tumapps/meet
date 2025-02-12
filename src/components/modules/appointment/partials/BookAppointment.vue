@@ -330,7 +330,7 @@ const searchQuery = ref('')
 const filteredSpaces = ref([])
 
 watch(searchQuery, (newSearchQuery) => {
-  if(newSearchQuery === '') {
+  if (newSearchQuery === '') {
     filteredSpaces.value = []
     return
   }
@@ -421,7 +421,7 @@ onMounted(() => {
                     <!-- Search Input -->
                     <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2"></b-form-input>
                     <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2"></b-form-input>
-                    <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = '', selectedSpace= '', selectedSpaceName = '', filteredSpaces = []">
+                    <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpace = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
                     </span>
                     <!-- Search Results -->

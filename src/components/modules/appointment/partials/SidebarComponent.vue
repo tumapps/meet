@@ -9,7 +9,7 @@
       <template v-for="(item, index) in menuItems" :key="index">
         <side-menu v-if="!item.children" :isTag="item.isTag" :title="item.title" :icon="item.icon" :miniTitle="item.miniTitle" :route="{ to: item.route }" :static-item="item.static" />
 
-        <side-menu v-else :title="item.title" :icon="item.icon" :miniTitle="item.miniTitle" :toggle-id="item.toggleId" :caret-icon="true" :route="{ popup: 'false', to: item.route }" @onClick="toggle" :active="currentRoute.includes(item.route)">
+        <side-menu v-else :title="item.title" :class="mychildren" :icon="item.icon" :miniTitle="item.miniTitle" :toggle-id="item.toggleId" :caret-icon="true" :route="{ popup: 'false', to: item.route }" @onClick="toggle" :active="currentRoute.includes(item.route)">
           <b-collapse tag="ul" class="sub-nav" :id="item.toggleId" accordion="e-commerce" :visible="currentRoute.includes(item.route)">
             <side-menu v-for="(subItem, subIndex) in item.children" :key="subIndex" isTag="router-link" :title="subItem.title" :icon="subItem.icon" :icon-size="subItem.iconSize" icon-type="solid" :miniTitle="subItem.miniTitle" :route="{ to: subItem.route }" />
           </b-collapse>
@@ -64,22 +64,20 @@ function transformMenuItem(backendItem) {
     route: backendItem.route,
     popup: backendItem.popup || 'false',
     caretIcon: backendItem.children ? true : false
-  };
+  }
 
   // Recursively transform children if they exist
   if (backendItem.children && Array.isArray(backendItem.children)) {
-    transformed.children = backendItem.children.map((child) => transformMenuItem(child));
+    transformed.children = backendItem.children.map((child) => transformMenuItem(child))
   }
 
-  return transformed;
+  return transformed
 }
-
 
 onMounted(() => {
   console.log('Fetching menu items from backend...', rawMenus.value)
   menuItems.value = rawMenus.value.map((item) => transformMenuItem(item))
   // console.log('Transformed menu items:', menuItems.value)
-  console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2));
-
+  console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2))
 })
 </script>
