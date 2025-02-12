@@ -61,18 +61,18 @@ class ConfigWrapper
             'loginUrl' => $_SERVER['FRONTEND_BASE_URL'],
 
             'menus' => [
-                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'home',   'roles' => ['user', 'secretary']],
+                ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'home',   'roles' => ['user', 'secretary', 'registrar']],
                 ['title' => 'Dashboard', 'icon' => 'home', 'route' => 'admin', 'roles' => ['su']],
-                ['title' => 'Appointments', 'icon' => 'table', 'route' => 'appointments', 'roles' => ['user', 'secretary']],
-                ['title' => 'Availability', 'icon' => 'calendar', 'route' => 'availability', 'roles' => ['user']],
+                ['title' => 'Meetings', 'icon' => 'table', 'route' => 'appointments', 'roles' => ['user', 'secretary', 'registrar']],
+                ['title' => 'Availability', 'icon' => 'calendar', 'route' => 'availability', 'roles' => ['user', 'registrar']],
                 [
                     'title' => 'Spaces',
                     'icon' => 'building',
                     'route' => 'spaces',
                     'roles' => ['registrar'],
                     'children' => [
-                        ['title' => 'Space Requests', 'icon' => 'message', 'route' => 'meetings-approval',  'roles' => ['registrar']],
-                        ['title' => 'All Spaces', 'icon' => 'building', 'route' => 'venue-management', 'roles' => ['registrar']]
+                        ['title' => 'Space Requests', 'route' => 'meetings-approval',  'roles' => ['registrar']],
+                        ['title' => 'All Spaces', 'route' => 'venue-management', 'roles' => ['registrar']]
                     ]
                 ],
                 [
@@ -81,8 +81,8 @@ class ConfigWrapper
                     'route' => 'all-events',
                     'roles' => ['registrar'],
                     'children' => [
-                        ['title' => 'Calendar', 'icon' => 'calendar', 'route' => 'eventscalendar', 'roles' => ['registrar']],
-                        ['title' => 'All Events', 'icon' => 'calendar', 'route' => 'all-events', 'roles' => ['registrar']]
+                        ['title' => 'Calendar', 'route' => 'eventscalendar', 'roles' => ['registrar']],
+                        ['title' => 'All Events', 'route' => 'all-events', 'roles' => ['registrar']]
                     ]
                 ],
                 [
@@ -91,12 +91,12 @@ class ConfigWrapper
                     'route' => 'iam',
                     'roles' => ['su'],
                     'children' => [
-                        ['title' => 'Users', 'icon' => 'users', 'route' => 'default.users', 'roles' => ['su']],
-                        ['title' => 'Roles', 'icon' => 'shield', 'route' => 'roles', 'roles' => ['su']],
-                        ['title' => 'Permissions', 'icon' => 'lock', 'route' => 'permissions','roles' => ['su']]
+                        ['title' => 'Users', 'route' => 'default.users', 'roles' => ['su']],
+                        ['title' => 'Roles', 'route' => 'roles', 'roles' => ['su']],
+                        ['title' => 'Permissions', 'route' => 'permissions', 'roles' => ['su']]
                     ]
                 ],
-                ['title' => 'Settings', 'icon' => 'gear','route' => 'settings', 'roles' => ['su']]
+                ['title' => 'Settings', 'icon' => 'gear', 'route' => 'settings', 'roles' => ['su']]
             ],
 
             'africasTalkingApi' => $_SERVER['AT_API_KEY'],
