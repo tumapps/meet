@@ -24,7 +24,7 @@ const props = defineProps({
 })
 
 // Refs
-const searchQuery = ref('')
+const searchQuery = ref(null)
 const searchResults = ref([])
 const attendees = ref([]) // Holds all attendees (from backend and added via search)
 const currentRemovalIndex = ref(null) // Tracks the index of the attendee being removed
@@ -75,10 +75,12 @@ watch(
 // watch searchQuery and call handleSearch
 watch(searchQuery, (newSearchQuery) => {
   console.log('searchQuery:', newSearchQuery)
+  console.log('tyoeof:', typeof newSearchQuery)
   console.log('searchResults:', searchResults.value)
-  if (newSearchQuery === null) {
+  if (!newSearchQuery) {
     searchResults.value = []
-    console.log('searchResults:', searchResults.value)
+    console.log('searchResults indde:', searchResults.value)
+    return // Stop execution to prevent unnecessary `handleSearch()`
   }
   handleSearch()
 })
@@ -236,7 +238,7 @@ watch(
         </b-form-group>
 
         <!-- Search Results -->
-        <ul v-if="searchResults.length" class="list-group position-relative" role="listbox">
+        <ul v-if="searchResults.length > 0" class="list-group position-relative" role="listbox">
           <li v-for="result in searchResults" :key="result.id" class="list-group-item list-group-item-action" @click="addAttendeeToTable(result)">
             {{ result.username }}
           </li>
