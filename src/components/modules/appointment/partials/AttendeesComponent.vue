@@ -73,7 +73,13 @@ watch(
   { immediate: true }
 )
 // watch searchQuery and call handleSearch
-watch(searchQuery, () => {
+watch(searchQuery, (newSearchQuery) => {
+  console.log('searchQuery:', newSearchQuery)
+  console.log('searchResults:', searchResults.value)
+  if (newSearchQuery === null) {
+    searchResults.value = []
+    console.log('searchResults:', searchResults.value)
+  }
   handleSearch()
 })
 

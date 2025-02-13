@@ -1027,7 +1027,7 @@ onUnmounted(() => {
         </b-col>
       </b-row>
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover table-sm">
           <thead>
             <tr>
               <th @click="sortTable('start_time')">
@@ -1361,10 +1361,7 @@ onUnmounted(() => {
   </b-modal>
 </template>
 <style scoped>
-.table tbody tr td {
-  /* background-color: rgb(96, 96, 177) !important; */
-  padding: 8px !important;
-}
+
 
 .error {
   color: red;

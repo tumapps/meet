@@ -225,7 +225,7 @@ onMounted(() => {
       </b-row>
       <!-- Table Data -->
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover table-sm">
           <thead>
             <tr>
               <!-- <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th> -->

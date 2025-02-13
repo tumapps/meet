@@ -308,7 +308,7 @@ const UpdateUser = async () => {
       </b-row>
       <div class="table-responsive">
         <!-- Table Section -->
-        <table class="table table-hover">
+        <table class="table table-hover table-sm">
           <thead>
             <tr>
               <th @click="sortTable('fullname')">FirstName <i class="fas fa-sort"></i></th>
@@ -555,7 +555,11 @@ const UpdateUser = async () => {
 
   <!-- Add User -->
 </template>
-<style>
+<style scoped>
+.table tbody tr td {
+  padding: 0px 8px !important; /* 2px top & bottom, 6px left & right */
+}
+
 /* Adjust the dropdown to fit items without scrolling */
 .custom-dropdown-menu {
   max-height: none;

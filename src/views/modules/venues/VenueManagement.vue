@@ -439,7 +439,7 @@ onMounted(async () => {
       </b-row>
       <!-- Table Data -->
       <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover table-sm">
           <thead>
             <tr>
               <th @click="sortTable('description')">Name <i class="fas fa-sort"></i></th>
@@ -458,9 +458,9 @@ onMounted(async () => {
                 <td>{{ item.closing_time }}</td>
                 <td>{{ item.capacity }}</td>
                 <td>
-                  <button :class="['btn', item.is_locked ? 'btn-danger' : 'btn-success']" @click="toggleLock(item.id)">
+                  <span :class="item.is_locked ? 'badge bg-success' : 'badge bg-warning'" @click="toggleLock(item.id)">
                     {{ item.is_locked ? 'Locked' : 'Unlocked' }}
-                  </button>
+                  </span>
                 </td>
                 <td>
                   <!-- //info button -->
