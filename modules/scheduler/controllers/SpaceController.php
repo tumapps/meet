@@ -98,6 +98,8 @@ class SpaceController extends \helpers\ApiController
         }
     }
 
+ 
+
     public function actionUpdate($id)
     {
         // Yii::$app->user->can('registrar');
@@ -105,22 +107,26 @@ class SpaceController extends \helpers\ApiController
         $model = $this->findModel($id);
 
         $roleFlags = $this->getRoleFlags(Yii::$app->user->id);
+        $currentUserId = Yii::$app->user->id;
 
         if ($roleFlags['isUser']) {
-            if ($model->id !== Yii::$app->user->identity->user_id || $model->space_type !== Space::SPACE_TYPE_UNMANAGED) {
+            if ($model->id !== $currentUserId || $model->space_type !== Space::SPACE_TYPE_UNMANAGED) {
                 return $this->errorResponse(['message' => ['You can only update your own unmanaged spaces']]);
             }
         } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
-            if ($model->space_type !== Space::SPACE_TYPE_MANAGED) {
-                return $this->errorResponse(['message' => ['Only managed spaces can be updated by registrar or admin']]);
+            if (!($model->space_type === Space::SPACE_TYPE_MANAGED ||
+                ($model->space_type === Space::SPACE_TYPE_UNMANAGED && $model->id === $currentUserId))) {
+                return $this->errorResponse(['message' => ['You can only update managed spaces or your own unmanaged spaces']]);
             }
         }
 
         if ($model->load($dataRequest) && $model->save()) {
             return $this->payloadResponse($this->findModel($id), ['statusCode' => 202, 'message' => 'Space updated successfully']);
         }
+
         return $this->errorResponse($model->getErrors());
     }
+
 
     public function actionDelete($id)
     {
