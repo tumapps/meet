@@ -1155,17 +1155,18 @@ onUnmounted(() => {
 
   <b-modal ref="myModal" hide-footer size="xl" @hide="handleModalClose">
     <template #title>
-      <div class="custom-modal-title">
-        <!-- <span class="contact-name">{{ appointmentDetails.contact_name }}</span> -->
-        <span class="subject">Subject: {{ truncatedSubject }}</span>
-        <span class="date"> Date: {{ appointmentDetails.appointment_date }}</span>
-        <span class="time"> Time: {{ appointmentDetails.start_time }} to {{ appointmentDetails.end_time }}</span>
-        <span class="status"
-          >Status:
-          <b-badge :variant="recordStatus.theme" class="me-3">
-            {{ recordStatus.label }}
-          </b-badge>
-        </span>
+      <div class="container-fluid" style="width: 95%; margin: 0 auto">
+        <div class="row align-items-center">
+          <div class="mb-3 col-lg-4 col-md-6 col-sm-6"><span class="fw-bold">Subject:</span> {{ truncatedSubject }}</div>
+          <div class="mb-3 col-lg-3 col-md-6 col-sm-6"><span class="fw-bold">Date:</span> {{ appointmentDetails.appointment_date }}</div>
+          <div class="mb-3 col-lg-3 col-md-6 col-sm-6"><span class="fw-bold">Time:</span> {{ appointmentDetails.start_time }} to {{ appointmentDetails.end_time }}</div>
+          <div class="mb-3 col-lg-2 col-md-6 col-sm-6">
+            <span class="fw-bold">Status:</span>
+            <b-badge :variant="recordStatus.theme" class="me-3">
+              {{ recordStatus.label }}
+            </b-badge>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -1361,10 +1362,11 @@ onUnmounted(() => {
   </b-modal>
 </template>
 <style scoped>
-
-
 .error {
   color: red;
+}
+.modal-title {
+  width: 100% !important;
 }
 
 .subject-column {
@@ -1374,29 +1376,6 @@ onUnmounted(() => {
   text-overflow: ellipsis; /* Show ellipses for overflowed text */
 }
 
-.custom-modal-title {
-  display: flex;
-  align-items: center; /* Vertically aligns items */
-  justify-content: flex-start; /* Ensures items are aligned to the start */
-  gap: 4rem; /* Adds spacing between each item */
-  width: 100%; /* Makes the title span the full width */
-  padding: 0.5rem; /* Adds some padding for better appearance */
-}
-
-.custom-modal-title .status {
-  margin-left: auto; /* Pushes the status badge to the far right */
-}
-
-.custom-modal-title span {
-  flex-shrink: 0; /* Prevents items from shrinking if the content overflows */
-}
-
-.custom-modal-title .contact-name,
-.custom-modal-title .subject,
-.custom-modal-title .date,
-.custom-modal-title .time {
-  color: #333; /* Custom text color */
-}
 .file-input-container {
   display: flex;
   align-items: center;
