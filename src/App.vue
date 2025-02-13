@@ -94,7 +94,7 @@ onMounted(() => {
 <style lang="scss">
 .table tbody tr td {
   /* background-color: rgb(96, 96, 177) !important; */
-  padding: 8px !important;
+  padding: 6px !important;
 }
 @import '@/assets/scss/hope-ui.scss';
 @import '@/assets/scss/pro.scss';
