@@ -72,10 +72,10 @@ function handleDateClick(info) {
     selectedDate.value = clickedDate
     console.log('Selected date:', selectedDate.value)
     //push to booking
-    if (props.dashType === 'user') {
-      router.push({ name: 'booking', query: { date: selectedDate.value } })
-    } else {
+    if (props.dashType === 'Registrar') {
       router.push({ name: 'all-events' })
+    } else {
+      router.push({ name: 'booking', query: { date: selectedDate.value } })
     }
     // console.log(typeof(selectedDate.value));
     //pass the selected date to the modal
