@@ -56,7 +56,7 @@ const menuItems = ref([])
 function transformMenuItem(backendItem) {
   const transformed = {
     // Only assign 'router-link' if there's a route and it's not a parent with children
-    isTag: backendItem.route && !backendItem.children ? 'router-link' : undefined,
+    isTag: backendItem.route && !backendItem.children ? 'router-link' : 'parent',
     title: backendItem.title,
     icon: backendItem.icon,
     miniTitle: backendItem.miniTitle || '',

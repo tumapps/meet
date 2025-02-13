@@ -1,6 +1,6 @@
 <template>
   <li :class="navItemClass" v-if="isTag !== 'router-link'">
-    <a ref="elem" :class="navLinkClass" aria-current="page" :href="createRoute(route.to)" :to="route" @click.prevent="onClickNav" :aria-expanded="collapseActive">
+    <a ref="elem" :class="navLinkClass" class="parentnav" aria-current="page" :href="createRoute(route.to)" :to="route" @click.prevent="onClickNav" :aria-expanded="collapseActive">
       <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
         <font-awesome-icon :icon="['fas', icon]" />
       </i>
@@ -21,8 +21,7 @@
   </li>
   <router-link :to="{ name: route.to }" v-else v-slot="{ navigate, isExactActive }">
     <li :class="navItemClass + ' ' + (isExactActive ? 'active' : '')">
-      <a ref="elem" :class="navLinkClass + ' ' + (isExactActive && isChild === 'false' ? 'mychild' : isExactActive && isChild !== 'true' ? 'active' : '')"
-      aria-current="page" @click="navigate">
+      <a ref="elem" :class="navLinkClass + ' ' + (isExactActive && isChild === 'false' ? 'mychild' : isExactActive && isChild !== 'true' ? 'active' : '')" aria-current="page" @click="navigate">
         <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
           <font-awesome-icon :icon="['fas', icon]" />
         </i>
@@ -139,15 +138,24 @@ watch(
   { deep: true }
 )
 
-watch(() => props,isChild, (newVal) => {
-  if (newVal) {
-    navLinkClass.value.push('mychild')
+watch(
+  () => props,
+  isChild,
+  (newVal) => {
+    if (newVal) {
+      navLinkClass.value.push('mychild')
+    }
   }
-})
+)
 </script>
 <style scoped>
 .mychild {
   color: #d89837 !important;
   font-weight: 800 !important;
+}
+
+.parentnav {
+  background-color: #097b3e !important;
+  color: #fff !important;
 }
 </style>
