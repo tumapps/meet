@@ -71,7 +71,7 @@ const flatPickrConfig = {
 
 const today = ref(new Date().toLocaleDateString())
 // console.log(today.value)
-const selectedUser_id = ref(null) // To store the corresponding user_id
+// const selectedUser_id = ref(null) // To store the corresponding user_id
 const selectedSpaceName = ref(null) // To store the corresponding space name
 
 //get user id from session storage
@@ -297,7 +297,7 @@ const getAppointmentType = async () => {
 }
 
 const UsersOptions = ref([])
-const selectedUsername = ref('') // To hold the selected username
+const selectedUserId = ref('') // To hold the selected username
 
 const getusers_booked = async () => {
   try {
@@ -345,12 +345,33 @@ watch(selectedSpaceName, (newSpaceName) => {
 })
 
 // Watch for changes in the selected username to update selectedUser_id
-watch(selectedUsername, (newUsername) => {
-  console.log('newUsername:', newUsername)
+const user_searchQuery = ref(null)
+// watch user_search query and filter UsersOptions and reasign to UsersOptions
+//duplicate usersOptions
+const UsersOptionsCopy = ref([])
+UsersOptionsCopy.value = UsersOptions.value
+watch(user_searchQuery, (newUserSearchQuery) => {
+  console.log('useroptions:', UsersOptions.value)
+  console.log('newUsername:', newUserSearchQuery)
+  if (!newUserSearchQuery) {
+    UsersOptionsCopy.value = []
+    return
+  }
+  UsersOptionsCopy.value = UsersOptions.value.filter((user) => user.username.toLowerCase().includes(newUserSearchQuery.toLowerCase()) || user.email.toLowerCase().includes(newUserSearchQuery.toLowerCase()) || user.fullname.toLowerCase().includes(newUserSearchQuery.toLowerCase()))
+  console.log('UsersOptionsCopy:', UsersOptionsCopy.value)
+})
 
-  const selectedUser = UsersOptions.value.find((user) => user.username === newUsername)
-  selectedUser_id.value = selectedUser ? selectedUser.id : null
-  userId.value = newUsername || authStore.getUserId()
+const selectedUsername = ref(null)
+
+const handleUserSelection = (id) => {
+  selectedUsername.value = UsersOptionsCopy.value.find((user) => user.id === id).fullname
+  selectedUserId.value = id
+  UsersOptionsCopy.value = [] // Clear the list after selection
+}
+
+watch(selectedUserId, (newUserId) => {
+  console.log('newUsername:', newUserId)
+  userId.value = newUserId || authStore.getUserId()
   appointmentData.value.user_id = userId.value
 
   if (appointmentData.value.appointment_date) {
@@ -400,14 +421,25 @@ onMounted(() => {
             <b-row class="align-items-center form-group">
               <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="ChairPerson:" label-for="input-1">
-                  <select v-model="selectedUsername" name="service" class="form-select" id="receipent">
-                    <!-- Show this option if UsersOptions is null or empty -->
-                    <option v-if="!UsersOptions || UsersOptions.length === 0" disabled>No users available</option>
-                    <!-- Render users if available -->
-                    <option v-else v-for="user in UsersOptions" :key="user.username" :value="user.id">
-                      {{ user.username }}
-                    </option>
-                  </select>
+                  <div class="position-relative d-flex flex-column">
+                  <!-- //show if selectedUserid  is null or empty -->
+                  <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2"></b-form-input>
+
+                  <!-- show when a user is selected -->
+                   <!-- not editable -->
+
+                  <b-form-input v-if="selectedUserId" v-model="selectedUsername" placeholder="Search User..." class="mb-2" readonly></b-form-input>
+                  <!-- remove selected user by clearing selected user id -->
+                  <span v-if="selectedUserId" class="xuser" @click=";(selectedUsername = ''), (selectedUserId = ''), (userId = '')">
+                    <i class="fas fa-times"></i>
+                  </span>
+                  <!-- Show this option if no results  -->
+                  <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
+                  <!-- show results and on clicking item assign user id to selected user id -->
+                  <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
+                    <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
+                  </ul>
+                  </div>
                 </b-form-group>
                 <div v-if="errors.user_id" class="error" aria-live="polite">
                   {{ errors.user_id }}
@@ -420,7 +452,7 @@ onMounted(() => {
                   <div class="position-relative d-flex flex-column">
                     <!-- Search Input -->
                     <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2"></b-form-input>
-                    <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2"></b-form-input>
+                    <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input>
                     <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
                     </span>
@@ -442,7 +474,6 @@ onMounted(() => {
                   {{ errors.space_id }}
                 </div>
               </b-col>
-         
 
               <!-- Date Field -->
               <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
@@ -453,7 +484,7 @@ onMounted(() => {
               </b-col>
             </b-row>
             <b-row class="align-items-center form-group">
-              <b-col  cols="12" lg="6"  class="mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col cols="12" lg="6" class="mb-sm-3 mb-md-3 mb-lg-0 mb-4">
                 <b-form-group label="Meeting Type:" label-for="input-1">
                   <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
                     <!-- Default placeholder option -->
@@ -479,7 +510,7 @@ onMounted(() => {
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row class="g-3 align-items-center form-group mt-3 p-2">
+            <b-row class="g-3 align-items-center form-group">
               <b-row>
                 <b-col md="12" lg="12" sm="12">
                   <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
@@ -618,7 +649,7 @@ onMounted(() => {
 
 .clear-btn {
   position: absolute;
-  right: 10px;
+  right: 20px;
   top: -50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -629,5 +660,18 @@ onMounted(() => {
 }
 .clear-btn:hover {
   color: #000;
+}
+
+.xuser{
+  cursor: pointer;
+  color: #118820;
+  font-size: 12px;
+  position: absolute;
+  top: -50%;
+  right: 20px;
+  transform: translateY(-50%);
+  /* Adjust icon size */
+ 
+  /* Space between input and icon */
 }
 </style>
