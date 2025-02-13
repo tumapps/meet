@@ -422,23 +422,23 @@ onMounted(() => {
               <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="ChairPerson:" label-for="input-1">
                   <div class="position-relative d-flex flex-column">
-                  <!-- //show if selectedUserid  is null or empty -->
-                  <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2"></b-form-input>
+                    <!-- //show if selectedUserid  is null or empty -->
+                    <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2"></b-form-input>
 
-                  <!-- show when a user is selected -->
-                   <!-- not editable -->
+                    <!-- show when a user is selected -->
+                    <!-- not editable -->
 
-                  <b-form-input v-if="selectedUserId" v-model="selectedUsername" placeholder="Search User..." class="mb-2" readonly></b-form-input>
-                  <!-- remove selected user by clearing selected user id -->
-                  <span v-if="selectedUserId" class="xuser" @click=";(selectedUsername = ''), (selectedUserId = ''), (userId = '')">
-                    <i class="fas fa-times"></i>
-                  </span>
-                  <!-- Show this option if no results  -->
-                  <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
-                  <!-- show results and on clicking item assign user id to selected user id -->
-                  <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
-                    <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
-                  </ul>
+                    <b-form-input v-if="selectedUserId" v-model="selectedUsername" placeholder="Search User..." class="mb-2" readonly></b-form-input>
+                    <!-- remove selected user by clearing selected user id -->
+                    <span v-if="selectedUserId" class="xuser" @click=";(selectedUsername = ''), (selectedUserId = ''), (userId = '')">
+                      <i class="fas fa-times"></i>
+                    </span>
+                    <!-- Show this option if no results  -->
+                    <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
+                    <!-- show results and on clicking item assign user id to selected user id -->
+                    <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
+                      <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
+                    </ul>
                   </div>
                 </b-form-group>
                 <div v-if="errors.user_id" class="error" aria-live="polite">
@@ -662,7 +662,7 @@ onMounted(() => {
   color: #000;
 }
 
-.xuser{
+.xuser {
   cursor: pointer;
   color: #118820;
   font-size: 12px;
@@ -671,7 +671,7 @@ onMounted(() => {
   right: 20px;
   transform: translateY(-50%);
   /* Adjust icon size */
- 
+
   /* Space between input and icon */
 }
 </style>

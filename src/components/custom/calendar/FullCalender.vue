@@ -22,7 +22,7 @@ const props = defineProps({
 
 console.log('dashType:', props.dashType)
 
-const { proxy, emit } = getCurrentInstance()
+const { proxy } = getCurrentInstance()
 const preferences = usePreferencesStore()
 const authStore = useAuthStore()
 const axiosInstance = AxiosInstance()
@@ -37,18 +37,18 @@ const role = ref('')
 role.value = authStore.getRole()
 // const userId = ref('');
 
-const appointmentModal = ref(null)
+// const appointmentModal = ref(null)
 
 //modal
-const showModal = () => {
-  // appointmentModal.value.$refs.appointmentModal.show()
-  if (props.dashType === 'user') {
-    appointmentModal.value.$refs.appointmentModal.show()
-  } else {
-    //emit a create event
-    emit('createEvent')
-  }
-}
+// const showModal = () => {
+//   // appointmentModal.value.$refs.appointmentModal.show()
+//   if (props.dashType === 'user') {
+//     appointmentModal.value.$refs.appointmentModal.show()
+//   } else {
+//     //emit a create event
+//     emit('createEvent')
+//   }
+// }
 const selectedDate = ref('')
 
 // Function to handle date click
@@ -72,11 +72,13 @@ function handleDateClick(info) {
     selectedDate.value = clickedDate
     console.log('Selected date:', selectedDate.value)
     //push to booking
-    router.push({ name: 'booking' })
+    if (props.dashType === 'user') {
+      router.push({ name: 'booking', query: { date: selectedDate.value } })
+    } else {
+      router.push({ name: 'all-events' })
+    }
     // console.log(typeof(selectedDate.value));
     //pass the selected date to the modal
-
-    showModal()
   }
 }
 
