@@ -1,11 +1,17 @@
 #!/bin/sh
 
-# Create logs directory if it doesn't exist
-mkdir -p /var/www/html/storage/logs
-
-# Ensure the RabbitMQ log file exists
-touch /var/www/html/storage/logs/rabbitmq.log
-chmod -R 777 /var/www/html/storage/logs
+# Ensure all necessary services are up
+echo "Starting Supervisor..."
 
 # Start Supervisor
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+# /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf &
+
+# Wait a bit for Supervisor to start
+sleep 5
+
+# Start Yii Queue Listener
+echo "Starting Yii queue listener..."
+php yii queue/listen
+
+# Keep container running
+exec "$@"
