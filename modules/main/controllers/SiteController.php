@@ -33,6 +33,7 @@ class SiteController extends \helpers\WebController
     }
     public function actionIndex()
     {
+        
         //Yii::$app->session->setFlash('success', 'Link created successfully');
         return $this->render('index');
     }
