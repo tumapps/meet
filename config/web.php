@@ -116,7 +116,20 @@ $config = [
                 'encryption' => $_SERVER['ENCRYPTION'],
             ],
             // 'transport' => function () {
-            //     return \auth\hooks\MailConfig::getMailConfig();
+            //     $settings = \auth\hooks\MailConfig::getMailConfig();
+
+            //     if (!$settings) {
+            //         throw new \yii\base\InvalidConfigException('Mail transport configuration is missing.');
+            //     }
+
+            //     return [
+            //         'scheme' => $settings['scheme'],
+            //         'host' => $settings['host'],
+            //         'username' => $settings['username'],
+            //         'password' => $settings['password'],
+            //         'port' => $settings['port'],
+            //         'encryption' => $settings['encryption'],
+            //     ];
             // },
         ],
         'log' => [
