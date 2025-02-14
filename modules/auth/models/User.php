@@ -5,6 +5,7 @@ namespace auth\models;
 use Yii;
 use helpers\traits\UserJWT;
 use scheduler\models\Appointments;
+use scheduler\models\ManagedUsers;
 use yii\web\User as WebUser;
 
 class User extends BaseModel implements \yii\web\IdentityInterface
@@ -147,4 +148,9 @@ class User extends BaseModel implements \yii\web\IdentityInterface
     {
         return $this->hasMany(Appointments::class, ['user_id' => 'user_id']);
     }
+
+    public function getManagedBy()
+{
+    return $this->hasMany(ManagedUsers::class, ['user_id' => 'user_id']);
+}
 }
