@@ -64,7 +64,10 @@ class Settings extends BaseModel
         return [
             [['user_id', 'slot_duration', 'booking_window'], 'default', 'value' => null],
             [['user_id', 'slot_duration', 'booking_window', 'advanced_booking'], 'integer'],
-            [['start_time', 'end_time', 'user_id'], 'required'],
+            [['booking_window'], 'integer', 'min' => 1, 'max' => 12],
+            [['slot_duration'], 'integer', 'min' => 20],
+            [['advanced_booking'], 'integer', 'min' => 15],
+            [['start_time', 'end_time', 'user_id', 'slot_duration', 'booking_window', 'advanced_booking'], 'required'],
             [['start_time', 'end_time'], 'safe'],
             [['start_time', 'end_time'], 'validateTimeRange'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
