@@ -103,7 +103,7 @@ onMounted(() => {
   padding: 0.5px 8px 0 22px !important;
 }
 
-.modal-title{
+.modal-title {
   min-width: 100% !important;
 }
 </style>

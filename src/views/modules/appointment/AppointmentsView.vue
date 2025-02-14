@@ -1298,7 +1298,7 @@ onUnmounted(() => {
                 <b-col lg="12" md="12" class="mb-3">
                   <AttendeesComponent :attendees="attendees" :meetingId="meetingId" @newAttendee="updateAttendees" :submitSignal="submitSignal" />
                 </b-col>
-                <b-col v-if="appointmentDetails.rejection_reason !== '' || appointmentDetails.rejection_reason !== null" lg="12" md="12" class="mb-3">
+                <b-col v-if="appointmentDetails.rejection_reason || appointmentDetails.rejection_reason" lg="12" md="12" class="mb-3">
                   <!-- //label for the rejection reason or the cancellation reason depending on the status of the appointment -->
                   <label for="description" class="form-label">Reason for {{ recordStatus.label === 'CANCELLED' ? 'Cancellation' : 'Rejection' }} </label>
                   <b-form-textarea v-model="appointmentDetails.rejection_reason" id="input-107" rows="3" disabled></b-form-textarea>
