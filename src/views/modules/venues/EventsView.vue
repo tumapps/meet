@@ -481,7 +481,7 @@ onMounted(async () => {
               </tr>
             </template>
             <tr v-else>
-              <td colspan="5" class="text-center">No data to display</td>
+              <td class="text-center">No data to display</td>
             </tr>
           </tbody>
         </table>
@@ -607,6 +607,14 @@ onMounted(async () => {
           <flat-pickr v-model="eventDetails.end_time" class="form-control" :config="config2" id="endTimePicker" />
         </div>
         <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
+      </b-col>
+      <!-- //description textbox   -->
+      <b-col md="12">
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea v-model="eventDetails.description" class="form-control" id="description" rows="5" />
+        </div>
+        <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
       </b-col>
     </b-row>
     <div class="d-flex justify-content-center">

@@ -230,7 +230,7 @@ const saveSettings = async () => {
 
             <b-col md="12">
               <b-form-group label="Slot Duration (in minutes)" label-for="slot-duration">
-                <b-form-input id="slot-duration" type="number" v-model="settings.slot_duration" min="15" max="60"></b-form-input>
+                <b-form-input id="slot-duration" type="number" v-model="settings.slot_duration"></b-form-input>
                 <div v-if="errors.slot_duration" class="error" aria-live="polite">{{ errors.slot_duration }}</div>
               </b-form-group>
             </b-col>
@@ -242,7 +242,7 @@ const saveSettings = async () => {
           <b-row>
             <b-col md="12">
               <b-form-group label="Buffer Time (in minutes)" label-for="buffer-time">
-                <b-form-input id="buffer-time" type="number" v-model="settings.advanced_booking" min="10"></b-form-input>
+                <b-form-input id="buffer-time" type="number" v-model="settings.advanced_booking"></b-form-input>
                 <div v-if="errors.advanced_booking" class="error" aria-live="polite">{{ errors.advanced_booking }}</div>
               </b-form-group>
             </b-col>

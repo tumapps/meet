@@ -141,7 +141,7 @@ const openAddUserModal = () => {
               </tr>
             </template>
             <tr v-else>
-              <td colspan="5" class="text-center">No data to display</td>
+              <td class="text-center">No data to display</td>
             </tr>
           </tbody>
         </table>
