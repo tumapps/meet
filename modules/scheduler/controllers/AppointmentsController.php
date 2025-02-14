@@ -54,14 +54,12 @@ class AppointmentsController extends \helpers\ApiController
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
 
 
-        if ($isSecretary ||  $isSuperAdmin && isset($search['user_id']) && !empty($search['user_id'])) {
-            $dataProvider = $searchModel->search($search);
-        } else {
-            $dataProvider = $searchModel->search($search);
-            if (!$isSuperAdmin) {
-                $dataProvider->query->andWhere(['user_id' => $currentUserId]);
-            }
+        $dataProvider = $searchModel->search($search);
+
+        if (!($isSecretary || $isSuperAdmin)) {
+            $dataProvider->query->andWhere(['user_id' => $currentUserId]);
         }
+        
 
         $appointments = $dataProvider->getModels();
 
