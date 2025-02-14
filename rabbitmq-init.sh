@@ -10,7 +10,7 @@ sleep 10
 rabbitmqctl add_vhost dev
 
 # Set permissions for the virtual host
-rabbitmqctl set_permissions -p dev guest ".*" ".*" ".*"
+rabbitmqctl set_permissions -p dev root ".*" ".*" ".*"
 
 # Bring RabbitMQ to the foreground
 wait
