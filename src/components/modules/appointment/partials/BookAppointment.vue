@@ -436,7 +436,7 @@ onMounted(() => {
                     <!-- Show this option if no results  -->
                     <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
                     <!-- show results and on clicking item assign user id to selected user id -->
-                    <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
+                    <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="mt-5 userlistul list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(UsersOptionsCopy = []), (user_searchQuery = '')">
                       <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
                     </ul>
                   </div>
@@ -457,7 +457,7 @@ onMounted(() => {
                       <i class="fas fa-times"></i>
                     </span>
                     <!-- Search Results -->
-                    <ul v-if="filteredSpaces.length && appointmentData.space_id === null" class="mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto">
+                    <ul v-if="filteredSpaces.length && appointmentData.space_id === null" class="userlistul mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(filteredSpaces = []), (searchQuery = '')">
                       <li v-for="space in filteredSpaces" :class="{ disabled: space.is_locked }" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">{{ space.name }}</li>
                     </ul>
                     <!-- No Results Message -->
@@ -465,10 +465,10 @@ onMounted(() => {
                   </div>
                 </b-form-group>
 
-                <!-- Clear Button -->
+                <!-- Clear Button
                 <span v-if="appointmentData.space_id" class="clear-btn" @click="appointmentData.space_id = ''">
                   <i class="fas fa-times"></i>
-                </span>
+                </span> -->
 
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
@@ -650,13 +650,11 @@ onMounted(() => {
 .clear-btn {
   position: absolute;
   right: 20px;
-  top: -50%;
+  top: 40%;
   transform: translateY(-50%);
   cursor: pointer;
   font-size: 1rem;
   color: #118820;
-  background: none;
-  border: none;
 }
 .clear-btn:hover {
   color: #000;
@@ -665,13 +663,18 @@ onMounted(() => {
 .xuser {
   cursor: pointer;
   color: #118820;
-  font-size: 12px;
+  font-size: 1rem;
   position: absolute;
-  top: -50%;
+  top: 40%;
   right: 20px;
   transform: translateY(-50%);
   /* Adjust icon size */
 
   /* Space between input and icon */
+}
+
+.userlistul {
+  z-index: 1000 !important;
+  /* //on mouse leave hide the list */
 }
 </style>
