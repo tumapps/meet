@@ -101,6 +101,6 @@ onMounted(() => {
 
 .table tbody tr td {
   /* background-color: rgb(96, 96, 177) !important; */
-  padding: 0 8px 0 12px !important;
+  padding: 0 8px 0 22px !important;
 }
 </style>
