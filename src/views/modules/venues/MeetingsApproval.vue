@@ -287,7 +287,7 @@ onMounted(() => {
       </b-row>
       <!-- Table Data -->
       <div class="table-responsive">
-        <table class="table table-hover table-sm">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th>Space</th>

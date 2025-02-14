@@ -136,9 +136,9 @@ const showRoleModal = (role) => {
 }
 
 // Format timestamp to a readable date
-function formatDate(timestamp) {
-  return new Date(timestamp * 1000).toLocaleString()
-}
+// function formatDate(timestamp) {
+//   return new Date(timestamp * 1000).toLocaleString()
+// }
 
 const sortedData = computed(() => {
   return [...tableData.value].sort((a, b) => {
@@ -260,15 +260,15 @@ onMounted(() => {
       </b-row>
       <!-- Table Data -->
       <div class="table-responsive">
-        <table class="table table-hover table-sm">
+        <table class="table table-hover ">
           <thead>
             <tr>
               <!-- <th @click="sortTable('description')">ID <i class="fas fa-sort"></i></th> -->
               <th @click="sortTable('start_date')">Role Name <i class="fas fa-sort"></i></th>
               <th>Description</th>
               <th>Data</th>
-              <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th>
-              <th>Updated At<i class="fas fa-sort"></i></th>
+              <!-- <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th> -->
+              <!-- <th>Updated At<i class="fas fa-sort"></i></th> -->
               <th>Actions</th>
             </tr>
           </thead>
@@ -279,8 +279,8 @@ onMounted(() => {
                 <td>{{ item.name }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.data }}</td>
-                <td>{{ formatDate(item.createdAt) }}</td>
-                <td>{{ formatDate(item.updatedAt) }}</td>
+                <!-- <td>{{ formatDate(item.createdAt) }}</td>
+                <td>{{ formatDate(item.updatedAt) }}</td> -->
                 <td>
                   <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="showRoleModal(item.name)">
                     <i class="fa-solid fa-shield" style="color: #076232"></i>

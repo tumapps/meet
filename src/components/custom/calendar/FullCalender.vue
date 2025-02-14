@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, getCurrentInstance, defineProps } from 'vue'
+import { ref, onMounted, watch, getCurrentInstance, defineProps, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -81,6 +81,8 @@ function handleDateClick(info) {
     //pass the selected date to the modal
   }
 }
+
+const Dashtype = computed(() => props.dashType)
 
 // Function to handle event click and open modal
 function handleEventClick(info) {
@@ -460,7 +462,7 @@ onMounted(async () => {
 </script>
 <template>
   <b-row>
-    <b-col lg="2" class="d-flex justify-content-lg-end mb-3 mb-5">
+    <b-col v-if="Dashtype !== 'Registrar'" lg="2" class="d-flex justify-content-lg-end mb-3 mb-5">
       <div v-if="role === 'su' || role === 'secretary'" class="w-100 w-lg-auto">
         <div class="dropdown w-100 w-lg-auto" style="float: right">
           <select v-model="selectedUser" name="service" class="form-select form-select-sm" id="addappointmenttype">

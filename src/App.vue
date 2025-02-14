@@ -92,7 +92,10 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-
+.table tbody tr td {
+  /* background-color: rgb(96, 96, 177) !important; */
+  padding: 0 !important;
+}
 @import '@/assets/scss/hope-ui.scss';
 @import '@/assets/scss/pro.scss';
 @import '@/assets/scss/custom.scss';

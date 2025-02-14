@@ -414,7 +414,7 @@ onMounted(async () => {
         </b-col>
       </b-row>
       <div class="table-responsive">
-        <table class="table table-hover table-sm">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th @click="sortTable('title')">

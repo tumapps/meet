@@ -308,7 +308,7 @@ const UpdateUser = async () => {
       </b-row>
       <div class="table-responsive">
         <!-- Table Section -->
-        <table class="table table-hover table-sm">
+        <table class="table table-hover specialTable">
           <thead>
             <tr>
               <th @click="sortTable('fullname')">FirstName <i class="fas fa-sort"></i></th>
@@ -555,18 +555,28 @@ const UpdateUser = async () => {
 
   <!-- Add User -->
 </template>
-<style scoped>
-.table tbody tr td {
-  padding: 0px 8px !important; /* 2px top & bottom, 6px left & right */
+<style>
+/* .specialTable tr td {
+  padding: 0 !important;
+  background-color: aqua !important;
+  margin: 0 !important;
 }
+.specialTable tbody template tr td {
+  padding: 0 !important;
+  background-color: rgb(231, 165, 23) !important;
+  margin: 0 !important;
+} */
 
-/* Adjust the dropdown to fit items without scrolling */
-.custom-dropdown-menu {
-  max-height: none;
-  /* Removes vertical scrolling constraint */
-  min-width: 150px;
-  /* Ensures adequate width for items with icons */
+.table tbody tr td {
+  padding: 0 !important;
 }
+/* Adjust the dropdown to fit items without scrolling */
+/* .custom-dropdown-menu { */
+  /* max-height: none; */
+  /* Removes vertical scrolling constraint */
+  /* min-width: 10px; */
+  /* Ensures adequate width for items with icons */
+/* } */
 
 /* Styling for icons with margin for spacing */
 .custom-dropdown-menu i {
@@ -575,9 +585,9 @@ const UpdateUser = async () => {
 }
 
 .circular-img {
-  border-radius: 50%; /* Make the image circular */
-  max-width: 60px; /* Adjust the size as needed */
-  max-height: 60px; /* Maintain proportions */
+  border-radius: 50% !important; /* Make the image circular */
+  max-width: 60px !important; /* Adjust the size as needed */
+  max-height: 60px !important; /* Maintain proportions */
   width: 100%; /* Ensure responsiveness */
   height: auto; /* Maintain aspect ratio */
   object-fit: contain; /* Ensure the image fills the circular frame */

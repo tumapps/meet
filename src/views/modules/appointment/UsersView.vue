@@ -122,7 +122,7 @@ const openAddUserModal = () => {
       </b-row>
       <div class="table-responsive">
         <!-- Table Section -->
-        <table class="table table-hover table-sm">
+        <table class="table table-hover">
           <thead>
             <tr>
               <th @click="sortTable('first_name')">FirstName <i class="fas fa-sort"></i></th>
