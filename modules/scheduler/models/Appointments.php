@@ -263,14 +263,16 @@ class Appointments extends BaseModel
 
     public function validateAdvanceBooking($attribute, $params)
     {
-        $isAdvancedBookingValid = TimeHelper::validateAdvanceBooking(
-            $this->user_id,
-            $this->start_time,
-            $this->appointment_date
-        );
+        if ($this->isNewRecord) {
+            $isAdvancedBookingValid = TimeHelper::validateAdvanceBooking(
+                $this->user_id,
+                $this->start_time,
+                $this->appointment_date
+            );
 
-        if (!$isAdvancedBookingValid) {
-            $this->addError($attribute, 'You cannot book an appointment this soon. Please choose a later time.');
+            if (!$isAdvancedBookingValid) {
+                $this->addError($attribute, 'You cannot book an appointment this soon. Please choose a later time.');
+            }
         }
     }
 
