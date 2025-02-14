@@ -13,6 +13,7 @@ use auth\models\User;
 use auth\models\searches\UserSearch;
 use auth\models\Profiles;
 use scheduler\models\AppointmentAttendees;
+use scheduler\models\ManagedUsers;
 use yii\base\InvalidArgumentException;
 
 class AuthController extends \helpers\ApiController
@@ -33,24 +34,32 @@ class AuthController extends \helpers\ApiController
 		$startTime = $queryParams['start_time'] ?? null;
 		$endTime = $queryParams['end_time'] ?? null;
 
+		$currentUserId = Yii::$app->user->id;
+		$currentUserRoles = array_keys($authManager->getRolesByUser($currentUserId));
+
+		$isSecretary = in_array('secretary', $currentUserRoles);
+
+
+		$managedUserIds = [];
+		if ($isSecretary) {
+			// Fetch only the users managed by the logged-in secretary
+			$managedUserIds = ManagedUsers::find()
+				->select('user_id')
+				->where(['secretary_id' => $currentUserId])
+				->column();
+		}
 
 		$filteredUsers = [];
 		foreach ($users as $user) {
-			$roles = array_keys($authManager->getRolesByUser($user->id));
+			$roles = array_keys($authManager->getRolesByUser($user->user_id));
 
 			if (in_array('su', $roles)) {
 				continue;
 			}
 
-			// $isAvailable = true;
-			// if ($type === 'attendees' && $appointmentDate && $startTime && $endTime) {
-			// 	$isAvailable = !AppointmentAttendees::isAttendeeUnavailable(
-			// 		$user->id,
-			// 		$appointmentDate,
-			// 		$startTime,
-			// 		$endTime
-			// 	);
-			// }
+			if ($isSecretary && !in_array($user->user_id, $managedUserIds)) {
+				continue;
+			}
 
 			if ($type === 'attendees' && $appointmentDate && $startTime && $endTime) {
 				$conflictExists = AppointmentAttendees::isAttendeeUnavailable($user->id, $appointmentDate, $startTime, $endTime);
@@ -61,7 +70,7 @@ class AuthController extends \helpers\ApiController
 			}
 
 			$filteredUsers[] = [
-				'id' => $user->id,
+				'id' => $user->user_id,
 				'username' => $user->username,
 				'status' => $user->status,
 				'last_activity' => $user->last_login_at,
