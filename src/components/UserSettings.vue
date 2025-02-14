@@ -94,7 +94,7 @@ const saveSettings = async () => {
     console.log('error', error)
     errors.value = error.response.data.errorPayload?.errors
     // const errorMessage = error.response.data.errorPayload.errors?.message
-// status code !== 422
+    // status code !== 422
     if (error.response.status !== 422) {
       proxy.$showAlert({
         title: 'Failed',

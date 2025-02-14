@@ -167,7 +167,7 @@ async function fetchAppointments() {
 
           return event
         })
-    }else{
+    } else {
       console.log('No data found')
       events.value = []
     }

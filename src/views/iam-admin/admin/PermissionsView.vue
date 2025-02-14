@@ -124,9 +124,9 @@ watch(searchQuery, () => {
 // }
 
 // Format timestamp to a readable date
-function formatDate(timestamp) {
-  return new Date(timestamp * 1000).toLocaleString()
-}
+// function formatDate(timestamp) {
+//   return new Date(timestamp * 1000).toLocaleString()
+// }
 
 const sortedData = computed(() => {
   return [...tableData.value].sort((a, b) => {
@@ -233,8 +233,8 @@ onMounted(() => {
               <th>Description</th>
               <!-- <th>Data</th> -->
               <!-- <th>RuleName</th> -->
-              <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th>
-              <th>Updated At<i class="fas fa-sort"></i></th>
+              <!-- <th @click="sortTable('end_date')">Created At<i class="fas fa-sort"></i></th>
+              <th>Updated At<i class="fas fa-sort"></i></th> -->
               <!-- <th>Actions</th> -->
             </tr>
           </thead>
@@ -247,8 +247,8 @@ onMounted(() => {
                 <!-- <td>{{ item.description }}</td> -->
 
                 <!-- <td>{{ item.ruleName }}</td> -->
-                <td>{{ formatDate(item.createdAt) }}</td>
-                <td>{{ formatDate(item.updatedAt) }}</td>
+                <!-- <td>{{ formatDate(item.createdAt) }}</td>
+                <td>{{ formatDate(item.updatedAt) }}</td> -->
                 <!-- <td>
                   <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.name)">
                     <i class="fas fa-edit" title="edit entry"></i>
