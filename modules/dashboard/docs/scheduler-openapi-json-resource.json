@@ -3084,6 +3084,440 @@
                 }
             }
         },
+        "/scheduler/managed-users": {
+            "get": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Lists all ManagedUsers models ",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_secretary_id",
+                        "in": "query",
+                        "description": "Secretary Id",
+                        "schema": {
+                            "type": "bigint"
+                        }
+                    },
+                    {
+                        "name": "_user_id",
+                        "in": "query",
+                        "description": "User Id",
+                        "schema": {
+                            "type": "bigint"
+                        }
+                    },
+                    {
+                        "name": "_is_deleted",
+                        "in": "query",
+                        "description": "Is Deleted",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/managed-users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/ManagedUsers"
+                                                    }
+                                                },
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/managed-users?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/managed-users?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/managed-users?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/managed-users?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/scheduler/managed-users?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/managed-users/{secretary_id}/{user_id}": {
+            "post": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Assign a user to the specified secretary id",
+                "parameters": [
+                    {
+                        "name": "secretary_id",
+                        "in": "path",
+                        "description": "Secretary Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "User Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/ManagedUsers"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "managed-users created succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "$ref": "#/components/schemas/ManagedUsers"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Removes or reassing a user from beig managed by the specified secretary id.",
+                "parameters": [
+                    {
+                        "name": "secretary_id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to reassing",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to reassign",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/managed-users/{id}": {
+            "get": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Displays a single ManagedUsers model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single ManagedUsers model.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "$ref": "#/components/schemas/ManagedUsers"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Updates an existing ManagedUsers model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to load and update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Finds the ManagedUsers model to be updated based on its primary key value",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManagedUsers"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/ManagedUsers"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "managed-users updated succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Restores a deleted ManagedUsers model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/scheduler/meeting-types": {
             "get": {
                 "tags": [
@@ -5527,6 +5961,41 @@
                 },
                 "type": "object"
             },
+            "ManagedUsers": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "secretary_id": {
+                        "title": "Secretary id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "user_id": {
+                        "title": "User id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
             "MeetingTypes": {
                 "properties": {
                     "id": {
@@ -5867,6 +6336,10 @@
         {
             "name": "Events",
             "description": "Available endpoints for Events model"
+        },
+        {
+            "name": "ManagedUsers",
+            "description": "Available endpoints for ManagedUsers model"
         },
         {
             "name": "MeetingTypes",
