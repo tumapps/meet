@@ -35,20 +35,6 @@ const today = new Date().toISOString().split('T')[0]
 //change the events owner
 const role = ref('')
 role.value = authStore.getRole()
-// const userId = ref('');
-
-// const appointmentModal = ref(null)
-
-//modal
-// const showModal = () => {
-//   // appointmentModal.value.$refs.appointmentModal.show()
-//   if (props.dashType === 'user') {
-//     appointmentModal.value.$refs.appointmentModal.show()
-//   } else {
-//     //emit a create event
-//     emit('createEvent')
-//   }
-// }
 const selectedDate = ref('')
 
 // Function to handle date click
@@ -107,80 +93,6 @@ const apiData = ref([])
 const isLoading = ref(false)
 const fetchError = ref(null)
 
-//update on this .. i stoppee dusing it since date coming form the backend changed format to yyyy-MM-dd
-
-// function parseCustomDate(dateString) {
-//   // Parse the new format "14 Dec 2024"
-//   return parse(dateString, 'dd MMM yyyy', new Date())
-// }
-
-// async function fetchAppointments() {
-//   isLoading.value = true
-//   fetchError.value = null
-//   try {
-//     const response = await axiosInstance.get('/v1/scheduler/appointments')
-
-//     apiData.value = response.data.dataPayload.data
-//     events.value = apiData.value
-//       .filter((item) => {
-//         // Ensure the event is ACTIVE and its date is today
-//         // const parsedDate = parse(item.appointment_date, 'yyyy-MM-dd', new Date())
-
-//         return item.recordStatus.label === 'ACTIVE'
-//       })
-//       .map((item) => {
-//         console.log('Item:', item)
-//         const parsedDate = parseCustomDate(item.appointment_date)
-//         const formattedDate = format(parsedDate, 'yyyy-MM-dd')
-//         let backgroundColor
-
-//         //this was used when i was displaying all events including cancelled now strictly showing active once
-//         // instead give diffrent colors to diffrent user id in secretary calendar view
-//         switch (item.recordStatus.label) {
-//           case 'ACTIVE':
-//             backgroundColor = '#86deb7'
-//             break
-//           case 'CANCELLED':
-//             backgroundColor = '#E05263'
-//             break
-//           case 'DELETED':
-//             backgroundColor = '#dc3545'
-//             break
-//           case 'PENDING':
-//             backgroundColor = '#b8e1ff'
-//             break
-//           case 'RESCHEDULE':
-//             backgroundColor = '#FFCAB1'
-//             break
-//           default:
-//             backgroundColor = '#FFB2E6'
-//         }
-//         return {
-//           title: item.subject,
-//           start: `${formattedDate}T${item.start_time}`,
-//           end: `${formattedDate}T${item.end_time}`,
-//           backgroundColor: item.recordStatus.themeColor || backgroundColor,
-//           display: 'block',
-//           borderColor: 'transparent',
-//           extendedProps: {
-//             start_time: item.start_time,
-//             end_time: item.end_time,
-//             description: item.description,
-//             contact_name: item.contact_name,
-//             status: item.recordStatus.label
-//           }
-
-//           console.log('tittle:', item.subject)
-
-//         }
-//       })
-//   } catch (error) {
-//     fetchError.value = 'Failed to load events. Please try again later.'
-//   } finally {
-//     isLoading.value = false
-//   }
-// }
-
 async function fetchAppointments() {
   isLoading.value = true
   fetchError.value = null
@@ -196,7 +108,7 @@ async function fetchAppointments() {
     const response = await axiosInstance.get('/v1/scheduler/appointments', { params })
 
     apiData.value = response.data.dataPayload.data
-    console.log('Raw API Data:', typeof apiData.value) // Debugging to check API response
+    console.log('Raw API Data:', apiData.value) // Debugging to check API response
     if (Array.isArray(apiData.value)) {
       events.value = apiData.value
         .filter((item) => {
@@ -255,6 +167,9 @@ async function fetchAppointments() {
 
           return event
         })
+    }else{
+      console.log('No data found')
+      events.value = []
     }
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
@@ -371,29 +286,7 @@ const calendarOptions = ref({
   eventClassNames: (event) => {
     return `event-${event.extendedProps?.status?.toLowerCase()}`
   }
-
-  // windowResize: function () {
-  //   let resizeTimeout
-  //   calendarOptions.value.windowResize = function () {
-  //     clearTimeout(resizeTimeout)
-  //     resizeTimeout = setTimeout(() => {
-  //       if (window.innerWidth < 768) {
-  //         calendarOptions.value.initialView = 'timeGridDay'
-  //         calendarOptions.value.dayMaxEvents = 2
-  //       } else {
-  //         calendarOptions.value.initialView = 'dayGridMonth'
-  //         calendarOptions.value.dayMaxEvents = 3
-  //       }
-  //     }, 300)
-  //   }
-  // }
 })
-
-// Watch for changes in events and update the calendar
-
-// watch(events, (newEvents) => {
-//   calendarOptions.value.events = [...newEvents]
-// })
 
 watch(events, (newEvents) => {
   // console.log("Events updated:", newEvents)  // Log the updated events
@@ -441,7 +334,7 @@ const getusers_booked = async () => {
 }
 
 watch(selectedUser, (newselectedUser) => {
-  if (newselectedUser === '') {
+  if (!newselectedUser) {
     fetchAppointments()
   } else {
     // fetchAppointmentsByUser(selectedUser.value)
