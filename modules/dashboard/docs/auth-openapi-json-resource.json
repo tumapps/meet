@@ -668,12 +668,12 @@
                 }
             }
         },
-        "/auth/auth": {
+        "/auth/users": {
             "get": {
                 "tags": [
                     "Appointments"
                 ],
-                "summary": "Lists all Appointments models",
+                "summary": "Lists all users",
                 "parameters": [
                     {
                         "name": "page",
