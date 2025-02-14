@@ -107,8 +107,8 @@ class AppointmentsController extends \helpers\ApiController
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
         $dataProvider = $searchModel->search($search);
 
-        $dataProvider->query->andWhere(['status' => Appointments::STATUS_PENDING]);
-        $dataProvider->query->andWhere(['=', 'is_deleted', Appointments::STATUS_DELETED]);
+        $dataProvider->query->andWhere(['appointments.status' => Appointments::STATUS_PENDING]);
+        $dataProvider->query->andWhere(['=', 'appointments.is_deleted', Appointments::STATUS_DELETED]);
 
 
         $appointments = $dataProvider->getModels();
