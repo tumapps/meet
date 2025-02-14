@@ -56,13 +56,13 @@ class AppointmentsSearch extends Appointments
             return $dataProvider;
         }
 
-        // $query->joinWith('user');
+        $query->joinWith('user');
 
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'user_id' => $this->user_id, // comment this for join with to work
+            // 'user_id' => $this->user_id, // comment this for join with to work
             'appointment_date' => $this->appointment_date,
             // 'is_deleted' => false,
             'start_time' => $this->start_time,
@@ -76,8 +76,10 @@ class AppointmentsSearch extends Appointments
             ->orFilterWhere(['ilike', 'mobile_number', $this->search])
             ->orFilterWhere(['ilike', 'subject', $this->search])
             ->orFilterWhere(['ilike', 'appointment_type', $this->search])
-            ->orFilterWhere(['ilike', 'description', $this->search]);
-            // ->orFilterWhere(['ilike', 'users.username', $this->search]);
+            ->orFilterWhere(['ilike', 'description', $this->search])
+            ->orFilterWhere(['ilike', 'users.username', $this->search])
+            ->orFilterWhere(['ILIKE', 'CAST(users.user_id AS TEXT)', $this->search]);
+
             
             // ->orFilterWhere(['ilike', 'status', $this->search]);
 
