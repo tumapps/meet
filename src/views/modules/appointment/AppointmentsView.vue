@@ -1057,7 +1057,7 @@ onUnmounted(() => {
             <template v-if="Array.isArray(tableData) && tableData.length > 0">
               <tr v-for="(item, index) in sortedData" :key="index">
                 <td class="subject-column" :title="item.subject">{{ item.subject }}</td>
-                <td v-if="role === 'su'">{{ item.userName }}</td>
+                <td v-if="role === 'su' || role === 'secretary'">{{ item.userName }}</td>
                 <td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }} - {{ item.end_time }}</td>
                 <td class="subject-column" :title="item.contact_name">{{ item.contact_name }}</td>
