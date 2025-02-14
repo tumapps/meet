@@ -308,22 +308,22 @@ const UpdateUser = async () => {
       </b-row>
       <div class="table-responsive">
         <!-- Table Section -->
-        <table class="table table-hover specialTable">
+        <table class="table table-hover">
           <thead>
             <tr>
-              <th @click="sortTable('fullname')">FirstName <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('username')">Username <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('mobile_number')">Mobile Number <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('email')">Email <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('role')">Role <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('last_Activity')">Last Activity <i class="fas fa-sort"></i></th>
-              <th @click="sortTable('status')">Status <i class="fas fa-sort"></i></th>
+              <th>FirstName</th>
+              <th>Username</th>
+              <th>Mobile Number</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Last Activity</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <template v-if="isArray && sortedData.length > 0">
-              <tr v-for="(item, index) in sortedData" :key="index">
+              <tr v-for="(item, index) in sortedData" :key="index" class="px-3">
                 <td>{{ item.fullname }}</td>
                 <td>{{ item.username }}</td>
                 <td>{{ item.mobile }}</td>
@@ -337,22 +337,14 @@ const UpdateUser = async () => {
                 </td>
 
                 <td>
-                  <b-dropdown right variant="link" toggle-class="text-dark" no-caret menu-class="custom-dropdown-menu">
-                    <template #button-content>
-                      <i class="fas fa-ellipsis-v"></i>
-                      <!-- Font Awesome kebab icon -->
-                    </template>
-
-                    <!-- Dropdown menu items with icons -->
-                    <b-dropdown-item @click="openModal(item.id)"> <i class="fas fa-eye mr-2"></i> View </b-dropdown-item>
-                    <!-- <b-dropdown-item> <i class="fas fa-pen mr-2"></i> Edit </b-dropdown-item>
-                    <b-dropdown-item> <i class="fas fa-trash mr-2"></i> Delete </b-dropdown-item> -->
-                  </b-dropdown>
+                  <button class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
+                    <i class="fas fa-eye" title="View"></i>
+                  </button>
                 </td>
               </tr>
             </template>
             <tr v-else>
-              <td colspan="5" class="text-center">No data to display</td>
+              <td class="text-center">No data to display</td>
             </tr>
           </tbody>
         </table>
@@ -481,109 +473,10 @@ const UpdateUser = async () => {
       </button>
     </div>
   </b-modal>
-  <!--<b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-lg fade" id="edit_user">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-      <form action="users.html#">
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="card-body">
-                <div class="form-groups-item">
-                  Profile Picture Section
-                  <div class="profile-picture m-4">
-                    <div class="profile-img">
-                      <img id="blah2" class="avatar circular-img" src="@/assets/images/avatars/01.png" alt="profile-img" />
-                    </div>
-                    <div class="add-profile">
-                      <span>Profile-pic.jpg</span>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="input-block mb-3">
-                        <label>First Name</label>
-                        <input type="text" v-model="userData.first_name" class="form-control" placeholder="Enter First Name" />
-                        <div v-if="errors.first_name" class="error" aria-live="polite">{{ errors.first_name }}</div>
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="input-block mb-3">
-                        <label>Last Name</label>
-                        <input type="text" class="form-control" v-model="userData.first_last" placeholder="Enter Last Name" />
-                        <div v-if="errors.first_last" class="error" aria-live="polite">{{ errors.first_last }}</div>
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="input-block mb-3">
-                        <label>User Name</label>
-                        <input type="text" class="form-control" v-model="userData.username" placeholder="Enter User Name" />
-                        <div v-if="errors.username" class="error" aria-live="polite">{{ errors.username }}</div>
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="input-block mb-3">
-                        <label>Email</label>
-                        <input type="email" class="form-control" v-model="userData.email" placeholder="Enter Email Address" />
-                        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email }}</div>
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="input-block mb-3">
-                        <label>Phone Number</label>
-                        <input type="text" class="form-control" v-model="userData.mobile_number" placeholder="Enter Phone Number" />
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                      <div class="mb-3">
-                        <label for="roledescription" class="form-label">Role</label>
-                        <b-form-select v-model="userData.roles[0]" :options="roles" id="roledescription" placeholder="Select a role" />
-                      </div>
-                      <div v-if="errors.role" class="error" aria-live="polite">
-                        {{ errors.role }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
-  </b-modal> -->
 
   <!-- Add User -->
 </template>
 <style>
-/* .specialTable tr td {
-  padding: 0 !important;
-  background-color: aqua !important;
-  margin: 0 !important;
-}
-.specialTable tbody template tr td {
-  padding: 0 !important;
-  background-color: rgb(231, 165, 23) !important;
-  margin: 0 !important;
-} */
-
-.table tbody tr td {
-  padding: 0 !important;
-}
-/* Adjust the dropdown to fit items without scrolling */
-/* .custom-dropdown-menu { */
-  /* max-height: none; */
-  /* Removes vertical scrolling constraint */
-  /* min-width: 10px; */
-  /* Ensures adequate width for items with icons */
-/* } */
-
-/* Styling for icons with margin for spacing */
-.custom-dropdown-menu i {
-  margin-right: 8px;
-  /* Space between icon and text */
-}
-
 .circular-img {
   border-radius: 50% !important; /* Make the image circular */
   max-width: 60px !important; /* Adjust the size as needed */
