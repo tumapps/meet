@@ -11,6 +11,7 @@ use scheduler\models\Availability;
 use scheduler\models\SpaceAvailability;
 use scheduler\models\Space;
 use scheduler\models\AppointmentAttendees;
+use scheduler\models\ManagedUsers;
 use scheduler\models\AppointmentAttachments;
 use scheduler\hooks\TimeHelper;
 use scheduler\hooks\AppointmentRescheduler as Ar;
@@ -56,10 +57,20 @@ class AppointmentsController extends \helpers\ApiController
 
         $dataProvider = $searchModel->search($search);
 
-        if (!($isSecretary || $isSuperAdmin)) {
-            $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        // if (!($isSecretary || $isSuperAdmin)) {
+        //     $dataProvider->query->andWhere(['user_id' => $currentUserId]);
+        // }
+        if ($isSecretary) {
+            $managedUserIds = ManagedUsers::find()
+                ->select('user_id')
+                ->where(['secretary_id' => $currentUserId])
+                ->column();
+
+            $dataProvider->query->andWhere(['appointments.user_id' => $managedUserIds]);
+        } elseif (!$isSuperAdmin) {
+            $dataProvider->query->andWhere(['appointments.user_id' => $currentUserId]);
         }
-        
+
 
         $appointments = $dataProvider->getModels();
 
