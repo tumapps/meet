@@ -933,7 +933,6 @@ class Appointments extends BaseModel
         }
     }
 
-
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
     {
         return self::find()
