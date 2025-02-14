@@ -92,7 +92,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-
 @import '@/assets/scss/hope-ui.scss';
 @import '@/assets/scss/pro.scss';
 @import '@/assets/scss/custom.scss';
@@ -101,6 +100,10 @@ onMounted(() => {
 
 .table tbody tr td {
   /* background-color: rgb(96, 96, 177) !important; */
-  padding: 0 8px 0 22px !important;
+  padding: 0.5px 8px 0 22px !important;
+}
+
+.modal-title{
+  min-width: 100% !important;
 }
 </style>
