@@ -28,7 +28,7 @@ const { proxy } = getCurrentInstance()
 // const route = useRoute();
 
 //errors
-const errors = ref({ start_time: '', end_time: '', booking_window: '', slot_duration: '', advanced_booking: '' })
+const errors = ref({})
 // Time options for select dropdown
 const timeOptions = ref(['08:00 ', '09:00 ', '10:00 ', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'])
 
@@ -53,6 +53,7 @@ function toggleWeekend() {
 
 //fetch user settings
 const fetchSettings = async () => {
+  errors.value = {}
   try {
     const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`)
     // console.log(response.data.dataPayload.data);
@@ -74,81 +75,39 @@ const fetchSettings = async () => {
   }
 }
 
-// Flatpickr config
-// const config = {
-//   enableTime: false,
-//   // noCalendar: true,
-//   dateFormat: 'Y-m-d',
-
-// };
-
-// const config2 = {
-//   enableTime: true,
-//   noCalendar: true,
-//   dateFormat: 'H:i',
-//   time_24hr: true,
-//   minuteIncrement: 10,
-// };
-
-// Selected date
-// const start_date = ref('');
-// const end_date = ref('');
-
-//selected time
-// const start_Time = ref('');
-// const end_Time = ref('');
-// const description = ref('');
-
-// // Function to save settings (add API or local storage logic here)
-// const saveAvailability = async () => {
-//   try {
-//     const response = await axiosInstance.post('v1/scheduler/availability', {
-//       user_id: user_id.value,
-//       start_date: start_date.value,
-//       end_date: end_date.value,
-//       start_time: start_Time.value,
-//       end_time: end_Time.value,
-//       description:description.value
-//     });
-
-//     proxy.$showToast({
-//       title: 'Updated',
-//       text: 'settings updated successfully!',
-//       icon: 'success',
-//     });
-//   } catch (error) {
-//     proxy.$showToast({
-//       title: 'Failed',
-//       text: 'failed to update your settings',
-//       icon: 'error',
-//     });
-//   }
-// }
-
-// Function to save settings (add API or local storage logic here)
 const saveSettings = async () => {
+  errors.value = {}
   try {
-    await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value)
-    proxy.$showToast({
-      title: 'Updated',
-      text: 'settings updated successfully!',
-      icon: 'success'
-    })
-  } catch (error) {
-    const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+    const response = await axiosInstance.put(`v1/scheduler/settings/${appointment_id.value}`, settings.value)
 
-    proxy.$showToast({
-      title: 'An error occurred',
-      text: errorMessage,
-      icon: 'error'
-    })
+    if (response.data.toastPayload) {
+      proxy.$showAlert({
+        title: response.data.toastPayload.toastTheme,
+        text: response.data.toastPayload.toastMessage,
+        icon: response.data.toastPayload.toastTheme,
+        showCancelButton: false,
+        showConfirmButton: false,
+        timer: 2000
+      })
+    }
+  } catch (error) {
+    console.log('error', error)
+    errors.value = error.response.data.errorPayload?.errors
+    // const errorMessage = error.response.data.errorPayload.errors?.message
+// status code !== 422
+    if (error.response.status !== 422) {
+      proxy.$showAlert({
+        title: 'Failed',
+        text: error.response.data.errorPayload.message,
+        icon: 'error'
+      })
+    }
   }
 }
 </script>
 <template>
   <div>
     <b-card>
-      <!-- <h2 class=" mb-2">Scheduler Settings</h2> -->
       <b-form @submit.prevent="saveSettings">
         <!-- Section: Working Hours -->
         <b-card class="mb-3 p-3 shadow">
@@ -175,49 +134,6 @@ const saveSettings = async () => {
             </b-col>
           </b-row>
         </b-card>
-
-        <!-- availability -->
-        <!-- <b-card>
-          <h4>Availability Settings</h4>
-          <b-row>
-            <b-col md="6">
-              <div class="mb-3">
-                <label for="datePicker" class="form-label">Start Date</label>
-                <flat-pickr v-model="start_date" class="form-control" :config="config" id="datePicker" />
-              </div>
-            </b-col>
-            <b-col md="5">
-              <div class="mb-3">
-                <label for="datePicker" class="form-label">Last Date</label>
-                <flat-pickr v-model="end_date" class="form-control" :config="config" id="datePicker" />
-              </div>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col md="6">
-              <div class="mb-3">
-                <label for="datePicker" class="form-label">Start Time</label>
-                <flat-pickr v-model="start_Time" class="form-control" :config="config2" id="datePicker" />
-              </div>
-            </b-col>
-            <b-col md="5">
-              <div class="mb-3">
-                <label for="datePicker" class="form-label">End Time</label>
-                <flat-pickr v-model="end_Time" class="form-control" :config="config2" id="datePicker" />
-              </div>
-            </b-col>
-            <b-col md="12" class="mb-3">
-              <b-form-group label="Description" label-for="description">
-                <b-form-input id="description" type="text" v-model="description"></b-form-input>
-                <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <div class="d-flex justify-content-end">
-            <b-button @click="saveAvailability" variant="primary">Save</b-button>
-          </div>
-        </b-card> -->
-        <!-- Section: Booking Settings -->
         <b-card class="mb-3 p-3 shadow">
           <h4>Booking Settings</h4>
           <b-row>
@@ -258,4 +174,9 @@ const saveSettings = async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.error {
+  color: red;
+  font-size: 1rem;
+}
+</style>

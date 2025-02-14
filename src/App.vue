@@ -106,4 +106,8 @@ onMounted(() => {
 .modal-title {
   min-width: 100% !important;
 }
+.error {
+  color: red;
+  font-size: 1rem;
+}
 </style>
