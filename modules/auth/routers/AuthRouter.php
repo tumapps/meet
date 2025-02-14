@@ -2,8 +2,8 @@
 return [
     /**
      * @OA\Get(
-     *   path="/auth/auth",
-     *   summary="Lists all Appointments models",
+     *   path="/auth/users",
+     *   summary="Lists all users",
      *   tags={"Appointments"},
      *   @OA\Parameter(description="Page No.", in="query", name="page", @OA\Schema(type="integer")),
      *   @OA\Parameter(description="Page Size", in="query", name="per-page", @OA\Schema(type="integer")),
