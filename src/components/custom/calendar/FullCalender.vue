@@ -454,6 +454,7 @@ onMounted(async () => {
   if (props.dashType === 'user') {
     await fetchAppointments()
   } else if (props.dashType === 'secretary') {
+    await fetchAppointments()
     await getusers_booked()
   } else if (props.dashType === 'Registrar') {
     await fetchEvents()
