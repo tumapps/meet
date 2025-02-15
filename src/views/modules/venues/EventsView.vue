@@ -2,6 +2,7 @@
 import { onMounted, ref, getCurrentInstance, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import FlatPickr from 'vue-flatpickr-component'
+import EventModal from '@/components/AddEvent.vue'
 
 const toastPayload = ref('')
 const { proxy } = getCurrentInstance()
@@ -21,6 +22,13 @@ const newEvent = ref(null)
 const editevent = ref(null)
 const isloading = ref(false)
 const recordStatus = ref('')
+
+const eventModalRef = ref(null)
+const openEventModal = (id) => {
+  if (eventModalRef.value) {
+    eventModalRef.value.showModal(id) // Pass the id to the child component
+  }
+}
 
 const InitialeventDetails = ref({
   title: '',
@@ -89,14 +97,6 @@ const sortedData = computed(() => {
     return 0
   })
 })
-
-const showModal = () => {
-  console.log('close modal', newEvent.value)
-
-  if (newEvent.value) {
-    newEvent.value.show()
-  }
-}
 
 const closeModal = () => {
   console.log('close modal', newEvent.value)
@@ -268,9 +268,9 @@ const AlterEvent = async (id) => {
   }
 }
 
-const RejectBooking = async (id, rejection_reason) => {
+const RejectBooking = async (id, cancellation_reason) => {
   try {
-    const response = await axiosInstance.put(`v1/scheduler/cancel/{id}`, { rejection_reason })
+    const response = await axiosInstance.put(`v1/scheduler/cancel/${id}`, { cancellation_reason })
 
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
@@ -334,7 +334,7 @@ const confirmReject = (id) => {
                 maxlength: 100
               },
               showCancelButton: true,
-              confirmButtonText: 'Reject',
+              confirmButtonText: 'Submit',
               cancelButtonText: 'Cancel',
               confirmButtonColor: '#076232',
               cancelButtonColor: '#d33'
@@ -384,7 +384,7 @@ onMounted(async () => {
         </b-col>
         <b-col lg="6">
           <div class="d-flex justify-content-end">
-            <b-button variant="primary" @click="showModal"> Add Event </b-button>
+            <b-button variant="primary" @click="openEventModal"> Add Event </b-button>
           </div>
         </b-col>
       </b-row>
@@ -507,67 +507,7 @@ onMounted(async () => {
     </b-card>
   </b-col>
 
-  <b-modal ref="newEvent" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
-    <b-row>
-      <b-col md="12">
-        <div class="mb-3">
-          <label for="startDatePicker" class="form-label">Title</label>
-          <input type="text" v-model="eventDetails.title" class="form-control" id="name" />
-        </div>
-        <div v-if="errors.title" class="error" aria-live="polite">{{ errors.title }}</div>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="levelDropdown" class="form-label">Start Date </label>
-          <flat-pickr v-model="eventDetails.start_date" class="form-control" :config="config" id="startDatePicker" />
-        </div>
-        <div v-if="errors.date" class="error" aria-live="polite">{{ errors.start_date }}</div>
-      </b-col>
-      <b-col md="12" lg="6">
-        <div class="mb-3">
-          <label for="levelDropdown" class="form-label">End Date </label>
-          <flat-pickr v-model="eventDetails.end_date" class="form-control" :config="config" id="startDatePicker" />
-        </div>
-        <div v-if="errors.end_date" class="error" aria-live="polite">{{ errors.end_date }}</div>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col md="6">
-        <div class="mb-3">
-          <label for="startTimePicker" class="form-label">Start Time</label>
-          <flat-pickr v-model="eventDetails.start_time" class="form-control" :config="config2" id="startTimePicker" />
-        </div>
-        <div v-if="errors.start_time" class="error" aria-live="polite">{{ errors.start_time }}</div>
-      </b-col>
-      <b-col md="6">
-        <div class="mb-3">
-          <label for="endTimePicker" class="form-label">End Time</label>
-          <flat-pickr v-model="eventDetails.end_time" class="form-control" :config="config2" id="endTimePicker" />
-        </div>
-        <div v-if="errors.end_time" class="error" aria-live="polite">{{ errors.end_time }}</div>
-      </b-col>
-    </b-row>
-    <b-row>
-      <!-- //text area for description -->
-      <!-- default row height is 12 -->
-      <b-col md="12">
-        <div class="mb-3">
-          <label for="description" class="form-label">Description</label>
-          <textarea v-model="eventDetails.description" class="form-control" id="description" rows="5" />
-        </div>
-        <div v-if="errors.description" class="error" aria-live="polite">{{ errors.description }}</div>
-      </b-col>
-    </b-row>
-    <div class="d-flex justify-content-center mt-5">
-      <b-button v-if="isloading === false" @click="saveEvent()" variant="primary">Submit</b-button>
-      <button v-else class="btn btn-primary" type="button" disabled>
-        <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-        submitting...
-      </button>
-    </div>
-  </b-modal>
+  <EventModal ref="eventModalRef" @NewEvent="getEvents"/>
 
   <b-modal ref="editevent" title="Edit Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
@@ -580,14 +520,14 @@ onMounted(async () => {
       </b-col>
     </b-row>
     <b-row>
-      <b-col md="12">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="levelDropdown" class="form-label">Start Date </label>
           <flat-pickr v-model="eventDetails.start_date" class="form-control" :config="config" id="startDatePicker" />
         </div>
         <div v-if="errors.date" class="error" aria-live="polite">{{ errors.start_date }}</div>
       </b-col>
-      <b-col md="12">
+      <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="levelDropdown" class="form-label">End Date </label>
           <flat-pickr v-model="eventDetails.end_date" class="form-control" :config="config" id="startDatePicker" />

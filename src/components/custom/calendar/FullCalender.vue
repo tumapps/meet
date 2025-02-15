@@ -9,6 +9,7 @@ import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
 import { usePreferencesStore } from '../../../store/preferences'
 import { format } from 'date-fns' // read comment on line 107
+import NewEvent from '@/components/AddEvent.vue'
 
 const router = useRouter()
 
@@ -21,6 +22,12 @@ const props = defineProps({
 //wooah
 
 console.log('dashType:', props.dashType)
+const eventModalRef = ref(null)
+const openEventModal = (id) => {
+  if (eventModalRef.value) {
+    eventModalRef.value.showModal(id) // Pass the id to the child component
+  }
+}
 
 const { proxy } = getCurrentInstance()
 const preferences = usePreferencesStore()
@@ -59,7 +66,8 @@ function handleDateClick(info) {
     console.log('Selected date:', selectedDate.value)
     //push to booking
     if (props.dashType === 'Registrar') {
-      router.push({ name: 'all-events' })
+      //open modal New events
+      openEventModal()
     } else {
       router.push({ name: 'booking', query: { date: selectedDate.value } })
     }
@@ -355,6 +363,7 @@ onMounted(async () => {
 })
 </script>
 <template>
+  <NewEvent ref="eventModalRef" @NewEvent="fetchEvents" />
   <b-row>
     <b-col v-if="Dashtype !== 'Registrar'" lg="2" class="d-flex justify-content-lg-end mb-3 mb-5">
       <div v-if="role === 'su' || role === 'secretary'" class="w-100 w-lg-auto">

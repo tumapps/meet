@@ -277,6 +277,7 @@ watch(
 }
 
 .table thead tr th {
-  padding: 1px !important;
+  /* padding: 1px !important; */
+  padding: 0.5px 8px 0 22px !important;
 }
 </style>

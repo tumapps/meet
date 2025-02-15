@@ -29,7 +29,7 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/iam-admin/admin/UsersView.vue')
   },
   {
-    path: '/admin/settings',
+    path: '/admin-settings',
     name: 'settings', // Now it will become appointment.dashboard
     meta: { requiresAuth: true, name: 'settings' },
     component: settings
@@ -86,7 +86,7 @@ export const defaultChildRoutes = (prefix) => [
     component: () => import('@/views/modules/venues/EventsView.vue')
   },
   {
-    path: '/home/events',
+    path: '/events-calendar',
     name: 'eventscalendar',
     component: RegistrarDashView,
     meta: { requiresAuth: true }
