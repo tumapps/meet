@@ -458,15 +458,15 @@ onMounted(async () => {
                 <td>{{ item.closing_time }}</td>
                 <td>{{ item.capacity }}</td>
                 <td>
-                  <span :class="item.is_locked ? 'badge bg-success' : 'badge bg-warning'" @click="toggleLock(item.id)">
+                  <span :class="item.is_locked ? 'badge bg-warning' : 'badge bg-success'" @click="toggleLock(item.id)">
                     {{ item.is_locked ? 'Locked' : 'Unlocked' }}
                   </span>
                 </td>
                 <td>
                   <!-- //info button -->
-                  <button class="btn btn-outline-info btn-sm me-3" @click="viewDeatils(item.id)">
+                  <!-- <button class="btn btn-outline-info btn-sm me-3" @click="viewDeatils(item.id)">
                     <i class="fas fa-info" title="View"></i>
-                  </button>
+                  </button> -->
                   <button class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>

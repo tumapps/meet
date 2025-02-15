@@ -35,20 +35,6 @@ const removedAttendees = ref({
 // Axios Instance
 const axiosInstance = createAxiosInstance()
 
-// Watch for changes in props.attendees
-// watch(
-//   () => props.attendees,
-//   (newAttendees) => {
-//     // Add a `fromBackend` flag to distinguish backend-loaded attendees
-//     attendees.value = newAttendees.map((user) => ({
-//       ...user,
-//       fromBackend: true,
-//       removed: false // Initialize `removed` flag
-//     }))
-//   },
-//   { immediate: true }
-// )
-
 watch(
   () => props.attendees,
   (newAttendees) => {
@@ -211,11 +197,6 @@ const submitRemovedAttendees = async () => {
   }
 }
 
-// Function to check if attendees is not null, undefined, or empty
-// const hasAttendees = computed(() => {
-//   return removedAttendees.value.attendees && Object.keys(removedAttendees.value.attendees).length > 0;
-// });
-
 watch(
   () => props.submitSignal,
   (newSubmitSignal) => {
@@ -252,8 +233,8 @@ watch(
     <div v-if="attendees.length > 0" class="table-responsive">
       <table class="table table-striped table-bordered">
         <thead>
-          <tr class="mytr">
-            <th>Name</th>
+          <tr>
+            <th>Names</th>
             <th>Email</th>
             <th>Status</th>
             <th>Action</th>
@@ -286,34 +267,16 @@ watch(
         </tbody>
       </table>
     </div>
-
-    <!-- Removal Reasons Modal -->
-    <!-- <b-modal ref="RemovalModal" title="Provide Reason for Removal" size="lg" hide-footer>
-      <template #default>
-        <div>
-          <label for="Reason for Removal">Reason:</label>
-          <input v-model="RemovalReason" type="text" class="form-control mb-3" id="RemovalReason" placeholder="Enter Reason for Removal" />
-        </div>
-        <div class="mt-3 mb-4">
-          <b-button @click="confirmRemoval" variant="primary" class="mr-2">Submit</b-button>
-        </div>
-      </template>
-    </b-modal> -->
-
-    <!-- Submit Removed Attendees Button -->
   </div>
 </template>
 
 <style scoped>
 /* Add custom styles if needed */
-
-.table tbody tr td {
-  /* background-color: rgb(96, 96, 177) !important; */
-  padding: 0px !important;
-}
-
-/* Add custom styles if needed */
 .text-muted {
   color: #6c757d !important;
+}
+
+.table thead tr th {
+  padding: 1px !important;
 }
 </style>

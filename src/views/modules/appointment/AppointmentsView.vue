@@ -367,7 +367,7 @@ const confirmRestore = (id) => {
   proxy
     .$showAlert({
       title: 'Are you sure?',
-      text: 'You are about to RESTORE thirestoreAppointments appointment. Do you want to proceed?',
+      text: 'You are about to RESTORE this Appointment. Do you want to proceed?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'RESTORE',
@@ -448,6 +448,7 @@ const setUserId = () => {
 const spaces = ref([]) // Initialize as an empty array
 const meetingId = ref(null)
 // create attendeesId array
+const specialDate = ref('')
 
 const attendeesId = ref([])
 const getAppointment = async (id) => {
@@ -465,6 +466,9 @@ const getAppointment = async (id) => {
       space.value = appointmentDetails.value.space ?? 'no space here'
       selectedAppointmentId.value = id
       appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
+      specialDate.value = response.data.dataPayload.data.appointment_date
+      console.log('Special Date:', specialDate.value)
+      console.log('appointment date after special date', appointmentDetails.value.appointment_date)
 
       // Ensure spaces.value is an array
       if (!Array.isArray(spaces.value)) {
@@ -547,67 +551,22 @@ watch(
 
 // Function to open modal
 const selectedAppointmentId = ref('')
-const openModal = (id) => {
+const openModal = async (id) => {
   getSpaces()
-  getAppointment(id)
-  getAppointmentType()
+  await getAppointment(id)
+  console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
+  if (appointmentDetails.value.recordStatus.label === 'ACTIVE') {
+    getAppointmentType()
+  }
+
   selectedAppointmentId.value = id
   myModal.value.show() // Open the modal
 
-  // console.log("selectedAppointmentId", selectedAppointmentId.value);
+  console.log('appointment deatils line 565', appointmentDetails.value.appointment_date)
 }
 
-// const updateAppointment = async () => {
-//   console.log(appointmentDetails.value.checked_in)
-//   try {
-//     errorDetails.value = {}
-
-//     const response = await axiosInstance.put(`/v1/scheduler/appointments/${selectedAppointmentId.value}`, appointmentDetails.value)
-
-//     // Check if toastPayload exists in the response and update it
-//     if (response.data.toastPayload) {
-//       toastPayload.value = response.data.toastPayload
-
-//       getAppointments(1)
-//       // console.log("toastPayload", toastPayload.value); // Log for debugging
-
-//       // Show toast notification using the response data
-//       proxy.$showAlert({
-//         title: toastPayload.value.toastMessage,
-//         icon: toastPayload.value.toastTheme, // You can switch this back to use the theme from the response
-//         showCancelButton: false,
-//         showConfirmButton: false,
-//         timer: 5000
-//       })
-//       //close the modal
-
-//       handleModalClose()
-//       myModal.value.hide()
-//     } else {
-//       // Fallback if toastPayload is not provided in the response
-//       proxy.$showToast({
-//         title: 'Appointment Updated successfully',
-//         icon: 'success'
-//       })
-//     }
-//   } catch (error) {
-//     if (error.response && error.response.data.errorPayload) {
-//       errorDetails.value = error.response.data.errorPayload.errors
-//     } else {
-//       console.error('bug', error)
-//       const errorMessage = error.response?.data?.errorPayload?.errors?.message || 'An error occurred'
-
-//       proxy.$showToast({
-//         title: 'An error occurred',
-//         text: errorMessage,
-//         icon: 'error'
-//       })
-//     }
-//   }
-// }
-
 //submit attendeess signail
-const submitSignal = ref(false)
+const submitSignal = ref('')
 
 const updateAppointment = async () => {
   uploading.value = true
@@ -615,54 +574,6 @@ const updateAppointment = async () => {
   //map only the attendee_id to the attendees array
   try {
     errorDetails.value = {}
-
-    // Create a new FormData object
-    // const formData = new FormData()
-
-    // for (const key in appointmentDetails.value) {
-    //   if (key === 'file' && appointmentDetails.value[key]) {
-    //     formData.append(key, appointmentDetails.value[key])
-    //   } else if (appointmentDetails.value[key] !== null && appointmentDetails.value[key] !== undefined) {
-    //     // ✅ Convert `attendees` to JSON only if it's an array
-    //     if (key === 'attendees' && Array.isArray(appointmentDetails.value[key])) {
-    //       formData.append(key, JSON.stringify(appointmentDetails.value[key]))
-    //     } else {
-    //       formData.append(key, appointmentDetails.value[key])
-    //     }
-    //   }
-    // }
-
-    // const formData = new FormData()
-
-    // // Append file separately
-    // if (appointmentDetails.value.file) {
-    //   formData.append('file', appointmentDetails.value.file)
-    // }
-
-    // // Append other fields
-    // Object.keys(appointmentDetails.value).forEach((key) => {
-    //   const value = appointmentDetails.value[key]
-
-    //   console.log('key:', key, ':', value)
-
-    //   if (key !== 'file' && value !== null && value !== undefined && key !== 'space' &&key !== 'recordStatus' && value.toString().trim() !== '') {
-    //     // if (key === 'attendees' && Array.isArray(value)) {
-    //       // formData.append(key, JSON.stringify(value))
-    //     // } else{
-    //        formData.append(key, value)
-    //     // }
-
-    //   }
-    // })
-
-    // / ✅ Convert attendees array to a JSON string before appending
-    // formData.append('attendees', JSON.stringify(attendees.value))
-
-    // console.log('attendees', attendees.value)
-    // console.log('Form data:', formData) // Log the FormData object for debugging
-
-    // Send the FormData object in the PUT request
-
     console.log('file dealer', fileInput.value)
     submitSignal.value = 'submit'
     const buttonText = ref(null)
@@ -849,7 +760,6 @@ const confirmCheckIn = (item) => {
 // Function to handle actions after modal closes
 const handleModalClose = () => {
   // Perform any actions you need after modal closes
-  //   console.log('Modal has been closed');
   appointmentDetails.value = { ...InitialappointmentDetails }
   errors.value = {}
   space.value = ''
@@ -936,22 +846,18 @@ const handleDateChange = (newValue) => {
   debouncedGetSlots()
 }
 
-//watch for changes in appointmentDetails.appointment_date and call getSlots
-
 watch(
   () => appointmentDetails.value.appointment_date,
   (newValue, oldValue) => {
-    if (!newValue) {
-      console.warn('appointment_date reset to null. Ignoring change.')
-      return
-    }
-
-    if (newValue !== oldValue) {
+    console.log('appointment deatils line 852', appointmentDetails.value.appointment_date)
+    if (newValue) {
       console.log(`Date changed from ${oldValue} to ${newValue}`)
       handleDateChange(newValue)
     }
   }
 )
+
+console.log('appointment date after the watch', appointmentDetails.value.appointment_date)
 
 const truncatedSubject = computed(() => {
   const subject = appointmentDetails.value.subject || ''
@@ -1061,8 +967,6 @@ onUnmounted(() => {
                 <td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }} - {{ item.end_time }}</td>
                 <td class="subject-column" :title="item.contact_name">{{ item.contact_name }}</td>
-                <!-- <td>{{ item.mobile_number }}</td>
-                <td>{{ item.email_address }}</td> -->
 
                 <td>
                   <span :class="'badge bg-' + item.recordStatus.theme">{{ item.recordStatus.label }}</span>
@@ -1113,9 +1017,11 @@ onUnmounted(() => {
                 </td>
               </tr>
             </template>
-            <tr v-else>
-              <td class="text-center">No data to display</td>
-            </tr>
+            <template v-else>
+              <tr>
+                <td colspan="6" class="text-center">No records found.</td>
+              </tr>
+            </template>
           </tbody>
         </table>
         <!-- Pagination -->
@@ -1137,7 +1043,6 @@ onUnmounted(() => {
       </b-col>
     </b-card>
   </b-col>
-  <!-- <BookAppointment ref="appointmentModal" @close="handleModalClose" @appointment-created="getAppointments(1)" /> -->
   <b-modal id="uppyModal" size="m" hide-header>
     <b-row>
       <b-col lg="12">
@@ -1151,18 +1056,17 @@ onUnmounted(() => {
     </b-row>
   </b-modal>
 
-  <!-- <b-modal ref="myModal" hide-footer :title="'Contact:' + '' + appointmentDetails.contact_name + ' ' + 'RE:' + ' ' + appointmentDetails.subject" size="xl">-->
-
   <b-modal ref="myModal" hide-footer size="xl" @hide="handleModalClose">
     <template #title>
-      <div class="container-fluid" style="width: 95%; margin: 0 auto">
+      <div class="container-fluid" style="width: 90% !important; margin: 0 !important; font-size: 1rem !important">
         <div class="row align-items-center">
-          <div class="mb-3 col-lg-4 col-md-6 col-sm-6"><span class="fw-bold">Subject:</span> {{ truncatedSubject }}</div>
           <div class="mb-3 col-lg-3 col-md-6 col-sm-6"><span class="fw-bold">Date:</span> {{ appointmentDetails.appointment_date }}</div>
+
+          <div class="mb-3 col-lg-4 col-md-6 col-sm-6"><span class="fw-bold">Subject:</span> {{ truncatedSubject }}</div>
           <div class="mb-3 col-lg-3 col-md-6 col-sm-6"><span class="fw-bold">Time:</span> {{ appointmentDetails.start_time }} to {{ appointmentDetails.end_time }}</div>
           <div class="mb-3 col-lg-2 col-md-6 col-sm-6">
             <span class="fw-bold">Status:</span>
-            <b-badge :variant="recordStatus.theme" class="me-3">
+            <b-badge :variant="recordStatus.theme">
               {{ recordStatus.label }}
             </b-badge>
           </div>

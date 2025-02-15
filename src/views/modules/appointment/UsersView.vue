@@ -140,9 +140,11 @@ const openAddUserModal = () => {
                 <td>{{ item.email }}</td>
               </tr>
             </template>
-            <tr v-else>
-              <td class="text-center">No data to display</td>
-            </tr>
+            <template v-else>
+              <tr>
+                <td colspan="6" class="text-center">No records found.</td>
+              </tr>
+            </template>
           </tbody>
         </table>
         <!-- Pagination -->
