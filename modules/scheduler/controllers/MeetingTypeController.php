@@ -32,7 +32,7 @@ class MeetingTypeController extends \helpers\ApiController
 
     public function actionView($id)
     {
-        Yii::$app->user->can('schedulerMeeting-typeView');
+        Yii::$app->user->can('schedulerMeeting-typeList');
         return $this->payloadResponse($this->findModel($id));
     }
 
