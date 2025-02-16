@@ -3234,34 +3234,23 @@
                         }
                     }
                 }
-            }
-        },
-        "/scheduler/managed-users/{secretary_id}/{user_id}": {
+            },
             "post": {
                 "tags": [
                     "ManagedUsers"
                 ],
                 "summary": "Assign a user to the specified secretary id",
-                "parameters": [
-                    {
-                        "name": "secretary_id",
-                        "in": "path",
-                        "description": "Secretary Id",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "User Id",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
+                "requestBody": {
+                    "description": "Fill in managed-users data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ManagedUsers"
+                            }
                         }
                     }
-                ],
+                },
                 "responses": {
                     "201": {
                         "description": "Data payload",
@@ -3311,49 +3300,6 @@
                                                     "example": "danger"
                                                 }
                                             },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "ManagedUsers"
-                ],
-                "summary": "Removes or reassing a user from beig managed by the specified secretary id.",
-                "parameters": [
-                    {
-                        "name": "secretary_id",
-                        "in": "path",
-                        "description": "ManagedUsers unique ID to reassing",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "ManagedUsers unique ID to reassign",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Deletion successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "dataPayload": {
                                             "type": "object"
                                         }
                                     },
@@ -3502,6 +3448,51 @@
                 "responses": {
                     "202": {
                         "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/managed-users/{secretary_id}/{user_id}": {
+            "delete": {
+                "tags": [
+                    "ManagedUsers"
+                ],
+                "summary": "Removes or reassing a user from beig managed by the specified secretary id.",
+                "parameters": [
+                    {
+                        "name": "secretary_id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to reassing",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ManagedUsers unique ID to reassign",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
                         "content": {
                             "application/json": {
                                 "schema": {
