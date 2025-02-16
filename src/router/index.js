@@ -34,6 +34,11 @@ export const defaultChildRoutes = (prefix) => [
     meta: { requiresAuth: true, name: 'settings' },
     component: settings
   },
+  {
+    path: '/meeting-types',
+    name: 'meetingTypes',
+    component: ()=> import('@/views/modules/appointment/MeeetingTypesView.vue'),
+  },
   // {
   //   path: '/new-user',
   //   name: prefix + '.adduser',

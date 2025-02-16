@@ -27,7 +27,7 @@
 
 <script>
 import SettingOffcanvas from '@/components/setting/SettingOffcanvas.vue'
-import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
+// import BrandLogo from '@/components/custom/logo/BrandLogo.vue'
 export default {
   components: { SettingOffcanvas }
 }

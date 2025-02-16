@@ -406,7 +406,7 @@ onMounted(async () => {
                 <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="getEvents(1)"> Search </b-button>
+                  <b-button variant="primary" @change="getEvents(1)" @click="getEvents(1)"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>
@@ -482,7 +482,7 @@ onMounted(async () => {
             </template>
             <template v-else>
               <tr>
-                <td colspan="6" class="text-center">No records found.</td>
+                <td class="text-center">No records found.</td>
               </tr>
             </template>
           </tbody>
@@ -507,9 +507,9 @@ onMounted(async () => {
     </b-card>
   </b-col>
 
-  <EventModal ref="eventModalRef" @NewEvent="getEvents"/>
+  <EventModal ref="eventModalRef" @NewEvent="getEvents" />
 
-  <b-modal ref="editevent" title="Edit Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
+  <b-modal ref="editevent" title="Edit Event" class="p-4 custom-modal-body" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
@@ -572,5 +572,9 @@ onMounted(async () => {
 .error {
   color: red;
   font-size: 0.8rem;
+}
+
+.my-modal .modal-content {
+  border-radius: 15px; /* Adjust as needed */
 }
 </style>

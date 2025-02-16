@@ -121,7 +121,7 @@ defineExpose({
 })
 </script>
 <template>
-  <b-modal ref="newEvent" title="Add Event" class="modal-fullscreen my-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
+  <b-modal ref="newEvent" title="Add Event" class="p-4 custom-modal-body" no-close-on-backdrop no-close-on-esc size="xl" hide-footer @hide="handleClose">
     <b-row>
       <b-col md="12">
         <div class="mb-3">
