@@ -47,9 +47,16 @@ return [
 
     /**
      * @OA\Get(
-     *   path="/auth/user",
+     *   path="/auth/user/{id}",
      *   summary="Get a specific user",
      *   tags={"Users"},
+     *   @OA\Parameter(
+     *     name="id",
+     *     in="path",
+     *     required=true,
+     *     description="User ID",
+     *     @OA\Schema(type="integer")
+     *   ),
      *   @OA\Response(
      *     response=200,
      *     description="Returns a user object",
@@ -64,7 +71,7 @@ return [
      *   )
      * )
      */
-    'GET user' => 'auth/get-user',
+    'GET user/{id}' => 'auth/get-user',
 
     /**
      * @OA\Put(
