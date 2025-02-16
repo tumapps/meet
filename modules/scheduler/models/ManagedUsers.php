@@ -52,7 +52,7 @@ class ManagedUsers extends BaseModel
             [['secretary_id', 'user_id'], 'required'],
             [['secretary_id', 'user_id', 'is_deleted'], 'default', 'value' => null],
             [['secretary_id', 'user_id', 'is_deleted'], 'integer'],
-            [['secretary_id', 'user_id', 'is_deleted'], 'validateAssignment'],
+            [['secretary_id', 'user_id'], 'validateAssignment'],
             [['secretary_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['secretary_id' => 'user_id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
