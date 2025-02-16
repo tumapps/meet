@@ -423,7 +423,7 @@ onMounted(() => {
                 <b-form-group label="ChairPerson:" label-for="input-1">
                   <div class="position-relative d-flex flex-column">
                     <!-- //show if selectedUserid  is null or empty -->
-                    <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2"></b-form-input>
+                    <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2" @click="UsersOptionsCopy = UsersOptions"></b-form-input>
 
                     <!-- show when a user is selected -->
                     <!-- not editable -->
@@ -436,7 +436,7 @@ onMounted(() => {
                     <!-- Show this option if no results  -->
                     <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
                     <!-- show results and on clicking item assign user id to selected user id -->
-                    <ul v-if="user_searchQuery && UsersOptionsCopy.length" class="mt-5 userlistul list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(UsersOptionsCopy = []), (user_searchQuery = '')">
+                    <ul v-if="UsersOptionsCopy.length" class="mt-5 userlistul list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(UsersOptionsCopy = []), (user_searchQuery = '')">
                       <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
                     </ul>
                   </div>
@@ -451,7 +451,7 @@ onMounted(() => {
                 <b-form-group label="Venue:" label-for="space">
                   <div class="position-relative d-flex flex-column">
                     <!-- Search Input -->
-                    <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2"></b-form-input>
+                    <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
                     <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input>
                     <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
