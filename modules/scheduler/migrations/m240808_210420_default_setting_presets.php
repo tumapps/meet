@@ -43,7 +43,7 @@ class m240808_210420_default_setting_presets extends Migration
             'email_password' => $this->string(128)->notNull(),
             'description' => $this->text()->null(), // description column can be useful for storing metadata or explanations about each setting.
             'email_username' => $this->string(128)->notNull(),
-            'is_deleted' => $this->boolean()->defaultValue(false),
+            'is_deleted' => $this->integer()->defaultValue(0),
             'created_at' => $this->integer(),
             'updated_at' => $this->integer(),
         ]);
