@@ -36,37 +36,37 @@ class ManagedUsersController extends \helpers\ApiController
         return $this->payloadResponse($this->findModel($id));
     }
 
-    // public function actionCreate($user_id, $secretary_id)
-    // {
-    //     Yii::$app->user->can('schedulerManaged-usersCreate');
-    //     $model = new ManagedUsers();
-
-    //     $model->loadDefaultValues();
-    //     $dataRequest['ManagedUsers'] = Yii::$app->request->getBodyParams();
-    //     if ($model->load($dataRequest) && $model->save()) {
-    //         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'ManagedUsers added successfully']);
-    //     }
-    //     return $this->errorResponse($model->getErrors());
-    // }
-
-    public function actionCreate($secretary_id, $user_id)
+    public function actionCreate()
     {
         Yii::$app->user->can('schedulerManaged-usersCreate');
-
         $model = new ManagedUsers();
-        $model->user_id = $user_id;
-        $model->secretary_id = $secretary_id;
 
-        if (!$model->validate()) {
-            return $this->errorResponse($model->getErrors());
+        $model->loadDefaultValues();
+        $dataRequest['ManagedUsers'] = Yii::$app->request->getBodyParams();
+        if ($model->load($dataRequest) && $model->save()) {
+            return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'User assigned to secretary successfully']);
         }
-
-        if ($model->save()) {
-            return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'User successfully assigned to secretary']);
-        }
-
         return $this->errorResponse($model->getErrors());
     }
+
+    // public function actionCreate($secretary_id, $user_id)
+    // {
+    //     Yii::$app->user->can('schedulerManaged-usersCreate');
+
+    //     $model = new ManagedUsers();
+    //     $model->user_id = $user_id;
+    //     $model->secretary_id = $secretary_id;
+
+    //     if (!$model->validate()) {
+    //         return $this->errorResponse($model->getErrors());
+    //     }
+
+    //     if ($model->save()) {
+    //         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'User successfully assigned to secretary']);
+    //     }
+
+    //     return $this->errorResponse($model->getErrors());
+    // }
 
     public function actionReassign($secretary_id, $user_id)
     {
@@ -75,23 +75,32 @@ class ManagedUsersController extends \helpers\ApiController
         $managedUser = ManagedUsers::findOne(['user_id' => $user_id, 'secretary_id' => $secretary_id]);
 
         if (!$managedUser) {
-            // return $this->errorResponse(['message' => ['This secretary does not manage the specified user.']]);
             return $this->toastResponse(['statusCode' => 202, 'message' => 'This secretary does not manage the specified user.']);
         }
 
         $model = $this->findModel($managedUser->id);
-
-        if ($model->is_deleted) {
-            Yii::$app->user->can('schedulerManaged-usersRestore');
-            $model->restore();
-            return $this->toastResponse(['statusCode' => 202, 'message' => 'user restored successfully']);
-        } else {
-            Yii::$app->user->can('schedulerManaged-usersDelete');
-            $model->delete();
-            return $this->toastResponse(['statusCode' => 202, 'message' => 'User successfully unassigned from the secretary.']);
+        if (!$model) {
+            return $this->errorResponse(['message' => ['Record not found.']]);
         }
-        // return $this->errorResponse(['message' => ['Failed to unassign user from the secretary.']]);
+        if ($this->removeAssignedUser($user_id, $secretary_id)) {
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'User successfully unassigned and permanently deleted.']);
+        } else {
+            return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to remove assigned user.']);
+        }
     }
+
+    private function removeAssignedUser($user_id, $secretary_id)
+    {
+        $sql = "DELETE FROM managed_users WHERE user_id = :user_id AND secretary_id = :secretary_id";
+
+        $deletedRows = Yii::$app->db->createCommand($sql)
+            ->bindValue(':user_id', $user_id)
+            ->bindValue(':secretary_id', $secretary_id)
+            ->execute();
+
+        return $deletedRows > 0;
+    }
+
 
 
 
