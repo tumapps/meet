@@ -43,12 +43,17 @@ return [
 
 /**
  * @OA\Post(
- * path="/scheduler/managed-users/{secretary_id}/{user_id}",
+ * path="/scheduler/managed-users",
  * summary="Assign a user to the specified secretary id",
  * tags={"ManagedUsers"},
- * @OA\Parameter(name="secretary_id", in="path", required=true, description="Secretary Id", @OA\Schema(type="integer")),
- * @OA\Parameter(name="user_id", in="path", required=true, description="User Id", @OA\Schema(type="integer")),
- *
+  * @OA\RequestBody(
+ *    required=true,
+ *    description="Fill in managed-users data",
+ *    @OA\JsonContent(
+ *       required={"secretary_id","user_id",},
+ *       ref="#/components/schemas/ManagedUsers",
+ *    ),
+ * ),
  * @OA\Response(
  *    response=201,
  *    description="Data payload",
@@ -73,7 +78,7 @@ return [
  * )
  *),
  */
-'POST managed-users/{secretary_id}/{user_id}'         => 'managed-users/create',
+'POST managed-users'         => 'managed-users/create',
 
 /**
  * @OA\Get(path="/scheduler/managed-users/{id}",
