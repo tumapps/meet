@@ -122,7 +122,6 @@ class AuthController extends \helpers\ApiController
 
 		return $this->payloadResponse(['profiles' => $formattedProfiles]);
 	}
-
 	public function actionToggleAccountStatus($id)
 	{
 		if (!$id) {
@@ -175,10 +174,10 @@ class AuthController extends \helpers\ApiController
 			'user_id' => $user->id,
 			'status' => $user->status,
 			'username' => $user->username,
-			'email' => $profile->email_address,
+			'email_address' => $profile->email_address,
 			'name' => trim($profile->first_name . ' ' . $profile->last_name),
 			'first_name' => $profile->first_name,
-			'first_last' => $profile->last_name,
+			'last_name' => $profile->last_name,
 			'mobile_number' => $profile->mobile_number,
 			'roles' => $roleNames,
 		];
@@ -190,7 +189,6 @@ class AuthController extends \helpers\ApiController
 	{
 		Yii::$app->user->can('su');
 		$dataRequest['UpdateUser'] = Yii::$app->request->getBodyParams();
-
 
 		$user = User::findOne($id);
 		if (!$user) {
