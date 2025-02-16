@@ -151,9 +151,6 @@ class AuthController extends \helpers\ApiController
 	public function actionGetUser($id)
 	{
 
-		if (!$id) {
-			return $this->errorResponse(['message' => ['User ID is required']]);
-		}
 		$user = User::findOne($id);
 
 		if (!$user) {
