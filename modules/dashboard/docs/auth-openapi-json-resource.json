@@ -870,12 +870,23 @@
                 }
             }
         },
-        "/auth/user": {
+        "/auth/user/{id}": {
             "get": {
                 "tags": [
                     "Users"
                 ],
                 "summary": "Get a specific user",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Returns a user object",
