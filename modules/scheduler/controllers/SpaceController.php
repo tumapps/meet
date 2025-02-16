@@ -5,6 +5,8 @@ namespace scheduler\controllers;
 use Yii;
 use scheduler\models\Space;
 use scheduler\models\searches\SpaceSearch;
+use scheduler\models\ManagedUsers;
+
 
 /**
  * @OA\Tag(
@@ -39,6 +41,19 @@ class SpaceController extends \helpers\ApiController
             $dataProvider->query->andWhere(['OR', ['id' => $currentUserId], ['space_type' => Space::SPACE_TYPE_MANAGED]]);
         } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
             $dataProvider->query->andWhere(['space_type' => Space::SPACE_TYPE_MANAGED]);
+        } elseif ($roleFlags['isSecretary']) {
+            // Only show spaces assigned to the current user as a secretary
+            $managedUserIds = ManagedUsers::find()
+                ->select('user_id')
+                ->where(['secretary_id' => $currentUserId])
+                ->column();
+    
+            // Restrict unmanaged spaces to only those assigned to managed users
+            $dataProvider->query->andWhere([
+                'OR',
+                ['space_type' => Space::SPACE_TYPE_MANAGED], // Keep all managed spaces
+                ['AND', ['space_type' => Space::SPACE_TYPE_UNMANAGED], ['id' => $managedUserIds]] // Filter unmanaged spaces
+            ]);
         }
 
         $spaceDetails = $dataProvider->getModels();
@@ -57,6 +72,8 @@ class SpaceController extends \helpers\ApiController
             'isSuperAdmin' => array_key_exists('su', $roles),
             'isRegistrar' => array_key_exists('registrar', $roles),
             'isUser' => array_key_exists('user', $roles),
+            'isSecretary' => array_key_exists('secretary', $roles),
+
         ];
     }
 
