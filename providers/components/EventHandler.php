@@ -96,6 +96,67 @@ class EventHandler
 		}
 	}
 
+	//onAppointmentVenueUpdate
+	public static function onAppointmentVenueUpdate(Event $event)
+	{
+		$contactPersonEmail = $event->data['contact_person_email'];
+		$subject = $event->data['subject'];
+		$chairPersonEmail = $event->data['chair_person_email'];
+		$attendeesDetails = $event->data['attendees_details'];
+		$appointmentId = $event->data['appointment_id'];
+
+		$commonData = [
+			'date' => $event->data['date'],
+			'startTime' => $event->data['start_time'],
+			'endTime' => $event->data['end_time'],
+			'username' => $event->data['contact_person_username'],
+			'contact_name' => $event->data['contact_person_name'],
+			'attachment_file_name' => $event->data['attachment_file_name'],
+			'attachment_download_link' => $event->data['attachment_download_link'],
+			'previous_venue' => $event->data['previous_venue'],
+			'new_venue' => $event->data['new_venue'],
+		];
+
+		$contactPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentVenueUpdate', array_merge($commonData, [
+			'recipientType' => 'contact_person',
+		]));
+
+		// self::addEmailToQueue($contactPersonEmail, $subject, $contactPersonEmailBody);
+		self::queueEmail($contactPersonEmail, $subject, $contactPersonEmailBody);
+
+		$chairPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentVenueUpdate', array_merge($commonData, [
+			'recipientType' => 'chair_person',
+		]));
+
+		// self::addEmailToQueue($chairPersonEmail, $subject, $chairPersonEmailBody);
+		self::queueEmail($chairPersonEmail, $subject, $chairPersonEmailBody);
+
+
+		if (!empty($attendeesDetails)) {
+			foreach ($attendeesDetails as $attendeeDetail) {
+				$attendeeEmail = $attendeeDetail['email'];
+				$attendee_id = $attendeeDetail['staff_id'];
+				$attendeeName = substr($attendeeEmail, 0, strpos($attendeeEmail, '@'));
+				$confirmationBaseUrl = Yii::$app->params['confirmationLink'];
+				// $appointmentHash = hash_hmac('sha256', $appointmentId, Yii::$app->params['secret_key']);
+				// $attendeeHash = hash_hmac('sha256', $attendee_id, Yii::$app->params['secret_key']);
+
+				$appointmentEnc = self::encryptData($appointmentId);
+				$attendeeIdEnc = self::encryptData($attendee_id);
+
+				$confirmationLink = $confirmationBaseUrl . '/' . $appointmentEnc . '/' . $attendeeIdEnc;
+
+				$attendeeEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentVenueUpdate', array_merge($commonData, [
+					'recipientType' => 'attendee',
+					'attendeeName' => $attendeeName,
+					'confirmationLink' => $confirmationLink,
+				]));
+				// self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, $subject, $attendeeEmailBody);
+			}
+		}
+	}
+
 	public static function onAccountCreation(Event $event)
 	{
 		$email = $event->data['email'];
@@ -113,7 +174,6 @@ class EventHandler
 		// self::addEmailToQueue($email, $subject, $body);
 		self::queueEmail($email, $subject, $body);
 	}
-
 	public static function onAppointmentRejected(Event $event)
 	{
 		$email = $event->data['email'];
@@ -127,7 +187,8 @@ class EventHandler
 			'endTime' => $event->data['end_time'],
 			'username' => $event->data['username'],
 			'contact_name' => $event->data['contact_name'],
-			'rejectionReason' => $event->data['rejection_reason']
+			'rejectionReason' => $event->data['rejection_reason'],
+			'spaceRequestUpdate' => $event->data['spaceRequestUpdate']
 		];
 
 		$contactPerson = Yii::$app->view->render('@ui/views/emails/appointmentRejected', array_merge($commonData, [
@@ -142,7 +203,7 @@ class EventHandler
 			'recipientType' => 'chairPerson',
 		]));
 
-		self::addEmailToQueue($bookedUserEmail, $subject, $chairPerson);
+		// self::addEmailToQueue($bookedUserEmail, $subject, $chairPerson);
 		self::queueEmail($bookedUserEmail, $subject, $chairPerson);
 
 
@@ -161,7 +222,6 @@ class EventHandler
 
 	public static function onAppointmentCancelled(Event $event)
 	{
-
 		$contactEmail = $event->data['contactEmail'];
 		$bookedUserEmail = $event->data['bookedUserEmail'];
 		$attendeesEmails = $event->data['attendees_emails'];
