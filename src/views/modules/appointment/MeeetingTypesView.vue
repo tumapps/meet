@@ -151,11 +151,12 @@ const deleteAction = async (id) => {
 const confirmDelete = (id, status) => {
   proxy
     .$showAlert({
-      icon: 'info',
-      title: 'Confirmation',
+      icon: 'warning',
+      title: 'Are you sure?',
       text: 'Are you sure you want to' + ' ' + [status ? 'restore' : 'delete'] + ' this meeting type?',
       showCancelButton: true,
       showConfirmButton: true,
+      confirmButtonText: 'Submit',
       confirmButtonColor: '#097B3E',
       cancelButtonColor: '#d33'
     })

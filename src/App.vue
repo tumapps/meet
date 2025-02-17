@@ -5,7 +5,7 @@
 <script setup>
 import { onMounted, computed, watch } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
 import createAxiosInstance from '@/api/axios'
 // import { useAuthStore } from '@/store/auth.store.js'
@@ -15,7 +15,6 @@ import { useSetting } from '@/store/pinia'
 
 import '@/plugins/styles'
 
-const router = useRouter()
 useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
 const menuStore = useMenuStore()
@@ -57,7 +56,7 @@ const resizePlugin = () => {
 const RunrefreshToken = async () => {
   try {
     const newToken = await axiosInstance.RunAccessToken()
-    router.push({ name: 'home' })
+    // router.push({ name: 'home' })
     console.log('Token refreshed madafaka:', newToken)
   } catch (error) {
     console.error('Failed to refresh token:', error)

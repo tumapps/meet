@@ -10,11 +10,12 @@ const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
 const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
 const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 
+
 // Default routes
 export const defaultChildRoutes = (prefix) => [
   {
     path: '', // Empty path makes this the default child
-    redirect: 'home' // Redirect to the home child route
+    redirect: '/auth/login' // Redirect to the home child route
   },
   {
     path: '/home',
@@ -39,12 +40,6 @@ export const defaultChildRoutes = (prefix) => [
     name: 'meetingTypes',
     component: () => import('@/views/modules/appointment/MeeetingTypesView.vue')
   },
-  // {
-  //   path: '/new-user',
-  //   name: prefix + '.adduser',
-  //   meta: { requiresAuth: true, name: 'Add User', isBanner: true },
-  //   component: () => import('@/views/iam-admin/AddUser.vue')
-  // },
   {
     path: '/profile',
     name: 'profile',
@@ -108,13 +103,6 @@ export const defaultChildRoutes = (prefix) => [
     props: true
   },
 
-  //admin routes
-  // {
-  //   path: '/users',
-  //   name: 'users',
-  //   meta: { requiresAuth: true },
-  //   component: () => import('@/views/iam-admin/admin/UsersView.vue')
-  // },
   {
     path: '/roles',
     name: 'roles',
