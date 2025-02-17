@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Appointment Rejected</title>
@@ -10,6 +11,7 @@
             padding: 0;
             font-family: Arial, sans-serif;
         }
+
         .email-container {
             background-color: #ffffff;
             margin: 20px auto;
@@ -19,36 +21,44 @@
             border: 1px solid #dddddd;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .email-header {
             text-align: center;
             padding-bottom: 20px;
         }
+
         .email-header h2 {
             margin: 0;
             color: #333333;
             font-size: 24px;
         }
+
         .email-body {
             font-size: 16px;
             color: #555555;
         }
+
         .email-body p {
             line-height: 1.5;
         }
+
         .appointment-details {
             margin: 20px 0;
             padding-left: 20px;
             border-left: 4px solid #d9534f;
         }
+
         .appointment-details p {
             margin-bottom: 10px;
         }
+
         .email-footer {
             text-align: center;
             padding-top: 20px;
             font-size: 12px;
             color: #999999;
         }
+
         .button {
             display: inline-block;
             padding: 10px 20px;
@@ -58,9 +68,11 @@
             text-decoration: none;
             border-radius: 4px;
         }
+
         .button:hover {
             background-color: #c9302c;
         }
+
         .contact-info {
             margin-top: 20px;
             font-size: 14px;
@@ -68,6 +80,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="email-container">
         <div class="email-header">
@@ -76,15 +89,33 @@
         <div class="email-body">
             <?php if ($recipientType === 'contactPerson'): ?>
                 <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
-                <p>Your appointment request with <?= htmlspecialchars($username) ?> has been rejected. Below are the details:</p>
+                <p>
+                    <?php if ($spaceRequestUpdate): ?>
+                        Your requested space has been rejected, and the meeting will revert to the previous space.
+                    <?php else: ?>
+                        Your appointment request with <?= htmlspecialchars($username) ?> has been rejected. Below are the details:
+                    <?php endif; ?>
+                </p>
 
             <?php elseif ($recipientType === 'chairPerson'): ?>
                 <p>Dear <?= htmlspecialchars($username) ?>,</p>
-                <p>Your appointment request by <?= htmlspecialchars($contact_name) ?> has been rejected. Here are the details:</p>
-             
+                <p>
+                    <?php if ($spaceRequestUpdate): ?>
+                        Your requested space has been rejected, and the meeting will revert to the previous space.
+                    <?php else: ?>
+                        Your appointment request by <?= htmlspecialchars($contact_name) ?> has been rejected. Here are the details:
+                    <?php endif; ?>
+                </p>
+
             <?php elseif ($recipientType === 'attendee'): ?>
                 <p>Dear <?= htmlspecialchars($attendeeName) ?>,</p>
-                <p>Unfortunately, the appointment you were invited to attend has been rejected. Here are the details:</p>
+                <p>
+                    <?php if ($spaceRequestUpdate): ?>
+                        Unfortunately, the appointment you were invited to attend has been rejected, and the meeting will revert to the previous space.
+                    <?php else: ?>
+                        Unfortunately, the appointment you were invited to attend has been rejected. Here are the details:
+                    <?php endif; ?>
+                </p>
             <?php endif; ?>
             <div class="appointment-details">
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
@@ -101,4 +132,5 @@
         </div>
     </div>
 </body>
+
 </html>
