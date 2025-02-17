@@ -117,7 +117,7 @@ class m240808_213712_create_scheduler_tables extends Migration
         );
 
         // appointment attendees table
-        $this->createTable('appointment_attendees', [
+        $this->createTable('{{%appointment_attendees}}', [
             'id' => $this->primaryKey(),
             'appointment_id' => $this->integer()->notNull(),
             'attendee_id' => $this->integer()->notNull(),
@@ -133,7 +133,7 @@ class m240808_213712_create_scheduler_tables extends Migration
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
-        $this->createTable('operation_reasons', [
+        $this->createTable('{{%operation_reasons}}', [
             'id' => $this->primaryKey(),
             'entity_id' => $this->bigInteger()->notNull(),
             'type' => $this->string(),
@@ -146,7 +146,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'updated_at' => $this->integer()->notNull(),
         ], $tableOptions);
 
-        $this->createTable('appointment_files', [
+        $this->createTable('{{%appointment_files}}', [
             'id' => $this->primaryKey(),
             'appointment_id' => $this->integer()->notNull(),
             'file_url' => $this->string()->notNull(),
