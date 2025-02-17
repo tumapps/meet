@@ -1125,7 +1125,7 @@ onUnmounted(() => {
                 </b-col>
                 <b-col lg="4" md="12" sm="12">
                   <label for="space" class="form-label">Space</label>
-                  <select v-model="space.space_id" name="space" class="form-select" id="space">
+                  <select v-model="appointmentDetails.space_id" name="space" class="form-select" id="space">
                     <!-- Default option -->
                     <option :value="null" disabled>
                       {{ Array.isArray(spaces) && spaces.length ? 'Choose Space' : 'No Spaces Available' }}
