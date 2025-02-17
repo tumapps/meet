@@ -52,7 +52,7 @@ class SpaceAvailability extends BaseModel
     public function rules()
     {
         return [
-            [['space_id', 'date', 'start_time', 'end_time'], 'required'],
+            [['space_id', 'appointment_id', 'date', 'start_time', 'end_time'], 'required'],
             [['space_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['space_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['date', 'start_time', 'end_time'], 'safe'],
