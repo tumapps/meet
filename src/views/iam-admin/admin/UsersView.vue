@@ -82,8 +82,9 @@ const openAddUserModal = () => {
 }
 
 const getUser = async (id) => {
+  errors.value = {}
   try {
-    const response = await axiosInstance.get(`/v1/auth/user?id=${id}`)
+    const response = await axiosInstance.get(`/v1/auth/user/${id}`)
 
     if (response.data.dataPayload && !response.data.errorPayload) {
       userData.value = response.data.dataPayload.data.user
@@ -228,6 +229,7 @@ const confirmStatusChange = (id) => {
 //update user details
 const UpdateUser = async () => {
   isloading.value = true
+  errors.value = {}
   try {
     const response = await axiosInstance.put(`/v1/auth/update-user/${userData.value.user_id}`, userData.value)
 
@@ -429,9 +431,9 @@ const UpdateUser = async () => {
       <b-col md="12" lg="6">
         <div class="mb-3">
           <label for="startDatePicker" class="form-label">Last Name</label>
-          <b-form-input v-model="userData.first_last" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
+          <b-form-input v-model="userData.last_name" id="roledata" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
-        <div v-if="errors.first_last" class="error" aria-live="polite">{{ errors.first_last }}</div>
+        <div v-if="errors.last_name" class="error" aria-live="polite">{{ errors.first_last }}</div>
       </b-col>
       <b-col md="12" lg="6">
         <div class="mb-3">
@@ -450,9 +452,9 @@ const UpdateUser = async () => {
       <b-col md="12" lg="12">
         <div class="mb-3">
           <label for="rolerulename" class="form-label">Email</label>
-          <b-form-input v-model="userData.email" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
+          <b-form-input v-model="userData.email_address" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
-        <div v-if="errors.email" class="error" aria-live="polite">{{ errors.email }}</div>
+        <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email }}</div>
       </b-col>
     </b-row>
     <!-- <b-row>

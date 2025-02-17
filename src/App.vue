@@ -75,7 +75,7 @@ onMounted(() => {
   store.setSetting()
 
   //call the refrsh token function from store
-  // RunrefreshToken()
+  RunrefreshToken()
 })
 
 // onUnmounted(() => {

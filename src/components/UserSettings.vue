@@ -1,5 +1,5 @@
 <script setup>
-import { watch, ref, getCurrentInstance, defineProps } from 'vue'
+import { watch, ref, getCurrentInstance, defineProps, onMounted } from 'vue'
 import AxiosInstance from '@/api/axios'
 // import { useRoute } from 'vue-router';
 // import FlatPickr from 'vue-flatpickr-component';
@@ -104,6 +104,10 @@ const saveSettings = async () => {
     }
   }
 }
+
+onMounted(() => {
+  fetchSettings()
+})
 </script>
 <template>
   <div>
