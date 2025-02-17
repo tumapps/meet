@@ -9,12 +9,12 @@ use scheduler\models\AppointmentAttachments;
 use scheduler\models\Events;
 use scheduler\hooks\TimeHelper;
 use scheduler\models\SpaceAvailability;
+use scheduler\models\Space;
 use yii\base\Event;
 use scheduler\models\Availability;
 use helpers\EventHandler;
 use borales\extensions\phoneInput\PhoneInputValidator;
-use yii\behaviors\BlameableBehavior;
-use yii\behaviors\TimestampBehavior;
+
 
 
 
@@ -68,6 +68,7 @@ class Appointments extends BaseModel
     const EVENT_APPOINTMENT_CREATED = 'appointmentCreated';
     const EVENT_APPOINTMENT_REJECTED = 'appointmentRejected';
     const EVENT_APPOINTMENT_DATE_UPDATED = 'appointmentUpdated';
+    const EVENT_APPOINTMENT_VENUE_UPDATE = 'appointmentVenueUpdated';
 
 
 
@@ -151,7 +152,7 @@ class Appointments extends BaseModel
             [['start_time', 'end_time'], 'validateAdvanceBooking'],
             [['start_time', 'end_time'], 'validateAvailability'],
             [['start_time', 'end_time'], 'validateOverlappingAppointment'],
-            [['start_time', 'end_time'], 'validateMeetingTime'],
+            [['start_time'], 'validateMeetingTime'],
 
             [['appointment_date'], 'validateOverlappingEvents'],
             [['appointment_date'], 'validateBookingWindow'],
@@ -537,7 +538,7 @@ class Appointments extends BaseModel
 
         $event = new Event();
         $event->sender = $this;
-        $subject = 'Appointment Created';
+        $subject = 'Meeting Created';
 
         $user = User::findOne($user_id);
         $chairPersonEmail = $user->profile->email_address;
@@ -571,6 +572,55 @@ class Appointments extends BaseModel
         $this->on(self::EVENT_APPOINTMENT_CREATED, [EventHandler::class, 'onCreatedAppointment'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_CREATED, $event);
     }
+
+    public function sendAppointmentVenueUpdateEvent($id, $contact_person_email, $contact_person_name, $user_id, $date, $startTime, $endTime, $new_venue_id, $previous_venue_id)
+    {
+
+        $event = new Event();
+        $event->sender = $this;
+        $subject = 'Meeting Venue Updated';
+
+        $user = User::findOne($user_id);
+        $chairPersonEmail = $user->profile->email_address;
+
+        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true, false);
+        $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
+
+        $fileName = null;
+        $downloadLink = null;
+
+        // geting venue detials
+        $previousVenue = $this->getSpaceName($id, $previous_venue_id);
+        $newVenue = $this->getSpaceName($id, $new_venue_id);
+
+
+
+        if ($attachementFile !== null) {
+            $fileName = $attachementFile['fileName'];
+            $downloadLink = $attachementFile['downloadLink'];
+        }
+
+        $eventData = [
+            'appointment_id' => $this->id,
+            'contact_person_email' => $contact_person_email,
+            'subject' => $subject,
+            'contact_person_name' => $contact_person_name,
+            'date' => $date,
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'contact_person_username' => $this->getUserName($user_id),
+            'chair_person_email' => $chairPersonEmail,
+            'attendees_details' => $attendeesDetails,
+            'attachment_file_name' => $fileName,
+            'attachment_download_link' => $downloadLink,
+            'new_venue' => $newVenue,
+            'previous_venue' => $previousVenue
+        ];
+
+        $this->on(self::EVENT_APPOINTMENT_VENUE_UPDATE, [EventHandler::class, 'onAppointmentVenueUpdate'], $eventData);
+        $this->trigger(self::EVENT_APPOINTMENT_VENUE_UPDATE, $event);
+    }
+
 
     public function sendAppointmentRescheduleEvent($email, $name, $bookedUserId)
     {
@@ -764,7 +814,7 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event);
     }
 
-    public function sendAppointmentRejectedEvent($email, $name, $user_id, $date, $startTime, $endTime)
+    public function sendAppointmentRejectedEvent($email, $name, $user_id, $date, $startTime, $endTime,  $isSpaceRequestUpdate = false)
     {
         $event = new Event();
         $event->sender = $this;
@@ -786,7 +836,8 @@ class Appointments extends BaseModel
             'username' => $this->getUserName($user_id),
             'user_email' => $bookedUserEmail,
             'attendees_emails' => $attendeesEmails,
-            'rejection_reason' => $rejection_reason
+            'rejection_reason' => $rejection_reason,
+            'spaceRequestUpdate' => $isSpaceRequestUpdate
         ];
 
         $this->on(self::EVENT_APPOINTMENT_REJECTED, [EventHandler::class, 'onAppointmentRejected'], $eventData);
@@ -871,6 +922,25 @@ class Appointments extends BaseModel
             ->asArray()
             ->all();
     }
+
+    protected function getSpaceName($appointmentId, $spaceId)
+    {
+        // Check SpaceAvailability for a managed space linked to the appointment
+        $spaceAvailability = SpaceAvailability::find()
+            ->select(['space_id'])
+            ->where(['appointment_id' => $appointmentId, 'space_id' => $spaceId])
+            ->scalar();
+    
+        // If a space is found in SpaceAvailability, use that space_id
+        $finalSpaceId = $spaceAvailability ?: $spaceId;
+    
+        // Fetch the space name from the Space table
+        return Space::find()
+            ->select(['name'])
+            ->where(['id' => $finalSpaceId])
+            ->scalar() ?: '';
+    }
+    
 
     /**
      * Checks if the requested appointment time overlaps with any existing appointments.

@@ -17,7 +17,8 @@ use scheduler\hooks\TimeHelper;
 use scheduler\hooks\AppointmentRescheduler as Ar;
 use auth\models\User;
 use scheduler\models\OperationReasons;
-use scheduler\models\MeetingTypes;;
+use scheduler\models\MeetingTypes;
+use scheduler\models\MeetingHistory;
 
 use app\providers\components\SmsComponent;
 
@@ -78,7 +79,7 @@ class AppointmentsController extends \helpers\ApiController
             $appointmentData = $appointment->toArray();
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
 
-            $appointmentData['space'] = $this->getSpaceDetails($appointment);
+            $appointmentData['space'] = $this->getSpaceDetails($appointment->id, $appointment->user_id);
 
             $attendees = AppointmentAttendees::find()
                 ->select(['attendee_id', 'status'])
@@ -127,7 +128,7 @@ class AppointmentsController extends \helpers\ApiController
         foreach ($appointments as &$appointment) {
             $appointmentData = $appointment->toArray();
             $appointmentData['userName'] = Appointments::getUserName($appointment->user_id);
-            $appointmentData['space'] = $this->getSpaceDetails($appointment);
+            $appointmentData['space'] = $this->getSpaceDetails($appointment->id, $appointment->user_id);
             $appointment = $appointmentData;
         }
 
@@ -145,20 +146,41 @@ class AppointmentsController extends \helpers\ApiController
             return $this->toastResponse(['statusCode' => 400, 'message' => 'Appointment cannot be approved. It may not exist or is not pending.']);
         }
 
+        $history =  MeetingHistory::find()->where(['meeting_id' => $model->id])->one();
+        if ($history) {
+            $previous_space_id = $history->space_id;
+        }
+
+
+
         $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
 
         $model->status = Appointments::STATUS_ACTIVE;
 
         if ($model->save(false)) {
-            $model->sendAppointmentCreatedEvent(
-                $model->id,
-                $model->email_address,
-                $model->contact_name,
-                $model->user_id,
-                $model->appointment_date,
-                $model->start_time,
-                $model->end_time
-            );
+            if ($history) {
+                $model->sendAppointmentVenueUpdateEvent(
+                    $model->id,
+                    $model->email_address,
+                    $model->contact_name,
+                    $model->user_id,
+                    $model->appointment_date,
+                    $model->start_time,
+                    $model->end_time,
+                    $model->space_id,
+                    $previous_space_id
+                );
+            } else {
+                $model->sendAppointmentCreatedEvent(
+                    $model->id,
+                    $model->email_address,
+                    $model->contact_name,
+                    $model->user_id,
+                    $model->appointment_date,
+                    $model->start_time,
+                    $model->end_time
+                );
+            }
 
             return $this->toastResponse(['message' => 'Appointment has been approved successfully.']);
         }
@@ -188,8 +210,16 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse($model->getErrors());
         }
 
+        $history =  Meetinghistory::find()->where(['meeting_id' => $model->id])->one();
+        if ($history) {
+            // Restore the previous space and status from history
+            $model->space_id = $history->space_id;
+            $model->status = $history->meeting_status;
+        } else {
+            $model->status = Appointments::STATUS_REJECTED;
+        }
+
         $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
-        $model->status = Appointments::STATUS_REJECTED;
 
         if ($model->save(false)) {
             // save action reason here
@@ -199,20 +229,36 @@ class AppointmentsController extends \helpers\ApiController
                 return $this->errorResponse(['message' => ['Unable to save rejection reason. Please try again later.']]);
             }
 
-            $model->sendAppointmentRejectedEvent(
-                $model->email_address,
-                $model->contact_name,
-                $model->user_id,
-                $model->appointment_date,
-                $model->start_time,
-                $model->end_time
-            );
+            if ($history) {
+
+                $model->sendAppointmentRejectedEvent(
+                    $model->email_address,
+                    $model->contact_name,
+                    $model->user_id,
+                    $model->appointment_date,
+                    $model->start_time,
+                    $model->end_time,
+                    true
+                );
+            } else {
+
+                $model->sendAppointmentRejectedEvent(
+                    $model->email_address,
+                    $model->contact_name,
+                    $model->user_id,
+                    $model->appointment_date,
+                    $model->start_time,
+                    $model->end_time
+                );
+            }
+
 
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment has been rejected successfully.']);
         }
 
         return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to reject appointment.']);
     }
+
 
     public function actionCancelMeeting($id)
     {
@@ -288,7 +334,7 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData = $appointment->toArray();
         $appointmentData['statusLabel'] = $statusLabel;
 
-        $appointmentData['space'] = $this->getSpaceDetails($appointment);
+        $appointmentData['space'] = $this->getSpaceDetails($appointment->id, $appointment->user_id);
         $appointmentData['rejection_reason'] = OperationReasons::find()->select(['reason'])->where(['entity_id' => $appointment->id])->scalar() ?? null;
 
 
@@ -333,7 +379,7 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData = $appointment->toArray();
         $appointmentData['statusLabel'] = $statusLabel;
 
-        $appointmentData['space'] = $this->getSpaceDetails($appointment);
+        $appointmentData['space'] = $this->getSpaceDetails($appointment->id, $appointment->user_id);
         $appointmentData['rejection_reason'] = OperationReasons::find()->select(['reason'])->where(['entity_id' => $appointment->id])->scalar() ?? null;
 
 
@@ -343,17 +389,17 @@ class AppointmentsController extends \helpers\ApiController
         return $this->payloadResponse($appointmentData);
     }
 
-    private function getSpaceDetails($appointment)
+    protected function getSpaceDetails($appointmentId, $userId)
     {
         $space = SpaceAvailability::find()
-            ->where(['appointment_id' => $appointment->id])
+            ->where(['appointment_id' => $appointmentId])
             ->asArray()
             ->one();
 
         if ($space && isset($space['space_id'])) {
             return Space::getSpaceNameDetails($space['space_id']);
         } elseif (empty($space)) {
-            return Space::getSpaceNameDetails($appointment->user_id);
+            return Space::getSpaceNameDetails($userId);
         } else {
             return null;
         }
@@ -490,20 +536,21 @@ class AppointmentsController extends \helpers\ApiController
         $initial_end_time = $model->end_time;
         $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
 
-        if (!empty($model->attendees)) {
-            $attendees = is_array($model->attendees) ? $model->attendees : json_decode($model->attendees, true);
-            if (is_array($attendees)) {
-                $model->attendees = array_values(array_diff($attendees, [$user_id]));
-            }
-        }
+        $initial_space_details = $this->getSpaceDetails($model->id, $model->user_id);
+        $initial_space_id = is_array($initial_space_details) && isset($initial_space_details['id']) ? $initial_space_details['id'] : null;
 
+        $new_space_id = $dataRequest['Appointments']['space_id'];
+        // $model->space_id = $new_space_id;
 
         $spaceType = Space::find()
             ->select(['space_type'])
-            ->where(['id' => $dataRequest['Appointments']['space_id']])
+            ->where(['id' =>  $new_space_id])
             ->scalar();
 
         $spaceAvailability = SpaceAvailability::findOne(['appointment_id' => $id]);
+
+        // check if space id has changed
+        $isSpaceChanged = $initial_space_id !== $new_space_id;
 
         if ($model->load($dataRequest)) {
 
@@ -522,6 +569,14 @@ class AppointmentsController extends \helpers\ApiController
                 $model->status = Appointments::STATUS_RESCHEDULED;
             }
 
+            // If space is changed & new space type is managed → set status to pending
+            if ($isSpaceChanged && $spaceType === Space::SPACE_TYPE_MANAGED) {
+                // save the previous appointment details
+                $history = new MeetingHistory();
+                $history->saveHistory($model->id, $initial_space_id, $model->status);
+                $model->status = Appointments::STATUS_PENDING;
+            }
+
             $transaction = Yii::$app->db->beginTransaction();
 
             try {
@@ -529,7 +584,7 @@ class AppointmentsController extends \helpers\ApiController
 
                     $this->updateAttendees($model->user_id, $model->id, $model->attendees, $model->appointment_date, $model->start_time, $model->end_time);
 
-                    if ($spaceType === Space::SPACE_TYPE_MANAGED) {
+                    if ($isSpaceChanged && $spaceType === Space::SPACE_TYPE_MANAGED) {
                         $this->updateSpaceAvailability($dataRequest, $spaceAvailability, $model->id);
                     }
 
@@ -909,8 +964,7 @@ class AppointmentsController extends \helpers\ApiController
         }
     }
 
-
-    protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability)
+    protected function updateSpaceAvailability($dataRequest, $currentSpaceAvailability, $appointmentId)
     {
         if (isset($dataRequest['Appointments']['space_id'])) {
             $space_id = $dataRequest['Appointments']['space_id'];
@@ -920,9 +974,9 @@ class AppointmentsController extends \helpers\ApiController
         }
 
         $space_id = $dataRequest['Appointments']['space_id'];
-        $date = $dataRequest['Appointments']['space_id'];
-        $start_time = $dataRequest['Appointments']['space_id'];
-        $end_time = $dataRequest['Appointments']['space_id'];
+        $date = $dataRequest['Appointments']['appointment_date'];
+        $start_time = $dataRequest['Appointments']['start_time'];
+        $end_time = $dataRequest['Appointments']['end_time'];
 
 
         if (empty($space_id) || $space_id === null) {
@@ -943,6 +997,7 @@ class AppointmentsController extends \helpers\ApiController
 
             $newSpaceAvailability = new SpaceAvailability();
             $newSpaceAvailability->space_id = $space_id;
+            $newSpaceAvailability->appointment_id = $appointmentId;
             $newSpaceAvailability->date = $date;
             $newSpaceAvailability->start_time = $start_time;
             $newSpaceAvailability->end_time = $end_time;
@@ -952,19 +1007,19 @@ class AppointmentsController extends \helpers\ApiController
             }
         }
 
-        if ($original_venue !== $new_venue) {
+        // if ($original_venue !== $new_venue) {
 
-            $model = new Appointments();
-            $model->sendAppointmentDateUpdatedEvent(
-                $model->user_id,
-                $model->email_address,
-                $model->appointment_date,
-                $model->start_time,
-                $model->end_time,
-                $model->contact_name,
-                $model->created_at
-            );
-        }
+        //     $model = new Appointments();
+        //     $model->sendAppointmentDateUpdatedEvent(
+        //         $model->user_id,
+        //         $model->email_address,
+        //         $model->appointment_date,
+        //         $model->start_time,
+        //         $model->end_time,
+        //         $model->contact_name,
+        //         $model->created_at
+        //     );
+        // }
     }
 
     public function actionConfirmAttendance($appointment_id, $attendee_id)
@@ -1089,25 +1144,6 @@ class AppointmentsController extends \helpers\ApiController
     {
         $user = User::findOne($userId);
         return $user && $user->profile ? $user->profile->email_address : null;
-    }
-
-    /**
-     * Recursively convert all values equal to 'null' (string) to null in an array.
-     *
-     * @param array $data The input array to process.
-     * @return array The processed array with 'null' values converted to null.
-     */
-    protected function convertNullStringsToNull(array $data)
-    {
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                $data[$key] = $this->convertNullStringsToNull($value);
-            } elseif ($value === 'null') {
-                $data[$key] = null;
-            }
-        }
-
-        return $data;
     }
 
     public function actionSendSms()
