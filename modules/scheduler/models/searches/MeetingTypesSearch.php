@@ -11,6 +11,8 @@ use scheduler\models\MeetingTypes;
  */
 class MeetingTypesSearch extends MeetingTypes
 {
+    public $search;
+
     /**
      * {@inheritdoc}
      */
@@ -18,7 +20,7 @@ class MeetingTypesSearch extends MeetingTypes
     {
         return [
             [['id', 'created_at', 'updated_at'], 'integer'],
-            [['type'], 'safe'],
+            [['type', 'search'], 'safe'],
             [['is_deleted'], 'boolean'],
         ];
     }
@@ -65,7 +67,7 @@ class MeetingTypesSearch extends MeetingTypes
             'updated_at' => $this->updated_at,
         ]);
 
-        $query->andFilterWhere(['ilike', 'type', $this->type]);
+        $query->orFilterWhere(['ilike', 'type', $this->search]);
 
         return $dataProvider;
     }
