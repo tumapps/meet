@@ -500,9 +500,9 @@ const getAppointment = async (id) => {
   }
 }
 
-const getSpaces = async () => {
+const getSpaces = async (userId) => {
   try {
-    const response = await axiosInstance.get('/v1/scheduler/spaces')
+    const response = await axiosInstance.get(`/v1/scheduler/spaces?user_id=${userId}`)
     // Ensure spaces.value is always an array
     spaces.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
     console.log('Getting spaces...')
@@ -551,9 +551,9 @@ watch(
 
 // Function to open modal
 const selectedAppointmentId = ref('')
-const openModal = async (id) => {
-  getSpaces()
-  await getAppointment(id)
+const openModal = async (id, userId) => {
+  getSpaces(userId)
+  await getAppointment(id, userId)
   console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
   if (appointmentDetails.value.recordStatus.label === 'ACTIVE') {
     getAppointmentType()
@@ -987,7 +987,7 @@ onUnmounted(() => {
 
                 <td>
                   <!-- Edit Button -->
-                  <button v-if="item.recordStatus.label === 'ACTIVE'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)" :disabled="item.checked_in">
+                  <button v-if="item.recordStatus.label === 'ACTIVE'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id, item.user_id)" :disabled="item.checked_in">
                     <i class="fas fa-edit" title="Edit"></i>
                   </button>
                   <button v-else-if="item.recordStatus.label !== 'ACTIVE'" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.id)">

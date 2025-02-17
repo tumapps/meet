@@ -37,7 +37,7 @@ export const defaultChildRoutes = (prefix) => [
   {
     path: '/meeting-types',
     name: 'meetingTypes',
-    component: ()=> import('@/views/modules/appointment/MeeetingTypesView.vue'),
+    component: () => import('@/views/modules/appointment/MeeetingTypesView.vue')
   },
   // {
   //   path: '/new-user',
