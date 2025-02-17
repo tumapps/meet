@@ -217,13 +217,13 @@ onMounted(() => {
                 </option>
               </select>
             </div>
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center" style="width: 20%">
               <b-input-group>
                 <!-- Search Input -->
-                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" />
+                <b-form-input placeholder="Search..." aria-label="Search" v-model="searchQuery" @change="getMeetingTypes(1)" />
                 <!-- Search Button -->
                 <b-input-group-append>
-                  <b-button variant="primary" @click="openModal2()"> Search </b-button>
+                  <b-button variant="primary" @click="getMeetingTypes(1)"> Search </b-button>
                 </b-input-group-append>
               </b-input-group>
             </div>
@@ -246,7 +246,7 @@ onMounted(() => {
                 <td>{{ meetingType.type }}</td>
                 <!-- <td>{{ meetingType.description }}</td> -->
                 <td>
-                  <button class="btn btn-outline-info btn-sm me-3" :disabled="meetingType.is_deleted" size="sm" @click="openModal(meetingType.id)">
+                  <button class="btn btn-outline-info btn-sm me-3"  size="sm" @click="openModal(meetingType.id)">
                     <i :class="['fas', meetingType.is_deleted ? 'fa-eye' : 'fa-edit']"></i>
                   </button>
                   <button class="btn btn-outline-danger btn-sm me-3" size="sm" @click="confirmDelete(meetingType.id, meetingType.is_deleted)">
@@ -284,8 +284,8 @@ onMounted(() => {
 
   <!-- Modal -->
   <b-modal ref="modal" id="modal" title="Edit Meeting Type" class="p-4 custom-modal-body" no-close-on-backdrop no-close-on-esc size="l" hide-footer @hide="handleClose">
-    <b-form-group label="Name" label-for="name" class="mb-3">
-      <b-form-input id="name" v-model="typeDetails.type" />
+    <b-form-group label="Type" label-for="Type" class="mb-3">
+      <b-form-input id="Type" v-model="typeDetails.type" />
       <div v-if="errors.type" class="error">{{ errors.type }}</div>
     </b-form-group>
     <!-- <b-form-group label="Description" label-for="description">
@@ -302,8 +302,8 @@ onMounted(() => {
 
   <!-- //modal 2 -->
   <b-modal ref="modal2" id="modal2" title="New Meeting Type" class="p-4 custom-modal-body" no-close-on-backdrop no-close-on-esc size="l" hide-footer @hide="handleClose">
-    <b-form-group label="name" label-for="name" class="mb-3">
-      <b-form-input id="name" v-model="typeDetails.type" />
+    <b-form-group label="Type" label-for="Type" class="mb-3">
+      <b-form-input id="Type" v-model="typeDetails.type" />
       <div v-if="errors.type" class="error">{{ errors.type }}</div>
     </b-form-group>
     <div class="d-flex justify-content-center">
