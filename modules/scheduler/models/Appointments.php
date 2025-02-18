@@ -590,8 +590,8 @@ class Appointments extends BaseModel
         $downloadLink = null;
 
         // geting venue detials
-        $previousVenue = $this->getSpaceName($id, $previous_venue_id);
-        $newVenue = $this->getSpaceName($id, $new_venue_id);
+        $previousVenue = $this->getSpaceName($previous_venue_id);
+        $newVenue = $this->getSpaceName($new_venue_id);
 
 
 
@@ -923,24 +923,15 @@ class Appointments extends BaseModel
             ->all();
     }
 
-    protected function getSpaceName($appointmentId, $spaceId)
+    protected function getSpaceName($spaceId)
     {
-        // Check SpaceAvailability for a managed space linked to the appointment
-        $spaceAvailability = SpaceAvailability::find()
-            ->select(['space_id'])
-            ->where(['appointment_id' => $appointmentId, 'space_id' => $spaceId])
-            ->scalar();
-    
-        // If a space is found in SpaceAvailability, use that space_id
-        $finalSpaceId = $spaceAvailability ?: $spaceId;
-    
-        // Fetch the space name from the Space table
+
         return Space::find()
             ->select(['name'])
-            ->where(['id' => $finalSpaceId])
+            ->where(['id' => $spaceId])
             ->scalar() ?: '';
     }
-    
+
 
     /**
      * Checks if the requested appointment time overlaps with any existing appointments.
