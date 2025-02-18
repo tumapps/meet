@@ -21,6 +21,14 @@ function goToFirstMenu() {
   menuStore.navigateToFirstMenu(router)
 }
 
+const logout = async () => {
+  try {
+    await axiosInstance.logout()
+    router.push('/auth/login')
+  } catch (error) {
+    console.error('Error during logout:', error)
+  }
+}
 const onSubmit = async () => {
   errors.value = { username: '', password: '', general: '' }
 
@@ -82,15 +90,18 @@ const onSubmit = async () => {
         <b-card class="text-center p-5 rounded-3 bg-aliceblue" style="min-height: 400px">
           <!-- Added padding and min-height -->
           <img src="@/assets/images/avatars/01.png" alt="User-Profile" class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded" loading="lazy" />
-          <h4 class="mt-4">Hi ! {{ username }}</h4>
-          <p>Enter your password to access the admin.</p>
+          <h4 class="m-4 m">Hi ! {{ username }}</h4>
+          <p>Your session is locked. Please enter your password to continue.</p>
           <div class="form-group me-3">
-            <label class="form-label" for="lock-pass">Password</label>
+            <!-- <label class="form-label" for="lock-pass">Password</label> -->
             <input type="password" class="form-control mb-0" id="password" v-model="password" placeholder="Enter password" aria-label="Password" autocomplete="off" />
             <div v-if="errors.password" class="error" aria-live="polite">{{ errors.password }}</div>
             <!-- Access errors.value -->
           </div>
-          <b-button class="bg-green" @click="onSubmit" variant="primary">Login</b-button>
+          <div class="d-flex w-100 justify-content-center gap-5">
+            <button class="btn btn-outline-primary" @click="onSubmit">Login</button>
+            <button class="btn btn-outline-danger" @click="logout">Logout</button>
+          </div>
         </b-card>
       </b-col>
     </b-row>
@@ -106,8 +117,16 @@ const onSubmit = async () => {
   /* background-color: black !important; */
 }
 
-.error {
-  color: red;
-  font-size: 1.1em;
+.logout-btn {
+  color: #d89837; /* Custom text color */
+  font-weight: bold; /* Makes text bold */
+  cursor: pointer; /* Pointer effect on hover */
+  display: inline-flex; /* Aligns text and icon properly */
+  align-items: center; /* Vertically aligns text and icon */
+  gap: 5px; /* Adds space between text and arrow */
+}
+
+.logout-btn:hover {
+  color: #b9782c; /* Darker shade on hover */
 }
 </style>
