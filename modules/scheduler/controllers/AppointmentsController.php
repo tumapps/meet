@@ -148,7 +148,8 @@ class AppointmentsController extends \helpers\ApiController
 
         $history =  MeetingHistory::find()->where(['meeting_id' => $model->id])->one();
         if ($history) {
-            $previous_space_id = $history->space_id;
+            $previous_venue_id = $history->space_id;
+            $new_venue_id = $history->new_space_id;
         }
 
 
@@ -167,8 +168,8 @@ class AppointmentsController extends \helpers\ApiController
                     $model->appointment_date,
                     $model->start_time,
                     $model->end_time,
-                    $model->space_id,
-                    $previous_space_id
+                    $new_venue_id,
+                    $previous_venue_id
                 );
             } else {
                 $model->sendAppointmentCreatedEvent(
@@ -573,7 +574,7 @@ class AppointmentsController extends \helpers\ApiController
             if ($isSpaceChanged && $spaceType === Space::SPACE_TYPE_MANAGED) {
                 // save the previous appointment details
                 $history = new MeetingHistory();
-                $history->saveHistory($model->id, $initial_space_id, $model->status);
+                $history->saveHistory($model->id, $initial_space_id, $model->status, $new_space_id);
                 $model->status = Appointments::STATUS_PENDING;
             }
 
