@@ -100,7 +100,7 @@ const onSubmit = async () => {
           </div>
           <div class="d-flex w-100 justify-content-center gap-5">
             <button class="btn btn-outline-primary" @click="onSubmit">Login</button>
-            <button class="btn btn-outline-danger" @click="logout">Logout</button>
+            <button class="btn btn-outline-warning" @click="logout">go Back</button>
           </div>
         </b-card>
       </b-col>
