@@ -28,7 +28,7 @@ const onSubmit = async () => {
       }
     )
 
-    if (response.data.dataPayload && !response.data.dataPayload.error) {
+    if (response.data.toastPayload) {
       proxy.$showAlert({
         title: response.data.toastPayload.toastTheme,
         text: response.data.toastPayload.toastMessage,
