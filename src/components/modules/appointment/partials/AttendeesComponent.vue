@@ -253,10 +253,11 @@ watch(
               </span>
             </td>
             <td>
-              <span :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
-                {{ user.status === 9 ? 'Pending' : 'Active' }}
+              <span :class="[user.status === 'PENDING' ? 'bg-info text-white' : user.status === 'CONFIRMED' ? 'bg-success text-white' : user.status === 'DECLINED' ? 'bg-danger text-white' : '', 'fw-bold text-nowrap px-2 py-1 small rounded']" :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
+                {{ user.status }}
               </span>
             </td>
+
             <td>
               <!-- Remove Icon -->
               <i v-if="!user.removed" class="fas fa-trash-alt text-danger cursor-pointer" @click="removeAttendee(index, user.fromBackend)" title="Remove"></i>

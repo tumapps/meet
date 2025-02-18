@@ -2,14 +2,11 @@
   <!-- Footer Section Start -->
   <footer :class="`footer ${footerStyle}`">
     <div class="footer-body">
-      <div class="right-panel">
-        © {{ new Date().getFullYear() }} <a href="https://crackit.co.ke/" target="_blank">TUM-ICTS. </a>All Rights Reserved.
-      </div>
+      <div class="right-panel">© {{ new Date().getFullYear() }} <a href="https://crackit.co.ke/" target="_blank">TUM-ICTS. </a>All Rights Reserved.</div>
     </div>
   </footer>
   <!-- Footer Section End -->
-   <b-offcanvas placement="bottom" title="Share">
-  </b-offcanvas>
+  <b-offcanvas placement="bottom" title="Share"> </b-offcanvas>
 </template>
 
 <script>
