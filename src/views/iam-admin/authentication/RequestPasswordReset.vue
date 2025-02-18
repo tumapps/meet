@@ -97,7 +97,10 @@ const onSubmit = async () => {
                   </div>
                 </div> -->
               </div>
-              <button type="submit" class="btn btn-primary">Reset</button>
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Reset</button>
+                <button type="button" class="btn btn-outline-warning" @click="router.push('/auth/login')">Back to Login</button>
+              </div>
             </form>
           </div>
         </div>
