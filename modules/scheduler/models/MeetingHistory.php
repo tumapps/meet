@@ -3,6 +3,7 @@
 namespace scheduler\models;
 
 use Yii;
+
 /**
  *@OA\Schema(
  *  schema="MeetingHistory",
@@ -31,15 +32,15 @@ class MeetingHistory extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'meeting_id',
-            'meeting_status',
-            'space_id',
-            'is_deleted',
-            'updated_at',
-            'created_at',
+                'id',
+                'meeting_id',
+                'meeting_status',
+                'space_id',
+                'is_deleted',
+                'updated_at',
+                'created_at',
             ]
         );
     }
@@ -49,7 +50,7 @@ class MeetingHistory extends BaseModel
     public function rules()
     {
         return [
-            [['meeting_id', 'meeting_status', 'space_id', 'is_deleted'], 'default', 'value' => null],
+            [['meeting_id', 'meeting_status', 'space_id', 'new_space_id', 'is_deleted'], 'default', 'value' => null],
             [['meeting_id', 'meeting_status', 'space_id', 'is_deleted',], 'integer'],
         ];
     }
@@ -70,10 +71,11 @@ class MeetingHistory extends BaseModel
         ];
     }
 
-    public function saveHistory($appointmentId, $previousSpaceId, $previousStatus)
+    public function saveHistory($appointmentId, $previousSpaceId, $previousStatus, $newSpceId)
     {
         $this->meeting_id = $appointmentId;
         $this->space_id = $previousSpaceId;
+        $this->new_space_id = $newSpceId;
         $this->meeting_status = $previousStatus;
         return $this->save(false);
 
