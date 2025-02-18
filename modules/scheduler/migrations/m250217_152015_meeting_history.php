@@ -17,6 +17,7 @@ class m250217_152015_meeting_history extends Migration
             'meeting_id' => $this->integer(),
             'meeting_status' => $this->integer(),
             'space_id' => $this->bigInteger(),
+            'new_space_id' => $this->bigInteger(),
             'is_deleted' => $this->integer()->defaultValue(0),
             'updated_at' => $this->integer(),
             'created_at' => $this->integer(),
