@@ -7,7 +7,6 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import AxiosInstance from '@/api/axios'
 import { useAuthStore } from '@/store/auth.store.js'
-import { usePreferencesStore } from '../../../store/preferences'
 import { format } from 'date-fns' // read comment on line 107
 import NewEvent from '@/components/AddEvent.vue'
 
@@ -30,7 +29,6 @@ const openEventModal = (id) => {
 }
 
 const { proxy } = getCurrentInstance()
-const preferences = usePreferencesStore()
 const authStore = useAuthStore()
 const axiosInstance = AxiosInstance()
 // Reactive variables
@@ -245,13 +243,6 @@ function handleDayCellClassNames(arg) {
   return []
 }
 
-watch(
-  () => preferences.weekend,
-  (newWeekend) => {
-    calendarOptions.value.weekends = newWeekend
-  }
-)
-
 // Watch for dashType changes and update initialView
 watch(
   () => props.dashType,
@@ -265,7 +256,7 @@ const calendarOptions = ref({
   initialView: props.dashType === 'Registrar' ? 'dayGridMonth' : 'timeGridWeek',
   height: 'auto',
   events: events.value,
-  weekends: preferences.weekend,
+  weekends: false,
   dayMaxEvents: 3,
   slotDuration: '00:30:00', // Set time slot intervals to 30 minutes
   slotMinTime: '08:00:00', // Start time of the day view

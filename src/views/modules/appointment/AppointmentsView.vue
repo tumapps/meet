@@ -132,7 +132,12 @@ const flatPickrConfig = {
   dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'd-M-Y',
-  minDate: 'today'
+  minDate: 'today',
+  disable: [
+    function (date) {
+      return date.getDay() === 6 || date.getDay() === 0
+    }
+  ]
 }
 
 const myModal = ref(null)
@@ -995,7 +1000,7 @@ onUnmounted(() => {
                   </button>
 
                   <!-- Cancel Button -->
-                  <button v-if="item.recordStatus.label !== 'CANCELLED' && item.recordStatus.label === 'ACTIVE'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
+                  <button v-if="(item.recordStatus.label !== 'CANCELLED' && item.recordStatus.label === 'ACTIVE') || item.recordStatus.label === 'RESCHEDULE'" class="btn btn-outline-warning btn-sm me-3" @click="confirmCancel(item.id)" :disabled="item.checked_in">
                     <i class="fas fa-cancel" title="Cancel"></i>
                   </button>
                   <button v-else-if="item.recordStatus.label !== 'ACTIVE'" class="btn btn-outline-warning btn-sm me-3" disabled>
@@ -1249,7 +1254,7 @@ onUnmounted(() => {
                 <b-row class="m-5">
                   <b-col>
                     <div class="d-flex justify-content-center">
-                      <b-button v-if="uploading === false" variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING'"> Update </b-button>
+                      <b-button v-if="uploading === false" variant="primary" class="me-3" @click="updateAppointment" ref="updateButton" :disabled="recordStatus.label !== 'ACTIVE' && recordStatus.label !== 'PENDING' && recordStatus.label !== 'RESCHEDULE'"> Update </b-button>
                       <button v-else class="btn btn-primary" type="button" disabled>
                         <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                         {{ buttonText.value !== null ? buttonText.value : 'Submitting...' }}

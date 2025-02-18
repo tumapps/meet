@@ -3,7 +3,7 @@
   <footer :class="`footer ${footerStyle}`">
     <div class="footer-body">
       <div class="right-panel">
-        © {{ new Date().getFullYear() }} <a href="https://crackit.co.ke/" target="_blank">CrackIT Technologies. </a>All Rights Reserved.
+        © {{ new Date().getFullYear() }} <a href="https://crackit.co.ke/" target="_blank">TUM-ICTS. </a>All Rights Reserved.
       </div>
     </div>
   </footer>

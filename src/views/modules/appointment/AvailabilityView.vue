@@ -29,7 +29,12 @@ const availabilityDetails = ref({
 const config = {
   enableTime: false,
   // noCalendar: true,
-  dateFormat: 'Y-m-d'
+  dateFormat: 'Y-m-d',
+  disable: [
+    function (date) {
+      return date.getDay() === 6 || date.getDay() === 0
+    }
+  ]
 }
 
 const config2 = {

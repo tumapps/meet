@@ -57,7 +57,12 @@ const config = {
   dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'F j, Y',
-  minDate: 'today'
+  minDate: 'today',
+  disable: [
+    function (date) {
+      return date.getDay() === 6 || date.getDay() === 0
+    }
+  ]
 }
 
 const config2 = {
