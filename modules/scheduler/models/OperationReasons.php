@@ -128,6 +128,7 @@ class OperationReasons extends BaseModel
                 'entity_id' => $entityId,
                 'affected_user_id' => $user_id,
             ])
+            ->orderBy(['created_at' => SORT_DESC]) 
             ->scalar();
 
         return $reason ?: 'No reason found';
