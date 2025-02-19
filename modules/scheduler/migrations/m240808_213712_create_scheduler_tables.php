@@ -31,9 +31,19 @@ class m240808_213712_create_scheduler_tables extends Migration
         ], $tableOptions);
 
 
+        $this->createTable('{{%meeting_types}}', [
+            'id' => $this->primaryKey(),
+            'type' => $this->string(50)->notNull(),
+            'is_deleted' => $this->boolean()->defaultValue(false),
+            'created_at' => $this->integer(),
+            'updated_at' => $this->integer()
+        ]);
+
+
         $this->createTable('{{%appointments}}', [
             'id' => $this->primaryKey(),
             'user_id' => $this->bigInteger(),
+            // 'appointment_type_id' => $this->integer(),
             'appointment_date' => $this->date()->notNull(),
             'start_time' => $this->time()->null(),
             'end_time' => $this->time()->null(),
@@ -41,7 +51,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'email_address' => $this->string(128)->notNull(),
             'mobile_number' => $this->string(15),
             'subject' => $this->text()->null(),
-            'appointment_type' => $this->string(), //personal or group
+            'appointment_type_id' => $this->string(), //personal or group
             'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(10),
             'priority' => $this->integer()->null(),
@@ -54,6 +64,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
+            // 'FOREIGN KEY ([[appointment_type_id]]) REFERENCES {{%meeting_types}} ([[id]])' .
+            //     $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
         //Add index to created_at column
@@ -158,14 +170,6 @@ class m240808_213712_create_scheduler_tables extends Migration
             'FOREIGN KEY ([[appointment_id]]) REFERENCES {{%appointments}} ([[id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
-
-        $this->createTable('{{%meeting_types}}', [
-            'id' => $this->primaryKey(),
-            'type' => $this->string(50)->notNull(),
-            'is_deleted' => $this->boolean()->defaultValue(false),
-            'created_at' => $this->integer(),
-            'updated_at' => $this->integer()
-        ]);
     }
 
     /**
@@ -173,7 +177,6 @@ class m240808_213712_create_scheduler_tables extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable('{{%meeting_types}}');
         $this->dropTable('{{%appointment_files}}');
         $this->dropTable('{{%appointment_attendees}}');
         $this->dropIndex('idx-events-start_date', '{{%events}}');
@@ -182,6 +185,7 @@ class m240808_213712_create_scheduler_tables extends Migration
         $this->dropTable('{{%spaces}}');
         $this->dropIndex('idx-appointments-created_at', '{{%appointments}}');
         $this->dropTable('{{%appointments}}');
+        $this->dropTable('{{%meeting_types}}');
         $this->dropTable('{{%unavailable_slots}}');
     }
 
