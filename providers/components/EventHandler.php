@@ -50,10 +50,12 @@ class EventHandler
 			'date' => $event->data['date'],
 			'startTime' => $event->data['start_time'],
 			'endTime' => $event->data['end_time'],
-			'username' => $event->data['contact_person_username'],
-			'contact_name' => $event->data['contact_person_name'],
+			'chairPerson' => $event->data['chair_person'],
+			'contactPerson' => $event->data['contact_person'],
 			'attachment_file_name' => $event->data['attachment_file_name'],
 			'attachment_download_link' => $event->data['attachment_download_link'],
+			'subject' => $event->data['subject'],
+			'description' => $event->data['description'],
 		];
 
 		$contactPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
@@ -61,14 +63,14 @@ class EventHandler
 		]));
 
 		// self::addEmailToQueue($contactPersonEmail, $subject, $contactPersonEmailBody);
-		self::queueEmail($contactPersonEmail, $subject, $contactPersonEmailBody);
+		self::queueEmail($contactPersonEmail, 'Meeting Confirmed', $contactPersonEmailBody);
 
 		$chairPersonEmailBody = Yii::$app->view->render('@ui/views/emails/appointmentCreated', array_merge($commonData, [
 			'recipientType' => 'chair_person',
 		]));
 
 		// self::addEmailToQueue($chairPersonEmail, $subject, $chairPersonEmailBody);
-		self::queueEmail($chairPersonEmail, $subject, $chairPersonEmailBody);
+		self::queueEmail($chairPersonEmail, 'Meeting Confirmed', $chairPersonEmailBody);
 
 
 		if (!empty($attendeesDetails)) {
@@ -91,7 +93,7 @@ class EventHandler
 					'confirmationLink' => $confirmationLink,
 				]));
 				// self::addEmailToQueue($attendeeEmail, $subject, $attendeeEmailBody);
-				self::queueEmail($attendeeEmail, $subject, $attendeeEmailBody);
+				self::queueEmail($attendeeEmail, 'Meeting Invitation', $attendeeEmailBody);
 			}
 		}
 	}
@@ -222,8 +224,8 @@ class EventHandler
 
 	public static function onAppointmentCancelled(Event $event)
 	{
-		$contactEmail = $event->data['contactEmail'];
-		$bookedUserEmail = $event->data['bookedUserEmail'];
+		$contactPersonEmail = $event->data['contactPersonEmail'];
+		$chairPerson = $event->data['chairPersonEmail'];
 		$attendeesEmails = $event->data['attendees_emails'];
 
 		$commonData = [
@@ -231,7 +233,7 @@ class EventHandler
 			'startTime' => $event->data['startTime'],
 			'endTime' => $event->data['endTime'],
 			'reason' => $event->data['cancellation_reason'],
-			'contactLink' => 'https://localhost',
+			'appointment_subject' => $event->data['appointment_subject'],
 		];
 
 		$userBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
@@ -239,8 +241,8 @@ class EventHandler
 			'recipientType' => 'user',
 		]));
 
-		// self::addEmailToQueue($contactEmail, $event->data['subject'], $userBody);
-		self::queueEmail($contactEmail, $event->data['subject'], $userBody);
+		// self::addEmailToQueue($contactPersonEmail, $event->data['subject'], $userBody);
+		self::queueEmail($contactPersonEmail, $event->data['subject'], $userBody);
 
 
 		$vcBody = Yii::$app->view->render('@ui/views/emails/appointmentCancelled', array_merge($commonData, [
@@ -248,8 +250,8 @@ class EventHandler
 			'recipientType' => 'vc', // Specify the recipient type
 		]));
 
-		// self::addEmailToQueue($bookedUserEmail, $event->data['subject'], $vcBody);
-		self::queueEmail($bookedUserEmail, $event->data['subject'], $vcBody);
+		// self::addEmailToQueue($chairPerson, $event->data['subject'], $vcBody);
+		self::queueEmail($chairPerson, $event->data['subject'], $vcBody);
 
 
 		if (!empty($attendeesEmails)) {
@@ -294,17 +296,22 @@ class EventHandler
 	{
 		$email = $event->data['email'];
 		$subject = $event->data['subject'];
+		$appointment_subject = $event->data['appointment_subject'];
 		$attendeesEmails = $event->data['attendees_emails'];
 
 		$commonData = [
-			'bookedUserName' => $event->data['bookedUserName'],
-			'supportEmail' => 'example@gmail.com'
+			'chairPerson' => $event->data['chair_person'],
+            'appointmentSubject' => $appointment_subject,
+			'date' => $event->data['date'],
+			'start_time' => $event->data['start_time'],
+            'end_time' => $event->data['end_time'],
+			'isEvent' => $event->data['isEvent']
 		];
 
 		$body = Yii::$app->view->render(
 			'@ui/views/emails/appointmentAffected',
 			array_merge($commonData, [
-				'name' => $event->data['name'],
+				'contact_name' => $event->data['contact_name'],
 				'recipientType' => 'user',
 			])
 		);
@@ -337,6 +344,7 @@ class EventHandler
 			'date' => $event->data['date'],
 			'startTime' => $event->data['startTime'],
 			'endTime' => $event->data['endTime'],
+			'appointment_subject' => $event->data['appointment_subject'],
 		];
 
 		$body = Yii::$app->view->render(
@@ -370,7 +378,8 @@ class EventHandler
 		$attendeesEmails = $event->data['attendees_emails'];
 
 		$commonData = [
-			'username' => $event->data['username'],  // chair of the meeting
+			'chairPerson' => $event->data['chair_person'],  // chair of the meeting
+			'appointment_subject' => $event->data['appointment_subject'],
 			'current_date' => $event->data['current_date'],
 			'initial_date' => $event->data['initial_date'],
 			'start_time' => $event->data['start_time'],
@@ -403,9 +412,11 @@ class EventHandler
 	{
 		$email = $event->data['email'];
 		$subject = $event->data['subject'];
+		$isEvent = $event->data['isEvent'];
 
 		$body = Yii::$app->view->render('@ui/views/emails/appointmentsNeedReschedule', [
 			'affectedAppointments' => $event->data['appointments'],
+			'isEvent' => $isEvent,
 		]);
 
 		// self::send($email, $subject, $body);
