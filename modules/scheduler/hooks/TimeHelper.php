@@ -277,7 +277,7 @@ class TimeHelper
     //     return false;
     // }
 
-    public static function checkExpireTime($appointment_date, $slot_start_time, $buffer_time)
+    public static function checkExpireTime($appointment_date, $slot_start_time, int $buffer_time = 0)
     {
         // Get current date and time
         $currentDate = date('Y-m-d');
