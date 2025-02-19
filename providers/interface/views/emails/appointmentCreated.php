@@ -46,7 +46,18 @@
             margin: 20px 0;
             padding-left: 20px;
             border-left: 4px solid #5cb85c;
+            border-radius: 5px;
+
         }
+
+        .meeting-description {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #D89837;
+            border-radius: 5px;
+        }
+
 
         .appointment-details p {
             margin-bottom: 10px;
@@ -88,38 +99,46 @@
             font-size: 14px;
             color: #777777;
         }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        .capitalize {
+            text-transform: capitalize;
+        }
     </style>
 </head>
 
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h2>Appointment Created</h2>
+            <h2 class="uppercase"><?= $subject ? $subject : 'Appointment Created' ?></h2>
         </div>
         <div class="email-body">
             <?php if ($recipientType === 'contact_person'): ?>
-                <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
-                <p>An appointment has been successfully created for you with <?= htmlspecialchars($username) ?>. Below are the appointment details:</p>
+                <p>Dear <span class="capitalize"><?= htmlspecialchars($contactPerson) ?>,</span></p>
+                <p>An appointment has been successfully created for you with <span class="capitalize"><?= htmlspecialchars($chairPerson) ?></span>. Below are the appointment details:</p>
 
             <?php elseif ($recipientType === 'chair_person'): ?>
-                <p>Dear <?= htmlspecialchars($username) ?>,</p>
-                <p>A new appointment has been booked with you by <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
+                <p>Dear <span class="capitalize"><?= htmlspecialchars($chairPerson) ?></span>,</p>
+                <p>A new appointment has been booked with you by <?= htmlspecialchars($contactPerson) ?>. Here are the details:</p>
 
             <?php elseif ($recipientType === 'attendee'): ?>
-                <p>Dear <?= htmlspecialchars($attendeeName) ?>,</p>
-                <p>You have been invited to attend a scheduled appointment with <?= htmlspecialchars($contact_name) ?>. Here are the details:</p>
-                <p>Please confirm your attendance by clicking the button below:</p>
-                <a href="<?= htmlspecialchars($confirmationLink) ?>" target="_blank"
-                    aria-label="Click to confirm your attendance"
-                    style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                    Confirm Attendance
-                </a>
-
+                <p>Dear <span class="capitalize"><?= htmlspecialchars($attendeeName) ?>,</span></p>
+                <p>You have been invited to attend a scheduled appointment with <?= htmlspecialchars($contactPerson) ?>. Here are the details:</p>
+            <?php endif; ?>
+            <?php if (!empty($description)): ?>
+                <div class="meeting-description">
+                    <p><strong>Meeting Description:</strong></p>
+                    <p><?= nl2br(htmlspecialchars($description)) ?></p>
+                </div>
             <?php endif; ?>
             <div class="appointment-details">
+                <p><strong>Subject:</strong> <?= htmlspecialchars($subject) ?></p>
                 <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                 <p><strong>Time:</strong> <?= htmlspecialchars($startTime) ?> - <?= htmlspecialchars($endTime) ?></p>
-                <p><strong>With:</strong> <?= htmlspecialchars($recipientType === 'contact_person' ? $username : $contact_name) ?></p>
+                <p><strong>With:</strong><span class="uppercase"><?= htmlspecialchars($recipientType === 'contact_person' ? $chairPerson : $contactPerson) ?></span></p>
             </div>
 
             <?php if (!empty($attachment_file_name) && !empty($attachment_download_link)): ?>
@@ -131,12 +150,19 @@
                     <a href="<?= htmlspecialchars($attachment_download_link) ?>" class="button" download>Download Agenda</a>
                 </div>
             <?php endif; ?>
+            <?php if ($recipientType === 'attendee'): ?>
+                <p>Please confirm your attendance by clicking the button below:</p>
+                <a href="<?= htmlspecialchars($confirmationLink) ?>" target="_blank"
+                    aria-label="Click to confirm your attendance"
+                    style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Confirm Attendance
+                </a>
+            <?php endif; ?>
+
         </div>
-        <div class="contact-info">
-            <p>If you have any questions, feel free to contact us.</p>
-        </div>
+
         <div class="email-footer">
-            <p>&copy; <?= date('Y') ?> Tum Tumeet. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= \Yii::$app->name; ?>. All rights reserved.</p>
         </div>
     </div>
 </body>

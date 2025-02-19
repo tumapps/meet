@@ -90,7 +90,7 @@
             </div>
         </div>
         <div class="email-footer">
-            <p>&copy; <?= date('Y') ?> Tum Tumeet. All rights reserved.</p>
+            <p>&copy; <?= date('Y') ?> <?= \Yii::$app->name; ?>.. All rights reserved.</p>
         </div>
     </div>
 </body>
