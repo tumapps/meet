@@ -4,7 +4,11 @@ namespace scheduler\controllers;
 
 use Yii;
 use scheduler\models\Settings;
+use scheduler\models\Space;
+
+
 use scheduler\models\searches\SettingsSearch;
+
 /**
  * @OA\Tag(
  *     name="Settings",
@@ -14,19 +18,19 @@ use scheduler\models\searches\SettingsSearch;
 class SettingsController extends \helpers\ApiController
 {
     public $permissions = [
-        'schedulerSettingsList'=>'View Settings List',
-        'schedulerSettingsCreate'=>'Add Settings',
-        'schedulerSettingsUpdate'=>'Edit Settings',
-        'schedulerSettingsDelete'=>'Delete Settings',
-        'schedulerSettingsRestore'=>'Restore Settings',
-        ];
+        'schedulerSettingsList' => 'View Settings List',
+        'schedulerSettingsCreate' => 'Add Settings',
+        'schedulerSettingsUpdate' => 'Edit Settings',
+        'schedulerSettingsDelete' => 'Delete Settings',
+        'schedulerSettingsRestore' => 'Restore Settings',
+    ];
     public function actionIndex()
     {
         Yii::$app->user->can('schedulerSettingsList');
         $searchModel = new SettingsSearch();
-        $search = $this->queryParameters(Yii::$app->request->queryParams,'SettingsSearch');
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'SettingsSearch');
         $dataProvider = $searchModel->search($search);
-        return $this->payloadResponse($dataProvider,['oneRecord'=>false]);
+        return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
     public function actionView($id)
@@ -34,7 +38,7 @@ class SettingsController extends \helpers\ApiController
         Yii::$app->user->can('schedulerSettingsList');
         $setting_id = Settings::getSettingId($id);
 
-        if(!$setting_id) {
+        if (!$setting_id) {
             return $this->payloadResponse(['message' => 'Settings Not Found for the current User']);
         }
 
@@ -47,10 +51,10 @@ class SettingsController extends \helpers\ApiController
         $model = new Settings();
         $model->loadDefaultValues();
         $dataRequest['Settings'] = Yii::$app->request->getBodyParams();
-        if($model->load($dataRequest) && $model->save()) {
-            return $this->payloadResponse($model,['statusCode'=>201,'message'=>'Settings added successfully']);
+        if ($model->load($dataRequest) && $model->save()) {
+            return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Settings added successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     public function actionUpdate($id)
@@ -58,10 +62,18 @@ class SettingsController extends \helpers\ApiController
         Yii::$app->user->can('schedulerSettingsUpdate');
         $dataRequest['Settings'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
-        if($model->load($dataRequest) && $model->save()) {
-           return $this->payloadResponse($this->findModel($id),['statusCode'=>202,'message'=>'Settings updated successfully']);
+        if ($model->load($dataRequest) && $model->save()) {
+            $spaceUpdate = space::findOne(['id' => $model->user_id]);
+            // update space opening and closing time for this user
+            if ($spaceUpdate) {
+                $spaceUpdate->opening_time = $model->start_time;
+                $spaceUpdate->closing_time = $model->end_time;
+                $spaceUpdate->save(false);
+            }
+
+            return $this->payloadResponse($this->findModel($id), ['statusCode' => 202, 'message' => 'Settings updated successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     public function actionDelete($id)
@@ -70,13 +82,13 @@ class SettingsController extends \helpers\ApiController
         if ($model->is_deleted) {
             Yii::$app->user->can('schedulerSettingsRestore');
             $model->restore();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Settings restored successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Settings restored successfully']);
         } else {
             Yii::$app->user->can('schedulerSettingsDelete');
             $model->delete();
-            return $this->toastResponse(['statusCode'=>202,'message'=>'Settings deleted successfully']);
+            return $this->toastResponse(['statusCode' => 202, 'message' => 'Settings deleted successfully']);
         }
-        return $this->errorResponse($model->getErrors()); 
+        return $this->errorResponse($model->getErrors());
     }
 
     protected function findModel($id)
