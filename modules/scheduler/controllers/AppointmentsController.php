@@ -55,12 +55,8 @@ class AppointmentsController extends \helpers\ApiController
         $searchModel = new AppointmentsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'AppointmentsSearch');
 
-
         $dataProvider = $searchModel->search($search);
 
-        // if (!($isSecretary || $isSuperAdmin)) {
-        //     $dataProvider->query->andWhere(['user_id' => $currentUserId]);
-        // }
         if ($isSecretary) {
             $managedUserIds = ManagedUsers::find()
                 ->select('user_id')
@@ -152,37 +148,16 @@ class AppointmentsController extends \helpers\ApiController
             $new_venue_id = $history->new_space_id;
         }
 
-
-
         $model->appointment_date = date('Y-m-d', strtotime($model->appointment_date));
 
         $model->status = Appointments::STATUS_ACTIVE;
 
         if ($model->save(false)) {
             if ($history) {
-                $model->sendAppointmentVenueUpdateEvent(
-                    $model->id,
-                    $model->email_address,
-                    $model->contact_name,
-                    $model->user_id,
-                    $model->appointment_date,
-                    $model->start_time,
-                    $model->end_time,
-                    $new_venue_id,
-                    $previous_venue_id
-                );
+                $model->sendAppointmentVenueUpdateEvent($new_venue_id, $previous_venue_id);
             } else {
-                $model->sendAppointmentCreatedEvent(
-                    $model->id,
-                    $model->email_address,
-                    $model->contact_name,
-                    $model->user_id,
-                    $model->appointment_date,
-                    $model->start_time,
-                    $model->end_time
-                );
+                $model->sendAppointmentCreatedEvent();
             }
-
             return $this->toastResponse(['message' => 'Appointment has been approved successfully.']);
         }
 
@@ -231,28 +206,10 @@ class AppointmentsController extends \helpers\ApiController
             }
 
             if ($history) {
-
-                $model->sendAppointmentRejectedEvent(
-                    $model->email_address,
-                    $model->contact_name,
-                    $model->user_id,
-                    $model->appointment_date,
-                    $model->start_time,
-                    $model->end_time,
-                    true
-                );
+                $model->sendAppointmentRejectedEvent(true);
             } else {
-
-                $model->sendAppointmentRejectedEvent(
-                    $model->email_address,
-                    $model->contact_name,
-                    $model->user_id,
-                    $model->appointment_date,
-                    $model->start_time,
-                    $model->end_time
-                );
+                $model->sendAppointmentRejectedEvent();
             }
-
 
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment has been rejected successfully.']);
         }
@@ -260,10 +217,9 @@ class AppointmentsController extends \helpers\ApiController
         return $this->toastResponse(['statusCode' => 500, 'message' => 'Failed to reject appointment.']);
     }
 
-
     public function actionCancelMeeting($id)
     {
-        Yii::$app->user->can('registrar');
+        // Yii::$app->user->can('registrar');
 
         $request = Yii::$app->request;
         $model = $this->findModel($id);
@@ -272,22 +228,8 @@ class AppointmentsController extends \helpers\ApiController
             return $this->errorResponse(['message' => ['Provided meeting ID does not exist']]);
         }
 
-        $contact_email = $model->email_address;
-        $contact_name = $model->contact_name;
-        $date = $model->appointment_date;
-        $starTime = $model->start_time;
-        $endTime = $model->end_time;
-        $user = User::findOne($model->user_id);
-
-        if ($user && $user->profile) {
-            $chairPersonEmail = $user->profile->email_address;
-        } else {
-            return $this->errorResponse(['message' => ['User profile or email not found']]);
-        }
-
         // Set scenario for validation
         $model->scenario = Appointments::SCENARIO_CANCEL;
-
 
         if ($request->isPut) {
             $putParams = $request->getBodyParams();
@@ -315,7 +257,7 @@ class AppointmentsController extends \helpers\ApiController
 
             $transaction->commit();
 
-            $model->sendAppointmentCancelledEvent($contact_email, $contact_name, $date, $starTime, $endTime, $chairPersonEmail, $model->user_id);
+            $model->sendAppointmentCancelledEvent();
 
             return $this->toastResponse(['statusCode' => 202, 'message' => 'Appointment CANCELLED successfully']);
         } catch (\Exception $e) {
@@ -336,7 +278,11 @@ class AppointmentsController extends \helpers\ApiController
         $appointmentData['statusLabel'] = $statusLabel;
 
         $appointmentData['space'] = $this->getSpaceDetails($appointment->id, $appointment->user_id);
-        $appointmentData['rejection_reason'] = OperationReasons::find()->select(['reason'])->where(['entity_id' => $appointment->id])->scalar() ?? null;
+        $appointmentData['rejection_reason'] = OperationReasons::find()
+            ->select(['reason'])
+            ->where(['entity_id' => $appointment->id])
+            ->andWhere(['NOT IN', 'type', ['REMOVED', 'DECLINED']])
+            ->scalar() ?? null;
 
 
         $attendees = AppointmentAttendees::find()
@@ -497,15 +443,7 @@ class AppointmentsController extends \helpers\ApiController
 
                     if ($model->status === Appointments::STATUS_ACTIVE) {
 
-                        $model->sendAppointmentCreatedEvent(
-                            $model->id,
-                            $model->email_address,
-                            $model->contact_name,
-                            $model->user_id,
-                            $model->appointment_date,
-                            $model->start_time,
-                            $model->end_time
-                        );
+                        $model->sendAppointmentCreatedEvent();
 
                         $transaction->commit();
                         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Appointment added successfully']);
@@ -541,7 +479,6 @@ class AppointmentsController extends \helpers\ApiController
         $initial_space_id = is_array($initial_space_details) && isset($initial_space_details['id']) ? $initial_space_details['id'] : null;
 
         $new_space_id = $dataRequest['Appointments']['space_id'];
-        // $model->space_id = $new_space_id;
 
         $spaceType = Space::find()
             ->select(['space_type'])
@@ -590,14 +527,7 @@ class AppointmentsController extends \helpers\ApiController
                     }
 
                     if ($model->status === Appointments::STATUS_RESCHEDULED) {
-                        $model->sendAppointmentRescheduledEvent(
-                            $model->user_id,
-                            $model->email_address,
-                            $model->appointment_date,
-                            $model->start_time,
-                            $model->end_time,
-                            $model->contact_name
-                        );
+                        $model->sendAppointmentRescheduledEvent();
                     }
 
                     if (
@@ -606,13 +536,7 @@ class AppointmentsController extends \helpers\ApiController
                         $model->end_time !== $initial_end_time
                     ) {
                         $model->sendAppointmentDateUpdatedEvent(
-                            $model->user_id,
-                            $model->email_address,
-                            $model->appointment_date,
-                            $model->start_time,
-                            $model->end_time,
-                            $model->contact_name,
-                            $model->created_at
+                            $initial_date
                         );
                     }
 
@@ -704,7 +628,7 @@ class AppointmentsController extends \helpers\ApiController
         return true;
     }
 
-    public function actionGetSlots($user_id = null, $date = null)
+    public function actionGetSlots()
     {
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
         $user_id = $dataRequest['Appointments']['user_id'];
@@ -722,19 +646,12 @@ class AppointmentsController extends \helpers\ApiController
     public function actionSuggestAvailableSlots($id)
     {
         $dataRequest['Appointments'] = Yii::$app->request->getBodyParams();
-        $rescheduledAppointmentId = $id;
-
-
-        if (empty($rescheduledAppointmentId)) {
-            return $this->errorResponse(['message' => ['Appointment ID is required']]);
-        }
 
         $model = new Appointments();
-        $appoitment = $model->getRescheduledAppointment($rescheduledAppointmentId);
+        $appoitment = $model->getRescheduledAppointment($id);
 
         if (!$appoitment) {
-            $msg = 'Appointment with id {' . $rescheduledAppointmentId . '} not found';
-            return $this->payloadResponse(['message' => $msg]);
+            return $this->toastResponse(['message' => ['Provided Appoitment id does not exist']]);
         }
 
         $suggestions = Ar::findNextAvailableSlot(
