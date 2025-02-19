@@ -1020,7 +1020,7 @@ class AppointmentsController extends \helpers\ApiController
 
             $operationalReason = new OperationReasons();
 
-            if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'DECLINED', 'APPOINTMENTS', $attendee->id, $attendee->id)) {
+            if (!$operationalReason->saveActionReason($appointment->id, $declineReason, 'DECLINED', 'APPOINTMENTS', $attendee->attendee_id, $attendee->attendee_id)) {
                 return $this->errorResponse(['message' => ['Unable to save decline reason. Please try again later.']]);
             }
 
