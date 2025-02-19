@@ -301,10 +301,10 @@ class EventHandler
 
 		$commonData = [
 			'chairPerson' => $event->data['chair_person'],
-            'appointmentSubject' => $appointment_subject,
+			'appointmentSubject' => $appointment_subject,
 			'date' => $event->data['date'],
 			'start_time' => $event->data['start_time'],
-            'end_time' => $event->data['end_time'],
+			'end_time' => $event->data['end_time'],
 			'isEvent' => $event->data['isEvent']
 		];
 
@@ -425,29 +425,39 @@ class EventHandler
 
 	public static function onAppointmentReminder(Event $event)
 	{
-		$email = $event->data['email'];
+		$contact_person_email = $event->data['contact_email'];
+		$chair_person_email = $event->data['chairPersonEmail'];
 		$subject = $event->data['subject'];
 		$attendeesEmails = $event->data['attendees_emails'];
 		// getting the appoiment id to update the reminder_sent_at when the reminder is sent
 		$id = $event->data['appointment_id'];
 
 		$commonData = [
+			'appointment_subject' => $event->data['appointment_subject'],
 			'date' => $event->data['date'],
 			'startTime' => $event->data['startTime'],
 			'endTime' => $event->data['endTime'],
 			'username' => $event->data['username'],
+			'contact_person_name' => $event->data['contact_name'],
 		];
 
-		$body = Yii::$app->view->render(
+		$contactPersonBody = Yii::$app->view->render(
 			'@ui/views/emails/appointmentReminder',
 			array_merge($commonData, [
-				'contact_name' => $event->data['contact_name'],
-				'recipientType' => 'user'
+				'recipientType' => 'contact_person'
 			])
 		);
 
-		// self::send($email, $subject, $body);
-		self::queueEmail($email, $subject, $body, 'reminder', $id);
+		self::queueEmail($contact_person_email, $subject, $contactPersonBody, 'reminder', $id);
+
+		$chairPersonBody = Yii::$app->view->render(
+			'@ui/views/emails/appointmentReminder',
+			array_merge($commonData, [
+				'recipientType' => 'chair_person',
+			])
+		);
+
+		self::queueEmail($chair_person_email, $subject, $chairPersonBody, 'reminder', $id);
 
 		if (!empty($attendeesEmails)) {
 			foreach ($attendeesEmails as $attendeeEmail) {
@@ -463,6 +473,31 @@ class EventHandler
 				self::queueEmail($attendeeEmail, $subject, $attendeeBody, 'reminder', $id);
 			}
 		}
+	}
+
+	public static function onAppointmentCompletedReminder(Event $event)
+	{
+		$contact_person_email = $event->data['contact_email'];
+		$chair_person_email = $event->data['chairPersonEmail'];
+		$subject = $event->data['subject'];
+
+		$data = [
+			'meeting_subject' => $event->data['appointment_subject'],
+			'date' => $event->data['date'],
+			'startTime' => $event->data['startTime'],
+			'endTime' => $event->data['endTime'],
+			'username' => $event->data['username'],
+			'contact_person_name' => $event->data['contact_name'],
+		];
+
+		$mailBody = Yii::$app->view->render(
+			'@ui/views/emails/appointmentCompletedReminder',
+			[
+				$data
+			]
+		);
+
+		self::queueEmail($chair_person_email, $subject, $mailBody);
 	}
 
 	public static function onBackUpFileUploaded(Event $event)
