@@ -15,7 +15,8 @@ trait Mail
     {
         $message = Yii::$app->mailer->compose()
             ->setTo($email)
-            ->setFrom([Yii::$app->params['adminEmail']])
+            // ->setFrom([Yii::$app->params['adminEmail']])
+            ->setFrom([Yii::$app->params['adminEmail'] => Yii::$app->name ?? 'TUMMEET'])
             ->setSubject($subject)
             ->setHtmlBody($body);
 
