@@ -2,6 +2,7 @@
 
 namespace scheduler\controllers;
 
+use scheduler\models\Appointments;
 use Yii;
 use scheduler\models\Events;
 use scheduler\models\searches\EventsSearch;
@@ -75,7 +76,13 @@ class EventsController extends \helpers\ApiController
             $model->loadDefaultValues();
             $dataRequest['Events'] = Yii::$app->request->getBodyParams();
             if ($model->load($dataRequest) && $model->save()) {
-                return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Events added successfully']);
+                $appointments = $this->getAffectedAppointments(
+                    $model->start_date,
+                    $model->end_date,
+                    $model->start_time,
+                    $model->end_time
+                );
+                return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'Events added successfully', 'affectedAppointments' => $appointments ?: null]);
             }
             return $this->errorResponse($model->getErrors());
         }
@@ -107,11 +114,41 @@ class EventsController extends \helpers\ApiController
         return $this->errorResponse($model->getErrors());
     }
 
+    private function getAffectedAppointments($satrt_date, $end_date, $start_time, $end_time)
+    {
+        $model =  new Appointments();
+        $affectedAppointments = $model->getOverlappingAppointment(null, $satrt_date, $end_date, $start_time, $end_time, true);
+        $model->sendAffectedAppointmentsEvent($affectedAppointments, true);
+
+        foreach ($affectedAppointments as $appointment) {
+
+            $appointment->status = Appointments::STATUS_RESCHEDULE;
+            $appointment->save(false);
+        }
+
+        self::sendNotifications($affectedAppointments);
+
+        return $affectedAppointments;
+    }
+
     protected function findModel($id)
     {
         if (($model = Events::findOne(['id' => $id])) !== null) {
             return $model;
         }
         throw new \yii\web\NotFoundHttpException('Record not found.');
+    }
+
+    private static function sendNotifications($appointments)
+    {
+        $model = new Appointments();
+
+        if (!empty($appointments)) {
+            $model->sendAffectedAppointmentsEvent($appointments);
+
+            foreach ($appointments as $appointment) {
+                $appointment->sendAppointmentRescheduleEvent(true);
+            }
+        }
     }
 }
