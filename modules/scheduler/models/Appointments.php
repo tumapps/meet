@@ -145,6 +145,8 @@ class Appointments extends BaseModel
             [['user_id', 'status'], 'integer'],
             [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'attendees', 'space_id'], 'safe'],
+            [['description'], 'string', 'max' => 255],
+            [['subject'], 'string', 'max' => 100],
 
             // Custom inline validators as separate rules
             [['start_time', 'end_time'], 'validateTimeRange'],
@@ -168,14 +170,14 @@ class Appointments extends BaseModel
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
             [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
-            [['appointment_type'], 'string', 'max' => 255],
+            [['appointment_type'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
             // Rules for scenarios
             ['cancellation_reason', 'required', 'on' => self::SCENARIO_CANCEL, 'message' => 'Cancellation reason is required.'],
-            ['cancellation_reason', 'string', 'max' => 255],
+            ['cancellation_reason', 'string', 'max' => 100],
             ['rejection_reason', 'required', 'on' => self::SCENARIO_REJECT, 'message' => 'Rejection reason is required.'],
-            ['rejection_reason', 'string', 'on' => self::SCENARIO_REJECT, 'max' => 255],
+            ['rejection_reason', 'string', 'on' => self::SCENARIO_REJECT, 'max' => 100],
 
 
             // file upload
@@ -507,25 +509,28 @@ class Appointments extends BaseModel
         return $appointment->save(false);
     }
 
-
-    public function sendAppointmentCancelledEvent($contactPersonEmail, $contactPersonName, $date, $startTime, $endTime, $chairPerosnEmail, $user_id)
+    public function sendAppointmentCancelledEvent()
     {
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Cancelled';
 
+        $user = User::findOne($this->user_id);
+        $chairPersonEmail = $user->profile->email_address;
+
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
-        $cancellation_reason = OperationReasons::getActionReason($this->id, $user_id);
+        $cancellation_reason = OperationReasons::getActionReason($this->id, $this->user_id);
 
         $eventData = [
-            'contactEmail' => $contactPersonEmail,
-            'contact_name' => $contactPersonName,
-            'date' => $date,
-            'startTime' => $startTime,
-            'endTime' => $endTime,
-            'bookedUserEmail' => $chairPerosnEmail,
+            'contactPersonEmail' => $this->email_address,
+            'contact_name' => $this->contact_name,
+            'date' => $this->appointment_date,
+            'startTime' => $this->start_time,
+            'endTime' => $this->end_time,
+            'chairPersonEmail' => $chairPersonEmail,
             'cancellation_reason' => $cancellation_reason,
             'subject' => $subject,
+            'appointment_subject' => $this->subject,
             'attendees_emails' => $attendeesEmails,
 
         ];
@@ -533,17 +538,16 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_CANCELLED, $event);
     }
 
-    public function sendAppointmentCreatedEvent($id, $contact_person_email, $contact_person_name, $user_id, $date, $startTime, $endTime)
+    public function sendAppointmentCreatedEvent()
     {
 
         $event = new Event();
         $event->sender = $this;
-        $subject = 'Meeting Created';
 
-        $user = User::findOne($user_id);
+        $user = User::findOne($this->user_id);
         $chairPersonEmail = $user->profile->email_address;
 
-        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true, false);
+        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id, true, false);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
 
         $fileName = null;
@@ -556,13 +560,15 @@ class Appointments extends BaseModel
 
         $eventData = [
             'appointment_id' => $this->id,
-            'contact_person_email' => $contact_person_email,
-            'subject' => $subject,
-            'contact_person_name' => $contact_person_name,
-            'date' => $date,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'contact_person_username' => $this->getUserName($user_id),
+            'contact_person_email' => $this->email_address,
+            'subject' => $this->subject,
+            'appointment_subject' => $this->subject,
+            'description' => $this->description,
+            'contact_person' => $this->contact_name,
+            'date' => $this->appointment_date,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'chair_person' => $this->getUserName($this->user_id),
             'chair_person_email' => $chairPersonEmail,
             'attendees_details' => $attendeesDetails,
             'attachment_file_name' => $fileName,
@@ -573,17 +579,16 @@ class Appointments extends BaseModel
         $this->trigger(self::EVENT_APPOINTMENT_CREATED, $event);
     }
 
-    public function sendAppointmentVenueUpdateEvent($id, $contact_person_email, $contact_person_name, $user_id, $date, $startTime, $endTime, $new_venue_id, $previous_venue_id)
+    public function sendAppointmentVenueUpdateEvent($new_venue_id, $previous_venue_id)
     {
-
         $event = new Event();
         $event->sender = $this;
         $subject = 'Meeting Venue Updated';
 
-        $user = User::findOne($user_id);
+        $user = User::findOne($this->user_id);
         $chairPersonEmail = $user->profile->email_address;
 
-        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($id, true, false);
+        $attendeesDetails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id, true, false);
         $attachementFile = AppointmentAttachments::getAppointmentAttachment($this->id);
 
         $fileName = null;
@@ -593,8 +598,6 @@ class Appointments extends BaseModel
         $previousVenue = $this->getSpaceName($previous_venue_id);
         $newVenue = $this->getSpaceName($new_venue_id);
 
-
-
         if ($attachementFile !== null) {
             $fileName = $attachementFile['fileName'];
             $downloadLink = $attachementFile['downloadLink'];
@@ -602,13 +605,13 @@ class Appointments extends BaseModel
 
         $eventData = [
             'appointment_id' => $this->id,
-            'contact_person_email' => $contact_person_email,
+            'contact_person_email' => $this->email_address,
             'subject' => $subject,
-            'contact_person_name' => $contact_person_name,
-            'date' => $date,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'contact_person_username' => $this->getUserName($user_id),
+            'contact_person_name' => $this->contact_name,
+            'date' => $this->apppointment_date,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'contact_person_username' => $this->getUserName($this->user_id),
             'chair_person_email' => $chairPersonEmail,
             'attendees_details' => $attendeesDetails,
             'attachment_file_name' => $fileName,
@@ -622,28 +625,32 @@ class Appointments extends BaseModel
     }
 
 
-    public function sendAppointmentRescheduleEvent($email, $name, $bookedUserId)
+    public function sendAppointmentRescheduleEvent($isEvent = false)
     {
         $event = new Event();
         $event->sender = $this;
-        $userName = User::find()->select('username')->where(['user_id' => $bookedUserId]);
         $subject = 'Appointment Reschedule';
 
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
 
         $eventData = [
-            'email' => $email,
+            'email' => $this->email_address,
             'subject' => $subject,
-            'name' => $name,
-            'bookedUserName' => $userName,
+            'appointment_subject' => $this->subject,
+            'date' => $this->appointment_date,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'contact_name' => $this->contact_name,
+            'chair_person' => $this->getUserName($this->user_id),
             'attendees_emails' => $attendeesEmails,
+            'isEvent' => $isEvent,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_RESCHEDULE, [EventHandler::class, 'onAppointmentReschedule'], $eventData);
         $this->trigger(self::EVENT_APPOINTMENT_RESCHEDULE, $event);
     }
 
-    public function sendAppointmentRescheduledEvent($user_id, $email, $date, $startTime, $endTime, $contact_person_name)
+    public function sendAppointmentRescheduledEvent()
     {
         $event = new Event();
         $event->sender = $this;
@@ -651,13 +658,14 @@ class Appointments extends BaseModel
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
 
         $eventData = [
-            'email' => $email,
+            'email' => $this->email_address,
             'subject' => $subject,
-            'date' => $date,
-            'sartTime' => $startTime,
-            'endTime' => $endTime,
-            'name' => $contact_person_name,
-            'username' => $this->getUserName($user_id),
+            'appointment_subject' => $this->subject,
+            'date' => $this->appointment_date,
+            'startTime' => $this->start_time,
+            'endTime' => $this->end_time,
+            'name' => $this->contact_name,
+            'username' => $this->getUserName($this->user_id),
             'attendees_emails' => $attendeesEmails,
         ];
 
@@ -666,23 +674,23 @@ class Appointments extends BaseModel
     }
 
 
-    public function sendAppointmentDateUpdatedEvent($user_id, $email, $current_date, $start_time, $end_time, $contact_person_name, $initial_date_time)
+    public function sendAppointmentDateUpdatedEvent($initial_date)
     {
         $event = new Event();
         $event->sender = $this;
         $subject = 'Meeting Date Updates';
         $attendees_emails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id);
-        $initial_date_time =  \Yii::$app->formatter->asDatetime($initial_date_time, 'php:Y-m-d H:i');
 
         $eventData = [
-            'email' => $email,
+            'email' => $this->email_address,
             'subject' => $subject,
-            'current_date' => $current_date,
-            'initial_date' => $initial_date_time,
-            'start_time' => $start_time,
-            'end_time' => $end_time,
-            'contact_person_name' => $contact_person_name,
-            'username' => $this->getUserName($user_id), // chair of the appointment
+            'appointment_subject' => $this->subject,
+            'current_date' => $this->appointment_date,
+            'initial_date' => $initial_date,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'contact_person_name' => $this->contact_name,
+            'chair_person' => $this->getUserName($this->user_id), // chair of the appointment
             'attendees_emails' => $attendees_emails,
         ];
 
@@ -794,7 +802,7 @@ class Appointments extends BaseModel
         }
     }
 
-    public function sendAffectedAppointmentsEvent($appointments)
+    public function sendAffectedAppointmentsEvent($appointments, $isEvent = false)
     {
         $user_id = $appointments[0]->user_id;
         $user = $user = User::findOne($user_id);
@@ -808,32 +816,33 @@ class Appointments extends BaseModel
             'email' => $userEmail,
             'subject' => $subject,
             'appointments' => $appointments,
+            'isEvent' => $isEvent
         ];
 
         $this->on(self::EVENT_AFFECTED_APPOINTMENTS, [EventHandler::class, 'onAffectedAppointments'], $eventData);
         $this->trigger(self::EVENT_AFFECTED_APPOINTMENTS, $event);
     }
 
-    public function sendAppointmentRejectedEvent($email, $name, $user_id, $date, $startTime, $endTime,  $isSpaceRequestUpdate = false)
+    public function sendAppointmentRejectedEvent($isSpaceRequestUpdate = false)
     {
         $event = new Event();
         $event->sender = $this;
         $subject = 'Appointment Rejected';
 
-        $user = User::findOne($user_id);
+        $user = User::findOne($this->user_id);
         $bookedUserEmail = $user->profile->email_address;
 
-        $rejection_reason = OperationReasons::getActionReason($this->id, $user_id);
+        $rejection_reason = OperationReasons::getActionReason($this->id, $this->user_id);
         $attendeesEmails = [];
 
         $eventData = [
-            'email' => $email,
+            'email' => $this->email_address,
             'subject' => $subject,
-            'contact_name' => $name,
-            'date' => $date,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'username' => $this->getUserName($user_id),
+            'contact_name' => $this->contact_name,
+            'date' => $this->appointment_date,
+            'start_time' => $this->start_time,
+            'end_time' => $this->end_time,
+            'username' => $this->getUserName($this->user_id),
             'user_email' => $bookedUserEmail,
             'attendees_emails' => $attendeesEmails,
             'rejection_reason' => $rejection_reason,
@@ -994,10 +1003,9 @@ class Appointments extends BaseModel
         }
     }
 
-    public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time)
+    public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time, $ignoreUser = false)
     {
-        return self::find()
-            ->where(['user_id' => $user_id])
+        $query = self::find()
             ->andWhere([
                 'AND',
                 ['>=', 'appointment_date', $start_date],
@@ -1011,10 +1019,16 @@ class Appointments extends BaseModel
                 ['AND', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
                 ['AND', ['<', 'start_time', $end_time], ['>', 'end_time', $end_time]],
             ])
-            // ->andWhere(['!=', 'status', 'self'])
-            ->orderBy(['created_at' => SORT_ASC])
-            ->all();
+            ->orderBy(['created_at' => SORT_ASC]);
+
+        // Only apply user_id condition if $ignoreUser is false
+        if (!$ignoreUser) {
+            $query->andWhere(['user_id' => $user_id]);
+        }
+
+        return $query->all();
     }
+
 
     private function getAvailability($user_id, $appointment_date, $start_time, $end_time)
     {
