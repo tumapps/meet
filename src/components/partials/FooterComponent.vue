@@ -2,7 +2,7 @@
   <!-- Footer Section Start -->
   <footer :class="`footer ${footerStyle}`">
     <div class="footer-body">
-      <div class="right-panel">© {{ new Date().getFullYear() }} <a href="https://crackit.co.ke/" target="_blank">TUM-ICTS. </a>All Rights Reserved.</div>
+      <div class="right-panel">© {{ new Date().getFullYear() }} <a href="https://tum.ac.ke/" target="_blank">TUM-ICTS. </a>All Rights Reserved.</div>
     </div>
   </footer>
   <!-- Footer Section End -->

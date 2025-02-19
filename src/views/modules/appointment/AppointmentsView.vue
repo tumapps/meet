@@ -61,9 +61,10 @@ const InitialappointmentDetails = {
   space_id: ''
 }
 
-const uploading = ref(false) // Holds the upload status
 
 const appointmentDetails = ref({ ...InitialappointmentDetails })
+const uploading = ref(false) // Holds the upload status
+
 const fileName = ref(null)
 const fileInput = ref(null)
 
@@ -560,7 +561,7 @@ const openModal = async (id, userId) => {
   getSpaces(userId)
   await getAppointment(id, userId)
   console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
-  if (appointmentDetails.value.recordStatus.label === 'ACTIVE') {
+  if (appointmentDetails.value.recordStatus.label === 'ACTIVE' || appointmentDetails.value.recordStatus.label === 'RESCHEDULE') {
     getAppointmentType()
   }
 
@@ -637,6 +638,7 @@ const suggestions = ref([])
 const suggestedDate = ref('')
 const timeSlots = ref([])
 
+
 // Function to fetch suggested slots
 const suggestSlots = async (id) => {
   try {
@@ -646,9 +648,14 @@ const suggestSlots = async (id) => {
 
     suggestions.value = response.data.dataPayload.data.suggestions
 
-    // Assign date and slots from the API response
     suggestedDate.value = suggestions.value.date
     timeSlots.value = suggestions.value.slots
+    appointmentDetails.value.appointment_date = suggestions.value.date
+
+
+    //update date to suggessted date
+    // appointmentDetails.value.appointment_date = suggestedDate.value
+    console.log('suggested date', suggestedDate.value)
 
     // Show a success toast message
     // Check if toastPayload exists in the response and update it
@@ -662,16 +669,9 @@ const suggestSlots = async (id) => {
         // icon: toastPayload.value.toastTheme || 'success', // You can switch this back to use the theme from the response
         icon: 'success'
       })
-    } else {
-      // Fallback if toastPayload is not provided in the response
-      proxy.$showToast({
-        title: 'Operation successful',
-        icon: 'success'
-      })
     }
-    //update date to suggessted date
-    appointmentDetails.value.appointment_date = suggestedDate
   } catch (error) {
+    console.log('error', error)
     // Handle errors
     errorDetails.value = error.response.data.errorPayload.errors
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
@@ -1078,7 +1078,6 @@ onUnmounted(() => {
         </div>
       </div>
     </template>
-
     <b-row class="justify-content-center">
       <b-col lg="12" sm="12">
         <b-card-body>
@@ -1087,13 +1086,13 @@ onUnmounted(() => {
               <b-row>
                 <b-col lg="4" md="12" class="mb-3">
                   <label for="input-107" class="form-label">Subject</label>
-                  <b-form-input v-model="appointmentDetails.subject" id="input-107"></b-form-input>
+                  <b-form-input v-model="appointmentDetails.subject" id="subject"></b-form-input>
                   <div v-if="errorDetails.subject" class="error">
                     {{ errorDetails.subject }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Date</label>
+                  <label for="date" class="form-label">Date</label>
                   <flat-pickr v-model="appointmentDetails.appointment_date" class="form-control" :config="flatPickrConfig" id="datePicker" />
 
                   <!-- <b-form-input v-model="appointmentDetails.appointment_date" id="input-107" type="date"></b-form-input> -->
@@ -1102,11 +1101,11 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Time</label>
+                  <label for="time" class="form-label">Time</label>
                   <div class="d-flex">
-                    <b-form-input v-model="appointmentDetails.start_time" id="input-107" type="time" class="me-2" @click="toggletimeSlotShow"></b-form-input>
+                    <b-form-input v-model="appointmentDetails.start_time" id="starttime" type="time" class="me-2" @click="toggletimeSlotShow"></b-form-input>
                     <span class="align-self-center">to</span>
-                    <b-form-input v-model="appointmentDetails.end_time" id="input-108" type="time" class="ms-2" @click="toggletimeSlotShow"></b-form-input>
+                    <b-form-input v-model="appointmentDetails.end_time" id="endtime" type="time" class="ms-2" @click="toggletimeSlotShow"></b-form-input>
                   </div>
                   <div v-if="errorDetails.start_time" class="error">
                     {{ errorDetails.start_time }}
@@ -1116,7 +1115,7 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <b-form-group label="Meeting Type:" label-for="input-1">
+                  <b-form-group label="Meeting Type:" label-for="meeting type">
                     <select v-model="appointmentDetails.appointment_type" name="service" class="form-select" id="addappointmenttype">
                       <!-- Default placeholder option -->
                       <option value="">Meeting Type</option>
@@ -1145,29 +1144,29 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Booked on</label>
-                  <b-form-input v-model="appointmentDetails.created_at" id="input-107" disabled></b-form-input>
+                  <label for="created_at" class="form-label">Booked on</label>
+                  <b-form-input v-model="appointmentDetails.created_at" id="created_at" disabled></b-form-input>
                   <div v-if="errorDetails.created_at" class="error">
                     {{ errorDetails.created_at }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Contact Person</label>
-                  <b-form-input v-model="appointmentDetails.contact_name" id="input-107"></b-form-input>
+                  <label for="contactPerson" class="form-label">Contact Person</label>
+                  <b-form-input v-model="appointmentDetails.contact_name" id="contactPerson"></b-form-input>
                   <div v-if="errorDetails.contact_name" class="error">
                     {{ errorDetails.contact_name }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Phone Number</label>
-                  <b-form-input v-model="appointmentDetails.mobile_number" id="input-107"></b-form-input>
+                  <label for="phone" class="form-label">Phone Number</label>
+                  <b-form-input v-model="appointmentDetails.mobile_number" id="phone"></b-form-input>
                   <div v-if="errorDetails.mobile_number" class="error">
                     {{ errorDetails.mobile_number }}
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <label for="input-107" class="form-label">Email</label>
-                  <b-form-input v-model="appointmentDetails.email_address" id="input-107"></b-form-input>
+                  <label for="email" class="form-label">Email</label>
+                  <b-form-input v-model="appointmentDetails.email_address" id="email"></b-form-input>
                   <div v-if="errorDetails.email_address" class="error">
                     {{ errorDetails.email_address }}
                   </div>
@@ -1235,14 +1234,14 @@ onUnmounted(() => {
                     <p class="ms-3 mb-0">Add Document</p>
                   </div>
                 </b-button> -->
-                <b-col lg="5" class="mb-3">
+                <b-col lg="12" class="mb-3">
                   <div v-if="appointmentDetails.status === 3">
                     <div v-if="timeSlots.length > 1">
                       <h3>{{ suggestedDate }}</h3>
                       <!-- Display the date from the API response -->
-                      <!-- <div>
+                      <b-col lg="12" md="12" sm="12">
                         <TimeSlotComponent :timeSlots="timeSlots" @update:timeSlots="updateTimeSlots" @selectedSlotsTimes="handleSelectedSlotsTimes" />
-                      </div> -->
+                      </b-col>
                     </div>
                     <div v-else>
                       <p>No available slots.</p>

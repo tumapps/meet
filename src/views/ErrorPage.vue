@@ -35,48 +35,48 @@ export default {
     </div>
 </template> -->
 
-
 <script>
-import Error401 from '../components/Error401.vue';
-import Error403 from '../components/Error403.vue';
-import Error404 from '../components/Error404.vue';
-import Error500 from '../components/Error500.vue';
+import Error401 from '../components/Error401.vue'
+import Error403 from '../components/Error403.vue'
+import Error404 from '../components/Error404.vue'
+// import Error500 from '../components/Error500.vue'
+import Error500 from '../components/500View.vue'
 
 export default {
-    props: {
-        code: {
-            type: String,
-            required: true
-        }
-    },
-    components: {
-        Error401,
-        Error403,
-        Error404,
-        Error500
-    },
-    computed: {
-        errorComponent() {
-            switch (this.code) {
-                case '401':
-                    return 'Error401';
-                case '403':
-                    return 'Error403';
-                case '404':
-                    return 'Error404';
-                case '500':
-                    return 'Error500';
-                default:
-                    return null;
-            }
-        }
+  props: {
+    code: {
+      type: String,
+      required: true
     }
-};
+  },
+  components: {
+    Error401,
+    Error403,
+    Error404,
+    Error500
+  },
+  computed: {
+    errorComponent() {
+      switch (this.code) {
+        case '401':
+          return 'Error401'
+        case '403':
+          return 'Error403'
+        case '404':
+          return 'Error404'
+        case '500':
+          return 'Error500'
+        default:
+          return null
+      }
+    }
+  }
+}
 </script>
 
 <template>
-    <div>
-        <component :is="errorComponent" v-if="errorComponent"></component>
-        <p v-else>An unknown error occurred.</p>
-    </div>
+  <div>
+    <component :is="errorComponent" v-if="errorComponent"></component>
+    <p v-else>An unknown error occurred.</p>
+  </div>
 </template>
