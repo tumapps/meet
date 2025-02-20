@@ -43,7 +43,7 @@ class m240808_213712_create_scheduler_tables extends Migration
         $this->createTable('{{%appointments}}', [
             'id' => $this->primaryKey(),
             'user_id' => $this->bigInteger(),
-            // 'appointment_type_id' => $this->integer(),
+            'appointment_type_id' => $this->integer(),
             'appointment_date' => $this->date()->notNull(),
             'start_time' => $this->time()->null(),
             'end_time' => $this->time()->null(),
@@ -51,7 +51,7 @@ class m240808_213712_create_scheduler_tables extends Migration
             'email_address' => $this->string(128)->notNull(),
             'mobile_number' => $this->string(15),
             'subject' => $this->text()->null(),
-            'appointment_type_id' => $this->string(), //personal or group
+            //'appointment_type_id' => $this->string(), //personal or group
             'description' => $this->string(255)->null(),
             'status' => $this->integer()->notNull()->defaultValue(10),
             'priority' => $this->integer()->null(),
@@ -64,8 +64,8 @@ class m240808_213712_create_scheduler_tables extends Migration
             'updated_at' => $this->integer()->notNull(),
             'FOREIGN KEY ([[user_id]]) REFERENCES {{%users}} ([[user_id]])' .
                 $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
-            // 'FOREIGN KEY ([[appointment_type_id]]) REFERENCES {{%meeting_types}} ([[id]])' .
-            //     $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
+            'FOREIGN KEY ([[appointment_type_id]]) REFERENCES {{%meeting_types}} ([[id]])' .
+                $this->buildFkClause('ON DELETE CASCADE', 'ON UPDATE CASCADE'),
         ], $tableOptions);
 
         //Add index to created_at column
