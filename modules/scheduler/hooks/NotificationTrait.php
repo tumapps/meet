@@ -3,17 +3,11 @@
 namespace scheduler\hooks;
 
 
-use Yii;
 use auth\models\User;
 use scheduler\models\AppointmentAttendees;
 use scheduler\models\AppointmentAttachments;
 use scheduler\models\OperationReasons;
-use scheduler\models\Events;
-use scheduler\hooks\TimeHelper;
-use scheduler\models\SpaceAvailability;
-use scheduler\models\Space;
 use yii\base\Event;
-use scheduler\models\Availability;
 use helpers\EventHandler;
 
 trait NotificationTrait
