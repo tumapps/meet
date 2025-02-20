@@ -52,7 +52,7 @@ const InitialappointmentDetails = {
   email_address: '',
   mobile_number: '',
   subject: '',
-  appointment_type: '',
+  appointment_type_id: '',
   status: '',
   created_at: '',
   updated_at: '',
@@ -772,7 +772,7 @@ const handleModalClose = () => {
   removeFile()
 }
 
-const appointmentTypeOptions = ref([])
+const appointmentTypeOptions = ref({})
 const getAppointmentType = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/types')
@@ -881,6 +881,7 @@ const updateAttendees = (attendeesId) => {
   appointmentDetails.value.attendees = attendeesId
   console.log('form data attending mangai', appointmentDetails.value.attendees)
 }
+const selectedType = ref('')
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -1116,16 +1117,16 @@ onUnmounted(() => {
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
                   <b-form-group label="Meeting Type:" label-for="meeting type">
-                    <select v-model="appointmentDetails.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                    <select v-model="selectedType" name="service" class="form-select" id="addappointmenttype">
                       <!-- Default placeholder option -->
                       <option value="">Meeting Type</option>
                       <!-- Dynamically populated options from API -->
-                      <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
-                        {{ type }}
+                      <option v-for="type in appointmentTypeOptions" :key="type" :value="type.id" @click="selectedType = type.type">
+                        {{ type.type }}
                       </option>
                     </select>
                   </b-form-group>
-                  <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+                  <div v-if="errors.appointment_type_id" class="error" aria-live="polite">{{ errors.appointment_type_id }}</div>
                 </b-col>
                 <b-col lg="4" md="12" sm="12">
                   <label for="space" class="form-label">Space</label>

@@ -39,15 +39,7 @@ const resetErrors = () => {
 
 const toastPayload = ref('')
 
-const errors = ref({
-  contact_name: '',
-  email_address: '',
-  start_time: '',
-  mobile_number: '',
-  subject: '',
-  appointment_type: '',
-  description: ''
-})
+const errors = ref({})
 const showme = ref(false)
 
 // const props = defineProps({
@@ -94,7 +86,7 @@ const initialAppointmentData = {
   mobile_number: '',
   subject: '',
   description: '',
-  appointment_type: '',
+  appointment_type_id: '',
   space_id: selectedSpaceName.value,
   file: null,
   attendees: ''
@@ -277,25 +269,27 @@ const appointmentTypeOptions = ref([])
 
 const getAppointmentType = async () => {
   try {
-    const response = await axiosInstance.get('/v1/scheduler/types')
-    appointmentTypeOptions.value = response.data.dataPayload.data.types
+    const response = await axiosInstance.get('/v1/scheduler/meeting-types')
+    appointmentTypeOptions.value = response.data.dataPayload.data
+    console.log('Appointment Type data:', appointmentTypeOptions.value)
   } catch (error) {
-    // console.error('Error fetching appointment types:', error);
-
-    if (error.response && error.response.data && error.response.data.errorPayload) {
-      // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors
-    } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
-
-      proxy.$showToast({
-        title: errorMessage,
-        text: errorMessage,
-        icon: 'error'
-      })
-    }
+    handleApiError(error)
   }
 }
+
+const handleApiError = (error) => {
+  if (error.response && error.response.data && error.response.data.errorPayload) {
+    errors.value = error.response.data.errorPayload.errors
+  } else {
+    const errorMessage = error.response.data?.errorPayload?.errors?.message || 'An unknown error occurred'
+    proxy.$showToast({
+      title: errorMessage,
+      text: errorMessage,
+      icon: 'error'
+    })
+  }
+}
+
 
 const UsersOptions = ref([])
 const selectedUserId = ref('') // To hold the selected username
@@ -380,6 +374,7 @@ watch(selectedUserId, (newUserId) => {
   }
   // getSlots()
 })
+const selectedType = ref('hello')
 
 onMounted(() => {
   slotsData.value.date = today.value
@@ -406,7 +401,7 @@ onMounted(() => {
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
         <input type="hidden" name="id" />
-        <input type="hidden" name="appointment_type" />
+        <input type="hidden" name="appointment_type_id" />
         <div class="w-100" id="v-pills-tabContent">
           <div class="fade active show m-5" id="-3">
             <b-row class="align-items-center form-group">
@@ -487,7 +482,7 @@ onMounted(() => {
             <b-row class="align-items-center form-group">
               <b-col cols="12" lg="6" class="mb-sm-3 mb-md-3 mb-lg-0 mb-4">
                 <b-form-group label="Meeting Type:" label-for="input-1">
-                  <!-- <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                  <!-- <select v-model="appointmentData.appointment_type_id" name="service" class="form-select" id="addappointmenttype">
                     Default placeholder option
                     <option value="">Meeting Type</option>
                     Dynamically populated options from API
@@ -496,18 +491,18 @@ onMounted(() => {
                     </option>
                   </select> -->
                   <div class="position-relative d-flex flex-column">
-                    <b-form-input v-model="appointmentData.appointment_type" placeholder="Meeting Type" @focus="showme = true" />
+                    <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
 
                     <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
-                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentData.appointment_type = type), (showme = false)">{{ type }}</li>
+                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentData.appointment_type_id = type.id, selectedType = type.type), (showme = false)">{{ type.type }}</li>
                     </ul>
-                    <span v-if="appointmentData.appointment_type" class="clear-btn" @click="appointmentData.appointment_type = ''">
+                    <span v-if="appointmentData.appointment_type_id" class="clear-btn" @click="appointmentData.appointment_type_id = ''">
                       <i class="fas fa-times"></i>
                     </span>
                   </div>
                 </b-form-group>
 
-                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+                <div v-if="errors.appointment_type_id" class="error" aria-live="polite">{{ errors.appointment_type_id }}</div>
               </b-col>
               <b-col cols="12" lg="6" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
@@ -533,7 +528,7 @@ onMounted(() => {
             <b-row class="align-items-center form-group mb-5">
               <!-- <b-col v-if="role === 'su' || role === 'secretary'" cols="12" :lg="role === 'su' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Meeting Type:" label-for="input-1">
-                  <select v-model="appointmentData.appointment_type" name="service" class="form-select" id="addappointmenttype">
+                  <select v-model="appointmentData.appointment_type_id" name="service" class="form-select" id="addappointmenttype">
                     Default placeholder option
                     <option value="">Meeting Type</option>
                     Dynamically populated options from API
@@ -542,7 +537,7 @@ onMounted(() => {
                     </option>
                   </select>
                 </b-form-group>
-                <div v-if="errors.appointment_type" class="error" aria-live="polite">{{ errors.appointment_type }}</div>
+                <div v-if="errors.appointment_type_id" class="error" aria-live="polite">{{ errors.appointment_type_id }}</div>
               </b-col> -->
               <!-- <b-col cols="12" :lg="role === 'su' ? 6 : role === 'secretary' ? 6 : 12" class="mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="Agenda:" label-for="input-1">
