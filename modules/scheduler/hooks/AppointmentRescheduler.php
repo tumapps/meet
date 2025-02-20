@@ -48,12 +48,20 @@ class AppointmentRescheduler
 		$appointment->save(false);
 	}
 
-	public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime)
+	public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime,  $disableWeekends = true)
 	{
 		// Get slot duration for a given time range
 		$slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
 
 		while (true) {
+
+			if ($disableWeekends) {
+				$dayOfWeek = date('N', strtotime($appointment_date));
+				if ($dayOfWeek >= 6) { 
+					$appointment_date = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
+					continue;
+				}
+			}
 
 			// Calculate available slots based on working hours and unavailable slots
 			$availableSlots = self::calculateAvailableSlots($user_id, $appointment_date, $startTime, $endTime, $slotDuration);
