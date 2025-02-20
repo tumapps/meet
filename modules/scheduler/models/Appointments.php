@@ -109,7 +109,7 @@ class Appointments extends BaseModel
                 'email_address',
                 'mobile_number',
                 'subject',
-                'appointment_type',
+                // 'appointment_type',
                 'status',
                 'recordStatus' => function () {
                     return $this->recordStatus;
@@ -134,7 +134,7 @@ class Appointments extends BaseModel
         return [
             [['user_id'], 'default', 'value' => null],
             [['user_id', 'appointment_type_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'appointment_type_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'appointment_type_id', 'subject', 'contact_name', 'mobile_number', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'attendees', 'space_id'], 'safe'],
             [['description'], 'string', 'max' => 255],
             [['subject'], 'string', 'max' => 100],
@@ -428,7 +428,7 @@ class Appointments extends BaseModel
             'description' => 'Notes',
             'cancellation_reason' => 'Reason',
             'rejection_reason'  => 'Rejection Reason',
-            'appointment_type' => 'Appointment Type',
+            'appointment_type_id' => 'Appointment Type',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
