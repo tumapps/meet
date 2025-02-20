@@ -5987,6 +5987,46 @@
                 },
                 "type": "object"
             },
+            "MeetingHistory": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "meeting_id": {
+                        "title": "Meeting id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "meeting_status": {
+                        "title": "Meeting status",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "space_id": {
+                        "title": "Space id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
             "MeetingTypes": {
                 "properties": {
                     "id": {
