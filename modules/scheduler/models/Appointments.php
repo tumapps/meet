@@ -101,7 +101,7 @@ class Appointments extends BaseModel
             [
                 'id',
                 'user_id',
-                // 'appointment_type_id',
+                'appointment_type_id',
                 'appointment_date',
                 'start_time',
                 'end_time',
@@ -109,7 +109,7 @@ class Appointments extends BaseModel
                 'email_address',
                 'mobile_number',
                 'subject',
-                // 'appointment_type',
+                'appointment_type',
                 'status',
                 'recordStatus' => function () {
                     return $this->recordStatus;
@@ -133,7 +133,7 @@ class Appointments extends BaseModel
     {
         return [
             [['user_id'], 'default', 'value' => null],
-            [['user_id', 'appointment_type_id', 'status'], 'integer'],
+            [['user_id', 'appointment_type_id', 'space_id', 'status'], 'integer'],
             [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'appointment_type_id', 'subject', 'contact_name', 'mobile_number', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'attendees', 'space_id'], 'safe'],
             [['description'], 'string', 'max' => 255],
@@ -155,8 +155,6 @@ class Appointments extends BaseModel
             [['attendees'], 'validateAttendeesCount'],
             [['mobile_number'], 'validateMobileNumber'],
 
-
-
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
 
@@ -165,7 +163,6 @@ class Appointments extends BaseModel
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
             // [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
-            // [['appointment_type'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
             // Rules for scenarios
@@ -242,7 +239,6 @@ class Appointments extends BaseModel
             $this->addError($attribute, 'Booking is not allowed on weekends.');
         }
     }
-
 
     private function isValidTime($time)
     {
@@ -445,14 +441,11 @@ class Appointments extends BaseModel
         return $this->hasOne(User::class, ['user_id' => 'user_id']);
     }
 
-    public static function getPriorityLabel()
+    public function getMeetingType()
     {
-        return [
-            ['code' => self::PRIORITY_LOW, 'label' => 'Low'],
-            ['code' => self::PRIORITY_MEDIUM, 'label' => 'Medium'],
-            ['code' => self::PRIORITY_HIGH, 'label' => 'High'],
-        ];
+        return $this->hasOne(\scheduler\models\MeetingTypes::class, ['id' => 'appointment_type_id']);
     }
+
 
     public static function getStatusLabel($status)
     {
@@ -771,16 +764,7 @@ class Appointments extends BaseModel
             return false;
         }
     }
-
-    public static function canOverride($existingAppointment, $newPriority)
-    {
-        // Compare the priority of the existing appointment with the new appointment
-        if ($existingAppointment->priority >= $newPriority) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+  
 
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time, $ignoreUser = false)
     {
