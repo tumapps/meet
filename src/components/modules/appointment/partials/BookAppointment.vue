@@ -482,21 +482,13 @@ onMounted(() => {
             <b-row class="align-items-center form-group">
               <b-col cols="12" lg="6" class="mb-sm-3 mb-md-3 mb-lg-0 mb-4">
                 <b-form-group label="Meeting Type:" label-for="input-1">
-                  <!-- <select v-model="appointmentData.appointment_type_id" name="service" class="form-select" id="addappointmenttype">
-                    Default placeholder option
-                    <option value="">Meeting Type</option>
-                    Dynamically populated options from API
-                    <option v-for="type in appointmentTypeOptions" :key="type" :value="type">
-                      {{ type }}
-                    </option>
-                  </select> -->
                   <div class="position-relative d-flex flex-column">
                     <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
 
                     <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
                       <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentData.appointment_type_id = type.id, selectedType = type.type), (showme = false)">{{ type.type }}</li>
                     </ul>
-                    <span v-if="appointmentData.appointment_type_id" class="clear-btn" @click="appointmentData.appointment_type_id = ''">
+                    <span v-if="appointmentData.appointment_type_id" class="clear-btn" @click="appointmentData.appointment_type_id = '', selectedType=''">
                       <i class="fas fa-times"></i>
                     </span>
                   </div>

@@ -457,6 +457,9 @@ const meetingId = ref(null)
 const specialDate = ref('')
 
 const attendeesId = ref([])
+
+const selectedType = ref('')
+
 const getAppointment = async (id) => {
   try {
     meetingId.value = id
@@ -473,7 +476,14 @@ const getAppointment = async (id) => {
       selectedAppointmentId.value = id
       appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
       specialDate.value = response.data.dataPayload.data.appointment_date
-      console.log('Special Date:', specialDate.value)
+
+      console.log('appointment type', appointmentDetails.value.appointment_type_id)
+      console.log("type otyopm", appointmentTypeOptions.value)
+      const selected = appointmentTypeOptions.value.find((type) => type.id === appointmentDetails.value.appointment_type_id)
+      console.log('selected:', selected)
+      selectedType.value = selected ? selected.type : 'nana'
+      console.log('selectedType madafak:', selectedType.value)
+
       console.log('appointment date after special date', appointmentDetails.value.appointment_date)
 
       // Ensure spaces.value is an array
@@ -530,6 +540,7 @@ const getSpaces = async (userId) => {
   }
 }
 
+
 // Watch for changes in appointmentDetails.value.space
 watch(
   () => appointmentDetails.value.space, // Watch the space object in appointmentDetails
@@ -559,15 +570,11 @@ watch(
 const selectedAppointmentId = ref('')
 const openModal = async (id, userId) => {
   getSpaces(userId)
+  await getAppointmentType()
   await getAppointment(id, userId)
   console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
-  if (appointmentDetails.value.recordStatus.label === 'ACTIVE' || appointmentDetails.value.recordStatus.label === 'RESCHEDULE') {
-    getAppointmentType()
-  }
-
   selectedAppointmentId.value = id
   myModal.value.show() // Open the modal
-
   console.log('appointment deatils line 565', appointmentDetails.value.appointment_date)
 }
 
@@ -771,29 +778,31 @@ const handleModalClose = () => {
   getAppointments(1) // Refresh the appointments after closing the modal
   removeFile()
 }
+const appointmentTypeOptions = ref([])
 
-const appointmentTypeOptions = ref({})
 const getAppointmentType = async () => {
   try {
-    const response = await axiosInstance.get('/v1/scheduler/types')
-    appointmentTypeOptions.value = response.data.dataPayload.data.types
+    const response = await axiosInstance.get('/v1/scheduler/meeting-types')
+    appointmentTypeOptions.value = response.data.dataPayload.data
+    console.log('Appointment Type data:', appointmentTypeOptions.value)
   } catch (error) {
-    // console.error('Error fetching appointment types:', error);
-
-    if (error.response && error.response.data && error.response.data.errorPayload) {
-      // Extract and handle errors from server response
-      errors.value = error.response.data.errorPayload.errors
-    } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
-
-      proxy.$showToast({
-        title: errorMessage,
-        text: errorMessage,
-        icon: 'error'
-      })
-    }
+    handleApiError(error)
   }
 }
+
+const handleApiError = (error) => {
+  if (error.response && error.response.data && error.response.data.errorPayload) {
+    errors.value = error.response.data.errorPayload.errors
+  } else {
+    const errorMessage = error.response.data?.errorPayload?.errors?.message || 'An unknown error occurred'
+    proxy.$showToast({
+      title: errorMessage,
+      text: errorMessage,
+      icon: 'error'
+    })
+  }
+}
+
 
 const apiResponse = ref([])
 
@@ -881,7 +890,8 @@ const updateAttendees = (attendeesId) => {
   appointmentDetails.value.attendees = attendeesId
   console.log('form data attending mangai', appointmentDetails.value.attendees)
 }
-const selectedType = ref('')
+
+const showme = ref(false)
 
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
@@ -1116,16 +1126,30 @@ onUnmounted(() => {
                   </div>
                 </b-col>
                 <b-col lg="4" md="12" class="mb-3">
-                  <b-form-group label="Meeting Type:" label-for="meeting type">
+                  <!-- <b-form-group label="Meeting Type:" label-for="meeting type">
                     <select v-model="selectedType" name="service" class="form-select" id="addappointmenttype">
-                      <!-- Default placeholder option -->
+                      Default placeholder option
                       <option value="">Meeting Type</option>
-                      <!-- Dynamically populated options from API -->
+                      Dynamically populated options from API
                       <option v-for="type in appointmentTypeOptions" :key="type" :value="type.id" @click="selectedType = type.type">
                         {{ type.type }}
                       </option>
                     </select>
-                  </b-form-group>
+                  </b-form-group> -->
+
+                  <b-form-group label="Meeting Type:" label-for="input-1">
+                  <div class="position-relative d-flex flex-column">
+                    <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
+
+                    <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
+                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentDetails.appointment_type_id = type.id, selectedType = type.type), (showme = false)">{{ type.type }}</li>
+                    </ul>
+                    <span v-if="appointmentDetails.appointment_type_id" class="clear-btn" @click="appointmentDetails.appointment_type_id = '', selectedType=''">
+                      <i class="fas fa-times"></i>
+                    </span>
+                  </div>
+                </b-form-group>
+                  
                   <div v-if="errors.appointment_type_id" class="error" aria-live="polite">{{ errors.appointment_type_id }}</div>
                 </b-col>
                 <b-col lg="4" md="12" sm="12">
@@ -1299,5 +1323,18 @@ onUnmounted(() => {
 
 .clear-file:hover {
   color: #3d4453; /* Icon color on hover */
+}
+
+.clear-btn {
+  position: absolute;
+  right: 20px;
+  top: 40%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1rem;
+  color: #118820;
+}
+.clear-btn:hover {
+  color: #000;
 }
 </style>
