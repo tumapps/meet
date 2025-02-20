@@ -101,7 +101,7 @@ class Appointments extends BaseModel
             [
                 'id',
                 'user_id',
-                'appointment_type_id',
+                // 'appointment_type_id',
                 'appointment_date',
                 'start_time',
                 'end_time',
@@ -165,7 +165,7 @@ class Appointments extends BaseModel
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
             // [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
-            [['appointment_type'], 'string', 'max' => 50],
+            // [['appointment_type'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
             // Rules for scenarios
