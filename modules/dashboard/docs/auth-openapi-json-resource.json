@@ -3263,10 +3263,6 @@
         {
             "name": "AUTH",
             "description": "Endpoints for the AUTH module"
-        },
-        {
-            "name": "Appointments",
-            "description": "Available endpoints for Appointments model"
         }
     ]
 }
