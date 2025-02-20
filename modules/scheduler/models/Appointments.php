@@ -101,6 +101,7 @@ class Appointments extends BaseModel
             [
                 'id',
                 'user_id',
+                'appointment_type_id',
                 'appointment_date',
                 'start_time',
                 'end_time',
@@ -132,8 +133,8 @@ class Appointments extends BaseModel
     {
         return [
             [['user_id'], 'default', 'value' => null],
-            [['user_id', 'status'], 'integer'],
-            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
+            [['user_id', 'appointment_type_id', 'status'], 'integer'],
+            [['appointment_date', 'email_address', 'start_time', 'end_time', 'user_id', 'appointment_type_id', 'subject', 'contact_name', 'mobile_number', 'appointment_type', 'description'], 'required'],
             [['appointment_date', 'start_time', 'end_time', 'attendees', 'space_id'], 'safe'],
             [['description'], 'string', 'max' => 255],
             [['subject'], 'string', 'max' => 100],
@@ -147,9 +148,13 @@ class Appointments extends BaseModel
             [['start_time'], 'validateMeetingTime'],
 
             [['appointment_date'], 'validateOverlappingEvents'],
+            [['space_id'], 'validateSpace'],
+            [['appointment_date'], 'checkWeekends'],
             [['appointment_date'], 'validateBookingWindow'],
             [['appointment_date'], 'validateOverlappingAppointment'],
             [['attendees'], 'validateAttendeesCount'],
+            [['mobile_number'], 'validateMobileNumber'],
+
 
 
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
@@ -159,7 +164,7 @@ class Appointments extends BaseModel
             [['contact_name'], 'string', 'max' => 50],
             [['email_address'], 'string', 'max' => 128],
             ['email_address', 'email'],
-            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            // [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
             [['appointment_type'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \auth\models\User::class, 'targetAttribute' => ['user_id' => 'user_id']],
 
@@ -199,7 +204,7 @@ class Appointments extends BaseModel
 
     public function validateMobileNumber($attribute, $params)
     {
-        $pattern = '/^(07|01|\+254)[0-9]{8}$/';
+        $pattern = '/^(07|01|\+2547)[0-9]{8}$/';
 
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Invalid phone number');
@@ -228,6 +233,16 @@ class Appointments extends BaseModel
             $this->addError($attribute, 'The selected time or date overlaps with another event.');
         }
     }
+
+    public function checkWeekends($attribute, $params)
+    {
+        $dayOfWeek = date('N', strtotime($this->$attribute));
+
+        if ($dayOfWeek >= 6) { 
+            $this->addError($attribute, 'Booking is not allowed on weekends.');
+        }
+    }
+
 
     private function isValidTime($time)
     {
@@ -319,6 +334,17 @@ class Appointments extends BaseModel
         }
     }
 
+    public function validateSpace($attribute, $params)
+    {
+        $space = Space::findOne($this->$attribute);
+    
+        if ($space) {
+            if ($space->is_deleted == 1 && $space->space_type === Space::SPACE_TYPE_MANAGED) {
+                $this->addError($attribute, 'The selected space is deleted and cannot be used for booking.');
+            }
+        }
+    }
+    
     public function validateAttendeesAvailability($attribute, $params)
     {
         foreach ($this->attendees as $attendeeId) {
