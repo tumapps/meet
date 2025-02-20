@@ -94,8 +94,8 @@ class TimeHelper
         $allSlots = self::generateTimeSlots($user_id);
         $bufferTime = Settings::find()->select('advanced_booking')->where(['user_id' => $user_id])->scalar() ?? 30; // defaults to 30  mins
 
-        if (!is_array($allSlots)) {
-            return 'No available slots';
+        if (!is_array($allSlots) || empty($allSlots)) {
+            return [];
         }
 
         $slotsWithAvailability = [];
@@ -132,7 +132,7 @@ class TimeHelper
         $endTime = Settings::find()->select('end_time')->where(['user_id' => $user_id])->scalar();
 
         if (empty($startTime) || empty($endTime)) {
-            return 'start time or endtime is not set';
+            return [];
         }
 
         $start = new \DateTime($startTime);
@@ -259,24 +259,6 @@ class TimeHelper
         return true;
     }
 
-
-
-    // public static function checkExpireTime($appointment_date, $slot_start_time, $buffer_time)
-    // {
-    //     // Get current date and time
-    //     $currentDate = date('Y-m-d');
-    //     $currentTime = date('H:i:s');
-
-    //     // Check if the appointment date is today
-    //     if ($appointment_date == $currentDate) {
-    //         // If the slot's start time is earlier than the current time, it's expired
-    //         return $slot_start_time < $currentTime;
-    //     }
-
-    //     // For future dates, the slot is not expired
-    //     return false;
-    // }
-
     public static function checkExpireTime($appointment_date, $slot_start_time, int $buffer_time = 0)
     {
         // Get current date and time
@@ -285,26 +267,16 @@ class TimeHelper
 
         // Check if the appointment date is today
         if ($appointment_date == $currentDate) {
-            // Add buffer time to the current time
-            $bufferedTime = date('H:i:s', strtotime("+$buffer_time minutes", strtotime($currentTime)));
+            // Convert times to timestamps for accurate comparison
+            $currentTimestamp = strtotime($currentTime);
+            $bufferedTimestamp = strtotime("+$buffer_time minutes", $currentTimestamp);
+            $slotTimestamp = strtotime($slot_start_time);
 
             // If the slot's start time is earlier than the buffered time, it's expired
-            return $slot_start_time < $bufferedTime;
+            return $slotTimestamp < $bufferedTimestamp;
         }
 
         // For future dates, the slot is not expired
-        return false;
-    }
-
-
-    public static function checkOveride($user_id, $date, $slot, $priority = 3, $appointment = null)
-    {
-        // If there's an overlapping appointment, check if it can be overridden
-        if ($appointment) {
-            return Appointments::canOverride($appointment, $priority);
-        }
-
-        // If no appointment overlaps, no override is necessary
         return false;
     }
 }
