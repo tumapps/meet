@@ -3,13 +3,10 @@
 namespace helpers\traits;
 
 use  Yii;
-use scheduler\models\Availability;
 use scheduler\models\Events;
-use scheduler\models\Space;
 use scheduler\models\SpaceAvailability;
 use scheduler\models\AppointmentAttendees;
 use scheduler\hooks\TimeHelper;
-use scheduler\hooks\AppointmentRescheduler as Ar;
 
 trait AppointmentPolicy
 {
