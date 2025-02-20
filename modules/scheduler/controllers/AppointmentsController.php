@@ -405,6 +405,13 @@ class AppointmentsController extends \helpers\ApiController
                 $model->space_id = $dataRequest['Appointments']['space_id'] ?? $model->user_id;
                 $spaceId = $model->space_id;
 
+                $model->uploadedFile = UploadedFile::getInstanceByName('file');
+                $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
+
+                if (!$model->validate()) {
+                    return $this->errorResponse($model->getErrors());
+                }
+
                 $space = Space::findOne(['id' => $spaceId]);
 
                 if (!$space) {
@@ -413,13 +420,6 @@ class AppointmentsController extends \helpers\ApiController
                             ? 'User-specific office space is not configured'
                             : 'The specified space does not exist']
                     ]);
-                }
-
-                $model->uploadedFile = UploadedFile::getInstanceByName('file');
-                $model->attendees = $dataRequest['Appointments']['attendees'] ?? [];
-
-                if (!$model->validate()) {
-                    return $this->errorResponse($model->getErrors());
                 }
 
                 if ($space->space_type === Space::SPACE_TYPE_MANAGED) {
