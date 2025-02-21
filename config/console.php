@@ -4,7 +4,7 @@ require_once __DIR__ . '/wrapper.php';
 $wrapper = new ConfigWrapper();
 $config = [
     'id' => $_SERVER['APP_CODE'] . '-console',
-    'name' => $_SERVER['APP_NAME'] . ' Terminal',
+    'name' => $_SERVER['APP_NAME'],
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log', 'queue'],
     'controllerNamespace' => 'cmd\controllers',
