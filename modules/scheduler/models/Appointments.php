@@ -109,7 +109,6 @@ class Appointments extends BaseModel
                 'email_address',
                 'mobile_number',
                 'subject',
-                'appointment_type',
                 'status',
                 'recordStatus' => function () {
                     return $this->recordStatus;
