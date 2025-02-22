@@ -23,7 +23,7 @@ class MeetingTypeController extends \helpers\ApiController
     ];
     public function actionIndex()
     {
-        Yii::$app->user->can('schedulerMeeting-typeList');
+        // Yii::$app->user->can('schedulerMeeting-typeList');
         $searchModel = new MeetingTypesSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'MeetingTypesSearch');
         $dataProvider = $searchModel->search($search);
