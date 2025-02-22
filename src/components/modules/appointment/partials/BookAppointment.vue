@@ -374,7 +374,7 @@ watch(selectedUserId, (newUserId) => {
   }
   // getSlots()
 })
-const selectedType = ref('hello')
+const selectedType = ref('')
 
 onMounted(() => {
   slotsData.value.date = today.value
