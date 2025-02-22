@@ -123,16 +123,13 @@ const sortTable = (key) => {
 
 const getSpaces = async (page) => {
   try {
-    console.log(selectedPerPage.value)
     const response = await axiosInstance.get(`v1/scheduler/spaces?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
-    console.log(response.data.dataPayload.data)
     currentPage.value = response.data.dataPayload.currentPage
     totalPages.value = response.data.dataPayload.totalPages
     perPage.value = response.data.dataPayload.perPage
 
-    // console.log("update")
   } catch (error) {
     const errorMessage = error.response?.data?.errorPayload?.errors?.message || error.response?.data?.errorPayload?.message || 'An unknown error occurred'
 
@@ -151,7 +148,6 @@ const getSpace = async (id) => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/space/${id}`)
     SpaceDetails.value = response.data.dataPayload.data
-    console.log(SpaceDetails.value)
   } catch (error) {
     // console.error(error);
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message || error?.response?.data?.errorPayload?.message || error?.message || 'An unknown error occurred'
@@ -234,7 +230,6 @@ const saveSpace = async () => {
 const updateSpaceDetails = async (id) => {
   try {
     isLoading.value = true
-    // console.log(availabilityDetails.value);
 
     // Make the API call to update availability details
     const response = await axiosInstance.put(`v1/scheduler/space/${id}`, SpaceDetails.value)
@@ -330,7 +325,6 @@ const deleteSpace = async (id) => {
 }
 
 const confirmAction = (id, action) => {
-  // console.log("id", id);
   selectedAvailability.value = id
   proxy
     .$showAlert({
@@ -360,7 +354,6 @@ const toggleLock = async (id) => {
     const response = await axiosInstance.put(`v1/scheduler/lock-space/${id}`)
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       //get spaces
       getSpaces(1)

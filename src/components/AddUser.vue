@@ -71,7 +71,6 @@ const submitForm = async () => {
         icon: toastPayload.value.toastTheme || 'success'
       })
       emit('user-created')
-      console.log('emits emitted')
     }
 
     // Close modal after successful submission

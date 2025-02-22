@@ -36,7 +36,6 @@ function handleClose() {
 }
 
 const showModal = () => {
-  console.log('close modal', newEvent.value)
 
   if (newEvent.value) {
     newEvent.value.show()
@@ -44,7 +43,6 @@ const showModal = () => {
 }
 
 const closeModal = () => {
-  console.log('close modal', newEvent.value)
   if (newEvent.value) {
     newEvent.value.hide() // Call the hide() method
   }

@@ -35,16 +35,13 @@ const pdfUrl = ref('') // Replace with your PDF URL
 
 const renderPdf = async (url) => {
   try {
-    console.log('Fetching PDF from URL:', url)
     const pdfDoc = await pdfjsLib.getDocument(url).promise
-    console.log('PDF document loaded:', pdfDoc)
 
     const canvas = pdfCanvas.value
     const canvasContext = canvas.getContext('2d')
 
     // Get the first page of the PDF
     const page = await pdfDoc.getPage(1)
-    console.log('First page loaded:', page)
 
     // Set canvas dimensions and render page
     const viewport = page.getViewport({ scale: 1.5 })
@@ -57,7 +54,6 @@ const renderPdf = async (url) => {
     }
 
     await page.render(renderContext).promise
-    console.log('Page rendered successfully')
   } catch (error) {
     console.error('Error rendering PDF:', error)
   }

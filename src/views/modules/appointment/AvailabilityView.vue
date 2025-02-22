@@ -185,7 +185,6 @@ const cancelAvailability = async (id) => {
 
 const getAvailabilities = async (page = 1) => {
   try {
-    console.log(selectedPerPage.value)
     const response = await axiosInstance.get(`v1/scheduler/availabilities?page=${page}&per-page=${selectedPerPage.value}`)
     isArray.value = Array.isArray(response.data)
     tableData.value = response.data.dataPayload.data
@@ -274,7 +273,6 @@ const saveAvailability = async () => {
 
 const updateAvailabilityDetails = async (id) => {
   try {
-    // console.log(availabilityDetails.value);
 
     // Make the API call to update availability details
     const response = await axiosInstance.put(`v1/scheduler/availability/${id}`, availabilityDetails.value)
@@ -305,7 +303,6 @@ const updateAvailabilityDetails = async (id) => {
     if (error.response && error.response.data.errorPayload) {
       // Check if errorPayload exists and has errors
       errors.value = error.response.data.errorPayload.errors
-      console.log(errors)
       if (errors.value && errors.value.message) {
         errorMessage = errors.value.message // Use specific error message
       }

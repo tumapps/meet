@@ -25,7 +25,7 @@ const AxiosInstance = () => {
       const response = await axios.get('https://api.ipify.org?format=json')
       userIP = response.data.ip // Assign the fetched IP to userIP
     } catch (error) {
-      // console.log('Error fetching IP address:', error)
+      console.error(error)
     }
   }
 
@@ -108,7 +108,6 @@ const AxiosInstance = () => {
         }
 
         if (statusCode === UNAUTHORIZED_CODE) {
-          console.log('Token expired, attempting to refresh...')
 
           if (!isRefreshing) {
             isRefreshing = true
@@ -147,7 +146,6 @@ const AxiosInstance = () => {
 
         // Handle other errors by redirecting to custom error page
         if (![422, TOKEN_EXPIRED_CODE, UNAUTHORIZED_CODE].includes(statusCode)) {
-          console.log(`Redirecting to error page due to status: ${statusCode}`)
           router.push({ path: `/error/${statusCode}` })
         }
       }

@@ -48,7 +48,6 @@ const confirmRemoveAttendee = (index) => {
       // Update attendee as removed and save the reason
       attendees.value[index].removed = true
       removalReasons.value[attendee.staff_id] = reason
-      console.log(removalReasons.value)
 
       // Show confirmation toast
       Swal.fire({

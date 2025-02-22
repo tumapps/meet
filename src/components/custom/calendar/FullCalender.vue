@@ -20,7 +20,6 @@ const props = defineProps({
 })
 //wooah
 
-console.log('dashType:', props.dashType)
 const eventModalRef = ref(null)
 const openEventModal = (id) => {
   if (eventModalRef.value) {
@@ -61,7 +60,6 @@ function handleDateClick(info) {
     //show booking modal
     //pass clicked date to selecedDate
     selectedDate.value = clickedDate
-    console.log('Selected date:', selectedDate.value)
     //push to booking
     if (props.dashType === 'Registrar') {
       //open modal New events
@@ -69,7 +67,6 @@ function handleDateClick(info) {
     } else {
       router.push({ name: 'booking', query: { date: selectedDate.value } })
     }
-    // console.log(typeof(selectedDate.value));
     //pass the selected date to the modal
   }
 }
@@ -114,7 +111,6 @@ async function fetchAppointments() {
     const response = await axiosInstance.get('/v1/scheduler/appointments', { params })
 
     apiData.value = response.data.dataPayload.data
-    console.log('Raw API Data:', apiData.value) // Debugging to check API response
     if (Array.isArray(apiData.value)) {
       events.value = apiData.value
         .filter((item) => {
@@ -122,7 +118,6 @@ async function fetchAppointments() {
           return item.recordStatus?.label === 'ACTIVE'
         })
         .map((item) => {
-          console.log('Item:', item)
 
           // const parsedDate = parseCustomDate(item.appointment_date)
           const formattedDate = format(item.appointment_date, 'yyyy-MM-dd')
@@ -169,12 +164,10 @@ async function fetchAppointments() {
           }
 
           // Log the constructed event
-          console.log('Event main Action :', event)
 
           return event
         })
     } else {
-      console.log('No data found')
       events.value = []
     }
   } catch (error) {
@@ -197,7 +190,6 @@ async function fetchEvents() {
     // Ensure apiData is always an array
     apiData.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
 
-    console.log('Raw API Data:', typeof apiData.value) // Debugging to check API response
 
     // Filter and map API data to FullCalendar's required format
     if (Array.isArray(apiData.value)) {
@@ -225,7 +217,6 @@ async function fetchEvents() {
         })
     }
 
-    console.log('Mapped Events:', events.value) // Debugging to verify mapped data
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
     console.error('Error fetching events:', error)
@@ -288,7 +279,6 @@ const calendarOptions = ref({
 })
 
 watch(events, (newEvents) => {
-  // console.log("Events updated:", newEvents)  // Log the updated events
   calendarOptions.value.events = [...newEvents]
 
   const calendarApi = calendarOptions.value?.getApi?.()
@@ -307,7 +297,6 @@ watch(events, (newEvents) => {
 // // Load events when the component is mounted
 // onMounted(() => {
 //   fetchAppointments() // Fetch events from the API
-//   console.log('events ata mount:', events.value)
 // })
 
 //filter meetings for secretary
@@ -321,8 +310,6 @@ const getusers_booked = async () => {
   try {
     const response = await axiosInstance.get('/v1/auth/users')
     UsersOptions.value = response.data.dataPayload.data
-    console.log('Users data:', UsersOptions.value)
-    // console.log("Users data:", UsersOptions.value);
   } catch (error) {
     proxy.$showToast({
       title: 'An error occurred',
@@ -337,7 +324,6 @@ watch(selectedUser, (newselectedUser) => {
     fetchAppointments()
   } else {
     // fetchAppointmentsByUser(selectedUser.value)
-    console.log('Selected User:', selectedUser.value)
     fetchAppointments()
   }
 })

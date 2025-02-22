@@ -40,7 +40,6 @@ const getSpace = async (id) => {
   try {
     const response = await axiosInstance.get(`v1/scheduler/space/${id}`)
     SpaceDetails.value = response.data.dataPayload.data
-    console.log(SpaceDetails.value)
   } catch (error) {
     // console.error(error);
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message || error?.response?.data?.errorPayload?.message || error?.message || 'An unknown error occurred'
@@ -57,7 +56,6 @@ const getSpace = async (id) => {
 const updateSpaceDetails = async (id) => {
   try {
     isLoading.value = true
-    // console.log(availabilityDetails.value);
 
     // Make the API call to update availability details
     const response = await axiosInstance.put(`v1/scheduler/space/${id}`, SpaceDetails.value)
@@ -104,7 +102,6 @@ const updateSpaceDetails = async (id) => {
 
 onMounted(() => {
   role.value = authStore.getRole()
-  console.log('here daddy', role.value)
 
   if (role.value !== 'su') {
     getSpace(user_id.value)

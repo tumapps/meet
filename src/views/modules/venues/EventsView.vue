@@ -104,7 +104,6 @@ const sortedData = computed(() => {
 })
 
 const closeModal = () => {
-  console.log('close modal', newEvent.value)
   if (newEvent.value) {
     newEvent.value.hide() // Call the hide() method
   }
@@ -116,7 +115,6 @@ const getEvent = async (id) => {
     eventDetails.value = response.data.dataPayload.data
     recordStatus.value = eventDetails.value.recordStatus
 
-    console.log(eventDetails.value)
   } catch (error) {
     // console.error(error);
     const errorMessage = error?.response?.data?.errorPayload?.errors?.message
@@ -218,8 +216,6 @@ watch(searchQuery, () => {
 })
 
 const confirmAction = (id, action) => {
-  // console.log("id", id);
-  // selectedAvailability.value = id
 
   proxy
     .$showAlert({
@@ -247,7 +243,6 @@ const AlterEvent = async (id) => {
     getEvents(1)
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
       proxy.$showToast({
@@ -363,7 +358,6 @@ const confirmReject = (id) => {
                 } else {
                   // Pass the reason to reject
                   RejectBooking(id, reasonResult.value.trim())
-                  console.log(reasonResult.value)
                   getEvents(1)
                 }
               }

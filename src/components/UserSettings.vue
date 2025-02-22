@@ -56,7 +56,6 @@ const fetchSettings = async () => {
   errors.value = {}
   try {
     const response = await axiosInstance.get(`v1/scheduler/settings/${user_id.value}`)
-    // console.log(response.data.dataPayload.data);
 
     settings.value = {
       start_time: response.data.dataPayload.data.start_time,
@@ -91,7 +90,6 @@ const saveSettings = async () => {
       })
     }
   } catch (error) {
-    console.log('error', error)
     errors.value = error.response.data.errorPayload?.errors
     // const errorMessage = error.response.data.errorPayload.errors?.message
     // status code !== 422

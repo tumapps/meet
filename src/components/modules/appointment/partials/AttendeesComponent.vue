@@ -60,12 +60,8 @@ watch(
 )
 // watch searchQuery and call handleSearch
 watch(searchQuery, (newSearchQuery) => {
-  console.log('searchQuery:', newSearchQuery)
-  console.log('tyoeof:', typeof newSearchQuery)
-  console.log('searchResults:', searchResults.value)
   if (!newSearchQuery) {
     searchResults.value = []
-    console.log('searchResults indde:', searchResults.value)
     return // Stop execution to prevent unnecessary `handleSearch()`
   }
   handleSearch()

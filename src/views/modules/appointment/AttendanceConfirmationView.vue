@@ -66,7 +66,6 @@ const handleResponse = async () => {
 // Utility function for formatting dates
 // const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString()
 
-// console.log("id", id);
 const confirmResponse = (scene) => {
   proxy
     .$showAlert({
@@ -114,8 +113,7 @@ onUnmounted(() => {
 })
 watch(
   () => route.params.meetingId,
-  (newId, oldId) => {
-    console.log(`Route changed: ${oldId} → ${newId}`)
+  (newId) => {
     if (newId) {
       fetchMeetingDetails(newId)
     }
@@ -123,8 +121,6 @@ watch(
 )
 onMounted(() => {
   const meetingId = route.params.meetingId // Use `meetingId` as per your route definition
-  console.log('Route params:', route.params) // Debugging route parameters
-  console.log('Extracted meetingId:', meetingId) // Ensure `meetingId` is not undefined
   if (meetingId) {
     fetchMeetingDetails(meetingId)
   } else {

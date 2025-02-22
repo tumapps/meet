@@ -57,7 +57,6 @@ const getPendingApprovals = async (page) => {
     const response = await axiosInstance.get('v1/scheduler/pending-appointments', { params })
 
     tableData.value = response.data.dataPayload.data
-    console.log(response.data.dataPayload.data)
     currentPage.value = response.data.current_page
     totalPages.value = response.data.last_page
     perPage.value = response.data.per_page
@@ -232,7 +231,6 @@ const confirmReject = (id) => {
                 } else {
                   // Pass the reason to reject
                   RejectBooking(id, reasonResult.value.trim())
-                  console.log(reasonResult.value)
                   getPendingApprovals(1)
                 }
               }

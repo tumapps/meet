@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed, watch, onUnmounted } from 'vue'
+import { onMounted, ref, getCurrentInstance, computed, watch} from 'vue'
 import AxiosInstance from '@/api/axios'
 // import globalUtils from '@/utilities/globalUtils'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'
@@ -129,11 +129,13 @@ const removeFile = () => {
   }
 }
 
+// const minDate = ref('today')
+
 const flatPickrConfig = {
   dateFormat: 'Y-m-d',
   altInput: true,
   altFormat: 'd-M-Y',
-  minDate: 'today',
+  // minDate: 'today',
   disable: [
     function (date) {
       return date.getDay() === 6 || date.getDay() === 0
@@ -896,14 +898,9 @@ const showme = ref(false)
 onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getAppointments(1)
-  proxy.$addWebSocketListener((data) => {
-    console.log('Received WebSocket message:', data)
-  })
 })
 
-onUnmounted(() => {
-  proxy.$removeWebSocketListener()
-})
+
 </script>
 <template>
   <b-col lg="12">

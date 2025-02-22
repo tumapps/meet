@@ -50,9 +50,7 @@ const rolename = ref('')
 // }
 
 const onModalShow = () => {
-  console.log('RolePermissions mounted heree', props.roleName)
   rolename.value = ref(props.roleName)
-  console.log('selected items', selectedItems.value)
 
   if (props.user_id && props.roleName) {
     custompath.value = `/v1/auth/assign-role-user/${props.user_id}`
@@ -63,17 +61,9 @@ const onModalShow = () => {
     custompath2.value = `/v1/auth/remove?id=${props.roleName}`
     getRoleDetails()
   }
-
-  // if (!props.user_id) {
-  //   getRoleDetails()
-  // } else if (props.user_id) {
-  //   console.log('Getting user roles')
-  //   // getUserRoles()
-  // }
 }
 
 const handleclose = () => {
-  console.log('RolePermissions closed')
   resetState() // Reset state
   assignedItemsSearch.value = ''
   availableItemsSearch.value = ''
@@ -89,14 +79,11 @@ watch(
   props.user_id,
   (newRoleName, oldRoleName, newUserId, oldUserId) => {
     rolename.value = newRoleName
-    console.log('RoleName changed:', rolename.value)
 
     if (newRoleName !== oldRoleName && !props.user_id) {
-      console.log('RoleName changed:', newRoleName)
       getRoleDetails()
     }
     if (newUserId !== oldUserId && props.user_id) {
-      console.log('User ID changed:', newUserId)
       getUserRoles()
     }
   }
@@ -118,7 +105,6 @@ const moveToSelected = (name) => {
     return
   }
   selectedItems.value.items.push(name)
-  console.log(selectedItems.value.items)
 }
 
 //check if the item is in the  selected items
@@ -137,7 +123,6 @@ const getUserRoles = async () => {
 //send the selected items to the backend
 const updateRolePermissions = async () => {
   try {
-    console.log('Selected items:', selectedItems.value)
     // Send the selected items to the backend
     const response = await axiosInstance.post(custompath.value, selectedItems.value)
 

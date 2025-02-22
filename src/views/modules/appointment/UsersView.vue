@@ -62,7 +62,6 @@ const updatePerPage = () => {
 
 // Pagination logic
 const goToPage = (page) => {
-  // console.log('page', page);
   if (page > 0 && page <= totalPages.value) {
     getUsers(page)
   }

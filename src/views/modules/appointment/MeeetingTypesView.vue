@@ -26,7 +26,7 @@ const getMeetingTypes = async (page) => {
     totalPages.value = response.data.dataPayload.totalPages
     perPage.value = response.data.dataPayload.perPage
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 }
 
@@ -35,7 +35,6 @@ const getMeetingType = async (id) => {
     const response = await axiosInstance.get(`/v1/scheduler/meeting-type/${id}`)
     typeDetails.value = response.data.dataPayload.data
   } catch (error) {
-    console.log(error)
     if (error.response.status !== 422) {
       proxy.$showAlert({
         title: error.response.data.errorPayload.toastTheme,
@@ -66,7 +65,6 @@ const newType = async () => {
       })
     }
   } catch (error) {
-    console.log(error)
     errors.value = error.response.data.errorPayload?.errors
     if (error.response.status !== 422) {
       proxy.$showAlert({
@@ -100,7 +98,6 @@ const updateType = async () => {
     }
     getMeetingTypes(1)
   } catch (error) {
-    console.log(error)
     errors.value = error.response.data.errorPayload?.errors
 
     if (error.response.status !== 422) {
@@ -133,7 +130,6 @@ const deleteAction = async (id) => {
       })
     }
   } catch (error) {
-    console.log(error)
     if (error.response.status !== 422) {
       proxy.$showAlert({
         title: error.response.data.errorPayload.toastTheme,

@@ -57,7 +57,6 @@ export default {
     }
 
     const onCheckboxUpdate = (defaultChecked, value) => {
-      // console.log(defaultChecked, value)
       if (checkboxCheckValue(defaultChecked, value)) {
         return [...defaultChecked.filter((item) => item !== value)]
       } else {
