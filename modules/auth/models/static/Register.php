@@ -57,7 +57,9 @@ class Register extends Model
             [['full_name'], 'safe'],
             [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => '/^\S+$/', 'message' => 'Whitespace is not allowed'],
             [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
-            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            // [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            [['mobile_number'], 'validateMobileNumber'],
+
 
             // [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
@@ -65,7 +67,7 @@ class Register extends Model
 
     public function validateMobileNumber($attribute, $params)
     {
-        $pattern = '/^(07|01|\+254)[0-9]{8}$/';
+        $pattern = '/^(07|01|\+2547)[0-9]{8}$/';
 
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Invalid phone number');
