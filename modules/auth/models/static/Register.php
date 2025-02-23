@@ -49,12 +49,13 @@ class Register extends Model
 
             //profile validation
             [['first_name', 'last_name', 'email_address', 'mobile_number'], 'required'],
+            [['first_name', 'last_name', 'username', 'middle_name'], 'validateName'],
             [['first_name', 'last_name'], 'string', 'max' => 50, 'min' => 3],
             [['middle_name'], 'string', 'max' => 50, 'min' => 1],
             [['email_address'], 'string', 'max' => 128],
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
-            [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => '/^\S+$/', 'message' => 'Whitespace is not'],
+            [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => '/^\S+$/', 'message' => 'Whitespace is not allowed'],
             [['first_name', 'last_name', 'middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
             [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
 
@@ -77,6 +78,10 @@ class Register extends Model
 
         if (!preg_match("/^[a-zA-Z']+$/", $name)) {
             $this->addError($attribute, 'The name can only contain alphabetic characters');
+        }
+
+        if (preg_match('/(.)\1{2,}/', $name)) {
+            $this->addError($attribute, 'The name cannot contain three or more consecutive identical characters.');
         }
     }
 

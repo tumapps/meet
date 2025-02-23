@@ -153,6 +153,7 @@ class Appointments extends BaseModel
             [['appointment_date'], 'validateOverlappingAppointment'],
             [['attendees'], 'validateAttendeesCount'],
             [['mobile_number'], 'validateMobileNumber'],
+            [['contact_name'], 'validateName'],
 
             [['appointment_date'], 'date', 'format' => 'php:Y-m-d'],
             ['appointment_date', 'date', 'format' => 'php:Y-m-d', 'min' => date('Y-m-d'), 'message' => 'The appointment date must not be in the past'],
@@ -185,6 +186,19 @@ class Appointments extends BaseModel
         $scenarios[self::SCENARIO_REJECT] = ['rejection_reason'];
         $scenarios[self::SCENARIO_DECLINE] = ['decline_reason'];
         return $scenarios;
+    }
+
+    public function validateName($attribute, $params)
+    {
+        $name = $this->$attribute;
+
+        if (!preg_match("/^[a-zA-Z']+$/", $name)) {
+            $this->addError($attribute, 'The name can only contain alphabetic characters');
+        }
+
+        if (preg_match('/(.)\1{2,}/', $name)) {
+            $this->addError($attribute, 'The name cannot contain three or more consecutive identical characters.');
+        }
     }
 
 
