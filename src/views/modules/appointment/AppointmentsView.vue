@@ -1064,8 +1064,8 @@ onMounted(async () => {
 
   <b-modal ref="myModal" hide-footer size="xl" @hide="handleModalClose">
     <template #title>
-      <div class="container-fluid" style="width: 90% !important; margin: 0 !important; font-size: 1rem !important">
-        <div class="row align-items-center">
+      <div class="container-fluid" style="width: 91% !important; margin: 0 !important; font-size: 1rem !important">
+        <div class="row align-items-left">
           <div class="mb-3 col-lg-3 col-md-6 col-sm-6"><span class="fw-bold">Date:</span> {{ appointmentDetails.appointment_date }}</div>
 
           <div class="mb-3 col-lg-4 col-md-6 col-sm-6"><span class="fw-bold">Subject:</span> {{ truncatedSubject }}</div>

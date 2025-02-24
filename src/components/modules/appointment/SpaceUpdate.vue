@@ -124,7 +124,7 @@ onMounted(() => {
       <b-col md="6">
         <div class="mb-3">
           <label for="startTimePicker" class="form-label">Opening Hours</label>
-            <flat-pickr v-model="SpaceDetails.opening_time" class="form-control" :config="config2" id="startTimePicker" disabled />
+          <flat-pickr v-model="SpaceDetails.opening_time" class="form-control" :config="config2" id="startTimePicker" disabled />
         </div>
         <div v-if="errors.opening_time" class="error" aria-live="polite">{{ errors.opening_time }}</div>
       </b-col>

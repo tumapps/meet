@@ -36,7 +36,6 @@ function handleClose() {
 }
 
 const showModal = () => {
-
   if (newEvent.value) {
     newEvent.value.show()
   }
@@ -95,21 +94,16 @@ const saveEvent = async (isUpdate = false) => {
         timer: 4000,
         timerProgressBar: true
       })
-    } else {
-      proxy.$showToast({
-        title: 'success',
-        icon: 'success'
-      })
     }
   } catch (error) {
     // Handle error if the request fails
     if (error.response && error.response.data.errorPayload) {
       errors.value = error.response.data.errorPayload.errors
     } else {
-      const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
+      const errorMessage = error.response.data.errorPayload.errors?.message
 
       proxy.$showToast({
-        title: 'An error occurred',
+        title: errorMessage,
         text: errorMessage,
         icon: 'error'
       })
