@@ -18,11 +18,12 @@ const user_id = ref('')
 user_id.value = authStore.getUserId()
 
 const config2 = {
-  enableTime: true,
+  enableTime: false,
   noCalendar: true,
   dateFormat: 'H:i',
   time_24hr: true,
-  minuteIncrement: 5
+  minuteIncrement: 5,
+  allowInput: false
 }
 
 const InitialSpaceDetails = {
@@ -123,14 +124,14 @@ onMounted(() => {
       <b-col md="6">
         <div class="mb-3">
           <label for="startTimePicker" class="form-label">Opening Hours</label>
-          <flat-pickr v-model="SpaceDetails.opening_time" class="form-control" :config="config2" id="startTimePicker" />
+            <flat-pickr v-model="SpaceDetails.opening_time" class="form-control" :config="config2" id="startTimePicker" disabled />
         </div>
         <div v-if="errors.opening_time" class="error" aria-live="polite">{{ errors.opening_time }}</div>
       </b-col>
       <b-col md="6">
         <div class="mb-3">
           <label for="endTimePicker" class="form-label">Closing Hours</label>
-          <flat-pickr v-model="SpaceDetails.closing_time" class="form-control" :config="config2" id="endTimePicker" />
+          <flat-pickr v-model="SpaceDetails.closing_time" class="form-control" :config="config2" id="endTimePicker" disabled />
         </div>
         <div v-if="errors.closing_time" class="error" aria-live="polite">{{ errors.closing_time }}</div>
       </b-col>

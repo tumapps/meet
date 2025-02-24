@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, getCurrentInstance, computed, watch} from 'vue'
+import { onMounted, ref, getCurrentInstance, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 // import globalUtils from '@/utilities/globalUtils'
 import TimeSlotComponent from '@/components/modules/appointment/partials/TimeSlotComponent.vue'
@@ -60,7 +60,6 @@ const InitialappointmentDetails = {
   user_id: '',
   space_id: ''
 }
-
 
 const appointmentDetails = ref({ ...InitialappointmentDetails })
 const uploading = ref(false) // Holds the upload status
@@ -480,7 +479,7 @@ const getAppointment = async (id) => {
       specialDate.value = response.data.dataPayload.data.appointment_date
 
       console.log('appointment type', appointmentDetails.value.appointment_type_id)
-      console.log("type otyopm", appointmentTypeOptions.value)
+      console.log('type otyopm', appointmentTypeOptions.value)
       const selected = appointmentTypeOptions.value.find((type) => type.id === appointmentDetails.value.appointment_type_id)
       console.log('selected:', selected)
       selectedType.value = selected ? selected.type : 'nana'
@@ -541,7 +540,6 @@ const getSpaces = async (userId) => {
     }
   }
 }
-
 
 // Watch for changes in appointmentDetails.value.space
 watch(
@@ -647,7 +645,6 @@ const suggestions = ref([])
 const suggestedDate = ref('')
 const timeSlots = ref([])
 
-
 // Function to fetch suggested slots
 const suggestSlots = async (id) => {
   try {
@@ -660,7 +657,6 @@ const suggestSlots = async (id) => {
     suggestedDate.value = suggestions.value.date
     timeSlots.value = suggestions.value.slots
     appointmentDetails.value.appointment_date = suggestions.value.date
-
 
     //update date to suggessted date
     // appointmentDetails.value.appointment_date = suggestedDate.value
@@ -805,7 +801,6 @@ const handleApiError = (error) => {
   }
 }
 
-
 const apiResponse = ref([])
 
 const getSlots = async () => {
@@ -899,8 +894,6 @@ onMounted(async () => {
   //fetch appointments and slots and unavailable slots
   getAppointments(1)
 })
-
-
 </script>
 <template>
   <b-col lg="12">
@@ -1135,18 +1128,18 @@ onMounted(async () => {
                   </b-form-group> -->
 
                   <b-form-group label="Meeting Type:" label-for="input-1">
-                  <div class="position-relative d-flex flex-column">
-                    <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
+                    <div class="position-relative d-flex flex-column">
+                      <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
 
-                    <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
-                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentDetails.appointment_type_id = type.id, selectedType = type.type), (showme = false)">{{ type.type }}</li>
-                    </ul>
-                    <span v-if="appointmentDetails.appointment_type_id" class="clear-btn" @click="appointmentDetails.appointment_type_id = '', selectedType=''">
-                      <i class="fas fa-times"></i>
-                    </span>
-                  </div>
-                </b-form-group>
-                  
+                      <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
+                        <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";((appointmentDetails.appointment_type_id = type.id), (selectedType = type.type)), (showme = false)">{{ type.type }}</li>
+                      </ul>
+                      <span v-if="appointmentDetails.appointment_type_id" class="clear-btn" @click=";(appointmentDetails.appointment_type_id = ''), (selectedType = '')">
+                        <i class="fas fa-times"></i>
+                      </span>
+                    </div>
+                  </b-form-group>
+
                   <div v-if="errors.appointment_type_id" class="error" aria-live="polite">{{ errors.appointment_type_id }}</div>
                 </b-col>
                 <b-col lg="4" md="12" sm="12">

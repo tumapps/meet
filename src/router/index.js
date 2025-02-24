@@ -10,7 +10,6 @@ const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
 const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
 const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 
-
 // Default routes
 export const defaultChildRoutes = (prefix) => [
   {
