@@ -46,7 +46,8 @@ class Profiles extends \helpers\ActiveRecord
             [['email_address'], 'email'],
             [['full_name'], 'safe'],
 
-            [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            // [['mobile_number'], PhoneInputValidator::className(), 'region' => ['KE']],
+            [['mobile_number'], 'validateMobileNumber'],
             [['first_name', 'last_name','middle_name'], 'match', 'pattern' => "/^[a-zA-Z']+$/", 'message' => 'The name can only contain alphabetic characters and apostrophes'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'user_id']],
         ];
@@ -55,7 +56,7 @@ class Profiles extends \helpers\ActiveRecord
 
     public function validateMobileNumber($attribute, $params)
     {
-        $pattern = '/^(07|01|\+254)[0-9]{8}$/';
+        $pattern = '/^(07|01|\+2547)[0-9]{8}$/';
 
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Invalid phone number');
