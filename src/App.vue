@@ -10,10 +10,20 @@ import { useAutoLogout } from '@/composables/useAutoLogout'
 import createAxiosInstance from '@/api/axios'
 // import { useAuthStore } from '@/store/auth.store.js'
 
+import { useRouter } from 'vue-router'
+
 // Import Pinia Store
 import { useSetting } from '@/store/pinia'
 
 import '@/plugins/styles'
+
+const router = useRouter()
+// const authStore = useAuthStore()
+
+// Function to check if a route requires authentication
+const requiresAuth = (route) => {
+  return route.matched.some((record) => record.meta.requiresAuth)
+}
 
 useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
 // Initialize the store
@@ -74,20 +84,25 @@ onMounted(() => {
   store.setSetting()
 
   //call the refrsh token function from store
-  RunrefreshToken()
+  // RunrefreshToken()
+  router.beforeEach(async (to, from, next) => {
+    if (requiresAuth(to)) {
+      if (localStorage.getItem('user.token')) {
+        try {
+          await RunrefreshToken() // Refresh the token before proceeding
+          next() // Allow navigation
+        } catch (error) {
+          console.error('Error refreshing token:', error)
+          next('/auth/login') // Redirect if refresh fails
+        }
+      } else {
+        next('/auth/login') // Redirect if no token
+      }
+    } else {
+      next() // No auth required, proceed normally
+    }
+  })
 })
-
-// onUnmounted(() => {
-//   // Remove the event listener when the component is unmounted
-//   window.removeEventListener('beforeunload', handleBeforeUnload)
-//   window.removeEventListener('resize', resizePlugin)
-//   authStore.initStore()
-// })
-
-// // Function to handle the `beforeunload` event
-// function handleBeforeUnload() {
-//   localStorage.clear() // Clear localStorage
-//   }
 </script>
 
 <style lang="scss">
