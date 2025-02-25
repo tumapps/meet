@@ -45,7 +45,8 @@
         .appointment-details {
             margin: 20px 0;
             padding-left: 20px;
-            border-left: 4px solid #007bff;
+            border-left: 4px solid #5cb85c;
+            border-radius: 5px;
         }
 
         .appointment-details p {
@@ -79,30 +80,28 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h2>Appointment Notification</h2>
+            <h2><?= htmlspecialchars($subject) ?></h2>
         </div>
         <div class="email-body">
             <p>Dear <?= htmlspecialchars($contact_name) ?>,</p>
 
             <?php if ($is_removed): ?>
-                <p>We regret to inform you that you have been removed from the following appointment:</p>
+                <p>We regret to inform you that you have been removed from the following Meeting:</p>
                 <div class="appointment-details">
-                    <p><strong>Appointment Name:</strong> <?= htmlspecialchars($appointment_name) ?></p>
+                    <p><strong>Subject:</strong> <?= htmlspecialchars($meeting_subject) ?></p>
                     <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                     <p><strong>Start Time:</strong> <?= htmlspecialchars($start_time) ?></p>
                     <p><strong>End Time:</strong> <?= htmlspecialchars($end_time) ?></p>
                 </div>
                 <p><strong>Reason for Removal:</strong> <?= htmlspecialchars($reason) ?></p>
-                <p>If you have any questions or concerns, please feel free to contact us.</p>
             <?php else: ?>
-                <p>You have been added as an attendee to the following appointment:</p>
+                <p>You have been added as an attendee to the following Meeting:</p>
                 <div class="appointment-details">
-                    <p><strong>Appointment Name:</strong> <?= htmlspecialchars($appointment_name) ?></p>
+                    <p><strong>Subject:</strong> <?= htmlspecialchars($meeting_subject) ?></p>
                     <p><strong>Date:</strong> <?= htmlspecialchars($date) ?></p>
                     <p><strong>Start Time:</strong> <?= htmlspecialchars($start_time) ?></p>
                     <p><strong>End Time:</strong> <?= htmlspecialchars($end_time) ?></p>
                 </div>
-                <p>We look forward to your participation. Please contact us if you have any questions.</p>
             <?php endif; ?>
         </div>
         <div class="email-footer">

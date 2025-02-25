@@ -273,7 +273,7 @@ class EventHandler
 		$email = $event->data['email'];
 
 		$commonData = [
-			'appointment_name' => $event->data['appointment_subject'],
+			'meeting_subject' => $event->data['meeting_subject'],
 			'date' => $event->data['appointment_date'],
 			'start_time' => $event->data['start_time'],
 			'end_time' => $event->data['end_time'],
@@ -289,7 +289,7 @@ class EventHandler
 		]));
 
 		// self::addEmailToQueue($email, $event->data['subject'], $body);
-		self::queueEmail($$email, $event->data['subject'], $body);
+		self::queueEmail($email, $event->data['subject'], $body);
 	}
 
 	public static function onAppointmentReschedule(Event $event)
