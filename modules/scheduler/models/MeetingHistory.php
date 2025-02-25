@@ -2,7 +2,7 @@
 
 namespace scheduler\models;
 
-use Yii;
+// use Yii;
 
 /**
  *@OA\Schema(

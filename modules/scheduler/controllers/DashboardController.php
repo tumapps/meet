@@ -4,8 +4,6 @@ namespace scheduler\controllers;
 
 use Yii;
 use scheduler\models\Appointments;
-use scheduler\models\searches\AppointmentsSearch;
-use helpers\WebSocketHandler;
 use Ratchet\Client\Connector;
 use React\EventLoop\Factory;
  

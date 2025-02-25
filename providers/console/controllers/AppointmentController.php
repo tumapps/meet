@@ -2,7 +2,7 @@
 
 namespace cmd\controllers;
 
-use Yii;
+// use Yii;
 use yii\console\Controller;
 use scheduler\models\Appointments;
 use yii\helpers\Console;

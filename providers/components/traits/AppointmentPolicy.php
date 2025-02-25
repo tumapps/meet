@@ -2,7 +2,6 @@
 
 namespace helpers\traits;
 
-use  Yii;
 use scheduler\models\Events;
 use scheduler\models\SpaceAvailability;
 use scheduler\models\AppointmentAttendees;

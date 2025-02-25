@@ -10,10 +10,8 @@ use scheduler\models\Events;
 use scheduler\hooks\TimeHelper;
 use scheduler\models\SpaceAvailability;
 use scheduler\models\Space;
-use yii\base\Event;
 use scheduler\models\Availability;
-use helpers\EventHandler;
-use borales\extensions\phoneInput\PhoneInputValidator;
+// use borales\extensions\phoneInput\PhoneInputValidator;
 use scheduler\hooks\NotificationTrait;
 
 

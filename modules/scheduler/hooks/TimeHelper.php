@@ -5,7 +5,6 @@ namespace scheduler\hooks;
 use scheduler\models\Settings;
 use scheduler\models\Appointments;
 use scheduler\models\Availability;
-use yii\helpers\ArrayHelper;
 
 
 

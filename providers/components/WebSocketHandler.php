@@ -4,11 +4,9 @@ namespace helpers;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use yii\console\ExitCode;
 use Ratchet\Client\Connector;
 use React\EventLoop\Factory;
 use scheduler\models\Appointments;
-use React\EventLoop\Timer\Timer;
 use React\EventLoop\LoopInterface;
 
 class WebSocketHandler implements MessageComponentInterface

@@ -4,14 +4,11 @@ namespace cmd\controllers;;
 
 
 use yii\console\Controller;
-use yii\console\ExitCode;
 use helpers\WebSocketHandler;
 use Ratchet\Server\IoServer;
 use React\EventLoop\Factory;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
-use Ratchet\App;
-use Yii;
 
 class WebSocketServerController extends Controller
 {
