@@ -857,7 +857,7 @@ class AppointmentsController extends \helpers\ApiController
 
         $existingAttendeesIds = AppointmentAttendees::find()
             ->select(['attendee_id'])
-            ->where(['appointment_id' => $appointment_id])
+            ->where(['appointment_id' => $appointment_id, 'is_removed' => 0])
             ->column();
 
         foreach ($newAttendees as $attendeeId) {
