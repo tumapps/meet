@@ -67,7 +67,7 @@ class Register extends Model
 
     public function validateMobileNumber($attribute, $params)
     {
-        $pattern = '/^(07|01|\+2547)[0-9]{8}$/';
+        $pattern = '/^(07|01|\+2547|\+2541)[0-9]{8}$/';
 
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Invalid phone number');
