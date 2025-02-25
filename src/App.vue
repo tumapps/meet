@@ -8,7 +8,6 @@ import { useMenuStore } from '@/store/menuStore'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
 import createAxiosInstance from '@/api/axios'
-// import { useAuthStore } from '@/store/auth.store.js'
 
 import { useRouter } from 'vue-router'
 
@@ -18,7 +17,6 @@ import { useSetting } from '@/store/pinia'
 import '@/plugins/styles'
 
 const router = useRouter()
-// const authStore = useAuthStore()
 
 // Function to check if a route requires authentication
 const requiresAuth = (route) => {
@@ -66,10 +64,10 @@ const resizePlugin = () => {
 const RunrefreshToken = async () => {
   try {
     const newToken = await axiosInstance.RunAccessToken()
-    // router.push({ name: 'home' })
-    console.log('Token refreshed madafaka:', newToken)
+    return !!newToken // Return `true` if token is refreshed, `false` otherwise
   } catch (error) {
     console.error('Failed to refresh token:', error)
+    return false // Token refresh failed
   }
 }
 
@@ -83,23 +81,16 @@ onMounted(() => {
   }, 200)
   store.setSetting()
 
-  //call the refrsh token function from store
-  // RunrefreshToken()
   router.beforeEach(async (to, from, next) => {
     if (requiresAuth(to)) {
-      if (localStorage.getItem('user.token')) {
-        try {
-          await RunrefreshToken() // Refresh the token before proceeding
-          next() // Allow navigation
-        } catch (error) {
-          console.error('Error refreshing token:', error)
-          next('/auth/login') // Redirect if refresh fails
-        }
+      const isAuthenticated = await RunrefreshToken()
+      if (isAuthenticated) {
+        next() // Allow navigation
       } else {
-        next('/auth/login') // Redirect if no token
+        next({ path: '/auth/login' }) // Redirect to login if token refresh failed
       }
     } else {
-      next() // No auth required, proceed normally
+      next() // Proceed if route does not require auth
     }
   })
 })

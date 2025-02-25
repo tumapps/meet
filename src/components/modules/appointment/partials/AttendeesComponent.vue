@@ -157,6 +157,8 @@ const confirmRemoval = () => {
       attendeesId.value = attendees.value.map((attendee) => attendee.id)
       removedUser.removed = true
       removedAttendees.value.attendees[removedUser.attendee_id] = reason
+
+      submitRemovedAttendees()
       //remove id of  user being removed from the attendeesid
       // attendeesId.value.splice
       console.log('Removed Attendees:', removedAttendees.value)
@@ -193,15 +195,15 @@ const submitRemovedAttendees = async () => {
   }
 }
 
-watch(
-  () => props.submitSignal,
-  (newSubmitSignal) => {
-    if (newSubmitSignal === 'submit') {
-      submitRemovedAttendees()
-    }
-  },
-  { immediate: true }
-)
+// watch(
+//   () => props.submitSignal,
+//   (newSubmitSignal) => {
+//     if (newSubmitSignal === 'submit') {
+//       submitRemovedAttendees()
+//     }
+//   },
+//   { immediate: true }
+// )
 </script>
 
 <template>

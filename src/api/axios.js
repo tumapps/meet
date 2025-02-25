@@ -108,7 +108,6 @@ const AxiosInstance = () => {
         }
 
         if (statusCode === UNAUTHORIZED_CODE) {
-
           if (!isRefreshing) {
             isRefreshing = true
             try {
@@ -175,7 +174,7 @@ const AxiosInstance = () => {
   //replica refresh token function but to be used to know where the refresh token is valid or not on app load
   const RunAccessToken = async () => {
     if (isRefreshing) {
-      return refreshPromise // Return the existing refresh promise
+      return refreshPromise // Wait for the existing refresh to complete
     }
 
     isRefreshing = true
@@ -186,16 +185,16 @@ const AxiosInstance = () => {
 
         if (localStorage.getItem('user.token') && localStorage.getItem('user.username')) {
           authStore.setToken(newToken, response.data.dataPayload.data.username)
-
-          goToFirstMenu()
+          return newToken // Return the new token
         } else if (localStorage.getItem('user.token') && !localStorage.getItem('user.username')) {
           router.push({ name: 'locked' })
+          throw new Error('User locked')
         }
       } catch (refreshError) {
         if (refreshError.response?.status === TOKEN_EXPIRED_CODE) {
           refreshAndRetryQueue.length = 0 // Clear queue
-          router.push({ path: `/auth/login` })
           localStorage.clear()
+          router.push({ path: `/auth/login` })
         } else {
           console.error('refresh token is not valid')
         }
