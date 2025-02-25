@@ -122,23 +122,6 @@ const submitForm = async () => {
             </b-form-group>
           </b-col>
         </b-row>
-        <!-- 
-        <b-row>
-          <b-col md="12" lg="6">
-            <b-form-group label="Password*" label-class="mb-2">
-              <b-form-input type="password" placeholder="Password" v-model="formData.password" required class="mb-3" />
-              <div v-if="errors.password" class="errors">{{ errors.password }}</div>
-            </b-form-group>
-          </b-col>
-
-          <b-col md="12" lg="6">
-            <b-form-group label="Confirm Password*" label-class="mb-2">
-              <b-form-input type="password" placeholder="Confirm Password" v-model="formData.confirm_password" required class="mb-4" />
-              <div v-if="errors.confirm_password" class="errors">{{ errors.confirm_password }}</div>
-            </b-form-group>
-          </b-col>
-        </b-row> -->
-
         <h3 class="mb-4">Personal Information</h3>
 
         <b-row>
@@ -169,12 +152,15 @@ const submitForm = async () => {
           </b-col>
 
           <!-- Contact Number -->
-          <b-col md="12" lg="6">
-            <b-form-group label="Contact Number*" label-class="mb-2">
-              <b-form-input type="text" placeholder="Contact Number" v-model="formData.mobile_number" class="mb-4" />
-              <div v-if="errors.mobile_number" class="errors">{{ errors.mobile_number }}</div>
-            </b-form-group>
-          </b-col>
+            <b-col md="12" lg="6">
+              <b-form-group label="Phone Number*" label-class="mb-2">
+                <b-input-group class="mb-3">
+                  <!-- <b-input-group-prepend is-text>+254</b-input-group-prepend> -->
+                  <b-form-input type="text" placeholder="Phone" v-model="formData.mobile_number" @input="formData.mobile_number = '+254' + formData.mobile_number.replace(/^\+254/, '')" />
+                </b-input-group>
+                <div v-if="errors.mobile_number" class="errors">{{ errors.mobile_number }}</div>
+              </b-form-group>
+            </b-col>
         </b-row>
 
         <div class="text-center mt-4">

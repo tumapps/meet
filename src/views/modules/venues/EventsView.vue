@@ -481,7 +481,7 @@ onMounted(async () => {
             </template>
             <template v-else>
               <tr>
-                <td class="text-center">No records found.</td>
+                <td colspan="6" class="text-center">No records found.</td>
               </tr>
             </template>
           </tbody>
