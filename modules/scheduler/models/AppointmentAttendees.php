@@ -138,6 +138,8 @@ class AppointmentAttendees extends BaseModel
             ->one();
 
         $eventData = [
+            'meeting_id' => $appointment_id,
+            'attendee_id' => $attendee_id,
             'meeting_subject' => $appointmentData->subject,
             'appointment_date' => $appointmentData->appointment_date,
             'start_time' => $appointmentData->start_time,

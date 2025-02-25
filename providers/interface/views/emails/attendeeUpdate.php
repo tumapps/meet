@@ -102,6 +102,12 @@
                     <p><strong>Start Time:</strong> <?= htmlspecialchars($start_time) ?></p>
                     <p><strong>End Time:</strong> <?= htmlspecialchars($end_time) ?></p>
                 </div>
+                <p>Please confirm your attendance by clicking the button below:</p>
+                <a href="<?= htmlspecialchars($confirmationLink) ?>" target="_blank"
+                    aria-label="Click to confirm your attendance"
+                    style="display: inline-block; padding: 10px 20px; background-color: #097B3E; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Confirm Attendance
+                </a>
             <?php endif; ?>
         </div>
         <div class="email-footer">

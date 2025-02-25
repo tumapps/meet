@@ -282,10 +282,19 @@ class EventHandler
 
 		$attendeeName = substr($email, 0, strpos($email, '@'));
 
+		$confirmationBaseUrl = Yii::$app->params['confirmationLink'];
+
+
+		$appointmentEnc = self::encryptData($event->data['meeting_id']);
+		$attendeeIdEnc = self::encryptData($event->data['attendee_id']);
+
+		$confirmationLink = $confirmationBaseUrl . '/' . $appointmentEnc . '/' . $attendeeIdEnc;
+
 		$body = Yii::$app->view->render('@ui/views/emails/attendeeUpdate', array_merge($commonData, [
 			'contact_name' => $attendeeName,
 			'reason' => $event->data['reason'] ?? '',
-			'is_removed' => $event->data['is_removed']
+			'is_removed' => $event->data['is_removed'],
+			'confirmationLink' => $confirmationLink,
 		]));
 
 		// self::addEmailToQueue($email, $event->data['subject'], $body);
