@@ -142,7 +142,9 @@ const handleSelectedSlotsTimes = (selectedTimes) => {
 const getSpaces = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/spaces')
-    spaces.value = response.data.dataPayload.data
+    if (Array.isArray(response.data.dataPayload.data)) {
+      spaces.value = response.data.dataPayload.data
+    }
     console.log('Spaces data:', response.data.dataPayload.data)
   } catch (error) {
     // console.error('Error fetching spaces:', error);
@@ -290,7 +292,6 @@ const handleApiError = (error) => {
   }
 }
 
-
 const UsersOptions = ref([])
 const selectedUserId = ref('') // To hold the selected username
 
@@ -418,25 +419,32 @@ onMounted(() => {
               <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="ChairPerson:" label-for="input-1">
                   <div class="position-relative d-flex flex-column">
-                    <!-- //show if selectedUserid  is null or empty -->
-                    <b-form-input v-if="!selectedUserId" v-model="user_searchQuery" placeholder="Search User..." class="mb-2" @click="UsersOptionsCopy = UsersOptions"></b-form-input>
+                    <!-- Show search input only if UsersOptions is not empty -->
+                    <b-form-input v-if="!selectedUserId && UsersOptions.length" v-model="user_searchQuery" placeholder="Search User..." class="mb-2" @click="UsersOptionsCopy = UsersOptions"></b-form-input>
 
-                    <!-- show when a user is selected -->
-                    <!-- not editable -->
-
+                    <!-- Show when a user is selected (read-only) -->
                     <b-form-input v-if="selectedUserId" v-model="selectedUsername" placeholder="Search User..." class="mb-2" readonly></b-form-input>
-                    <!-- remove selected user by clearing selected user id -->
+
+                    <!-- Remove selected user -->
                     <span v-if="selectedUserId" class="xuser" @click=";(selectedUsername = ''), (selectedUserId = ''), (userId = '')">
                       <i class="fas fa-times"></i>
                     </span>
-                    <!-- Show this option if no results  -->
+
+                    <!-- Show "No users available" if UsersOptions is completely empty -->
+                    <p v-if="UsersOptions.length === 0" class="text-muted mt-2">No users available.</p>
+
+                    <!-- Show "No results found" only if searching and no results -->
                     <p v-if="!selectedUserId && user_searchQuery && !UsersOptionsCopy.length" class="text-muted mt-2">No results found.</p>
-                    <!-- show results and on clicking item assign user id to selected user id -->
+
+                    <!-- Show user list dropdown -->
                     <ul v-if="UsersOptionsCopy.length" class="mt-5 userlistul list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(UsersOptionsCopy = []), (user_searchQuery = '')">
-                      <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">{{ user.fullname }}</li>
+                      <li v-for="user in UsersOptionsCopy" :key="user.id" class="list-group-item list-group-item-action" @click="handleUserSelection(user.id)">
+                        {{ user.fullname }}
+                      </li>
                     </ul>
                   </div>
                 </b-form-group>
+
                 <div v-if="errors.user_id" class="error" aria-live="polite">
                   {{ errors.user_id }}
                 </div>
@@ -446,18 +454,22 @@ onMounted(() => {
               <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-4 mb-lg-0">
                 <b-form-group label="Venue:" label-for="space">
                   <div class="position-relative d-flex flex-column">
-                    <!-- Search Input -->
-                    <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search Space..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
-                    <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input>
+                    <!-- Show search input only if spaces exist -->
+                    <b-form-input  v-model="searchQuery" placeholder="Search venue ..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
+                    <!-- Show selected space name (read-only) -->
+                    <!-- <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input> -->
+                    <!-- Clear selection -->
                     <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
                     </span>
-                    <!-- Search Results -->
-                    <ul v-if="filteredSpaces.length && appointmentData.space_id === null" class="userlistul mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(filteredSpaces = []), (searchQuery = '')">
-                      <li v-for="space in filteredSpaces" :class="{ disabled: space.is_locked }" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">{{ space.name }}</li>
+                    <!-- Show "No results found" if searching but no matches -->
+                    <p v-if="searchQuery && filteredSpaces.length === 0" class="text-muted mt-2">No venues available.</p>
+                    <!-- Show dropdown list of spaces -->
+                    <ul v-if="filteredSpaces.length > 0 && appointmentData.space_id === null" class="userlistul mt-5 list-group position-absolute w-100 bg-white border rounded shadow" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave=";(filteredSpaces = []), (searchQuery = '')">
+                      <li v-for="space in filteredSpaces" :class="{ disabled: space.is_locked }" :key="space.id" class="list-group-item list-group-item-action" @click=";(appointmentData.space_id = space.id), (selectedSpaceName = space.name)">
+                        {{ space.name }}
+                      </li>
                     </ul>
-                    <!-- No Results Message -->
-                    <p v-else-if="searchQuery && !filteredSpaces.length" class="text-muted mt-2">No results found.</p>
                   </div>
                 </b-form-group>
 
@@ -486,9 +498,9 @@ onMounted(() => {
                     <b-form-input v-model="selectedType" placeholder="Meeting Type" @focus="showme = true" />
 
                     <ul v-if="appointmentTypeOptions.length && showme" class="list-group position-relative" role="listbox" style="max-height: 160px; overflow-y: auto" @mouseleave="showme = false">
-                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";(appointmentData.appointment_type_id = type.id, selectedType = type.type), (showme = false)">{{ type.type }}</li>
+                      <li v-for="type in appointmentTypeOptions" :key="type" class="list-group-item list-group-item-action" @click=";((appointmentData.appointment_type_id = type.id), (selectedType = type.type)), (showme = false)">{{ type.type }}</li>
                     </ul>
-                    <span v-if="appointmentData.appointment_type_id" class="clear-btn" @click="appointmentData.appointment_type_id = '', selectedType=''">
+                    <span v-if="appointmentData.appointment_type_id" class="clear-btn" @click=";(appointmentData.appointment_type_id = ''), (selectedType = '')">
                       <i class="fas fa-times"></i>
                     </span>
                   </div>
