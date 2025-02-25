@@ -64,7 +64,7 @@ class AppointmentController extends Controller
         $appointments = Appointments::getAppointmentsPastOneHour();
 
         if (empty($appointments)) {
-            Console::output('No reminders found.');
+            Console::output('No meeting update reminders found.');
         } else {
             foreach ($appointments as $appointment) {
                 // Console::output("Sending ");

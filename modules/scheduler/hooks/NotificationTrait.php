@@ -251,7 +251,7 @@ trait NotificationTrait
         $chairPersonEmail = $user->profile->email_address;
 
         $eventData = [
-            'contact_email' => $this->contact_email,
+            'contact_email' => $this->email_address,
             'subject' => $subject,
             'appointment_subject' => $this->subject,
             'date' => $this->appointment_date,
