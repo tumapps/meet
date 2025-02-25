@@ -452,7 +452,10 @@ onMounted(() => {
                 <b-form-group label="Venue:" label-for="space">
                   <div class="position-relative d-flex flex-column">
                     <!-- Show search input only if spaces exist -->
-                    <b-form-input v-model="searchQuery" placeholder="Search venue ..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
+                    <b-form-input v-if="appointmentData.space_id === null"  v-model="searchQuery" placeholder="Search venue ..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
+                    <!-- Show selected space name (read-only) -->
+                    <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input>
+                    <!-- Clear selection -->
                     <span v-if="appointmentData.space_id" class="clear-btn" @click=";(appointmentData.space_id = ''), (selectedSpaceName = ''), (filteredSpaces = [])">
                       <i class="fas fa-times"></i>
                     </span>
