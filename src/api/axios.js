@@ -185,8 +185,13 @@ const AxiosInstance = () => {
 
         if (localStorage.getItem('user.token') && localStorage.getItem('user.username')) {
           authStore.setToken(newToken, response.data.dataPayload.data.username)
-          return newToken // Return the new token
-        } else if (localStorage.getItem('user.token') && !localStorage.getItem('user.username')) {
+          localStorage.setItem('loggedIn', true)
+          authStore.setToken(newToken, response.data.dataPayload.data.username)
+          goToFirstMenu()
+          return newToken
+         // Return the new token
+
+        } else if (!localStorage.getItem('user.token') && localStorage.getItem('user.username')) {
           router.push({ name: 'locked' })
           throw new Error('User locked')
         }

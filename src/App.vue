@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed, watch } from 'vue'
+import { onBeforeMount, onMounted, computed, watch } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
@@ -61,6 +61,7 @@ const resizePlugin = () => {
   }
 }
 
+// Function to refresh token (Only runs once on app load)
 const RunrefreshToken = async () => {
   try {
     const newToken = await axiosInstance.RunAccessToken()
@@ -80,19 +81,21 @@ onMounted(() => {
     resizePlugin()
   }, 200)
   store.setSetting()
+})
 
-  router.beforeEach(async (to, from, next) => {
-    if (requiresAuth(to)) {
+router.beforeEach((to, from, next) => {
+  if (requiresAuth(to)) {
+    // Token check already handled in onBeforeMount, so no need to re-run
+    onBeforeMount(async () => {
       const isAuthenticated = await RunrefreshToken()
-      if (isAuthenticated) {
-        next() // Allow navigation
-      } else {
-        next({ path: '/auth/login' }) // Redirect to login if token refresh failed
+      if (!isAuthenticated) {
+        router.replace({ path: '/auth/login' }) // Redirect if token refresh fails
       }
-    } else {
-      next() // Proceed if route does not require auth
-    }
-  })
+    })
+    next()
+  } else {
+    next()
+  }
 })
 </script>
 
