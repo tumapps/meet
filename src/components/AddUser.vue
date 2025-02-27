@@ -152,15 +152,15 @@ const submitForm = async () => {
           </b-col>
 
           <!-- Contact Number -->
-            <b-col md="12" lg="6">
-              <b-form-group label="Phone Number*" label-class="mb-2">
-                <b-input-group class="mb-3">
-                  <!-- <b-input-group-prepend is-text>+254</b-input-group-prepend> -->
-                  <b-form-input type="text" placeholder="Phone" v-model="formData.mobile_number" @input="formData.mobile_number = '+254' + formData.mobile_number.replace(/^\+254/, '')" />
-                </b-input-group>
-                <div v-if="errors.mobile_number" class="errors">{{ errors.mobile_number }}</div>
-              </b-form-group>
-            </b-col>
+          <b-col md="12" lg="6">
+            <b-form-group label="Phone Number*" label-class="mb-2">
+              <b-input-group class="mb-3">
+                <!-- <b-input-group-prepend is-text>+254</b-input-group-prepend> -->
+                <b-form-input type="text" placeholder="Phone" v-model="formData.mobile_number" @input="formData.mobile_number = '+254' + formData.mobile_number.replace(/^\+254/, '')" />
+              </b-input-group>
+              <div v-if="errors.mobile_number" class="errors">{{ errors.mobile_number }}</div>
+            </b-form-group>
+          </b-col>
         </b-row>
 
         <div class="text-center mt-4">
