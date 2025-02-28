@@ -95,6 +95,11 @@ class AppointmentRescheduler
 			// Split the slot into start and end times
 			[$slotStart, $slotEnd] = explode('-', $slot);
 
+			if (TimeHelper::checkExpireTime($appointment_date, $slotStart)) {
+				continue; // Skip expired slots
+			}
+	
+
 			// Calculate the duration of this slot in minutes
 			$slotDuration = (strtotime($slotEnd) - strtotime($slotStart)) / 60;
 
@@ -104,7 +109,7 @@ class AppointmentRescheduler
 				'startTime' => $slotStart,
 				'endTime' => $slotEnd,
 				'booked' => false,
-				'is_expired' => TimeHelper::checkExpireTime($appointment_date, $slotStart)
+				// 'is_expired' => TimeHelper::checkExpireTime($appointment_date, $slotStart)
 			];
 
 			// Check if the accumulated duration meets or exceeds the required duration
