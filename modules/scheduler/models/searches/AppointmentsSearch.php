@@ -20,7 +20,7 @@ class AppointmentsSearch extends Appointments
     {
         return [
             [['id', 'user_id'], 'integer'],
-            [['appointment_date', 'is_deleted','start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'search','subject', 'appointment_type', 'status', 'created_at', 'updated_at'], 'safe'],
+            [['appointment_date', 'is_deleted','start_time', 'end_time', 'contact_name', 'email_address', 'mobile_number', 'search','subject', 'status', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -75,7 +75,7 @@ class AppointmentsSearch extends Appointments
             ->orFilterWhere(['ilike', 'email_address', $this->search])
             ->orFilterWhere(['ilike', 'mobile_number', $this->search])
             ->orFilterWhere(['ilike', 'subject', $this->search])
-            ->orFilterWhere(['ilike', 'appointment_type', $this->search])
+            // ->orFilterWhere(['ilike', 'appointment_type', $this->search])
             ->orFilterWhere(['ilike', 'description', $this->search])
             ->orFilterWhere(['ilike', 'users.username', $this->search])
             ->orFilterWhere(['ILIKE', 'CAST(users.user_id AS TEXT)', $this->search]);
