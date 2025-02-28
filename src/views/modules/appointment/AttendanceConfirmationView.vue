@@ -219,16 +219,10 @@ onMounted(() => {
 </template> -->
 
 <template>
-  <section
-    :style="{
-      background: 'linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url(/assets/images/meeting-bg.jpg)',
-      backgroundSize: 'cover',
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center'
-    }">
+  <section class="confirm-section">
     <div class="d-flex justify-content-center align-items-center vh-100">
       <!-- Outer Card -->
-      <div class="card shadow-lg p-5 rounded" style="max-width: 800px; width: 100%; min-height: 550px; background: #f5f5f5">
+      <div class="card shadow-lg p-5 rounded">
         <!-- Header Section -->
         <div class="text-center mb-4">
           <img src="/logo.ico" alt="Company Logo" class="mb-3" style="max-width: 180px" />
@@ -265,7 +259,7 @@ onMounted(() => {
         <!-- Confirmation Section -->
         <div class="mt-4 text-center">
           <p class="mb-4 text-secondary">Your confirmation of attendance is required to finalize this appointment. Please respond below.</p>
-          <button class="btn btn-success mx-3" :disabled="isSubmitting" @click="confirmResponse('Accept')"><i class="fas fa-check-circle"></i> Confirm Attendance</button>
+            <button class="btn btn-success mx-3 mb-3" :disabled="isSubmitting" @click="confirmResponse('Accept')"><i class="fas fa-check-circle"></i> Confirm Attendance</button>
           <button class="btn btn-danger mx-3" :disabled="isSubmitting" @click="confirmResponse('Reject')"><i class="fas fa-times-circle"></i> Decline Attendance</button>
         </div>
 
@@ -279,3 +273,12 @@ onMounted(() => {
     </div>
   </section>
 </template>
+<style scoped>
+
+.confirm-section {
+  background-image: url(@/assets/images/auth-pro/04.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+</style>
