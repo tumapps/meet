@@ -190,7 +190,7 @@ class Appointments extends BaseModel
     {
         $name = $this->$attribute;
 
-        if (!preg_match("/^[a-zA-Z']+$/", $name)) {
+        if (!preg_match("/^[a-zA-Z' ]+$/", $name)) {
             $this->addError($attribute, 'The name can only contain alphabetic characters');
         }
 
