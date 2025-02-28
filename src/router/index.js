@@ -65,14 +65,6 @@ export const defaultChildRoutes = (prefix) => [
     component: booking
   },
 
-  //admin routes
-  {
-path: '/assign',
-name: 'assign',
-meta: { requiresAuth: true },
-component: () => import('@/views/iam-admin/admin/AssignSecretaryView.vue')
-  },
-
   //venues routes
   {
     path: '/venue-management',
