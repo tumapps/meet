@@ -5,6 +5,8 @@ namespace scheduler\controllers;
 use Yii;
 use scheduler\models\ManagedUsers;
 use scheduler\models\searches\ManagedUsersSearch;
+use auth\models\User;
+use auth\models\searches\UserSearch;
 
 /**
  * @OA\Tag(
@@ -49,24 +51,61 @@ class ManagedUsersController extends \helpers\ApiController
         return $this->errorResponse($model->getErrors());
     }
 
-    // public function actionCreate($secretary_id, $user_id)
-    // {
-    //     Yii::$app->user->can('schedulerManaged-usersCreate');
+    public function actionManagedUsers($id)
+    {
+        $searchModel = new UserSearch();
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'UserSearch');
+        $dataProvider = $searchModel->search($search);
 
-    //     $model = new ManagedUsers();
-    //     $model->user_id = $user_id;
-    //     $model->secretary_id = $secretary_id;
+        // $users = $dataProvider->getModels();
+        $users = User::find()
+            ->select(['users.user_id', 'username', 'profiles.first_name', 'profiles.last_name'])
+            ->joinWith('profile')
+            ->asArray()
+            ->all();
 
-    //     if (!$model->validate()) {
-    //         return $this->errorResponse($model->getErrors());
-    //     }
+        // return $users;
+        $authManager = Yii::$app->authManager;
 
-    //     if ($model->save()) {
-    //         return $this->payloadResponse($model, ['statusCode' => 201, 'message' => 'User successfully assigned to secretary']);
-    //     }
+        $secretaryId = Yii::$app->request->get('id');
 
-    //     return $this->errorResponse($model->getErrors());
-    // }
+        // Fetch users specifically assigned to the given secretary
+        $secretaryAssignedUserIds = ManagedUsers::find()
+            ->select('user_id')
+            ->where(['secretary_id' => $secretaryId])
+            ->column();
+
+        $assignedUsers = [];
+        $availableUsers = [];
+
+
+        foreach ($users as $user) {
+            $roles = array_keys($authManager->getRolesByUser($user['user_id']));
+
+            // Skip users with "secretary" or "admin" roles
+            if (in_array('secretary', $roles) || in_array('su', $roles)) {
+                continue;
+            }
+
+            $userData = [
+                'user_id' => $user['user_id'],
+                'username' => $user['username'],
+                'fullname' => $user['first_name'] . ' ' . $user['last_name'],
+            ];
+
+            // Check assignment status
+            if (in_array($user['user_id'], $secretaryAssignedUserIds)) {
+                $assignedUsers[] = $userData;
+            } else {
+                $availableUsers[] = $userData;
+            }
+        }
+
+        return $this->payloadResponse([
+            'assigned' => $assignedUsers,
+            'available' => $availableUsers
+        ]);
+    }
 
     public function actionReassign($secretary_id, $user_id)
     {
@@ -99,6 +138,10 @@ class ManagedUsersController extends \helpers\ApiController
             ->execute();
 
         return $deletedRows > 0;
+
+        // $getUser = ManagedUsers::findOne(['user_id' => $user_id, 'secretary_id' => $secretary_id]);
+        // $model = $this->findModel($getUser->idate);
+        // $model->forceDelete();
     }
 
 
