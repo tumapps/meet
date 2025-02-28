@@ -118,7 +118,6 @@ async function fetchAppointments() {
           return item.recordStatus?.label === 'ACTIVE'
         })
         .map((item) => {
-
           // const parsedDate = parseCustomDate(item.appointment_date)
           const formattedDate = format(item.appointment_date, 'yyyy-MM-dd')
           let backgroundColor
@@ -190,7 +189,6 @@ async function fetchEvents() {
     // Ensure apiData is always an array
     apiData.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
 
-
     // Filter and map API data to FullCalendar's required format
     if (Array.isArray(apiData.value)) {
       events.value = apiData.value
@@ -216,7 +214,6 @@ async function fetchEvents() {
           }
         })
     }
-
   } catch (error) {
     fetchError.value = 'Failed to load events. Please try again later.'
     console.error('Error fetching events:', error)
@@ -309,7 +306,12 @@ const selectedUser = ref('') // To hold the selected username
 const getusers_booked = async () => {
   try {
     const response = await axiosInstance.get('/v1/auth/users')
-    UsersOptions.value = response.data.dataPayload.data
+    //  assing is isarray
+    if (Array.isArray(response?.data?.dataPayload?.data)) {
+      UsersOptions.value = response.data.dataPayload.data
+    } else {
+      UsersOptions.value = [] // Fallback if it's not an array
+    }
   } catch (error) {
     proxy.$showToast({
       title: 'An error occurred',

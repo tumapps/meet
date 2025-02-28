@@ -3,6 +3,7 @@ import { ref, onMounted, computed, getCurrentInstance, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 import Adduser from '@/components/AddUser.vue'
 import RolePermissions from '@/components/RolePermissions.vue'
+import AssignSecretary from '@/components/AssignSecretary.vue'
 
 const axiosInstance = AxiosInstance()
 const { proxy } = getCurrentInstance()
@@ -266,6 +267,20 @@ const UpdateUser = async () => {
     isloading.value = false
   }
 }
+// Assign Secretary
+
+const assignModal = ref(null)
+const secretary_id = ref(null)
+const secretary_name = ref(null)
+
+const showAssignModal = () => {
+  secretary_id.value = userData.value.user_id
+  secretary_name.value = userData.value.name
+
+  if (assignModal.value) {
+    assignModal.value.show() // ✅ This now calls the exposed method in the child
+  }
+}
 </script>
 <template>
   <b-col lg="12">
@@ -372,6 +387,7 @@ const UpdateUser = async () => {
 
   <!-- modal to view and edit user details -->
   <RolePermissions ref="roleModal" :roleName="roleName" :user_id="propUser_id" />
+  <AssignSecretary ref="assignModal" :user_id="secretary_id" :name="secretary_name" />
   <b-modal ref="ViewUser" :title="userData.username" class="modal custom-modal modal-xl fade" id="edit_user" hide-footer>
     <template #modal-header="{ close }">
       <h5 class="modal-title">User Details</h5>
@@ -448,12 +464,18 @@ const UpdateUser = async () => {
         </div>
         <div v-if="errors.mobile_number" class="error" aria-live="polite">{{ errors.mobile_number }}</div>
       </b-col>
-      <b-col md="12" lg="12">
+      <b-col :md="12" :lg="userData.roles[0] === 'secretary' ? 6 : 12">
         <div class="mb-3">
           <label for="rolerulename" class="form-label">Email</label>
           <b-form-input v-model="userData.email_address" id="rolerulename" type="text" placeholder="Enter Role data"></b-form-input>
         </div>
         <div v-if="errors.email_address" class="error" aria-live="polite">{{ errors.email }}</div>
+      </b-col>
+      <b-col v-if="userData.roles[0] === 'secretary'" md="12" lg="6">
+        <div class="mb-3">
+          <label for="roledescription" class="form-label">Assign Users </label>
+          <b-button @click="showAssignModal" variant="outline-primary" class="w-100"> Assign </b-button>
+        </div>
       </b-col>
     </b-row>
     <!-- <b-row>
