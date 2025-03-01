@@ -499,12 +499,7 @@ class EventHandler
 			'contact_person_name' => $event->data['contact_name'],
 		];
 
-		$mailBody = Yii::$app->view->render(
-			'@ui/views/emails/appointmentCompletedReminder',
-			[
-				$data
-			]
-		);
+		$mailBody = Yii::$app->view->render('@ui/views/emails/appointmentCompletedReminder',$data);
 
 		self::queueEmail($chair_person_email, $subject, $mailBody);
 	}

@@ -91,10 +91,10 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h2 class="uppercase"><?= htmlspecialchars($subject) ?></h2>
+            <h2 class="uppercase"><?= htmlspecialchars($meeting_subject) ?></h2>
         </div>
         <div class="email-body">
-            <p>Dear <?= htmlspecialchars($chairPerson) ?>,</p>
+            <p>Dear <?= htmlspecialchars($username) ?>,</p>
 
             <p>The Meeting scheduled on <strong><?= htmlspecialchars($date) ?></strong> from <strong><?= htmlspecialchars($startTime) ?> to <?= htmlspecialchars($endTime) ?></strong> has ended more than an hour ago.</p>
 
