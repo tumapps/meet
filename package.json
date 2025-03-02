@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 8083",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "test": "vitest"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
@@ -88,14 +89,17 @@
     "@types/jexcel": "^3.9.8",
     "@vue/compiler-sfc": "^3.2.41 ",
     "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/test-utils": "^2.4.6",
     "eslint": "^8.57.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^8.7.1",
     "fslightbox-vue": "^2.1.1",
+    "jsdom": "^26.0.0",
     "prettier": "^2.2.1",
     "sass": "^1.55.0",
     "tailwindcss": "^3.4.6",
     "tailwindcss-primeui": "^0.3.2",
-    "unplugin-vue-components": "^0.27.3"
+    "unplugin-vue-components": "^0.27.3",
+    "vitest": "^3.0.7"
   }
 }
