@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
+  <!-- <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
     <div class="d-flex flex-column">
       <h3>Quick Insights</h3>
       <p class="text-primary mb-0">Meetings Dashboard</p>
@@ -10,7 +10,7 @@
       </div>
       <b-button variant="primary">Analytics</b-button>
     </div>
-  </div>
+  </div> -->
   <b-row class="row-cols-2 row-cols-md-2 row-cols-lg-4">
     <b-col>
       <analytics-widget :value="1206" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
@@ -145,10 +145,10 @@ import { ref, computed, watch } from 'vue'
 import { useSetting } from '@/store/pinia'
 import AnalyticsWidget from '@/components/widgets/AnalyticsWidget.vue'
 import Vue3autocounter from 'vue3-autocounter'
-import FlatPicker from 'vue-flatpickr-component'
+// import FlatPicker from 'vue-flatpickr-component'
 import { getVariableColor } from '@/utilities/root-var'
 
-const date = ref('')
+// const date = ref('')
 // const imgGroup = ref([require('@/assets/images/table/1.png'), require('@/assets/images/table/2.png'), require('@/assets/images/table/3.png'), require('@/assets/images/table/4.png'), require('@/assets/images/table/5.png')])
 
 const store = useSetting()
