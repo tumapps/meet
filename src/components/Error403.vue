@@ -1,3 +1,13 @@
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const gohome = () => {
+  router.push('/auth/login')
+  localStorage.clear()
+}
+</script>
 <template>
   <div class="error-container">
     <div class="error-message">
@@ -5,7 +15,7 @@
       <p>Access Forbidden. You do not have permission to access this resource.</p>
     </div>
     <div class="error-actions">
-      <button @click="$router.go(-1)" class="back-button">Go Back</button>
+      <button @click="gohome" class="back-button">Go Back</button>
       <p>Contact the administrator if the issue persists.</p>
     </div>
   </div>
@@ -18,8 +28,8 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Gradient background */
-  color: white;
+  background: #fff; /* Gradient background */
+  color:#000;
   font-family: Arial, sans-serif;
   text-align: center;
   padding: 20px;
@@ -46,7 +56,7 @@
   padding: 10px 20px;
   font-size: 1rem;
   background-color: #ffffff;
-  color: #ff7e5f;
+  color: primary;
   border: none;
   border-radius: 5px;
   cursor: pointer;

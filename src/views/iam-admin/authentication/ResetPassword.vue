@@ -27,11 +27,11 @@ const resetPassword = async () => {
       confirm_password: repeatPassword.value
     })
 
-    if (response.data.dataPayload && !response.data.dataPayload.error) {
+    if (response.data.dataPayload) {
       proxy.$showAlert({
-        title: 'success',
-        text: 'Password reset successfully!',
-        icon: 'success',
+        title: response.data.dataPayload.toastTheme,
+        text: response.data.dataPayload.toastMessage,
+        icon: response.data.dataPayload.toastTheme,
         timer: 4000,
         showConfirmButton: false,
         showCancelButton: false
@@ -64,11 +64,11 @@ const resetPassword = async () => {
 
 <template>
   <!-- Password Reset 1 - Bootstrap Brain Component -->
-  <div class="d-flex vh-100">
+  <div class="d-flex vh-100 maindiv">
     <div class="container my-auto">
       <div class="row justify-content-md-center align-items-center">
         <div class="col-12 col-md-11 col-lg-8 col-xl-7 col-xxl-6">
-          <div class="bg- p-4 p-md-5 rounded shadow-sm">
+          <div class="bg- p-4 p-md-5 rounded shadow-sm bg-white">
             <div class="row gy-3 mb-5">
               <div class="col-12">
                 <div class="text-center">
@@ -114,5 +114,13 @@ const resetPassword = async () => {
 .error {
   color: red;
   font-size: 1.1em;
+}
+
+.maindiv {
+  background-color: #fa2626;
+  /* from src/assets/images/tum.jpg */
+  background-image: url('@/assets/images/tum.jpg');
+  background-size: cover;
+  background-position: center;
 }
 </style>

@@ -11,6 +11,8 @@ import router from './router'
 // Library Components
 import VueSweetalert2 from 'vue-sweetalert2'
 import BootstrapVueNext from 'bootstrap-vue-next'
+import VueApexCharts from 'vue3-apexcharts'
+
 // fontawesome activation
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -53,6 +55,8 @@ app.use(globalDirective)
 app.mixin(globalMixin)
 app.use(axiosPlugin)
 app.use(sweetAlertPlugin)
+app.use(VueApexCharts)
+
 // Make functions globally accessible
 app.provide('showAlert', showAlert)
 app.provide('showToast', showToast)

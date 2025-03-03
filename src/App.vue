@@ -3,14 +3,15 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, computed, watch } from 'vue'
+import { onBeforeMount, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useMenuStore } from '@/store/menuStore'
 import { useRoute } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
 import createAxiosInstance from '@/api/axios'
+import { useCleanup } from '@/composables/useCleanup'
 
 import { useRouter } from 'vue-router'
-
+const { registerCleanup } = useCleanup(); // ✅ Initialize cleanup manager
 // Import Pinia Store
 import { useSetting } from '@/store/pinia'
 
@@ -77,6 +78,7 @@ onMounted(() => {
   // Add the event listener when the component is mounted
   // window.addEventListener('beforeunload', handleBeforeUnload)
   window.addEventListener('resize', resizePlugin)
+  registerCleanup(() => window.removeEventListener("resize", resizePlugin)); // Auto-remove
   setTimeout(() => {
     resizePlugin()
   }, 200)
@@ -97,6 +99,12 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+onUnmounted(() => {
+  registerCleanup(() => {
+    console.log("App.vue unmounted: Cleaning up...");
+  });
+});
 </script>
 
 <style lang="scss">

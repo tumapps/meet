@@ -1,57 +1,54 @@
 <template>
-  <b-card class="card-block card-stretch card-height">
-    <div class="mb-2 d-flex justify-content-between align-items-center">
-      <span class="text-dark">{{ title }}</span>
-      <b-badge tag="a" variant=" bg-primary-subtle"  pill @click="navigateToRoute"> {{ buttonText }} </b-badge>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex align-items-center gap-3">
+        <div :class="`bg-${variant}-subtle p-2 rounded`">
+          <!-- <icon-component type="dual-tone" :icon-name="icon" :size="32"></icon-component> -->
+          <font-awesome-icon :icon="['fas', icon]" :style="{ color: Iconcolor }" class="anicon" />
+        </div>
+        <div>
+          <h4 class="counter">
+            <Vue3autocounter ref="counter" separator="" :duration="3" :startAmount="0" :endAmount="value" />
+          </h4>
+          <span class="text-dark">{{ description }}</span>
+        </div>
+      </div>
     </div>
-    <h2 class="counter"><Vue3autocounter ref="counter" separator="" :prefix="prefix" :duration="3" :startAmount="0" :endAmount="amount" /></h2>
-    <small>{{ description }}</small>
-  </b-card>
+  </div>
 </template>
 
-<script setup>
-import { defineProps } from 'vue'
+<script>
 import Vue3autocounter from 'vue3-autocounter'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const props = defineProps({
-  title: {
-    type: String,
-    default: ''
+export default {
+  components: {
+    Vue3autocounter
   },
-  buttonText: {
-    type: String,
-    default: ''
-  },
-  buttonLink: {
-    type: String,
-    default: 'javascript:void(0);'
-  },
-  amount: {
-    type: [String, Number],
-    default: '0'
-  },
-  description: {
-    type: String,
-    default: ''
-  },
-  prefix: {
-    type: String,
-    default: ''
-  }
-})
-
-const navigateToRoute = () => {
-  if (props.buttonLink) {
-    router.push({ name: props.buttonLink })
+  props: {
+    icon: {
+      type: String,
+      default: 'user'
+    },
+    description: {
+      type: String,
+      default: ''
+    },
+    value: {
+      type: [Number, String],
+      default: 0
+    },
+    Iconcolor: {
+      type: String,
+      default: '#D89837'
+    },
+    Iconsize: {
+      type: String,
+      default: '32'
+    }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-buttonNavLink {
-  cursor: pointer !important;
+<style scoped>
+.anicon {
+  font-size: 28px;
 }
 </style>
