@@ -3,108 +3,99 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, computed, watch, onUnmounted } from 'vue'
-import { useMenuStore } from '@/store/menuStore'
-import { useRoute } from 'vue-router'
+import { onMounted, computed, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAutoLogout } from '@/composables/useAutoLogout'
 import createAxiosInstance from '@/api/axios'
 import { useCleanup } from '@/composables/useCleanup'
-
-import { useRouter } from 'vue-router'
-const { registerCleanup } = useCleanup(); // ✅ Initialize cleanup manager
-// Import Pinia Store
 import { useSetting } from '@/store/pinia'
 
 import '@/plugins/styles'
 
+// ✅ Initialize necessary utilities
+const { registerCleanup } = useCleanup()
+const store = useSetting()
+const axiosInstance = createAxiosInstance()
 const router = useRouter()
 
-// Function to check if a route requires authentication
-const requiresAuth = (route) => {
-  return route.matched.some((record) => record.meta.requiresAuth)
-}
+// ⏳ Auto logout after inactivity (15 minutes = 900000ms)
+useAutoLogout(900000)
 
-useAutoLogout(900000) // Set 2 minutes (120000 ms) for inactivity
-// Initialize the store
-const menuStore = useMenuStore()
-const axiosInstance = createAxiosInstance()
-const route = useRoute()
-// const authStore = useAuthStore()
-
-watch(
-  () => route.meta.customMenus,
-  (newMenus) => {
-    if (newMenus) {
-      menuStore.setMenus(newMenus)
-    }
-  },
-  { immediate: true } // Trigger immediately on load
-)
-
-const store = useSetting()
-
-// Computed property for sidebar type
+// ✅ Computed property for sidebar type
 const sidebarType = computed(() => store.sidebar_type_value)
 
-// Resize function to handle sidebar responsiveness
+// ✅ Function to refresh token (Runs only on app load)
+const RunrefreshToken = async () => {
+  try {
+    if (localStorage.getItem('loggedIn') !== 'true') {
+      const newToken = await axiosInstance.RunAccessToken()
+      return !!newToken
+    }
+    return false
+  } catch (error) {
+    console.error('Failed to refresh token:', error)
+    return false
+  }
+}
+
+// ✅ Resize function to handle sidebar responsiveness (Debounced)
 const resizePlugin = () => {
   const sidebarResponsive = document.querySelector('[data-sidebar="responsive"]')
+  if (!sidebarResponsive) return
+
   if (window.innerWidth < 1025) {
-    if (sidebarResponsive && !sidebarResponsive.classList.contains('sidebar-mini')) {
+    if (!sidebarResponsive.classList.contains('sidebar-mini')) {
       sidebarResponsive.classList.add('on-resize')
       store.sidebar_type([...sidebarType.value, 'sidebar-mini'])
     }
   } else {
-    if (sidebarResponsive && sidebarResponsive.classList.contains('sidebar-mini') && sidebarResponsive.classList.contains('on-resize')) {
+    if (sidebarResponsive.classList.contains('sidebar-mini') && sidebarResponsive.classList.contains('on-resize')) {
       sidebarResponsive.classList.remove('on-resize')
       store.sidebar_type(sidebarType.value.filter((item) => item !== 'sidebar-mini'))
     }
   }
 }
 
-// Function to refresh token (Only runs once on app load)
-const RunrefreshToken = async () => {
-  try {
-    const newToken = await axiosInstance.RunAccessToken()
-    return !!newToken // Return `true` if token is refreshed, `false` otherwise
-  } catch (error) {
-    console.error('Failed to refresh token:', error)
-    return false // Token refresh failed
-  }
+// ✅ Unauthenticated routes (Skip session check)
+const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen', '/confirm']
+
+// ✅ Add navigation guard (Only once, outside lifecycle hooks)
+if (localStorage.getItem('loggedIn') !== 'true') {
+  router.beforeEach((to, from, next) => {
+    // Allow access to unauthenticated routes
+    if (unauthenticatedRoutes.includes(to.path) || to.path.startsWith('/confirm/')) {
+      return next()
+    }
+
+    // Refresh token before allowing navigation
+    RunrefreshToken().then(() => {
+      next()
+    })
+  })
 }
 
-// Lifecycle hooks for component mount and unmount
+// ✅ Lifecycle Hooks
 onMounted(() => {
-  // Add the event listener when the component is mounted
-  // window.addEventListener('beforeunload', handleBeforeUnload)
+  console.log('App Mounted')
+
+  // Run token refresh on mount
+  RunrefreshToken()
+
+  // ✅ Attach event listener for resize
   window.addEventListener('resize', resizePlugin)
-  registerCleanup(() => window.removeEventListener("resize", resizePlugin)); // Auto-remove
-  setTimeout(() => {
-    resizePlugin()
-  }, 200)
+  registerCleanup(() => window.removeEventListener('resize', resizePlugin))
+
+  // ✅ Initial sidebar adjustment
+  setTimeout(resizePlugin, 200)
+
+  // ✅ Set application settings
   store.setSetting()
 })
 
-router.beforeEach((to, from, next) => {
-  if (requiresAuth(to)) {
-    // Token check already handled in onBeforeMount, so no need to re-run
-    onBeforeMount(async () => {
-      const isAuthenticated = await RunrefreshToken()
-      if (!isAuthenticated) {
-        router.replace({ path: '/auth/login' }) // Redirect if token refresh fails
-      }
-    })
-    next()
-  } else {
-    next()
-  }
-})
-
 onUnmounted(() => {
-  registerCleanup(() => {
-    console.log("App.vue unmounted: Cleaning up...");
-  });
-});
+  console.log('App Unmounted: Cleaning up...')
+  registerCleanup(() => localStorage.setItem('loggedIn', false))
+})
 </script>
 
 <style lang="scss">
@@ -115,13 +106,13 @@ onUnmounted(() => {
 @import '@/assets/custom-vue/scss/plugins.scss';
 
 .table tbody tr td {
-  /* background-color: rgb(96, 96, 177) !important; */
   padding: 0.5px 8px 0 22px !important;
 }
 
 .modal-title {
   min-width: 100% !important;
 }
+
 .error {
   color: red;
   font-size: 1rem;

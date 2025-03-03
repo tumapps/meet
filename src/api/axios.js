@@ -186,7 +186,6 @@ const AxiosInstance = () => {
         if (localStorage.getItem('user.token') && localStorage.getItem('user.username')) {
           authStore.setToken(newToken, response.data.dataPayload.data.username)
           localStorage.setItem('loggedIn', true)
-          authStore.setToken(newToken, response.data.dataPayload.data.username)
           goToFirstMenu()
           return newToken
           // Return the new token

@@ -43,7 +43,7 @@ const onSubmit = async () => {
       // console.log("hello", authStore.getUserId());
 
       menuStore.setMenus(response.data.dataPayload.data.menus)
-
+localStorage.setItem('loggedIn', true)
       proxy.$showToast({
         title: 'success',
         text: 'You have successfully logged in!',

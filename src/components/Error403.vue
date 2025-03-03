@@ -29,7 +29,7 @@ const gohome = () => {
   justify-content: center;
   height: 100vh;
   background: #fff; /* Gradient background */
-  color:#000;
+  color: #000;
   font-family: Arial, sans-serif;
   text-align: center;
   padding: 20px;
@@ -38,8 +38,7 @@ const gohome = () => {
 .error-message h1 {
   font-size: 5rem;
   margin: 0;
-  color: #fff;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+  color: #000;
 }
 
 .error-message p {
@@ -54,18 +53,18 @@ const gohome = () => {
 
 .back-button {
   padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #ffffff;
-  color: primary;
+  font-size: 1.3rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  background-color: #fff;
+  color: #097B3E;
 }
 
 .back-button:hover {
-  background-color: #ffeedf;
+  background-color: #097B3E;
   transform: scale(1.05);
+  color: #fff
 }
 
 .error-actions p {

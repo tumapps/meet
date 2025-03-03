@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import authRoutes from './auth'
 
+// Create an Axios instance
+
 // Lazy load components
 const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')

@@ -46,6 +46,7 @@ const onSubmit = async () => {
       // console.log('Cookie received:', setCookieHeader);
       // set the httponly cookie
       document.cookie = setCookieHeader
+      localStorage.setItem('loggedIn', true)
 
       proxy.$showToast({
         title: 'success',

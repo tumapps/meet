@@ -11,7 +11,7 @@
       <b-button variant="primary">Analytics</b-button>
     </div>
   </div>
-  <b-row class="row-cols-1 row-cols-md-2 row-cols-lg-4">
+  <b-row class="row-cols-2 row-cols-md-2 row-cols-lg-4">
     <b-col>
       <analytics-widget :value="1206" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
     </b-col>
