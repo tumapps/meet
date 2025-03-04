@@ -45,7 +45,7 @@ class DashboardController extends \helpers\ApiController
 	    
 	    $connector('ws://localhost:8080')
 	        ->then(function($conn) use ($dataToSend) {
-	            $conn->send($dataToSend); // Send the data to WebSocket server
+	            $conn->send($dataToSend);
 	            $conn->close();
 	        }, function($e) {
 	            echo "Could not connect to WebSocket: {$e->getMessage()}\n";
