@@ -153,7 +153,7 @@ trait NotificationTrait
             'contact_person_email' => $this->email_address,
             'subject' => $subject,
             'contact_person_name' => $this->contact_name,
-            'date' => $this->apppointment_date,
+            'date' => $this->appointment_date,
             'start_time' => $this->start_time,
             'end_time' => $this->end_time,
             'contact_person_username' => $this->getUserName($this->user_id),
