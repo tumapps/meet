@@ -4021,6 +4021,131 @@
                 }
             }
         },
+        "/scheduler/reports": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "Returns all statistical results for meetings",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/system-metrics": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "lists system-metrics",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/yearly-meeting-summary": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "lists system-metrics",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/weekly-meeting-summary": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "lists system-metrics",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/space-utilization": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "lists system-metrics",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/scheduler/settings/create": {
             "post": {
                 "tags": [
