@@ -668,7 +668,7 @@ class Appointments extends BaseModel
         return self::find()->count();
     }
 
-    public function upComingAppointments($appointment_date = null, $limit = 10)
+    public static function upComingAppointments($appointment_date = null, $limit = 10)
     {
         if ($appointment_date === null) {
             $appointment_date = date('Y-m-d');
