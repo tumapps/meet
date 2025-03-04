@@ -7,14 +7,12 @@ use yii\base\Model;
 use auth\models\User;
 use auth\models\Profiles;
 use auth\models\Tokens;
-// use helpers\traits\Mail;
 use yii\base\Event;
 use helpers\EventHandler;
 
 
 class PasswordResetRequest extends Model
 {
-    // use Mail;
 
     public $username;
     const EVENT_PASSWORD_RESET_REQUEST = 'passwordResetRequest';
