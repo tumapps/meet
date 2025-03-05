@@ -110,6 +110,10 @@ class ManagedUsersController extends \helpers\ApiController
     public function actionReassign($secretary_id, $user_id)
     {
         Yii::$app->user->can('schedulerManaged-usersUpdate');
+ 
+        if(empty($user_id) || empty($secretary_id) || $user_id === "null"){
+            return $this->toastResponse(['message' => 'user id is required']);
+        }
 
         $managedUser = ManagedUsers::findOne(['user_id' => $user_id, 'secretary_id' => $secretary_id]);
 
@@ -130,6 +134,7 @@ class ManagedUsersController extends \helpers\ApiController
 
     private function removeAssignedUser($user_id, $secretary_id)
     {
+        
         $sql = "DELETE FROM managed_users WHERE user_id = :user_id AND secretary_id = :secretary_id";
 
         $deletedRows = Yii::$app->db->createCommand($sql)
