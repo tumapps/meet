@@ -1,3 +1,256 @@
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+// Pinia Store
+import { useSetting } from '@/store/pinia'
+import AnalyticsWidget from '@/components/widgets/AnalyticsWidget.vue'
+import Vue3autocounter from 'vue3-autocounter'
+// import FlatPicker from 'vue-flatpickr-component'
+import { getVariableColor } from '@/utilities/root-var'
+import AxiosInstance from '@/api/axios'
+
+const axiosInstance = AxiosInstance()
+
+// const date = ref('')
+// const imgGroup = ref([require('@/assets/images/table/1.png'), require('@/assets/images/table/2.png'), require('@/assets/images/table/3.png'), require('@/assets/images/table/4.png'), require('@/assets/images/table/5.png')])
+
+const store = useSetting()
+// const themeColor = computed(() => store.getters['setting/theme_color'].colors)
+const themeColor = computed(() => store.theme_color)
+const colors = ref(null)
+const colorsChange = () => {
+  const newColors = getVariableColor()
+  colors.value = [newColors.primary, newColors.warning]
+}
+colorsChange()
+watch(
+  themeColor,
+  () => {
+    colorsChange()
+    grossVolume.value = {
+      ...grossVolume.value,
+      options: {
+        ...grossVolume.value.options,
+        colors: colors.value
+      }
+    }
+  },
+  { deep: true }
+)
+watch(
+  themeColor,
+  () => {
+    colorsChange()
+    netVolumeSale.value = {
+      ...netVolumeSale.value,
+      options: {
+        ...netVolumeSale.value.options,
+        colors: colors.value,
+        markers: {
+          ...netVolumeSale.value.options.markers,
+          strokeColors: colors.value
+        }
+      }
+    }
+  },
+  { deep: true }
+)
+
+// get stats from backend
+const analytics = ref({})
+const getAnalytics = async () => {
+  const response = await axiosInstance.get('/v1/scheduler/reports')
+
+  console.log('API Response:', response.data.dataPayload.data)
+  analytics.value = response.data.dataPayload.data
+  // get all the analytics data from the backend
+}
+const weeklyStats = ref({})
+const getWeeklyStats = async () => {
+  const response = await axiosInstance.get('v1/scheduler/weekly-meeting-summary')
+
+  console.log('API Response:', response.data.dataPayload.data)
+  weeklyStats.value = response.data.dataPayload.data.weekly_meeting_summary
+}
+
+const annualStats = ref({})
+const getAnnualStats = async () => {
+  const response = await axiosInstance.get('/v1/scheduler/yearly-meeting-summary')
+
+  console.log('API Response:', response.data.dataPayload.data)
+  annualStats.value = response.data.dataPayload.data.yearly_meeting_summary
+}
+
+const timeline = ref([
+  { name: 'Cameron Williamson', position: 'Dentist', time: '11 Jul 8:10 PM' },
+  { name: 'Brooklyn Simmons', position: 'Orthopedic', time: '11 Jul 11 PM' },
+  { name: 'Leslie Alexander', position: 'Neurology', time: '11 Jul 1:21 AM' },
+  { name: 'Robbin Doe', position: 'ENT', time: '11 Jul 4:30 AM' },
+  { name: 'Jane Cooper', position: 'Cardiologist', time: '11 Jul 4:50 AM' }
+])
+
+const grossVolume = computed(() => {
+  const dates = Object.keys(weeklyStats.value).sort() // Sort dates
+  return {
+    series: [
+      {
+        name: 'Successful meetings',
+        data: dates.map((date) => weeklyStats.value[date]?.attended_meetings || 0)
+      },
+      {
+        name: 'Failed meetings',
+        data: dates.map((date) => (weeklyStats.value[date]?.canceled_meetings || 0) + (weeklyStats.value[date]?.missed_meetings || 0))
+      }
+    ],
+    options: {
+      chart: {
+        type: 'bar',
+        height: '100%',
+        stacked: true,
+        toolbar: {
+          show: false
+        }
+      },
+      colors: colors.value,
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '28%',
+          endingShape: 'rounded',
+          borderRadius: 3
+        }
+      },
+      legend: {
+        show: false
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        show: true,
+        width: 3,
+        colors: ['transparent']
+      },
+      grid: {
+        show: true,
+        strokeDashArray: 7
+      },
+      xaxis: {
+        categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+        labels: {
+          minHeight: 20,
+          maxHeight: 20,
+          style: {
+            colors: '#8A92A6'
+          }
+        }
+      },
+      yaxis: {
+        title: {
+          text: ''
+        },
+        labels: {
+          minWidth: 20,
+          maxWidth: 20,
+          style: {
+            colors: '#8A92A6'
+          }
+        }
+      },
+      fill: {
+        opacity: 1
+      },
+      tooltip: {
+        y: {
+          formatter: function (val) {
+            return '$ ' + val + ' thousands'
+          }
+        }
+      },
+      responsive: [
+        {
+          breakpoint: 1025,
+          options: {
+            chart: {
+              height: 130
+            }
+          }
+        }
+      ]
+    }
+  }
+})
+
+// Compute the total number of meetings for the week
+const totalMeetingsInWeek = computed(() => {
+  return Object.values(weeklyStats.value).reduce((sum, day) => sum + (day.total_meetings || 0), 0)
+})
+
+const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const netVolumeSale = computed(() => {
+  return {
+    series: [
+      {
+        name: 'Sales',
+        data: monthsOrder.map((month) => annualStats.value[month]?.total_meetings || 0) // Extract data in correct order
+      }
+    ],
+    options: {
+      colors: colors.value,
+      chart: {
+        height: '100%',
+        type: 'line',
+        toolbar: {
+          show: false
+        }
+      },
+      forecastDataPoints: {
+        count: 3
+      },
+      stroke: {
+        width: 3
+      },
+      grid: {
+        show: true,
+        strokeDashArray: 7
+      },
+      markers: {
+        size: 6,
+        colors: '#FFFFFF',
+        strokeColors: colors.value,
+        strokeWidth: 2,
+        strokeOpacity: 0.9,
+        strokeDashArray: 0,
+        fillOpacity: 0,
+        shape: 'circle',
+        radius: 2,
+        offsetX: 0,
+        offsetY: 0
+      },
+      xaxis: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        },
+        tooltip: {
+          enabled: false
+        }
+      }
+    }
+  }
+})
+
+onMounted(async () => {
+  // fetchSettings()
+  getAnalytics()
+  getWeeklyStats()
+  getAnnualStats()
+})
+</script>
+
 <template>
   <!-- <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
     <div class="d-flex flex-column">
@@ -13,16 +266,16 @@
   </div> -->
   <b-row class="row-cols-2 row-cols-md-2 row-cols-lg-4">
     <b-col>
-      <analytics-widget :value="1206" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
+      <analytics-widget :value="analytics.total_appointments" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="2455" description="New" Iconcolor="#097B3E" icon="users"></analytics-widget>
+      <analytics-widget :value="analytics.attended" description="New" Iconcolor="#097B3E" icon="users"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="1200" description="Active" Iconcolor="#097B3E" icon="phone"></analytics-widget>
+      <analytics-widget :value="analytics.active" description="Active" Iconcolor="#097B3E" icon="phone"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="1200" description="Cancelled" Iconcolor="#d33" icon="phone-slash"></analytics-widget>
+      <analytics-widget :value="analytics.canceled" description="Cancelled" Iconcolor="#d33" icon="phone-slash"></analytics-widget>
     </b-col>
   </b-row>
 
@@ -110,7 +363,7 @@
 
         <div class="mb-3">
           <h2 class="counter">
-            <Vue3autocounter ref="counter" separator="," :duration="3" :startAmount="0" :endAmount="124" />
+            <Vue3autocounter ref="counter" separator="," :duration="2" :startAmount="0" :endAmount="totalMeetingsInWeek" />
           </h2>
         </div>
         <div>
@@ -138,208 +391,3 @@
     </b-col>
   </b-row>
 </template>
-
-<script setup>
-import { ref, computed, watch } from 'vue'
-// Pinia Store
-import { useSetting } from '@/store/pinia'
-import AnalyticsWidget from '@/components/widgets/AnalyticsWidget.vue'
-import Vue3autocounter from 'vue3-autocounter'
-// import FlatPicker from 'vue-flatpickr-component'
-import { getVariableColor } from '@/utilities/root-var'
-
-// const date = ref('')
-// const imgGroup = ref([require('@/assets/images/table/1.png'), require('@/assets/images/table/2.png'), require('@/assets/images/table/3.png'), require('@/assets/images/table/4.png'), require('@/assets/images/table/5.png')])
-
-const store = useSetting()
-// const themeColor = computed(() => store.getters['setting/theme_color'].colors)
-const themeColor = computed(() => store.theme_color)
-const colors = ref(null)
-const colorsChange = () => {
-  const newColors = getVariableColor()
-  colors.value = [newColors.primary, newColors.warning]
-}
-colorsChange()
-watch(
-  themeColor,
-  () => {
-    colorsChange()
-    grossVolume.value = {
-      ...grossVolume.value,
-      options: {
-        ...grossVolume.value.options,
-        colors: colors.value
-      }
-    }
-  },
-  { deep: true }
-)
-watch(
-  themeColor,
-  () => {
-    colorsChange()
-    netVolumeSale.value = {
-      ...netVolumeSale.value,
-      options: {
-        ...netVolumeSale.value.options,
-        colors: colors.value,
-        markers: {
-          ...netVolumeSale.value.options.markers,
-          strokeColors: colors.value
-        }
-      }
-    }
-  },
-  { deep: true }
-)
-
-const timeline = ref([
-  { name: 'Cameron Williamson', position: 'Dentist', time: '11 Jul 8:10 PM' },
-  { name: 'Brooklyn Simmons', position: 'Orthopedic', time: '11 Jul 11 PM' },
-  { name: 'Leslie Alexander', position: 'Neurology', time: '11 Jul 1:21 AM' },
-  { name: 'Robbin Doe', position: 'ENT', time: '11 Jul 4:30 AM' },
-  { name: 'Jane Cooper', position: 'Cardiologist', time: '11 Jul 4:50 AM' }
-])
-
-const grossVolume = ref({
-  series: [
-    {
-      name: 'Successful deals',
-      data: [30, 50, 35, 60, 40, 60, 60]
-    },
-    {
-      name: 'Failed deals',
-      data: [40, 50, 55, 50, 30, 80, 30]
-    }
-  ],
-  options: {
-    chart: {
-      type: 'bar',
-      height: '100%',
-      stacked: true,
-      toolbar: {
-        show: false
-      }
-    },
-    colors: colors.value,
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '28%',
-        endingShape: 'rounded',
-        borderRadius: 3
-      }
-    },
-    legend: {
-      show: false
-    },
-    dataLabels: {
-      enabled: false
-    },
-    stroke: {
-      show: true,
-      width: 3,
-      colors: ['transparent']
-    },
-    grid: {
-      show: true,
-      strokeDashArray: 7
-    },
-    xaxis: {
-      categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-      labels: {
-        minHeight: 20,
-        maxHeight: 20,
-        style: {
-          colors: '#8A92A6'
-        }
-      }
-    },
-    yaxis: {
-      title: {
-        text: ''
-      },
-      labels: {
-        minWidth: 20,
-        maxWidth: 20,
-        style: {
-          colors: '#8A92A6'
-        }
-      }
-    },
-    fill: {
-      opacity: 1
-    },
-    tooltip: {
-      y: {
-        formatter: function (val) {
-          return '$ ' + val + ' thousands'
-        }
-      }
-    },
-    responsive: [
-      {
-        breakpoint: 1025,
-        options: {
-          chart: {
-            height: 130
-          }
-        }
-      }
-    ]
-  }
-})
-const netVolumeSale = ref({
-  series: [
-    {
-      name: 'Sales',
-      data: [10, 82, 75, 68, 47, 60, 49, 91, 108, 200]
-    }
-  ],
-  options: {
-    colors: colors.value,
-    chart: {
-      height: '100%',
-      type: 'line',
-      toolbar: {
-        show: false
-      }
-    },
-    forecastDataPoints: {
-      count: 3
-    },
-    stroke: {
-      width: 3
-    },
-    grid: {
-      show: true,
-      strokeDashArray: 7
-    },
-    markers: {
-      size: 6,
-      colors: '#FFFFFF',
-      strokeColors: colors.value,
-      strokeWidth: 2,
-      strokeOpacity: 0.9,
-      strokeDashArray: 0,
-      fillOpacity: 0,
-      shape: 'circle',
-      radius: 2,
-      offsetX: 0,
-      offsetY: 0
-    },
-    xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-      axisBorder: {
-        show: false
-      },
-      axisTicks: {
-        show: false
-      },
-      tooltip: {
-        enabled: false
-      }
-    }
-  }
-})
-</script>
