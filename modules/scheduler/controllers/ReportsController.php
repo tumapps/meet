@@ -22,6 +22,7 @@ class ReportsController extends \helpers\ApiController
         $missed  = Appointments::find()->where(['status' => Appointments::STATUS_MISSED])->count();
         $onHold = Appointments::find()->where(['status' => Appointments::STATUS_RESCHEDULE])->count();
         $active = Appointments::find()->where(['status' => Appointments::STATUS_ACTIVE])->count();
+        $pending = Appointments::find()->where(['status' => Appointments::STATUS_PENDING])->count();
 
         return $this->payloadResponse([
             'total_appointments' => $totalAppointments,
@@ -30,6 +31,7 @@ class ReportsController extends \helpers\ApiController
             'canceled' => $canceled,
             'rejected' => $rejected,
             'attended' => $completed,
+            'pending' => $pending,
             'missed' => $missed,
             'on_hold' => $onHold,
             'upcoming' => $upcoming,
