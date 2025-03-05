@@ -183,10 +183,13 @@ class ReportsController extends \helpers\ApiController
         $startDate = $weekRange['start_of_week'];
         $endDate = $weekRange['end_of_week'];
 
-        $appointments = Appointments::find()
+        $appointmentsQuery = Appointments::find()
             ->where(['between', 'appointment_date', $startDate, $endDate])
-            ->asArray()
-            ->all();
+            ->asArray();
+        // ->all();
+
+        $appointments = $appointmentsQuery->all();
+        $appointmentsCount = $appointmentsQuery->count();
 
         $result = [];
 
@@ -247,6 +250,7 @@ class ReportsController extends \helpers\ApiController
         }
 
         return $this->payloadResponse([
+            'total_meetings' => $appointmentsCount,
             'weekly_meeting_summary' => $result
         ]);
     }
