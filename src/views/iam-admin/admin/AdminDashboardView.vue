@@ -7,8 +7,10 @@ import Vue3autocounter from 'vue3-autocounter'
 // import FlatPicker from 'vue-flatpickr-component'
 import { getVariableColor } from '@/utilities/root-var'
 import AxiosInstance from '@/api/axios'
+import { useRouter } from 'vue-router'
 
 const axiosInstance = AxiosInstance()
+const router = useRouter()
 
 // const date = ref('')
 // const imgGroup = ref([require('@/assets/images/table/1.png'), require('@/assets/images/table/2.png'), require('@/assets/images/table/3.png'), require('@/assets/images/table/4.png'), require('@/assets/images/table/5.png')])
@@ -135,7 +137,7 @@ const grossVolume = computed(() => {
         strokeDashArray: 7
       },
       xaxis: {
-        categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+        categories: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         labels: {
           minHeight: 20,
           maxHeight: 20,
@@ -149,8 +151,8 @@ const grossVolume = computed(() => {
           text: ''
         },
         labels: {
-          minWidth: 20,
-          maxWidth: 20,
+          minWidth: 15,
+          maxWidth: 15,
           style: {
             colors: '#8A92A6'
           }
@@ -162,7 +164,7 @@ const grossVolume = computed(() => {
       tooltip: {
         y: {
           formatter: function (val) {
-            return '$ ' + val + ' thousands'
+            return val
           }
         }
       },
@@ -243,6 +245,11 @@ const netVolumeSale = computed(() => {
   }
 })
 
+const viewAllEvents = () => {
+  console.log('View all events')
+  router.push({ name: 'all-events' })
+}
+
 onMounted(async () => {
   // fetchSettings()
   getAnalytics()
@@ -264,15 +271,19 @@ onMounted(async () => {
       <b-button variant="primary">Analytics</b-button>
     </div>
   </div> -->
-  <b-row class="row-cols-2 row-cols-md-2 row-cols-lg-4">
+  <b-row class="row-cols-2 row-cols-md-3 row-cols-lg-5">
     <b-col>
       <analytics-widget :value="analytics.total_appointments" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="analytics.attended" description="New" Iconcolor="#097B3E" icon="users"></analytics-widget>
+      <analytics-widget :value="analytics.active" description="Active" Iconcolor="#097B3E" icon="phone"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="analytics.active" description="Active" Iconcolor="#097B3E" icon="phone"></analytics-widget>
+      <analytics-widget :value="analytics.pending" description="Pending" Iconcolor="#3788D8" icon="inbox"></analytics-widget>
+    </b-col>
+
+    <b-col>
+      <analytics-widget :value="analytics.attended" description="Completed" Iconcolor="#097B3E" icon="circle-check"></analytics-widget>
     </b-col>
     <b-col>
       <analytics-widget :value="analytics.canceled" description="Cancelled" Iconcolor="#d33" icon="phone-slash"></analytics-widget>
@@ -328,12 +339,12 @@ onMounted(async () => {
       <div class="card">
         <div class="flex-wrap card-header d-flex justify-content-between">
           <div class="header-title">
-            <h4>Upcoming Appointments</h4>
+            <h4>Upcoming Events</h4>
             <p class="mb-0">
-              <svg class="me-2" width="24" height="24" viewBox="0 0 24 24">
+              <svg class="me-2" width="24" height="24" viewBox="0 0 24 2I4">
                 <path fill="#17904b" d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"></path>
               </svg>
-              16% this month
+              <span class="text-primary" @click="viewAllEvents" style="cursor: pointer">View All</span>
             </p>
           </div>
         </div>
@@ -377,13 +388,14 @@ onMounted(async () => {
         <template #header>
           <div class="d-flex justify-content-between flex-wrap">
             <h4 class="card-title">Meetings Distribution</h4>
-            <div class="dropdown">
+            <div>{{ new Date().getFullYear() }}</div>
+            <!-- <div class="dropdown">
               <b-dropdown variant="none px-0 py-0" id="dropdown-1" text="This year">
                 <b-dropdown-item variant="none">Year</b-dropdown-item>
                 <b-dropdown-item variant="none">Month</b-dropdown-item>
                 <b-dropdown-item variant="none">Week</b-dropdown-item>
               </b-dropdown>
-            </div>
+            </div> -->
           </div>
         </template>
         <apexchart height="100%" type="line" class="dashboard-line-chart" :options="netVolumeSale.options" :series="netVolumeSale.series" />

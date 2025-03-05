@@ -88,7 +88,7 @@ const goToPage = (page) => {
 //get roles
 const getPermissions = async (page = currentPage.value) => {
   try {
-    const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}&search=${searchQuery.value}`)
+    const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
     console.log(tableData.value)
 
