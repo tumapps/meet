@@ -205,6 +205,7 @@ class ReportsController extends \helpers\ApiController
             $formattedDate = $date->format('Y-m-d');
             $result[$formattedDate] = [
                 'total_meetings' => 0,
+                'active_meetings' => 0,
                 'attended_meetings' => 0,
                 'canceled_meetings' => 0,
                 'missed_meetings' => 0,
@@ -241,6 +242,9 @@ class ReportsController extends \helpers\ApiController
                         break;
                     case 3:
                         $result[$appointmentDate]['on_hold_meetings']++;
+                        break;
+                    case 10:
+                        $result[$appointmentDate]['active_meetings']++;
                         break;
                     case 11:
                         $result[$appointmentDate]['pending_meetings']++;
