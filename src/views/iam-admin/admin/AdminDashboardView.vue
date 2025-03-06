@@ -273,20 +273,20 @@ onMounted(async () => {
   </div> -->
   <b-row class="row-cols-2 row-cols-md-3 row-cols-lg-5">
     <b-col>
-      <analytics-widget :value="analytics.total_appointments" description="All" Iconcolor="#3788D8" icon="file-lines"></analytics-widget>
+      <analytics-widget :value="analytics.total_appointments" description="All" Iconcolor="#3788D8" icon="calendar-alt"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="analytics.active" description="Active" Iconcolor="#097B3E" icon="phone"></analytics-widget>
+      <analytics-widget :value="analytics.active" description="Active" Iconcolor="#097B3E" icon="calendar-check"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="analytics.pending" description="Pending" Iconcolor="#3788D8" icon="inbox"></analytics-widget>
+      <analytics-widget :value="analytics.pending" description="Pending" Iconcolor="#3788D8" icon="hourglass"></analytics-widget>
     </b-col>
 
     <b-col>
       <analytics-widget :value="analytics.attended" description="Completed" Iconcolor="#097B3E" icon="circle-check"></analytics-widget>
     </b-col>
     <b-col>
-      <analytics-widget :value="analytics.canceled" description="Cancelled" Iconcolor="#d33" icon="phone-slash"></analytics-widget>
+      <analytics-widget :value="analytics.canceled" description="Cancelled" Iconcolor="#d33" icon="calendar-xmark"></analytics-widget>
     </b-col>
   </b-row>
 
