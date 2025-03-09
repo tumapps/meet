@@ -9,7 +9,8 @@ use Yii;
  *  @OA\Property(property="id", type="integer",title="Id", example="integer"),
  *  @OA\Property(property="title", type="string",title="Title", example="string"),
  *  @OA\Property(property="description", type="string",title="Description", example="string"),
- *  @OA\Property(property="event_date", type="string",title="Event date", example="string"),
+ *  @OA\Property(property="start_date", type="string",title="Start date", example="string"),
+ *  @OA\Property(property="end_date", type="string",title="End date", example="string"),
  *  @OA\Property(property="start_time", type="string",title="Start time", example="string"),
  *  @OA\Property(property="end_time", type="string",title="End time", example="string"),
  *  @OA\Property(property="is_deleted", type="int",title="Is deleted", example="int"),
@@ -43,7 +44,7 @@ class Events extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
             'id',
             'title',
