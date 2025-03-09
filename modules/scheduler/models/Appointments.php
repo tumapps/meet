@@ -580,6 +580,7 @@ class Appointments extends BaseModel
             ->where(['<=', 'appointment_date', $currentDate])
             ->andWhere(['<', 'end_time', $currentTime])
             ->andWhere(['status' => self::STATUS_ACTIVE])
+            ->andWhere(['appointment_completed_reminder_sent' => 0])
             ->all();
 
         $filteredAppointments = array_filter($appointments, function ($appointment) use ($oneHourAgo) {
@@ -629,6 +630,17 @@ class Appointments extends BaseModel
         $appointment = self::findOne($id);
         if ($appointment) {
             $appointment->updateAttributes(['reminder_sent_at' => date('Y-m-d H:i:s')]);
+            Yii::info("Updated reminder_sent_at for appointment ID: {$id}", __METHOD__);
+        } else {
+            Yii::warning("Appointment not found for ID: {$id}", __METHOD__);
+        }
+    }
+
+    public static function updateCompletedAppointmentsReminder($id)
+    {
+        $appointment = self::findOne($id);
+        if ($appointment) {
+            $appointment->updateAttributes(['appointment_completed_reminder_sent' => 1]);
             Yii::info("Updated reminder_sent_at for appointment ID: {$id}", __METHOD__);
         } else {
             Yii::warning("Appointment not found for ID: {$id}", __METHOD__);

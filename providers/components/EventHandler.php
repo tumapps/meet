@@ -489,7 +489,7 @@ class EventHandler
 		$contact_person_email = $event->data['contact_email'];
 		$chair_person_email = $event->data['chairPersonEmail'];
 		$subject = $event->data['subject'];
-
+		$id = $event->data['appointment_id'];
 		$data = [
 			'meeting_subject' => $event->data['appointment_subject'],
 			'date' => $event->data['date'],
@@ -501,7 +501,7 @@ class EventHandler
 
 		$mailBody = Yii::$app->view->render('@ui/views/emails/appointmentCompletedReminder',$data);
 
-		self::queueEmail($chair_person_email, $subject, $mailBody);
+		self::queueEmail($chair_person_email, $subject, $mailBody, 'reminder', $id, true);
 	}
 
 	public static function onBackUpFileUploaded(Event $event)
@@ -521,7 +521,7 @@ class EventHandler
 		self::queueEmail($email, $subject, $body);
 	}
 
-	public static function queueEmail($email, $subject, $body, $type = '', $id = '')
+	public static function queueEmail($email, $subject, $body, $type = '', $id = '', $appointmentcompleted = false)
 	{
 		Yii::$app->queue->push(new \scheduler\jobs\MailJob([
 			'email' => $email,
@@ -529,6 +529,7 @@ class EventHandler
 			'body' => $body,
 			'type' => $type,
 			'id' => $id,
+			'appointmentcompleted' => $appointmentcompleted
 		]));
 
 		Yii::info("Email queued for: {$email}", 'mailQueue');

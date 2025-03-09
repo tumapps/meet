@@ -16,6 +16,7 @@ class MailJob extends BaseObject implements \yii\queue\JobInterface
     public $body;
     public $type;
     public $id;
+    public $appointmentcompleted;
 
     public function execute($queue)
     {
@@ -24,6 +25,9 @@ class MailJob extends BaseObject implements \yii\queue\JobInterface
         if (self::send($this->email, $this->subject, $this->body)) {
             if ($this->type === 'reminder' && $this->id !== null || !empty($this->id)) {
                 Appointments::updateReminder($this->id);
+                if ($this->appointmentcompleted === true) {
+                    Appointments::updateCompletedAppointmentsReminder($this->id);
+                }
             }
             Yii::info("Email sent to {$this->email} at: {$date}", 'mailQueue');
         } else {
@@ -35,6 +39,7 @@ class MailJob extends BaseObject implements \yii\queue\JobInterface
                 'body' => $this->body,
                 'type' => $this->type,
                 'id' => $this->id,
+                'appointmentcompleted' => $this->appointmentcompleted,
             ]));
         }
     }

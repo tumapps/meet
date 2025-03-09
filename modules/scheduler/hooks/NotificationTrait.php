@@ -260,6 +260,7 @@ trait NotificationTrait
             'contact_name' => $this->contact_name,
             'username' => $this->getUserName($this->user_id),
             'chairPersonEmail' => $chairPersonEmail,
+            'appointment_id' => $this->id,
         ];
 
         $this->on(self::EVENT_APPOINTMENT_COMPLETED_REMINDER, [EventHandler::class, 'onAppointmentCompletedReminder'], $eventData);
