@@ -2,9 +2,13 @@
 
 namespace scheduler\controllers;
 
+use Yii;
 use scheduler\models\Appointments;
 use scheduler\models\Space;
 use scheduler\models\SpaceAvailability;
+use scheduler\models\Events;
+use scheduler\models\searches\EventsSearch;
+
 
 
 
@@ -37,6 +41,60 @@ class ReportsController extends \helpers\ApiController
             'upcoming' => $upcoming,
         ]);
     }
+
+    public function actionUpcomingEvents()
+    {
+        // Yii::$app->user->can('schedulerEventsList');
+        $searchModel = new EventsSearch();
+        $search = $this->queryParameters(Yii::$app->request->queryParams, 'EventsSearch');
+        $dataProvider = $searchModel->search($search);
+
+        $currentDate = date('Y-m-d');
+        $dataProvider->query->andWhere(['>=', 'start_date', $currentDate]);
+        $dataProvider->query->andWhere(['!=', 'status', Events::STATUS_CANCELLED]); // Exclude canceled events
+        $dataProvider->query->andWhere(['=', 'is_deleted', Events::STATUS_UNDELETED]); // Exclude deleted events
+
+
+        $dataProvider->setSort([
+            'defaultOrder' => ['start_date' => SORT_ASC],
+            'attributes' => [
+                'start_date' => [
+                    'asc' => ['start_date' => SORT_ASC], 
+                    'desc' => ['start_date' => SORT_DESC],
+                    'default' => SORT_ASC,
+                ],
+            ],
+        ]);
+
+        return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
+    }
+
+    // public function actionUserMetrics($user_id)
+    // {
+    //     $totalAppointments = Appointments::find()->where(['user_id' => $user_id])->count();
+    //     $scheduled = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_RESCHEDULED])->count();
+    //     $canceled = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_CANCELLED])->count();
+    //     $rejected = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_REJECTED])->count();
+    //     $completed = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_ATTENDED])->count();
+    //     $upcoming  = Appointments::upComingAppointments($user_id);
+    //     $missed  = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_MISSED])->count();
+    //     $onHold = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_RESCHEDULE])->count();
+    //     $active = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_ACTIVE])->count();
+    //     $pending = Appointments::find()->where(['user_id' => $user_id, 'status' => Appointments::STATUS_PENDING])->count();
+
+    //     return $this->payloadResponse([
+    //         'total_appointments' => $totalAppointments,
+    //         'active' => $active,
+    //         'scheduled' => $scheduled,
+    //         'canceled' => $canceled,
+    //         'rejected' => $rejected,
+    //         'attended' => $completed,
+    //         'pending' => $pending,
+    //         'missed' => $missed,
+    //         'on_hold' => $onHold,
+    //         'upcoming' => $upcoming,
+    //     ]);
+    // }
     public function actionSystemMetrics()
     {
         $avgDuration = Appointments::find()

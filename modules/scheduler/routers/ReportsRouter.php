@@ -76,7 +76,7 @@ return [
      *   tags={"Report and Analytics"},
      *   @OA\Response(
      *     response=200,
-     *     description="Returns a data payload object for all scheduler/appointments",
+     *     description="Returns a data payload object for space utilization",
      *     @OA\JsonContent(
      *         @OA\Property(property="dataPayload", type="object",
      *             ),
@@ -87,4 +87,21 @@ return [
      */
     // 'GET system-metrics'     => 'reports/meeting-duration',
     'GET space-utilization'     => 'reports/space-utilization',
+
+    /**
+     * @OA\Get(path="/scheduler/upcoming-events",
+     *   summary="lists all upcoming events sort by start date in ascending order",
+     *   tags={"Report and Analytics"},
+     *   @OA\Response(
+     *     response=200,
+     *     description="Returns a data payload object for reports/upcoming-events",
+     *     @OA\JsonContent(
+     *         @OA\Property(property="dataPayload", type="object",
+     *             ),
+     *         )
+     *     )
+     *   ),
+     * )
+     */
+    'GET upcoming-events'     => 'reports/upcoming-events',
 ];
