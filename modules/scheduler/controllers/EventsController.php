@@ -28,6 +28,21 @@ class EventsController extends \helpers\ApiController
         $searchModel = new EventsSearch();
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'EventsSearch');
         $dataProvider = $searchModel->search($search);
+
+        // $currentDate = date('Y-m-d');
+        // $dataProvider->query->andWhere(['>=', 'start_date', $currentDate]);
+
+        $dataProvider->setSort([
+            'defaultOrder' => ['start_date' => SORT_ASC],
+            'attributes' => [
+                'start_date' => [
+                    'asc' => ['start_date' => SORT_ASC], 
+                    'desc' => ['start_date' => SORT_DESC],
+                    'default' => SORT_ASC,
+                ],
+            ],
+        ]);
+
         return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
 
