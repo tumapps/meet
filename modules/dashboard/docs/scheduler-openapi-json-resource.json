@@ -4129,7 +4129,32 @@
                 "summary": "lists system-metrics",
                 "responses": {
                     "200": {
-                        "description": "Returns a data payload object for all scheduler/appointments",
+                        "description": "Returns a data payload object for space utilization",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scheduler/upcoming-events": {
+            "get": {
+                "tags": [
+                    "Report and Analytics"
+                ],
+                "summary": "lists all upcoming events sort by start date in ascending order",
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for reports/upcoming-events",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6148,8 +6173,13 @@
                         "type": "string",
                         "example": "string"
                     },
-                    "event_date": {
-                        "title": "Event date",
+                    "start_date": {
+                        "title": "Start date",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "end_date": {
+                        "title": "End date",
                         "type": "string",
                         "example": "string"
                     },
