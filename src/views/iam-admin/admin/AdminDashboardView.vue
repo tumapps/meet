@@ -85,15 +85,13 @@ const getEvents = async () => {
   const response = await axiosInstance.get('/v1/scheduler/upcoming-events')
 
   console.log('API Response:', response.data.dataPayload.data)
-  timeline.value = response.data.dataPayload.data
+  if (Array.isArray(response.data.dataPayload.data)) {
+    if (response.data.dataPayload.data.length > 0) {
+      timeline.value = response.data.dataPayload.data
+    }
+  } 
 }
-const timeline = ref([
-  { name: 'Cameron Williamson', position: 'Dentist', time: '11 Jul 8:10 PM' },
-  { name: 'Brooklyn Simmons', position: 'Orthopedic', time: '11 Jul 11 PM' },
-  { name: 'Leslie Alexander', position: 'Neurology', time: '11 Jul 1:21 AM' },
-  { name: 'Robbin Doe', position: 'ENT', time: '11 Jul 4:30 AM' },
-  { name: 'Jane Cooper', position: 'Cardiologist', time: '11 Jul 4:50 AM' }
-])
+const timeline = ref([])
 
 const grossVolume = computed(() => {
   const dates = Object.keys(weeklyStats.value).sort() // Sort dates
