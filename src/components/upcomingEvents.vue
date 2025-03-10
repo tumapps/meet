@@ -12,6 +12,13 @@ const props = defineProps({
   }
 })
 
+// check if props.events is empty
+const message = ref(null)
+if (!props.events.length) {
+  console.log('No events')
+  message.value = 'No Upcoming events'
+}
+
 const viewAllEvents = () => {
   router.push({ name: 'all-events' })
   console.log('View all events')
@@ -45,7 +52,8 @@ const viewThisEvent = (id) => {
           </p>
         </div>
       </div>
-      <div class="card-body" style="max-height: 400px; overflow-y: auto">
+      <div v-if="props.events.length !== 0" class="card-body" style="max-height: 400px; overflow-y: auto; min-height: 400px">
+        {{ props.events.length }}
         <div class="d-flex profile-media align-items-top" style="cursor: pointer" v-for="(item, id) in props.events" :key="id" @click="viewThisEvent(item.id)">
           <div class="mt-1 profile-dots-pills border-primary"></div>
           <div class="ms-4">
@@ -59,6 +67,9 @@ const viewThisEvent = (id) => {
           </div>
         </div>
       </div>
+      <div v-else class="card-body">
+        <p class="text-center">{{ message }}</p>
+        </div>
     </div>
   </b-col>
 </template>
