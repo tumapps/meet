@@ -60,18 +60,21 @@ const resizePlugin = () => {
 const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen', '/confirm']
 
 // ✅ Add navigation guard (Only once, outside lifecycle hooks)
-if (localStorage.getItem('loggedIn') !== 'true') {
-  router.beforeEach((to, from, next) => {
-    // Allow access to unauthenticated routes
-    if (unauthenticatedRoutes.includes(to.path) || to.path.startsWith('/confirm/')) {
-      return next()
-    }
 
-    // Refresh token before allowing navigation
-    RunrefreshToken().then(() => {
-      next()
+const validToken = async () => {
+  if (localStorage.getItem('loggedIn') !== 'true') {
+    router.beforeEach((to, from, next) => {
+      // Allow access to unauthenticated routes
+      if (unauthenticatedRoutes.includes(to.path) || to.path.startsWith('/confirm/')) {
+        return next()
+      }
+
+      // Refresh token before allowing navigation
+      RunrefreshToken().then(() => {
+        next()
+      })
     })
-  })
+  }
 }
 
 // ✅ Lifecycle Hooks
@@ -79,7 +82,7 @@ onMounted(() => {
   console.log('App Mounted')
 
   // Run token refresh on mount
-  RunrefreshToken()
+  validToken()
 
   // ✅ Attach event listener for resize
   window.addEventListener('resize', resizePlugin)
