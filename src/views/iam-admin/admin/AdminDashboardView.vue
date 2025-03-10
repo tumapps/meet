@@ -7,10 +7,9 @@ import Vue3autocounter from 'vue3-autocounter'
 // import FlatPicker from 'vue-flatpickr-component'
 import { getVariableColor } from '@/utilities/root-var'
 import AxiosInstance from '@/api/axios'
-import { useRouter } from 'vue-router'
+import UpcomingEvents from '@/components/upcomingEvents.vue'
 
 const axiosInstance = AxiosInstance()
-const router = useRouter()
 
 // const date = ref('')
 // const imgGroup = ref([require('@/assets/images/table/1.png'), require('@/assets/images/table/2.png'), require('@/assets/images/table/3.png'), require('@/assets/images/table/4.png'), require('@/assets/images/table/5.png')])
@@ -82,6 +81,12 @@ const getAnnualStats = async () => {
   annualStats.value = response.data.dataPayload.data.yearly_meeting_summary
 }
 
+const getEvents = async () => {
+  const response = await axiosInstance.get('/v1/scheduler/upcoming-events')
+
+  console.log('API Response:', response.data.dataPayload.data)
+  timeline.value = response.data.dataPayload.data
+}
 const timeline = ref([
   { name: 'Cameron Williamson', position: 'Dentist', time: '11 Jul 8:10 PM' },
   { name: 'Brooklyn Simmons', position: 'Orthopedic', time: '11 Jul 11 PM' },
@@ -245,16 +250,12 @@ const netVolumeSale = computed(() => {
   }
 })
 
-const viewAllEvents = () => {
-  console.log('View all events')
-  router.push({ name: 'all-events' })
-}
-
 onMounted(async () => {
   // fetchSettings()
   getAnalytics()
   getWeeklyStats()
   getAnnualStats()
+  getEvents()
 })
 </script>
 
@@ -335,32 +336,7 @@ onMounted(async () => {
         </b-card-body>
       </b-card>
     </b-col>
-    <b-col lg="4" md="6" sm="12">
-      <div class="card">
-        <div class="flex-wrap card-header d-flex justify-content-between">
-          <div class="header-title">
-            <h4>Upcoming Events</h4>
-            <p class="mb-0">
-              <svg class="me-2" width="24" height="24" viewBox="0 0 24 2I4">
-                <path fill="#17904b" d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z"></path>
-              </svg>
-              <span class="text-primary" @click="viewAllEvents" style="cursor: pointer">View All</span>
-            </p>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex profile-media align-items-top" v-for="(item, index) in timeline" :key="index">
-            <div class="mt-1 profile-dots-pills border-primary"></div>
-            <div class="ms-4">
-              <h6 class="mb-1">
-                {{ item.name }} - <span class="text-primary">{{ item.position }}</span>
-              </h6>
-              <span class="mb-0">{{ item.time }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </b-col>
+    <UpcomingEvents :events="timeline" />
   </b-row>
 
   <b-row>
