@@ -284,7 +284,7 @@ onMounted(async () => {
 
   <b-row>
     <b-col lg="8" md="6" sm="12">
-      <TableView />
+      <TableView :height="height" />
     </b-col>
     <UpcomingEvents :events="timeline" />
   </b-row>
@@ -326,7 +326,8 @@ onMounted(async () => {
 @media (min-width: 992px) {
   /* lg and above */
   .custom-card {
-    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 500px !important;
   }
 }
 </style>
