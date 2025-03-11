@@ -40,7 +40,7 @@ const viewThisEvent = (id) => {
   <ViewEvent ref="editevent" :event_id="event_id" />
 
   <b-col lg="4" md="6" sm="12">
-    <div class="card">
+    <div class="card custom-card">
       <div class="flex-wrap card-header d-flex justify-content-between">
         <div class="header-title">
           <h4>Upcoming Events</h4>
@@ -52,7 +52,7 @@ const viewThisEvent = (id) => {
           </p>
         </div>
       </div>
-      <div v-if="props.events.length !== 0" class="card-body" style="max-height: 400px; overflow-y: auto; min-height: 400px">
+      <div v-if="props.events.length !== 0" class="card-body" style="max-height: 400px; overflow-y: auto; min-height: 400px !important">
         {{ props.events.length }}
         <div class="d-flex profile-media align-items-top" style="cursor: pointer" v-for="(item, id) in props.events" :key="id" @click="viewThisEvent(item.id)">
           <div class="mt-1 profile-dots-pills border-primary"></div>
@@ -69,7 +69,15 @@ const viewThisEvent = (id) => {
       </div>
       <div v-else class="card-body">
         <p class="text-center">{{ message }}</p>
-        </div>
+      </div>
     </div>
   </b-col>
 </template>
+<style>
+@media (min-width: 992px) {
+  /* lg and above */
+  .custom-card {
+    height: 300px !important;
+  }
+}
+</style>
