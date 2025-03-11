@@ -53,7 +53,6 @@ const viewThisEvent = (id) => {
         </div>
       </div>
       <div v-if="props.events.length !== 0" class="card-body" style="max-height: 400px; overflow-y: auto; min-height: 400px !important">
-        {{ props.events.length }}
         <div class="d-flex profile-media align-items-top" style="cursor: pointer" v-for="(item, id) in props.events" :key="id" @click="viewThisEvent(item.id)">
           <div class="mt-1 profile-dots-pills border-primary"></div>
           <div class="ms-4">
