@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, getCurrentInstance, onMounted, computed, watch } from 'vue'
 import AxiosInstance from '@/api/axios'
 
@@ -255,23 +255,20 @@ onMounted(() => {
       </b-col>
       <b-row class="mb-3">
         <b-col lg="12" class="mb-3">
-          <!-- <div class="d-flex justify-content-end">
+           <div class="d-flex justify-content-end">
                         <b-button variant="primary" @click="showModal">
                             New Space
                         </b-button>
-                    </div> -->
+                    </div> --
         </b-col>
         <b-col lg="12">
-          <!-- Table Controls -->
           <div class="d-flex justify-content-between">
-            <!-- Pagination Controls -->
             <div class="d-flex align-items-center">
               <select id="itemsPerPage" v-model="selectedPerPage" @change="updatePerPage" class="form-select form-select-sm">
                 <option v-for="option in perPageOptions" :key="option" :value="option">{{ option }}</option>
               </select>
             </div>
 
-            <!-- Search Box -->
             <div class="d-flex align-items-center">
               <b-input-group>
                 <b-form-input placeholder="Search..." v-model="searchQuery" />
@@ -283,7 +280,6 @@ onMounted(() => {
           </div>
         </b-col>
       </b-row>
-      <!-- Table Data -->
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
@@ -310,7 +306,6 @@ onMounted(() => {
                 <td>{{ item.contact_name }}</td>
                 <td>{{ item.userName }}</td>
                 <td>
-                  <!-- Actions -->
                   <button class="btn btn-outline-primary btn-sm me-3" @click="confirmApprove(item.id)">
                     <i class="fas fa-check" title="APPROVE"></i>
                   </button>
@@ -329,7 +324,6 @@ onMounted(() => {
         </table>
       </div>
 
-      <!-- Pagination -->
       <b-col sm="12" lg="12" class="mt-5 d-flex justify-content-end mb-n5">
         <nav aria-label="Page navigation">
           <ul class="pagination justify-content-end">
@@ -347,4 +341,11 @@ onMounted(() => {
       </b-col>
     </b-card>
   </b-col>
+</template> -->
+
+<script setup>
+import TableView from '@/components/spacesMiniTable.vue'
+</script>
+<template>
+  <TableView />
 </template>
