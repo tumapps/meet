@@ -2,7 +2,7 @@
   <li :class="navItemClass" v-if="isTag !== 'router-link'">
     <a ref="elem" :class="navLinkClass" class="parentnav" aria-current="page" :href="createRoute(route.to)" :to="route" @click.prevent="onClickNav" :aria-expanded="collapseActive">
       <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
-        <font-awesome-icon :icon="['fas', icon]" />
+        <font-awesome-icon :icon="['fas', icon]" :class="animation" />
       </i>
       <i class="sidenav-mini-icon" v-if="miniTitle !== '' && miniTitle !== null" v-b-tooltip.hover.right="title" :title="title"> {{ miniTitle }} </i>
       <span :class="titleClass">
@@ -23,7 +23,7 @@
     <li :class="navItemClass + ' ' + (isExactActive ? 'active' : '')">
       <a ref="elem" :class="navLinkClass + ' ' + (isExactActive && isChild === 'false' ? 'mychild' : isExactActive && isChild !== 'true' ? 'active' : '')" aria-current="page" @click="navigate">
         <i :class="iconClass" v-if="iconClass" v-b-tooltip.hover.right="title" :title="title">
-          <font-awesome-icon :icon="['fas', icon]" />
+          <font-awesome-icon :icon="['fas', icon]" :class="animation" />
         </i>
         <i class="sidenav-mini-icon" v-if="miniTitle !== '' && miniTitle !== null" v-b-tooltip.hover.right="title" :title="title"> {{ miniTitle }} </i>
         <span :class="titleClass">
@@ -45,7 +45,6 @@
 <script setup>
 import { ref, watch, computed, defineProps, defineEmits } from 'vue'
 import { useRouter } from 'vue-router'
-
 const props = defineProps({
   staticItem: { type: Boolean, default: false },
   isChild: { type: String, default: 'false' },
@@ -53,6 +52,7 @@ const props = defineProps({
   title: { type: String, default: 'Dashboard' },
   miniTitle: { type: String, default: '' },
   icon: { type: String, default: '' },
+  animation: { type: String, default: 'spin' },
   caretIcon: { type: Boolean, default: false },
   iconType: { type: String, default: 'dual-tone' },
   iconSize: { type: Number, default: 20 },
