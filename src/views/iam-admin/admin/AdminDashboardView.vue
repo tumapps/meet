@@ -8,6 +8,7 @@ import Vue3autocounter from 'vue3-autocounter'
 import { getVariableColor } from '@/utilities/root-var'
 import AxiosInstance from '@/api/axios'
 import UpcomingEvents from '@/components/upcomingEvents.vue'
+import TableView from '@/components/spacesMiniTable.vue'
 
 const axiosInstance = AxiosInstance()
 
@@ -89,21 +90,25 @@ const getEvents = async () => {
     if (response.data.dataPayload.data.length > 0) {
       timeline.value = response.data.dataPayload.data
     }
-  } 
+  }
 }
 const timeline = ref([])
 
 const grossVolume = computed(() => {
-  const dates = Object.keys(weeklyStats.value).sort() // Sort dates
+  const dates = Object.keys(weeklyStats.value || {}).sort() // Sort dates
   return {
     series: [
       {
         name: 'Successful meetings',
-        data: dates.map((date) => weeklyStats.value[date]?.attended_meetings || 0)
+        data: dates.map((date) => weeklyStats.value[date]?.attended_meetings)
       },
       {
         name: 'Failed meetings',
-        data: dates.map((date) => (weeklyStats.value[date]?.canceled_meetings || 0) + (weeklyStats.value[date]?.missed_meetings || 0))
+        data: dates.map((date) => (weeklyStats.value[date]?.canceled_meetings || 0) + weeklyStats.value[date]?.missed_meetings)
+      },
+      {
+        name: 'Active meetings',
+        data: dates.map((date) => weeklyStats.value[date]?.active_meetings)
       }
     ],
     options: {
@@ -119,7 +124,7 @@ const grossVolume = computed(() => {
       plotOptions: {
         bar: {
           horizontal: false,
-          columnWidth: '28%',
+          columnWidth: '25%',
           endingShape: 'rounded',
           borderRadius: 3
         }
@@ -140,7 +145,7 @@ const grossVolume = computed(() => {
         strokeDashArray: 7
       },
       xaxis: {
-        categories: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         labels: {
           minHeight: 20,
           maxHeight: 20,
@@ -258,18 +263,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- <div class="d-flex justify-content-between align-items-center flex-wrap mb-4 gap-3">
-    <div class="d-flex flex-column">
-      <h3>Quick Insights</h3>
-      <p class="text-primary mb-0">Meetings Dashboard</p>
-    </div>
-    <div class="d-flex justify-content-between align-items-center rounded flex-wrap gap-3">
-      <div class="form-group mb-0">
-        <flat-picker v-model="date" :config="{ mode: 'range', minDate: 'today', dateFormat: 'Y-m-d' }" name="date" placeholder="24 Jan 2022 to 23 Feb 2022" class="form-control"></flat-picker>
-      </div>
-      <b-button variant="primary">Analytics</b-button>
-    </div>
-  </div> -->
   <b-row class="row-cols-2 row-cols-md-3 row-cols-lg-5">
     <b-col>
       <analytics-widget :value="analytics.total_appointments" description="All" Iconcolor="#3788D8" icon="calendar-alt"></analytics-widget>
@@ -291,54 +284,13 @@ onMounted(async () => {
 
   <b-row>
     <b-col lg="8" md="6" sm="12">
-      <b-card no-body>
-        <b-card-header class="flex-wrap d-flex justify-content-between">
-          <b-card-title><h4>Doctors</h4></b-card-title>
-        </b-card-header>
-        <b-card-body class="px-0">
-          <div class="table-responsive">
-            <b-table-simple id="doctors-table" striped class="py-3">
-              <b-thead class="bg-soft-primary">
-                <b-tr class="text-dark">
-                  <th class="sorting_asc">User</th>
-                  <th class="sorting_asc">Email</th>
-                  <th class="sorting_asc">Contact no.</th>
-                  <th class="text-center">More Details</th>
-                </b-tr>
-              </b-thead>
-              <b-tbody>
-                <b-tr v-for="(item, index) in list" :key="index">
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <img class="rounded img-fluid avatar-40 me-3" :src="item.img" alt="profile" loading="lazy" />
-                      <h6 class="mb-0">{{ item.name }}</h6>
-                    </div>
-                  </td>
-                  <td>{{ item.email }}</td>
-                  <td>{{ item.contact }}</td>
-                  <td class="text-center">
-                    <a href="#">View</a>
-                  </td>
-                </b-tr>
-              </b-tbody>
-              <b-tfoot>
-                <b-tr>
-                  <th title="User"></th>
-                  <th title="Email"></th>
-                  <th title="Contact-Number"></th>
-                  <th title="More Details"></th>
-                </b-tr>
-              </b-tfoot>
-            </b-table-simple>
-          </div>
-        </b-card-body>
-      </b-card>
+      <TableView />
     </b-col>
     <UpcomingEvents :events="timeline" />
   </b-row>
 
   <b-row>
-    <b-col lg="4" md="6">
+    <b-col lg="4" md="12">
       <b-card class="card-block card-stretch card-height">
         <div class="d-flex align-items-start justify-content-between mb-2">
           <p class="mb-0 text-dark">Total Meetings</p>
@@ -363,13 +315,6 @@ onMounted(async () => {
           <div class="d-flex justify-content-between flex-wrap">
             <h4 class="card-title">Meetings Distribution</h4>
             <div>{{ new Date().getFullYear() }}</div>
-            <!-- <div class="dropdown">
-              <b-dropdown variant="none px-0 py-0" id="dropdown-1" text="This year">
-                <b-dropdown-item variant="none">Year</b-dropdown-item>
-                <b-dropdown-item variant="none">Month</b-dropdown-item>
-                <b-dropdown-item variant="none">Week</b-dropdown-item>
-              </b-dropdown>
-            </div> -->
           </div>
         </template>
         <apexchart height="100%" type="line" class="dashboard-line-chart" :options="netVolumeSale.options" :series="netVolumeSale.series" />
@@ -377,3 +322,11 @@ onMounted(async () => {
     </b-col>
   </b-row>
 </template>
+<style>
+@media (min-width: 992px) {
+  /* lg and above */
+  .custom-card {
+    height: 300px !important;
+  }
+}
+</style>
