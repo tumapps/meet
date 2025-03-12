@@ -201,7 +201,7 @@ const netVolumeSale = computed(() => {
   return {
     series: [
       {
-        name: 'Sales',
+        name: 'Meetings',
         data: monthsOrder.map((month) => annualStats.value[month]?.total_meetings || 0) // Extract data in correct order
       }
     ],
