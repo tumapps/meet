@@ -228,9 +228,10 @@ class Appointments extends BaseModel
         }
 
         if (!$this->isValidTime($this->start_time) || !$this->isValidTime($this->end_time)) {
-            $this->addError($attribute, 'Start time and End time must be in the format HH:MM.');
+            $this->addError($attribute, 'Select Start time and End time for the specificed date');
             return;
         }
+        
 
         $hasOverlappingEvents = Events::getOverlappingEvents(
             $this->appointment_date,
