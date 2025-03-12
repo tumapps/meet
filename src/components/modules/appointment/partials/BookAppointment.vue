@@ -115,7 +115,6 @@ const removeFile = () => {
 const handleDateChange = (newValue) => {
   appointmentData.value.appointment_date = newValue
   slotsData.value.date = newValue
-  // console.log('date changed:', newValue);
   getSlots()
 }
 
@@ -447,12 +446,19 @@ onMounted(() => {
                 </div>
               </b-col>
 
+              <!-- Date Field -->
+              <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
+                <b-form-group label="Date:" label-for="input-1">
+                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername && role === 'su'" v-b-tooltip.hover="{ title: 'Chair must be selected', disabled: !!selectedUsername }" />
+                </b-form-group>
+                <div v-if="errors.appointment_date" class="error" aria-live="polite">{{ errors.appointment_date }}</div>
+              </b-col>
               <!-- Venue Field -->
               <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-4 mb-lg-0">
                 <b-form-group label="Venue:" label-for="space">
                   <div class="position-relative d-flex flex-column">
                     <!-- Show search input only if spaces exist -->
-                    <b-form-input v-if="appointmentData.space_id === null"  v-model="searchQuery" placeholder="Search venue ..." class="mb-2" @click="filteredSpaces = spaces"></b-form-input>
+                    <b-form-input v-if="appointmentData.space_id === null" v-model="searchQuery" placeholder="Search venue ..." class="mb-2" @click="filteredSpaces = spaces"> </b-form-input>
                     <!-- Show selected space name (read-only) -->
                     <b-form-input v-if="appointmentData.space_id !== null" v-model="selectedSpaceName" placeholder="Search Space..." class="mb-2" readonly></b-form-input>
                     <!-- Clear selection -->
@@ -470,14 +476,6 @@ onMounted(() => {
                 <div v-if="errors.space_id" class="error" aria-live="polite">
                   {{ errors.space_id }}
                 </div>
-              </b-col>
-
-              <!-- Date Field -->
-              <b-col cols="12" :lg="role === 'user' ? 6 : role === 'registrar' ? 6 : 4" class="mb-sm-3 mb-md-3 mb-lg-0">
-                <b-form-group label="Date:" label-for="input-1">
-                  <flat-pickr v-model="selectedDate" class="form-control" :config="flatPickrConfig" id="datePicker" :disabled="!selectedUsername && role === 'su'" v-b-tooltip.hover="{ title: 'Chair must be selected', disabled: !!selectedUsername }" />
-                </b-form-group>
-                <div v-if="errors.appointment_date" class="error" aria-live="polite">{{ errors.appointment_date }}</div>
               </b-col>
             </b-row>
             <b-row class="align-items-center form-group">
