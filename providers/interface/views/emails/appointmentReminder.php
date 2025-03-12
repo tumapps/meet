@@ -93,7 +93,7 @@
 
             <?php if ($recipientType === 'contact_person' || $recipientType === 'chair_person'): ?>
                 <p>This is a reminder for your upcoming appointment with
-                    <?= htmlspecialchars($recipientType === 'contact_person' ? $chairperson_name : $contact_person_name) ?>.
+                    <?= htmlspecialchars($recipientType === 'contact_person' ? $username : $contact_person_name) ?>.
                     Please review the details below:</p>
 
             <?php elseif ($recipientType === 'attendee'): ?>
