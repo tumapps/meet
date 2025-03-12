@@ -306,9 +306,8 @@ onMounted(() => {
                 <td>{{ item.appointment_date }}</td>
                 <td>{{ item.start_time }}- {{ item.end_time }}</td>
                 <td>{{ item.subject }}</td>
-
-                <td>{{ item.contact_name }}</td>
                 <td>{{ item.userName }}</td>
+                <td>{{ item.contact_name }}</td>
                 <td>
                   <!-- Actions -->
                   <button class="btn btn-outline-primary btn-sm me-3" @click="confirmApprove(item.id)">
