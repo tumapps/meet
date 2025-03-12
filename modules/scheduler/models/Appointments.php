@@ -143,6 +143,7 @@ class Appointments extends BaseModel
             [['start_time', 'end_time'], 'validateAvailability'],
             [['start_time', 'end_time'], 'validateOverlappingAppointment'],
             [['start_time'], 'validateMeetingTime'],
+            [['space_id'], 'validateOverlappingSpace'],
 
             [['appointment_date'], 'validateOverlappingEvents'],
             [['space_id'], 'validateSpace'],
@@ -246,7 +247,7 @@ class Appointments extends BaseModel
     {
         $dayOfWeek = date('N', strtotime($this->$attribute));
 
-        if ($dayOfWeek >= 6) { 
+        if ($dayOfWeek >= 6) {
             $this->addError($attribute, 'Booking is not allowed on weekends.');
         }
     }
@@ -275,6 +276,7 @@ class Appointments extends BaseModel
             $this->addError($attribute, 'The selected space is not available at the chosen time.');
         }
     }
+
 
     public function validateAdvanceBooking($attribute, $params)
     {
@@ -344,14 +346,14 @@ class Appointments extends BaseModel
     public function validateSpace($attribute, $params)
     {
         $space = Space::findOne($this->$attribute);
-    
+
         if ($space) {
             if ($space->is_deleted == 1 && $space->space_type === Space::SPACE_TYPE_MANAGED) {
                 $this->addError($attribute, 'The selected space is deleted and cannot be used for booking.');
             }
         }
     }
-    
+
     public function validateAttendeesAvailability($attribute, $params)
     {
         foreach ($this->attendees as $attendeeId) {
@@ -787,7 +789,7 @@ class Appointments extends BaseModel
             return false;
         }
     }
-  
+
 
     public function getOverlappingAppointment($user_id, $start_date, $end_date, $start_time, $end_time, $ignoreUser = false)
     {

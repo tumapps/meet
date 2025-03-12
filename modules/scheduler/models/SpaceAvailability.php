@@ -4,6 +4,7 @@ namespace scheduler\models;
 
 use Yii;
 use scheduler\models\Space;
+
 /**
  *@OA\Schema(
  *  schema="SpaceAvailability",
@@ -33,16 +34,16 @@ class SpaceAvailability extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'space_id',
-            'date',
-            'start_time',
-            'end_time',
-            'is_deleted',
-            'created_at',
-            'updated_at',
+                'id',
+                'space_id',
+                'date',
+                'start_time',
+                'end_time',
+                'is_deleted',
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -92,17 +93,41 @@ class SpaceAvailability extends BaseModel
 
     public static function getOverlappingSpace($spaceId, $date, $start_time, $end_time)
     {
-        return self::find()
-            ->where(['space_id' => $spaceId, 'date' => $date, 'is_deleted' => 0])
-            ->andWhere(['or',
-                ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $start_time]],
-                ['and', ['<=', 'start_time', $end_time], ['>=', 'end_time', $end_time]],
-                ['and', ['>=', 'start_time', $start_time], ['<=', 'end_time', $end_time]],
-                ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]],
+        $overlapExists = SpaceAvailability::find()
+            ->where(['space_id' => $spaceId])
+            ->andWhere(['date' => $date])
+            ->andWhere([
+                'or',
+                ['between', 'start_time', $start_time, $end_time],
+                ['between', 'end_time', $start_time, $end_time],
+                ['and', ['<=', 'start_time', $start_time], ['>=', 'end_time', $end_time]]
             ])
             ->exists();
+
+        return $overlapExists;
     }
 
+    // public function validateOverlappingSpace1($attribute, $params)
+    // {
+    //     if (!$this->space_id) {
+    //         return;
+    //     }
+
+    //     $overlapExists = SpaceAvailability::find()
+    //         ->where(['space_id' => $this->space_id])
+    //         ->andWhere(['date' => $this->appointment_date]) 
+    //         ->andWhere([
+    //             'or',
+    //             ['between', 'start_time', $this->start_time, $this->end_time],
+    //             ['between', 'end_time', $this->start_time, $this->end_time],
+    //             ['and', ['<=', 'start_time', $this->start_time], ['>=', 'end_time', $this->end_time]]
+    //         ])
+    //         ->exists();
+
+    //     if ($overlapExists) {
+    //         $this->addError($attribute, 'The selected space is already booked during the specified time.');
+    //     }
+    // }
 
 
     /**
