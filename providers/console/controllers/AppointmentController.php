@@ -36,6 +36,7 @@ class AppointmentController extends Controller
 
     public function actionCheckPassedAppointments()
     {
+        Console::output("updating passed meetings");
 
         $appointments = Appointments::updatePassedAppointments();
 
