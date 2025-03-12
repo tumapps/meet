@@ -35,7 +35,7 @@ trait NotificationTrait
         $attendeesEmails = AppointmentAttendees::getAttendeesEmailsByAppointmentId($this->id, false, true);
 
         $eventData = [
-            'contact_email' => $this->contact_email,
+            'contact_email' => $this->email_address,
             'subject' => $subject,
             'appointment_subject' => $this->subject,
             'description' => $this->description,
