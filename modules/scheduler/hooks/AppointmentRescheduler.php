@@ -50,6 +50,12 @@ class AppointmentRescheduler
 
 	public static function findNextAvailableSlot($user_id, $appointment_date, $startTime, $endTime,  $disableWeekends = true)
 	{
+		$today = date('Y-m-d');
+
+		// Ensure the search starts from today or the provided future date
+		if ($appointment_date < $today) {
+			$appointment_date = $today;
+		}
 		// Get slot duration for a given time range
 		$slotDuration = TimeHelper::calculateDuration(new \DateTime($startTime), new \DateTime($endTime));
 
@@ -57,7 +63,7 @@ class AppointmentRescheduler
 
 			if ($disableWeekends) {
 				$dayOfWeek = date('N', strtotime($appointment_date));
-				if ($dayOfWeek >= 6) { 
+				if ($dayOfWeek >= 6) {
 					$appointment_date = date('Y-m-d', strtotime($appointment_date . ' +1 day'));
 					continue;
 				}
@@ -98,7 +104,7 @@ class AppointmentRescheduler
 			if (TimeHelper::checkExpireTime($appointment_date, $slotStart)) {
 				continue; // Skip expired slots
 			}
-	
+
 
 			// Calculate the duration of this slot in minutes
 			$slotDuration = (strtotime($slotEnd) - strtotime($slotStart)) / 60;
