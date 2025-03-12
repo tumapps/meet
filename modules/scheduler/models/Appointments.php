@@ -143,6 +143,8 @@ class Appointments extends BaseModel
             [['start_time', 'end_time'], 'validateAvailability'],
             [['start_time', 'end_time'], 'validateOverlappingAppointment'],
             [['start_time'], 'validateMeetingTime'],
+
+
             [['space_id'], 'validateOverlappingSpace'],
 
             [['appointment_date'], 'validateOverlappingEvents'],
@@ -176,8 +178,6 @@ class Appointments extends BaseModel
             [['uploadedFile'], 'validateFileAttachment'],
         ];
     }
-
-
     public function scenarios()
     {
         $scenarios = parent::scenarios();
@@ -265,6 +265,9 @@ class Appointments extends BaseModel
 
     public function validateOverlappingSpace($attribute, $params)
     {
+        if (empty($this->start_time) || empty($this->end_time)) {
+            return;
+        }
         $hasOverlappingSpace = SpaceAvailability::getOverlappingSpace(
             $this->space_id,
             $this->appointment_date,
