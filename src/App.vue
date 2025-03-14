@@ -82,6 +82,7 @@ onMounted(() => {
   console.log('App Mounted')
 
   // Run token refresh on mount
+  // hello world
   validToken()
 
   // ✅ Attach event listener for resize
