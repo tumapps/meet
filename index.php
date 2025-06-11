@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
 
+
 require __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__, "omnibase.cfg");
 $dotenv->safeLoad();
