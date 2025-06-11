@@ -1,5 +1,5 @@
 <?php
-namespace dashboard\models;
+namespace main\models;
 
 /**
  * This is the base model class for dashboard module.

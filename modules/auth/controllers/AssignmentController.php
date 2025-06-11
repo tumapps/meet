@@ -212,7 +212,7 @@ class AssignmentController extends \helpers\ApiController
         }
 
         if (!is_numeric($id)) {
-            return $this->errorResponse(['message' => ['User id must be an integer']]);
+            return $this->errorResponse(['message' => ['Invalid User Id']]);
         }
 
         $auth = Yii::$app->authManager;
