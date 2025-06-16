@@ -3,18 +3,19 @@
 namespace auth\controllers;
 
 use Yii;
+use auth\models\Otp;
+use auth\models\User;
+use auth\models\Profiles;
+use auth\models\RefreshToken;
 use auth\models\static\Login;
 use auth\models\static\Register;
+use scheduler\models\ManagedUsers;
+use auth\models\searches\UserSearch;
 use auth\models\static\PasswordReset;
 use auth\models\static\ChangePassword;
-use auth\models\static\PasswordResetRequest;
-use auth\models\RefreshToken;
-use auth\models\User;
-use auth\models\searches\UserSearch;
-use auth\models\Profiles;
-use scheduler\models\AppointmentAttendees;
-use scheduler\models\ManagedUsers;
 use yii\base\InvalidArgumentException;
+use scheduler\models\AppointmentAttendees;
+use auth\models\static\PasswordResetRequest;
 
 class AuthController extends \helpers\ApiController
 {
@@ -328,20 +329,117 @@ class AuthController extends \helpers\ApiController
 		}
 	}
 
+	// public function actionPasswordResetRequest()
+	// {
+	// 	$model = new PasswordResetRequest();
+	// 	$dataRequest['PasswordResetRequest'] = Yii::$app->request->getBodyParams();
+
+	// 	if ($model->load($dataRequest) && $model->validate()) {
+	// 		if ($model->sendEmail()) {
+	// 			return $this->toastResponse(['message' => ['Password reset link has been sent to your email']]);
+	// 		} else {
+	// 			return $this->errorResponse(['message' => ['Unable to send password reset email. Please try again later.']]);
+	// 		}
+	// 	}
+
+	// 	return $this->errorResponse($model->getErrors());
+	// }
 	public function actionPasswordResetRequest()
 	{
 		$model = new PasswordResetRequest();
 		$dataRequest['PasswordResetRequest'] = Yii::$app->request->getBodyParams();
 
 		if ($model->load($dataRequest) && $model->validate()) {
-			if ($model->sendEmail()) {
-				return $this->toastResponse(['message' => ['Password reset link has been sent to your email']]);
+			$isMobile = Yii::$app->request->getBodyParam('is_mobile', false);
+
+			$user = User::find()->select(['user_id'])
+				->where(['username' => $model->username, 'status' => User::STATUS_ACTIVE])
+				->one();
+			if (!$user) {
+				return $this->errorResponse(['message' => ['User not found.']]);
+			}
+			$user_id = $user->user_id;
+
+			$emailRecord = Profiles::find()->select(['email_address'])->where(['user_id' => $user_id])->one();
+			if (!$emailRecord) {
+				return $this->errorResponse(['message' => ['Email not found for the user.']]);
+			}
+
+			$email = $emailRecord->email_address;
+
+			// return $email;
+
+			if ($isMobile) {
+				//Generate and save OTP
+				$otp = new Otp();
+				$otp_code = $otp->generateOtp();
+
+				$otpModel = new \auth\models\Otp();
+				$otpModel->user_id = $user_id;
+				$otpModel->code = $otp_code;
+				$otpModel->type = 'password_reset';
+				$otpModel->expires_at = time() + (5 * 60); // 5 min
+				$otpModel->is_used = 0;
+				$otpModel->is_deleted = 0;
+				$otpModel->created_at = time();
+				$otpModel->updated_at = time();
+				$otpModel->save(false);
+
+				//Send OTP via email
+
+				Yii::$app->queue->push(new \scheduler\jobs\MailJob([
+					'email' => $email,
+					'subject' => 'Password Reset OTP',
+					'body' =>  "Your OTP code is: $otp_code",
+					'type' => '',
+					'id' => '',
+					'appointmentcompleted' => false
+				]));
+
+				return $this->toastResponse(['message' => ['Enter OTP sent to your email. Please check your inbox.']]);
 			} else {
-				return $this->errorResponse(['message' => ['Unable to send password reset email. Please try again later.']]);
+				// Browser - send reset token
+				if ($model->sendEmail()) {
+					return $this->toastResponse(['message' => ['Password reset link has been sent to your email.']]);
+				} else {
+					return $this->errorResponse(['message' => ['Unable to send password reset email. Please try again later.']]);
+				}
 			}
 		}
 
 		return $this->errorResponse($model->getErrors());
+	}
+
+	public function actionVerifyOtp()
+	{
+		$username = Yii::$app->request->post('username');
+		$code = Yii::$app->request->post('otpcode');
+
+		if (empty($username) || empty($code)) {
+			return $this->errorResponse(['message' => ['Username and OTP code are required.']]);
+		}
+
+		$user = User::find()->select(['user_id'])
+			->where(['username' => $username, 'status' => User::STATUS_ACTIVE])
+			->one();
+		if (!$user) {
+			return $this->errorResponse(['username' => ['User not found.']]);
+		}
+
+		$userId = $user->user_id;
+
+		if (!$userId || !$code) {
+			return $this->errorResponse(['message' => ['User ID and OTP code are required.']]);
+		}
+
+		$otpModel = new \auth\models\Otp();
+		$isValid = $otpModel->verifyOtp($userId, $code);
+
+		if ($isValid) {
+			return $this->toastResponse(['message' => ['OTP verified successfully.']]);
+		} else {
+			return $this->errorResponse(['message' => ['Invalid or expired OTP.']]);
+		}
 	}
 
 	public function actionResetPassword()
@@ -361,6 +459,30 @@ class AuthController extends \helpers\ApiController
 
 		if ($model->load($dataRequest) && $model->validate()) {
 			if ($model->resetPassword()) {
+				return $this->toastResponse(['message' => ['Password updated successfully']]);
+			}
+		}
+
+		return $this->errorResponse($model->getErrors());
+	}
+	public function actionMobileResetPassword()
+	{
+
+		$dataRequest['PasswordReset'] = Yii::$app->request->getBodyParams();
+		$username = $dataRequest['PasswordReset']['username'];
+		$user = User::findByUsername($username);
+		if (!$user) {
+			return $this->errorResponse(['message' => ['User not found']]);
+		}
+
+		try {
+			$model = new PasswordReset(null, true);
+		} catch (InvalidArgumentException $e) {
+			return $this->errorResponse(['message' => [$e->getMessage()]]);
+		}
+
+		if ($model->load($dataRequest) && $model->validate()) {
+			if ($model->resetPassword2($user->user_id)) {
 				return $this->toastResponse(['message' => ['Password updated successfully']]);
 			}
 		}

@@ -15,6 +15,8 @@ class m250602_191139_test_endpoints extends Migration
         $this->createTable('{{%student_profile}}', [
             'std_id' => $this->primaryKey(),
             'reg_number' => $this->string(20)->notNull()->unique(),
+            'name' => $this->string(100)->notNull(),
+            'phone_number' => $this->string(15)->notNull()->unique(),
             'id_number' => $this->string(20)->notNull()->unique(),
             'student_email' => $this->string(100)->notNull()->unique(),
             'fee_paid' => $this->decimal(10, 2)->notNull(),
@@ -86,8 +88,9 @@ class m250602_191139_test_endpoints extends Migration
         $uniqueRegNumbers = [];
         $uniqueEmails = [];
         $uniqueIdNumbers = [];
+        $uniquePhoneNumbers = [];
 
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 500; $i++) {
             // Unique registration number
             do {
                 $reg_number = strtoupper($faker->bothify('TUM_REG_NO/??/####'));
@@ -105,6 +108,11 @@ class m250602_191139_test_endpoints extends Migration
                 $id_number = $faker->unique()->numerify('2########');
             } while (in_array($id_number, $uniqueIdNumbers));
             $uniqueIdNumbers[] = $id_number;
+
+            do {
+                $phone_number = $faker->unique()->numerify('07########');
+            } while (in_array($phone_number, $uniquePhoneNumbers));
+            $uniquePhoneNumbers[] = $phone_number;
 
             // Fee logic
             $total_fee = 75000;
@@ -129,6 +137,8 @@ class m250602_191139_test_endpoints extends Migration
             $this->insert('{{%student_profile}}', [
                 'reg_number' => $reg_number,
                 'id_number' => $id_number,
+                'name' => $faker->name,
+                'phone_number' => $phone_number,
                 'student_email' => $email,
                 'fee_paid' => $fee_paid,
                 'total_fee' => $total_fee,
@@ -148,46 +158,5 @@ class m250602_191139_test_endpoints extends Migration
 
         Console::output('✅ 100 students seeded into `student_profile` table.');
     }
-
-
-    private function seed2()
-    {
-        $faker = Factory::create();
-        $uniqueRegNumbers = [];
-        $uniqueEmails = [];
-
-        for ($i = 0; $i < 100; $i++) {
-            do {
-                $reg_number = strtoupper($faker->bothify('TUM/??/####'));
-            } while (in_array($reg_number, $uniqueRegNumbers));
-            $uniqueRegNumbers[] = $reg_number;
-
-            do {
-                $email = $faker->unique()->safeEmail;
-            } while (in_array($email, $uniqueEmails));
-            $uniqueEmails[] = $email;
-
-            $fee_paid = $faker->numberBetween(20000, 70000);
-            $total_fee = 75000;
-            $status = $fee_paid >= $total_fee ? 'cleared' : 'pending';
-
-            $this->insert('{{%student_profile}}', [
-                'reg_number' => $reg_number,
-                'student_email' => $email,
-                'fee_paid' => $fee_paid,
-                'total_fee' => $total_fee,
-                // 'photo' => $faker->imageUrl(200, 200, 'people'),
-                'photo' => "https://i.pravatar.cc/150?img=" . $faker->numberBetween(1, 70),
-                'last_payment_note' => "Last Payment: Ksh{$faker->numberBetween(500, 5000)} ({$faker->date('d M Y')})",
-                'next_due_note' => "Next Due: {$faker->date('d M Y')}",
-                'status' => $status,
-                'class' => $faker->randomElement(['CS A', 'CS B', 'IT A', 'IT B']),
-                'school' => $faker->randomElement(['School of ICT', 'School of Engineering', 'School of Business']),
-                'department' => $faker->randomElement(['Computer Science', 'Information Technology', 'Business Administration']),
-                'year_of_study' => $faker->randomElement(['1.1', '1.2', '2.1', '2.2', '3.1', '3.2', '4.1', '4.2']),
-            ]);
-        }
-
-        Console::output('✅ 100 students seeded into `student_profile` table.');
-    }
+    
 }

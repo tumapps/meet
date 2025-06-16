@@ -28,8 +28,8 @@ class StudentProfileController extends \helpers\ApiController
         $search = $this->queryParameters(Yii::$app->request->queryParams, 'StudentProfileSearch');
         $dataProvider = $searchModel->search($search);
         foreach ($dataProvider->models as $model) {
-    $model->calculateFeePercentages();
-}
+            $model->calculateFeePercentages();
+        }
 
         return $this->payloadResponse($dataProvider, ['oneRecord' => false]);
     }
@@ -52,7 +52,7 @@ class StudentProfileController extends \helpers\ApiController
 
     public function actionCreate()
     {
-        Yii::$app->user->can('authStudent-profileCreate');
+        // Yii::$app->user->can('authStudent-profileCreate');
         $model = new StudentProfile();
         $model->loadDefaultValues();
         $dataRequest['StudentProfile'] = Yii::$app->request->getBodyParams();

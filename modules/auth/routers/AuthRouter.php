@@ -141,6 +141,8 @@ return [
      * )
      */
     'POST login' => 'auth/login',
+    'POST verify-otp' => 'auth/verify-otp',
+    'POST resend-otp' => 'auth/resend-otp',
 
     /**
      * @OA\Post(
@@ -231,6 +233,7 @@ return [
      * )
      */
     'POST password-reset-request' => 'auth/password-reset-request',
+    'POST mobile-reset-password' => 'auth/mobile-reset-password',
 
     /**
      * @OA\Post(

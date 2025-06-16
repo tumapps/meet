@@ -3,6 +3,7 @@
 namespace auth\models;
 
 use Yii;
+
 /**
  *@OA\Schema(
  *  schema="Issues",
@@ -31,15 +32,15 @@ class Issues extends BaseModel
     public function fields()
     {
         return array_merge(
-            parent::fields(), 
+            parent::fields(),
             [
-            'id',
-            'staff_id',
-            'student_id',
-            'issue',
-            'is_deleted',
-            'created_at',
-            'updated_at',
+                'id',
+                'staff_id',
+                'student_id',
+                'issue',
+                'is_deleted',
+                'created_at',
+                'updated_at',
             ]
         );
     }
@@ -49,7 +50,7 @@ class Issues extends BaseModel
     public function rules()
     {
         return [
-            [['staff_id', 'student_id', 'issue'], 'required'],
+            [['staff_id', 'student_id', 'issue'], 'required', 'message' => 'This field can not be blank'],
             [['staff_id', 'student_id', 'is_deleted', 'created_at', 'updated_at'], 'default', 'value' => null],
             [['staff_id', 'student_id', 'is_deleted', 'created_at', 'updated_at'], 'integer'],
             [['issue'], 'string'],
