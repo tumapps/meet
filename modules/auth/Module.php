@@ -1,4 +1,5 @@
 <?php
+
 namespace auth;
 
 /**
@@ -18,7 +19,7 @@ namespace auth;
  *         url="http://www.apache.org/licenses/LICENSE-2.0.html"
  *     )
  * )
- */ 
+ */
 
 class Module extends \helpers\BaseModule
 {
@@ -26,8 +27,8 @@ class Module extends \helpers\BaseModule
      * {@inheritdoc}
      */
     public $controllerNamespace = 'auth\controllers';
-    public $name = 'Auth. Module';
-
+    // public $name = 'Auth. Module';
+    public $name = 'auth';
 }
 
 /**

@@ -13,5 +13,6 @@ start serevre: php -S localhost:8088 -t . index.php
 CREATE USER tummeet_root  WITH PASSWORD 'tummeet@2024';
 
 
+gcloud compute ssh francisyuppie@stream-nexus
 
 
