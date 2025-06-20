@@ -48,3 +48,9 @@ omnibase.cfg
 
 /storage
 /.vscode
+
+
+modules/admin/migrations/m240206_054743_settings.php
+modules/auth/controllers/IssuesController.php
+modules/auth/controllers/VerificationDetailController.php
+modules/auth/controllers/StudentProfileController.php

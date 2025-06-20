@@ -486,7 +486,7 @@ class EventHandler
 
 	public static function onAppointmentCompletedReminder(Event $event)
 	{
-		$contact_person_email = $event->data['contact_email'];
+		// $contact_person_email = $event->data['contact_email'];
 		$chair_person_email = $event->data['chairPersonEmail'];
 		$subject = $event->data['subject'];
 		$id = $event->data['appointment_id'];
