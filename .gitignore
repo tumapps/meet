@@ -54,3 +54,4 @@ modules/admin/migrations/m240206_054743_settings.php
 modules/auth/controllers/IssuesController.php
 modules/auth/controllers/VerificationDetailController.php
 modules/auth/controllers/StudentProfileController.php
+modules/auth/migrations/m250614_074921_otp_verification.php
