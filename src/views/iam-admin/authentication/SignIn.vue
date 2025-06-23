@@ -43,7 +43,7 @@ const onSubmit = async () => {
       // console.log("hello", authStore.getUserId());
 
       menuStore.setMenus(response.data.dataPayload.data.menus)
-localStorage.setItem('loggedIn', true)
+      localStorage.setItem('loggedIn', true)
       proxy.$showToast({
         title: 'success',
         text: 'You have successfully logged in!',
@@ -69,8 +69,8 @@ localStorage.setItem('loggedIn', true)
     isLoading.value = false
   }
 }
+const showPassword = ref(false)
 </script>
-
 <template>
   <section class="iq-auth-page">
     <div class="row m-0 align-items-center justify-content-center vh-100 w-100">
@@ -85,11 +85,11 @@ localStorage.setItem('loggedIn', true)
               <div v-if="errors.username" class="error" aria-live="polite">{{ errors.username }}</div>
               <!-- Access errors.value -->
             </div>
-            <div class="form-group">
+            <div class="form-group position-relative">
               <label class="form-label" for="password">Password</label>
-              <input type="password" class="form-control mb-0" id="password" v-model="password" placeholder="Enter password" autocomplete="current-password" aria-label="Password" />
+              <input :type="showPassword ? 'text' : 'password'" class="form-control mb-0 pe-5" id="password" v-model="password" placeholder="Enter password" autocomplete="current-password" aria-label="Password" />
+              <i class="fas" :class="showPassword ? 'fa-eye' : 'fa-eye-slash'" @click="showPassword = !showPassword" style="position: absolute; top: 50%; right: 15px; transform: translateY(50%); cursor: pointer; color: #6c757d"></i>
               <div v-if="errors.password" class="error" aria-live="polite">{{ errors.password }}</div>
-              <!-- Access errors.value -->
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div class="form-check d-inline-block pt-1 mb-0">

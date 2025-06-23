@@ -284,9 +284,9 @@ onMounted(async () => {
 
   <b-row>
     <b-col lg="8" md="6" sm="12">
-      <TableView :height="height" />
+      <TableView />
     </b-col>
-    <UpcomingEvents :events="timeline" />
+    <UpcomingEvents :events="timeline"/>
   </b-row>
 
   <b-row>

@@ -12,7 +12,7 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
 const perPage = ref(20)
-const perPageOptions = ref([10, 20, 50, 100])
+const perPageOptions = ref([ 20, 50])
 
 // const AddPermission = ref(null)
 // const PermissionDetails = ref({
@@ -252,7 +252,7 @@ onMounted(() => {
                 <!-- <td>
                   <button type="button" class="btn btn-outline-primary btn-sm me-3" @click="openModal(item.name)">
                     <i class="fas fa-edit" title="edit entry"></i>
-                  </button> 
+                  </button>
                   <button type="button" class="btn btn-outline-danger btn-sm" @click="confirmDelete(item.id)">
                     <i class="fas fa-trash" title="delete entry"></i>
                   </button>

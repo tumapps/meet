@@ -148,6 +148,11 @@ const updatePassword = async () => {
     }
   }
 }
+
+// Toggle visibility
+const showOldPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
 </script>
 
 <template>
@@ -225,23 +230,37 @@ const updatePassword = async () => {
                   <div>
                     <form @submit.prevent="updatePassword" class="mt-3">
                       <div class="row">
-                        <b-col md="12" lg="12" class="form-group">
-                          <label class="form-label" for="pass"> Current Password:</label>
-                          <input v-model="oldPassword" type="password" class="form-control" id="oldpass" placeholder="Password" />
+                        <!-- Old Password -->
+                        <b-col md="12" class="form-group">
+                          <label class="form-label" for="oldpass">Current Password:</label>
+                          <div class="position-relative">
+                            <input v-model="oldPassword" :type="showOldPassword ? 'text' : 'password'" class="form-control pe-5" id="oldpass" placeholder="Current Password" />
+                            <i class="fas" :class="showOldPassword ? 'fa-eye' : 'fa-eye-slash'" @click="showOldPassword = !showOldPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer"></i>
+                          </div>
                           <div v-if="errors.oldPassword" class="error" aria-live="polite">{{ errors.oldPassword }}</div>
                         </b-col>
+
+                        <!-- New Password -->
                         <b-col md="12" class="form-group">
                           <label class="form-label" for="pass">Password:</label>
-                          <input v-model="password" type="password" class="form-control" id="pass" placeholder="Password" />
+                          <div class="position-relative">
+                            <input v-model="password" :type="showNewPassword ? 'text' : 'password'" class="form-control pe-5" id="pass" placeholder="New Password" />
+                            <i class="fas" :class="showNewPassword ? 'fa-eye' : 'fa-eye-slash'" @click="showNewPassword = !showNewPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer"></i>
+                          </div>
                           <div v-if="errors.newPassword" class="error" aria-live="polite">{{ errors.newPassword }}</div>
                         </b-col>
+
+                        <!-- Confirm Password -->
                         <b-col md="12" class="form-group">
                           <label class="form-label" for="rpass">Repeat Password:</label>
-                          <input v-model="confirm_password" type="password" class="form-control" id="rpass" placeholder="Repeat Password " />
-                          <i class="bi bi-eye-slash" id="togglePassword"></i>
+                          <div class="position-relative">
+                            <input v-model="confirm_password" :type="showConfirmPassword ? 'text' : 'password'" class="form-control pe-5" id="rpass" placeholder="Repeat Password" />
+                            <i class="fas" :class="showConfirmPassword ? 'fa-eye' : 'fa-eye-slash'" @click="showConfirmPassword = !showConfirmPassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer"></i>
+                          </div>
                           <div v-if="errors.confirm_password" class="error" aria-live="polite">{{ errors.confirm_password }}</div>
                         </b-col>
                       </div>
+
                       <button type="submit" class="btn btn-primary">Update</button>
                     </form>
                   </div>

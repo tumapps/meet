@@ -135,7 +135,7 @@ const submitForm = async () => {
 
           <!-- Middle Name -->
           <b-col md="12" lg="6">
-            <b-form-group label="Middle Name" label-class="mb-2">
+            <b-form-group label="Middle Name" label-class="mb-2" aria-describedby="middlename">
               <b-form-input type="text" placeholder="Middle Name" v-model="formData.middle_name" class="mb-3" />
               <div v-if="errors.middle_name" class="errors">{{ errors.middle_name }}</div>
             </b-form-group>

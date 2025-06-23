@@ -8,7 +8,7 @@ const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
 const home = () => import('@/views/modules/appointment/DashboardPageView.vue')
-const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
+const booking = () => import('@/views/modules/appointment/newBookMeetingView.vue')
 const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
 const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 
@@ -65,6 +65,12 @@ export const defaultChildRoutes = (prefix) => [
     name: 'booking',
     meta: { requiresAuth: true },
     component: booking
+  },
+  {
+    path: '/new-booking',
+    name: 'newbooking',
+    meta: { requiresAuth: true },
+    component: () => import('@/views/modules/appointment/newBookMeeting.vue')
   },
 
   //venues routes
@@ -182,57 +188,124 @@ const router = createRouter({
   routes
 })
 
+// router.beforeEach((to, from, next) => {
+//   const token = localStorage.getItem('user.token')
+//   const user = localStorage.getItem('user.username')
+//   // const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
+//   const menus = JSON.parse(localStorage.getItem('menus') || '[]')
+//   const fallbackRoute = menus.length && menus[0].route ? menus[0].route : '/'
+
+//   console.log('Fallback Route:', fallbackRoute)
+//   console.log('to path:', to.path)
+
+//   // 1. Special handling for the `/lockscreen` route
+//   if (to.path === '/lockscreen') {
+//     if (token) {
+//       console.log('Token fu kind hd:', token)
+//       // Redirect authenticated users away from lockscreen
+//       if (to.path !== fallbackRoute) {
+//         return next(fallbackRoute)
+//       } else {
+//         return next()
+//       }
+//     }
+//     console.log('kung fu hustle:', token)
+//     // Allow unauthenticated users to proceed
+//     return next()
+//   }
+
+//   // 2. Handle authenticated routes
+//   if (to.meta.requiresAuth) {
+//     if (token) {
+//       // User is authenticated, proceed
+//       return next()
+//     } else if (!token && user) {
+//       // Session locked, redirect to lockscreen
+//       return next('/lockscreen')
+//     } else {
+//       // Not authenticated, redirect to login
+//       return next('/auth/login')
+//     }
+//   }
+
+//   // 3. Handle unauthenticated routes
+//   const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen']
+
+//   if (unauthenticatedRoutes.includes(to.path)) {
+//     if (token && user) {
+//       // Authenticated user, redirect to previous route
+//       return next(`${fallbackRoute}`)
+//     } else if (!token && user) {
+//       // Session locked, redirect to lockscreen
+//       return next('/lockscreen')
+//     }
+//     // Allow unauthenticated users to proceed
+//     return next()
+//   }
+
+//   // 4. Default case: allow access to other routes
+//   return next()
+// })
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
   const user = localStorage.getItem('user.username')
-  const fallbackRoute = localStorage.getItem('menus') ? JSON.parse(localStorage.getItem('menus'))[0].route : '/'
 
-  console.log('Fallback Route:', fallbackRoute)
-  console.log('to path:', to.path)
+  // Safely get fallback route
+  let fallbackRoute = '/'
+  try {
+    const menus = localStorage.getItem('menus')
+    if (menus) {
+      const parsedMenus = JSON.parse(menus)
+      if (parsedMenus.length > 0 && parsedMenus[0].route) {
+        fallbackRoute = parsedMenus[0].route
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing menus:', e)
+  }
 
-  // 1. Special handling for the `/lockscreen` route
+  // Prevent fallback to lockscreen
+  if (fallbackRoute === '/lockscreen') {
+    fallbackRoute = '/'
+  }
+
+  // 1. Handle lockscreen route separately
   if (to.path === '/lockscreen') {
     if (token) {
-      console.log('Token fu kind hd:', token)
-      // Redirect authenticated users away from lockscreen
-      return next(`${fallbackRoute}`)
+      // Avoid redirecting to current route
+      return next(fallbackRoute !== '/lockscreen' ? fallbackRoute : '/')
     }
-    console.log('kung fu hustle:', token)
-    // Allow unauthenticated users to proceed
-    return next()
+    return next() // Allow access to lockscreen
   }
 
-  // 2. Handle authenticated routes
+  // 2. Protected routes
   if (to.meta.requiresAuth) {
     if (token) {
-      // User is authenticated, proceed
-      return next()
-    } else if (!token && user) {
-      // Session locked, redirect to lockscreen
-      return next('/lockscreen')
-    } else {
-      // Not authenticated, redirect to login
-      return next('/auth/login')
+      return next() // Allow access
     }
+    if (!token && user) {
+      // Only redirect to lockscreen if not already going there
+      return to.path !== '/lockscreen' ? next('/lockscreen') : next()
+    }
+    return next('/auth/login') // Redirect to login
   }
 
-  // 3. Handle unauthenticated routes
-  const unauthenticatedRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/lockscreen']
+  // 3. Public routes
+  const publicRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed']
 
-  if (unauthenticatedRoutes.includes(to.path)) {
+  if (publicRoutes.includes(to.path)) {
     if (token && user) {
-      // Authenticated user, redirect to previous route
-      return next(`${fallbackRoute}`)
-    } else if (!token && user) {
-      // Session locked, redirect to lockscreen
-      return next('/lockscreen')
+      // Avoid redirect loop to same route
+      return to.path !== fallbackRoute ? next(fallbackRoute) : next()
     }
-    // Allow unauthenticated users to proceed
-    return next()
+    if (!token && user) {
+      // Only redirect to lockscreen if not already going there
+      return to.path !== '/lockscreen' ? next('/lockscreen') : next()
+    }
+    return next() // Allow public access
   }
 
-  // 4. Default case: allow access to other routes
-  return next()
+  // 4. All other routes
+  next()
 })
-
 export default router

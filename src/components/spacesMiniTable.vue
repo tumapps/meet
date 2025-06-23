@@ -13,7 +13,7 @@ const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const perPage = ref(20) // Number of items per page (from API response)
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
-const perPageOptions = ref([20, 50, 100])
+const perPageOptions = ref([20, 50])
 const searchQuery = ref('')
 const errors = ref({})
 
@@ -54,7 +54,7 @@ const getPendingApprovals = async (page) => {
       params._search = searchQuery.value
     }
 
-    const response = await axiosInstance.get('v1/scheduler/pending-appointments', { params })
+    const response = await axiosInstance.get('/v1/scheduler/pending-appointments', { params })
 
     tableData.value = response.data.dataPayload.data
     currentPage.value = response.data.current_page
@@ -347,3 +347,6 @@ onMounted(() => {
     </b-card>
   </b-col>
 </template>
+<style scoped>
+
+</style>

@@ -31,10 +31,10 @@ const currentRemovalIndex = ref(null) // Tracks the index of the attendee being 
 const removedAttendees = ref({
   attendees: {} // This will hold the key-value pairs for attendees
 }) // Stores removed attendees and their reasons
-
+const meetingRoles = ['Attendee', 'Meeting Secretary']
 // Axios Instance
 const axiosInstance = createAxiosInstance()
-
+//store schedule here
 watch(
   () => props.attendees,
   (newAttendees) => {
@@ -47,7 +47,6 @@ watch(
   },
   { immediate: true }
 )
-
 //watch for changes in ptrops.meetingId
 const meetingId = ref(null)
 watch(
@@ -98,14 +97,16 @@ const addAttendeeToTable = (user) => {
   const duplicate = attendees.value.some((attendee) => attendee.attendee_id === user.id)
 
   if (!duplicate) {
-    attendees.value.push({ ...user, fromBackend: false, removed: false })
+    attendees.value.push({ ...user, fromBackend: false, is_secretary: false, role: 'Attendee', removed: false })
     //push only id from attendees to attendeesId
-    attendeesId.value = attendees.value.map((attendee) => attendee.id)
+    attendeesId.value = attendees.value.map((attendee) => ({
+      id: attendee.id,
+      is_secretary: attendee.is_secretary
+    }))
     searchResults.value = ''
   } else {
     Swal.fire('Error!', 'Attendee already added.', 'error')
   }
-
   console.log('final attendees', attendees.value)
   console.log('final attendeesId', attendeesId.value)
 
@@ -176,6 +177,32 @@ const restoreAttendee = (index) => {
   removedAttendees.value.attendees = removedAttendees.value.attendees.filter((user) => user.staff_id !== restoredUser.staff_id)
 }
 
+const onRoleChange = (attendeeId, role) => {
+  const selectedAttendee = attendees.value.find((a) => a.id === attendeeId)
+  if (!selectedAttendee) return
+
+  if (role === 'Meeting Secretary') {
+    attendees.value.forEach((a) => {
+      if (a.id !== attendeeId && a.is_secretary) {
+        a.is_secretary = false
+        a.role = 'Attendee'
+      }
+    })
+    selectedAttendee.is_secretary = true
+    selectedAttendee.role = role
+  } else {
+    selectedAttendee.is_secretary = false
+    selectedAttendee.role = role
+  }
+
+  console.log('before:', attendeesId.value)
+
+  attendeesId.value = attendees.value.map((a) => ({
+    id: a.id,
+    is_secretary: a.is_secretary
+  }))
+  console.log('after:', attendeesId.value)
+}
 // Submit removed attendees
 const submitRemovedAttendees = async () => {
   if (Object.keys(removedAttendees.value.attendees).length === 0) {
@@ -194,18 +221,12 @@ const submitRemovedAttendees = async () => {
     console.error('Error submitting removed attendees:', error)
   }
 }
-
-// watch(
-//   () => props.submitSignal,
-//   (newSubmitSignal) => {
-//     if (newSubmitSignal === 'submit') {
-//       submitRemovedAttendees()
-//     }
-//   },
-//   { immediate: true }
-// )
+//method to get availability for attendee
+const getMySchedule = async () => {
+  // schedule.value = ['']
+  console.log('my schedule')
+}
 </script>
-
 <template>
   <div>
     <!-- Search and Add Attendees Section -->
@@ -233,6 +254,7 @@ const submitRemovedAttendees = async () => {
         <thead>
           <tr>
             <th>Names</th>
+            <th>Role</th>
             <th>Email</th>
             <th>Status</th>
             <th>Action</th>
@@ -246,6 +268,10 @@ const submitRemovedAttendees = async () => {
               </span>
             </td>
             <td>
+              <b-form-select v-model="user.role" :options="meetingRoles" class="mb-3" @change="(role) => onRoleChange(user.id, role)"></b-form-select>
+            </td>
+
+            <td>
               <span :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
                 {{ user.email }}
               </span>
@@ -258,9 +284,10 @@ const submitRemovedAttendees = async () => {
 
             <td>
               <!-- Remove Icon -->
-              <i v-if="!user.removed" class="fas fa-trash-alt text-danger cursor-pointer" @click="removeAttendee(index, user.fromBackend)" title="Remove"></i>
+              <i v-if="!user.removed" class="fas fa-trash-alt text-danger cursor-pointer" @click="removeAttendee(index, user.fromBackend)" v-b-tooltip.hover title="Remove from list"></i>
               <!-- Restore Icon -->
-              <i v-else class="fas fa-undo text-success cursor-pointer" @click="restoreAttendee(index)" title="Restore"></i>
+              <i v-else class="fas fa-undo cursor-pointer" v-b-tooltip.hover title="Restore to list" @click="restoreAttendee(index)"></i>
+              <i class="fas fa-eye m-3" @click="getMySchedule(user.id)" v-b-tooltip.hover title="View Schedule"></i>
             </td>
           </tr>
         </tbody>

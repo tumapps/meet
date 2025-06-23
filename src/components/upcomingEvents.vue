@@ -72,3 +72,10 @@ const viewThisEvent = (id) => {
     </div>
   </b-col>
 </template>
+<style scoped>
+@media(max-width:1199.98px){
+  .custom-card{
+    height: 269px;
+  }
+}
+</style>

@@ -14,7 +14,7 @@ const searchQuery = ref('')
 const currentPage = ref(1) // The current page being viewed
 const totalPages = ref(1) // Total number of pages from the API
 const selectedPerPage = ref(20) // Number of items per page (from dropdown)
-const perPageOptions = ref([10, 20, 50, 100])
+const perPageOptions = ref([20, 50])
 // const appointmentModal = ref(null)
 
 const AddRole = ref(null)

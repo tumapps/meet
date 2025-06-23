@@ -29,7 +29,7 @@ import { showAlert, showToast } from '@/utilities/sweetAlert'
 import sweetAlertPlugin from '@/plugins/sweetAlertPlugin'
 import Vue3Autocounter from 'vue3-autocounter'
 import 'flatpickr/dist/flatpickr.css'
-import 'flatpickr/dist/themes/material_blue.css' // Optional theme, pick one that fits
+import 'flatpickr/dist/themes/material_green.css' // Optional theme, pick one that fits
 import { useMenuStore } from '@/store/menuStore'
 import { usePreferencesStore } from '@/store/preferences'
 import WebSocketPlugin from './plugins/websocket'
