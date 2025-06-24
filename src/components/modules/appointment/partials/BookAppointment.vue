@@ -389,6 +389,9 @@ onMounted(() => {
 })
 </script>
 <template>
+  <!-- //AttendeesComponent -->
+  <!-- <AttendeesComponent ref="attendeeModal" /> -->
+  <!-- <b-modal ref="appointmentModal" title="Book Meeting" class="modal-fullscreen my-modal rounded-modal" no-close-on-backdrop no-close-on-esc size="xl" hide-footer :static="true" @hide="closeModal"> -->
   <b-card>
     <b-row class="mb-4 myheading">
       <b-col lg="12" class="d-flex justify-content-left">
@@ -399,8 +402,8 @@ onMounted(() => {
     </b-row>
     <form id="add-form" action="javascript:void(0)" method="post">
       <div class="d-flex flex-column align-items-start">
-        <!-- <input type="hidden" name="id" />
-        <input type="hidden" name="appointment_type_id" /> -->
+        <input type="hidden" name="id" />
+        <input type="hidden" name="appointment_type_id" />
         <div class="w-100" id="v-pills-tabContent">
           <div class="fade active show m-5" id="-3">
             <b-row class="align-items-center form-group">
@@ -414,7 +417,7 @@ onMounted(() => {
             </b-row>
 
             <b-row class="align-items-center form-group">
-              <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="6" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
+              <b-col v-if="role === 'su' || role === 'secretary'" cols="12" lg="4" class="mb-4 mb-sm-3 mb-md-3 mb-lg-0">
                 <b-form-group label="ChairPerson:" label-for="input-1">
                   <div class="position-relative d-flex flex-column">
                     <!-- Show search input only if UsersOptions is not empty -->
