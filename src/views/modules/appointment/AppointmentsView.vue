@@ -101,9 +101,9 @@ const uploadFile = async () => {
       })
     }
 
-    console.log('response', response)
+    //console.log('response', response)
   } catch (error) {
-    console.log('error', error)
+    //console.log('error', error)
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An error occurred'
     proxy.$showAlert({
       title: 'An error occurred',
@@ -189,7 +189,7 @@ const sortedData = computed(() => {
 })
 
 const confirmDelete = (id) => {
-  // console.log("id", id);
+  // //console.log("id", id);
   selectedAppointmentId.value = id
   proxy
     .$showAlert({
@@ -248,7 +248,7 @@ const confirmCancel = (id) => {
     .then((result) => {
       if (result.isConfirmed) {
         const reason = result.value // Access the input value here
-        // console.log('Cancellation reason:', reason); // Optional: log the reason
+        // //console.log('Cancellation reason:', reason); // Optional: log the reason
         // Proceed with the cancellation using the provided reason
         cancelAppointment(id, reason)
         getAppointments(1)
@@ -258,7 +258,7 @@ const confirmCancel = (id) => {
 
 const cancelAppointment = async (id, reason) => {
   try {
-    // console.log("reasinsnius", reason);
+    // //console.log("reasinsnius", reason);
     const response = await axiosInstance.put(`v1/scheduler/cancel-meeting/${id}`, { cancellation_reason: reason })
     getAppointment(id)
     getAppointments(1)
@@ -291,7 +291,7 @@ const deleteAppointment = async (id) => {
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
+      // //console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
       proxy.$showAlert({
@@ -326,7 +326,7 @@ const deleteAppointment = async (id) => {
 const restoreAppointment = async (id) => {
   // Reset toastPayload to an empty object
   toastPayload.value = {}
-  // console.log("restore", toastPayload.value);
+  // //console.log("restore", toastPayload.value);
 
   try {
     // Make sure the correct HTTP method is used (assuming it's PUT for restoration)
@@ -338,7 +338,7 @@ const restoreAppointment = async (id) => {
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
+      // //console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
       proxy.$showAlert({
@@ -369,7 +369,7 @@ const restoreAppointment = async (id) => {
 }
 
 const confirmRestore = (id) => {
-  // console.log("id", id);
+  // //console.log("id", id);
   selectedAppointmentId.value = id
   proxy
     .$showAlert({
@@ -416,7 +416,7 @@ const getAppointments = async (page = 1) => {
     if (error.response && error.response.data.errorPayload) {
       // Check if errorPayload exists and has errors
       errors.value = error.response.data.errorPayload.errors
-      console.log(errors)
+      //console.log(errors)
       if (errors.value && errors.value.message) {
         errorMessage = errors.value.message // Use specific error message
       }
@@ -446,7 +446,7 @@ const setUserId = () => {
   if (authStore.getRole() === 'su') {
     //get the user id from the owner of the appointment
     slotsData.value.user_id = appointmentDetails.value.user_id
-    // console.log("user_id", slotsData.value.user_id);
+    // //console.log("user_id", slotsData.value.user_id);
   } else {
     slotsData.value.user_id = authStore.getUserId()
   }
@@ -478,20 +478,20 @@ const getAppointment = async (id) => {
       appointmentDetails.value.space_id = response.data.dataPayload.data.space?.id ?? 'no space'
       specialDate.value = response.data.dataPayload.data.appointment_date
 
-      console.log('appointment type', appointmentDetails.value.appointment_type_id)
-      console.log('type otyopm', appointmentTypeOptions.value)
+      //console.log('appointment type', appointmentDetails.value.appointment_type_id)
+      //console.log('type otyopm', appointmentTypeOptions.value)
       const selected = appointmentTypeOptions.value.find((type) => type.id === appointmentDetails.value.appointment_type_id)
-      console.log('selected:', selected)
+      //console.log('selected:', selected)
       selectedType.value = selected ? selected.type : 'nana'
-      console.log('selectedType madafak:', selectedType.value)
+      //console.log('selectedType madafak:', selectedType.value)
 
-      console.log('appointment date after special date', appointmentDetails.value.appointment_date)
+      //console.log('appointment date after special date', appointmentDetails.value.appointment_date)
 
       // Ensure spaces.value is an array
       if (!Array.isArray(spaces.value)) {
         spaces.value = [] // Initialize as an empty array if it's not already
       }
-      console.log('Spaces here:', appointmentDetails.value.space)
+      //console.log('Spaces here:', appointmentDetails.value.space)
       // Check if the space from the appointment exists in the spaces array
       if (appointmentDetails.value.space && !spaces.value.some((s) => s.id === appointmentDetails.value.space.id)) {
         // If the space doesn't exist in the spaces array, add it
@@ -503,7 +503,7 @@ const getAppointment = async (id) => {
       downloadLink.value = appointmentDetails.value.attachment?.downloadLink || null
     }
   } catch (error) {
-    console.log('error', error)
+    //console.log('error', error)
     const errorMessage =
       error.response?.data?.errorPayload?.errors?.message ||
       error.message || // Fallback to generic error message from the error object
@@ -522,9 +522,9 @@ const getSpaces = async (userId) => {
     const response = await axiosInstance.get(`/v1/scheduler/spaces?user_id=${userId}`)
     // Ensure spaces.value is always an array
     spaces.value = Array.isArray(response.data.dataPayload.data) ? response.data.dataPayload.data : []
-    console.log('Getting spaces...')
+    //console.log('Getting spaces...')
 
-    console.log('Spaces data:', spaces.value)
+    //console.log('Spaces data:', spaces.value)
   } catch (error) {
     if (error.response && error.response.data && error.response.data.errorPayload) {
       // Extract and handle errors from server response
@@ -546,20 +546,20 @@ watch(
   () => appointmentDetails.value.space, // Watch the space object in appointmentDetails
   (newSpace) => {
     if (newSpace) {
-      console.log('New found:', newSpace)
-      console.log('Spaces1:', spaces.value)
+      //console.log('New found:', newSpace)
+      //console.log('Spaces1:', spaces.value)
       // Ensure spaces.value is an array
       if (!Array.isArray(spaces.value)) {
         spaces.value = [] // Initialize as an empty array if it's not already
       }
-      console.log('Spaces2:', spaces.value)
+      //console.log('Spaces2:', spaces.value)
       // Check if the new space already exists in the spaces array
       const spaceExists = spaces.value.some((space) => space.id === newSpace.id)
-      console.log('Space exists:', spaceExists)
+      //console.log('Space exists:', spaceExists)
       // If the space doesn't exist, add it to the spaces array
       if (!spaceExists) {
         spaces.value.push(newSpace)
-        console.log('New space added to spaces array:', spaces.value)
+        //console.log('New space added to spaces array:', spaces.value)
       }
     }
   },
@@ -572,10 +572,10 @@ const openModal = async (id, userId) => {
   getSpaces(userId)
   await getAppointmentType()
   await getAppointment(id, userId)
-  console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
+  //console.log('appointment deatils line 557', appointmentDetails.value.appointment_date)
   selectedAppointmentId.value = id
   myModal.value.show() // Open the modal
-  console.log('appointment deatils line 565', appointmentDetails.value.appointment_date)
+  //console.log('appointment deatils line 565', appointmentDetails.value.appointment_date)
 }
 
 //submit attendeess signail
@@ -583,11 +583,11 @@ const submitSignal = ref('')
 
 const updateAppointment = async () => {
   uploading.value = true
-  console.log(appointmentDetails.value)
+  //console.log(appointmentDetails.value)
   //map only the attendee_id to the attendees array
   try {
     errorDetails.value = {}
-    console.log('file dealer', fileInput.value)
+    //console.log('file dealer', fileInput.value)
     submitSignal.value = 'submit'
     const buttonText = ref(null)
 
@@ -660,13 +660,13 @@ const suggestSlots = async (id) => {
 
     //update date to suggessted date
     // appointmentDetails.value.appointment_date = suggestedDate.value
-    console.log('suggested date', suggestedDate.value)
+    //console.log('suggested date', suggestedDate.value)
 
     // Show a success toast message
     // Check if toastPayload exists in the response and update it
     if (response.data.toastPayload) {
       toastPayload.value = response.data.toastPayload
-      // console.log("toastPayload", toastPayload.value); // Log for debugging
+      // //console.log("toastPayload", toastPayload.value); // Log for debugging
 
       // Show toast notification using the response data
       proxy.$showToast({
@@ -676,7 +676,7 @@ const suggestSlots = async (id) => {
       })
     }
   } catch (error) {
-    console.log('error', error)
+    //console.log('error', error)
     // Handle errors
     errorDetails.value = error.response.data.errorPayload.errors
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
@@ -782,7 +782,7 @@ const getAppointmentType = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/meeting-types')
     appointmentTypeOptions.value = response.data.dataPayload.data
-    console.log('Appointment Type data:', appointmentTypeOptions.value)
+    //console.log('Appointment Type data:', appointmentTypeOptions.value)
   } catch (error) {
     handleApiError(error)
   }
@@ -808,7 +808,7 @@ const getSlots = async () => {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value)
 
     // Debug the response
-    console.log(response.data)
+    //console.log(response.data)
 
     // Update the `apiResponse` ref with the response data (ensure it's an array)
     apiResponse.value = Array.isArray(response.data.dataPayload?.data?.slots) ? response.data.dataPayload.data.slots : []
@@ -851,7 +851,7 @@ const handleDateChange = (newValue) => {
   // Update the date in `slotsData`
   slotsData.value.date = newValue
 
-  console.log('Date changed:', newValue)
+  //console.log('Date changed:', newValue)
 
   // Call the debounced getSlots
   debouncedGetSlots()
@@ -860,15 +860,15 @@ const handleDateChange = (newValue) => {
 watch(
   () => appointmentDetails.value.appointment_date,
   (newValue, oldValue) => {
-    console.log('appointment deatils line 852', appointmentDetails.value.appointment_date)
+    //console.log('appointment deatils line 852', appointmentDetails.value.appointment_date)
     if (newValue) {
-      console.log(`Date changed from ${oldValue} to ${newValue}`)
+      //console.log(`Date changed from ${oldValue} to ${newValue}`)
       handleDateChange(newValue)
     }
   }
 )
 
-console.log('appointment date after the watch', appointmentDetails.value.appointment_date)
+//console.log('appointment date after the watch', appointmentDetails.value.appointment_date)
 
 const truncatedSubject = computed(() => {
   const subject = appointmentDetails.value.subject || ''
@@ -885,7 +885,7 @@ const toggletimeSlotShow = () => {
 //get attendees from component  via emits
 const updateAttendees = (attendeesId) => {
   appointmentDetails.value.attendees = attendeesId
-  console.log('form data attending mangai', appointmentDetails.value.attendees)
+  //console.log('form data attending mangai', appointmentDetails.value.attendees)
 }
 
 const showme = ref(false)

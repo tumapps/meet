@@ -15,7 +15,7 @@ const errors = ref({ password: '', repeatPassword: '', general: '' })
 const isLoading = ref(false)
 const token = route.query.token
 
-// console.log(token);
+// //console.log(token);
 
 const resetPassword = async () => {
   errors.value = { password: '', repeatPassword: '', general: '' }
@@ -41,7 +41,7 @@ const resetPassword = async () => {
       router.push('/')
     }
   } catch (error) {
-    // console.log(error)
+    // //console.log(error)
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors

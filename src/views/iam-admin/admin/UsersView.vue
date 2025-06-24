@@ -46,7 +46,7 @@ const getUsers = async (page) => {
 
     isArray.value = Array.isArray(tableData.value)
 
-    console.log('tableData', tableData.value)
+    //console.log('tableData', tableData.value)
   } catch (error) {
     // console.error('Error fetching users:', error);
   }
@@ -64,7 +64,7 @@ const updatePerPage = () => {
 
 // Pagination logic
 const goToPage = (page) => {
-  // console.log('page', page);
+  // //console.log('page', page);
   if (page > 0 && page <= totalPages.value) {
     getUsers(page)
   }
@@ -91,7 +91,7 @@ const getUser = async (id) => {
       userData.value = response.data.dataPayload.data.user
     }
 
-    console.log('userData', userData.value)
+    //console.log('userData', userData.value)
   } catch (error) {
     // Check if error.response is defined before accessing it
     const errorMessage = error.response.data.errorPayload.errors?.message || 'An unknown error occurred'
@@ -123,7 +123,7 @@ const getRoles = async () => {
     const response = await axiosInstance.get('/v1/auth/roles')
     rolesData.value = Object.values(response.data.dataPayload.data)
     roles.value = rolesData.value.map((role) => role.name)
-    console.log('roles', roles.value)
+    //console.log('roles', roles.value)
   } catch (error) {
     console.error(error)
   }
@@ -149,7 +149,7 @@ onMounted(() => {
 const toastPayload = ref('')
 
 const toggleStatus = async (id) => {
-  console.log('id', id)
+  //console.log('id', id)
   try {
     const response = await axiosInstance.put(`/v1/auth/lock-account/${id}`)
 
@@ -221,7 +221,7 @@ const confirmStatusChange = (id) => {
         toggleStatus(id)
       } else {
         userData.value.status = originalState
-        console.log('userData.value.status ori', userData.value.status)
+        //console.log('userData.value.status ori', userData.value.status)
       }
     })
 }

@@ -40,7 +40,7 @@ const onSubmit = async () => {
       authStore.setRole(response.data.dataPayload.data.roles[0])
 
       //console log the user id from the session storage
-      // console.log("hello", authStore.getUserId());
+      // //console.log("hello", authStore.getUserId());
 
       menuStore.setMenus(response.data.dataPayload.data.menus)
       localStorage.setItem('loggedIn', true)

@@ -62,7 +62,7 @@ const analytics = ref({})
 const getAnalytics = async () => {
   const response = await axiosInstance.get('/v1/scheduler/reports')
 
-  console.log('API Response:', response.data.dataPayload.data)
+  //console.log('API Response:', response.data.dataPayload.data)
   analytics.value = response.data.dataPayload.data
   // get all the analytics data from the backend
 }
@@ -70,7 +70,7 @@ const weeklyStats = ref({})
 const getWeeklyStats = async () => {
   const response = await axiosInstance.get('v1/scheduler/weekly-meeting-summary')
 
-  console.log('API Response:', response.data.dataPayload.data)
+  //console.log('API Response:', response.data.dataPayload.data)
   weeklyStats.value = response.data.dataPayload.data.weekly_meeting_summary
 }
 
@@ -78,14 +78,14 @@ const annualStats = ref({})
 const getAnnualStats = async () => {
   const response = await axiosInstance.get('/v1/scheduler/yearly-meeting-summary')
 
-  console.log('API Response:', response.data.dataPayload.data)
+  //console.log('API Response:', response.data.dataPayload.data)
   annualStats.value = response.data.dataPayload.data.yearly_meeting_summary
 }
 
 const getEvents = async () => {
   const response = await axiosInstance.get('/v1/scheduler/upcoming-events')
 
-  console.log('API Response:', response.data.dataPayload.data)
+  //console.log('API Response:', response.data.dataPayload.data)
   if (Array.isArray(response.data.dataPayload.data)) {
     if (response.data.dataPayload.data.length > 0) {
       timeline.value = response.data.dataPayload.data

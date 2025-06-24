@@ -43,7 +43,7 @@ const onSubmit = async () => {
     if (response.data.dataPayload && !response.data.dataPayload.error) {
       //set cookie
       const setCookieHeader = response.headers['set-cookie']
-      // console.log('Cookie received:', setCookieHeader);
+      // //console.log('Cookie received:', setCookieHeader);
       // set the httponly cookie
       document.cookie = setCookieHeader
       localStorage.setItem('loggedIn', true)
@@ -66,7 +66,7 @@ const onSubmit = async () => {
       })
     }
   } catch (error) {
-    console.log('Error:', error)
+    //console.log('Error:', error)
     proxy.$showToast({
       title: 'An error occurred ',
       text: 'Ooops! an error has occured while logging in!',
@@ -75,7 +75,7 @@ const onSubmit = async () => {
 
     if (error.response && error.response.status === 422 && error.response.data.errorPayload) {
       const errorDetails = error.response.data.errorPayload.errors
-      // console.log("Validation error details:", errorDetails);
+      // //console.log("Validation error details:", errorDetails);
       errors.value.password = errorDetails.password || ''
     }
   } finally {

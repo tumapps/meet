@@ -160,7 +160,7 @@ const fetchSettings = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/system-settings')
 
-    console.log('API Response:', response.data) // Debugging
+    //console.log('API Response:', response.data) // Debugging
 
     if (response.data?.dataPayload?.data?.length) {
       settings.value = response.data.dataPayload.data[0] // Extract first object

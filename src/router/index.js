@@ -195,13 +195,13 @@ const router = createRouter({
 //   const menus = JSON.parse(localStorage.getItem('menus') || '[]')
 //   const fallbackRoute = menus.length && menus[0].route ? menus[0].route : '/'
 
-//   console.log('Fallback Route:', fallbackRoute)
-//   console.log('to path:', to.path)
+//   //console.log('Fallback Route:', fallbackRoute)
+//   //console.log('to path:', to.path)
 
 //   // 1. Special handling for the `/lockscreen` route
 //   if (to.path === '/lockscreen') {
 //     if (token) {
-//       console.log('Token fu kind hd:', token)
+//       //console.log('Token fu kind hd:', token)
 //       // Redirect authenticated users away from lockscreen
 //       if (to.path !== fallbackRoute) {
 //         return next(fallbackRoute)
@@ -209,7 +209,7 @@ const router = createRouter({
 //         return next()
 //       }
 //     }
-//     console.log('kung fu hustle:', token)
+//     //console.log('kung fu hustle:', token)
 //     // Allow unauthenticated users to proceed
 //     return next()
 //   }
@@ -251,15 +251,15 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
   const username = localStorage.getItem('user.username')
 
-  console.log('[Route Guard] Navigating from:', from.fullPath)
-  console.log('[Route Guard] Navigating to:', to.fullPath)
-  console.log('[Route Guard] Token:', token)
-  console.log('[Route Guard] Username:', username)
+  //console.log('[Route Guard] Navigating from:', from.fullPath)
+  //console.log('[Route Guard] Navigating to:', to.fullPath)
+  //console.log('[Route Guard] Token:', token)
+  //console.log('[Route Guard] Username:', username)
   const publicRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/confirm']
 
   if (publicRoutes.some((route) => to.path === route || to.path.startsWith(route + '/'))) {
     if (token && username) {
-      console.log('[Route Guard] Authenticated user on public route. Redirecting to fallbackRoute.')
+      //console.log('[Route Guard] Authenticated user on public route. Redirecting to fallbackRoute.')
       if (to.path === fallbackRoute) return next() // prevent same-route redirect
       return next(fallbackRoute)
     }
@@ -307,7 +307,7 @@ router.beforeEach((to, from, next) => {
   // Step 4: Handle /lockscreen directly
   if (to.path === '/lockscreen') {
     if (token) {
-      console.log('[Route Guard] Already authenticated. Redirecting from /lockscreen to fallbackRoute.')
+      //console.log('[Route Guard] Already authenticated. Redirecting from /lockscreen to fallbackRoute.')
       if (to.path === fallbackRoute) return next() // avoid self redirect
       return next(fallbackRoute)
     }
@@ -316,14 +316,14 @@ router.beforeEach((to, from, next) => {
 
   // Step 5: Handle protected routes
   if (to.meta.requiresAuth) {
-    console.log('[Route Guard] Protected route. Allowing access.')
+    //console.log('[Route Guard] Protected route. Allowing access.')
     return next()
   }
 
   // Step 6: Handle public routes
 
   // Step 7: Final default allow
-  console.log('[Route Guard] Route matched no special rule. Allowing access.')
+  //console.log('[Route Guard] Route matched no special rule. Allowing access.')
   return next()
 })
 export default router

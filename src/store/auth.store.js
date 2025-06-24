@@ -23,10 +23,10 @@ export const useAuthStore = defineStore('userAuth', {
 
       if (storedToken && storedUsername) {
         this.setToken(storedToken, storedUsername)
-        console.log('Store initialized')
+        //console.log('Store initialized')
       }
 
-      console.log('Store initialized')
+      //console.log('Store initialized')
     },
 
     // initStore() {
@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('userAuth', {
     //         // If the token is valid, update the store
     //         const newToken = response.data?.dataPayload.data.token;
     //         this.setToken(newToken, storedUsername);
-    //         console.log('Token refreshed successfully.');
+    //         //console.log('Token refreshed successfully.');
     //       })
     //       .catch((error) => {
     //         console.error('Error refreshing token:', error);
@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('userAuth', {
     // },
 
     setToken(token, username) {
-      // console.log('Setting token:', token, username);
+      // //console.log('Setting token:', token, username);
 
       this.user.token = token
       this.user.username = username
@@ -72,13 +72,13 @@ export const useAuthStore = defineStore('userAuth', {
       localStorage.removeItem('user.token')
       localStorage.removeItem('user.username')
 
-      // console.log('Removed token');
+      // //console.log('Removed token');
     },
 
     setIp(ipAddr) {
       this.user.ipAddr = ipAddr
       sessionStorage.setItem('ipA', ipAddr)
-      // console.log("Set IP address in store:", sessionStorage.getItem("ipA"));
+      // //console.log("Set IP address in store:", sessionStorage.getItem("ipA"));
     },
 
     setUserId(token) {
@@ -88,10 +88,10 @@ export const useAuthStore = defineStore('userAuth', {
         const arrayToken = token.split('.')
         const tokenPayload = JSON.parse(atob(arrayToken[1]))
 
-        // console.log('Token payload:', tokenPayload);
+        // //console.log('Token payload:', tokenPayload);
 
         const user_id = tokenPayload.user_id // Declare user_id here
-        // console.log('User ID:', user_id);
+        // //console.log('User ID:', user_id);
 
         // Convert user_id to a string before encryption
         const userIdString = user_id.toString()
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore('userAuth', {
             return null
           }
 
-          // console.log('Decrypted user_id:', userIdInt);
+          // //console.log('Decrypted user_id:', userIdInt);
           return userIdInt
         } catch (error) {
           // console.error('Error during decryption:', error);
@@ -169,7 +169,7 @@ export const useAuthStore = defineStore('userAuth', {
           // Convert the decrypted value back to an integer
           const Role = decryptedRole
 
-          console.log('Decrypted role:', Role)
+          //console.log('Decrypted role:', Role)
           return Role
         } catch (error) {
           // console.error('Error during decryption:', error);

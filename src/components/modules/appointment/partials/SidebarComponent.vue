@@ -75,9 +75,9 @@ function transformMenuItem(backendItem) {
 }
 
 onMounted(() => {
-  console.log('Fetching menu items from backend...', rawMenus.value)
+  //console.log('Fetching menu items from backend...', rawMenus.value)
   menuItems.value = rawMenus.value.map((item) => transformMenuItem(item))
-  // console.log('Transformed menu items:', menuItems.value)
-  console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2))
+  // //console.log('Transformed menu items:', menuItems.value)
+  //console.log('Transformed menu items:', JSON.stringify(menuItems.value, null, 2))
 })
 </script>

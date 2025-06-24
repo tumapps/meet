@@ -30,7 +30,7 @@ const uploading = ref(false) // Holds the upload status
 
 // watch attendees
 // watch(attendees,(newValue) => {
-//   console.log('attendees in parent', newValue)
+//   //console.log('attendees in parent', newValue)
 // })
 
 const resetErrors = () => {
@@ -53,7 +53,7 @@ const apiResponse = ref([])
 const selectedDate = ref(null)
 
 const today = ref(new Date().toLocaleDateString())
-// console.log(today.value)
+// //console.log(today.value)
 // const selectedUser_id = ref(null) // To store the corresponding user_id
 const selectedSpaceName = ref(null) // To store the corresponding space name
 
@@ -111,7 +111,7 @@ const handleDateChange = (newValue) => {
 //watcher for date change
 watch(selectedDate, (newValue) => {
   if (newValue) {
-    console.log('Date changed:', newValue)
+    //console.log('Date changed:', newValue)
     handleDateChange(newValue)
   }
 })
@@ -134,7 +134,7 @@ const getSpaces = async () => {
     if (Array.isArray(response.data.dataPayload.data)) {
       spaces.value = response.data.dataPayload.data
     }
-    console.log('Spaces data:', response.data.dataPayload.data)
+    //console.log('Spaces data:', response.data.dataPayload.data)
   } catch (error) {
     // console.error('Error fetching spaces:', error);
 
@@ -155,7 +155,7 @@ const getSpaces = async () => {
 const getSlots = async () => {
   try {
     const response = await axiosInstance.post('/v1/scheduler/get-slots', slotsData.value)
-    console.log('user_id', userId.value)
+    //console.log('user_id', userId.value)
     // Update the `apiResponse` ref with the response data
     apiResponse.value = response.data.dataPayload.data.slots
     // Set all slots to `selected: false`
@@ -181,26 +181,26 @@ const getSlots = async () => {
   }
 }
 const submitAppointment = async () => {
-  console.log('appointmentData finallll:', appointmentData.value)
+  //console.log('appointmentData finallll:', appointmentData.value)
   // Reset errors
   resetErrors()
   uploading.value = true
   uploadProgress.value = 0
-  console.log('appointmentData: 100s', appointmentData.value)
+  //console.log('appointmentData: 100s', appointmentData.value)
 
   const formData = new FormData()
   formData.append('file', appointmentData.value.file)
 
   // Add other appointment fields to formData
   Object.keys(appointmentData.value).forEach((key) => {
-    console.log('key:', key, ':', appointmentData.value[key])
+    //console.log('key:', key, ':', appointmentData.value[key])
 
     if (key !== 'file') {
       formData.append(key, appointmentData.value[key])
     }
   })
 
-  console.log('Form data:', formData)
+  //console.log('Form data:', formData)
 
   try {
     const response = await axiosInstance.post('/v1/scheduler/appointments', formData, {
@@ -261,7 +261,7 @@ const getAppointmentType = async () => {
   try {
     const response = await axiosInstance.get('/v1/scheduler/meeting-types')
     appointmentTypeOptions.value = response.data.dataPayload.data
-    console.log('Appointment Type data:', appointmentTypeOptions.value)
+    //console.log('Appointment Type data:', appointmentTypeOptions.value)
   } catch (error) {
     handleApiError(error)
   }
@@ -289,7 +289,7 @@ const getusers_booked = async () => {
     if (Array.isArray(response.data.dataPayload.data)) {
       UsersOptions.value = response.data.dataPayload.data
     }
-    // console.log('Users data:', UsersOptions.value)
+    // //console.log('Users data:', UsersOptions.value)
   } catch (error) {
     if (error.response && error.response.data && error.response.data.errorPayload) {
       // Extract and handle errors from server response
@@ -309,7 +309,7 @@ const getusers_booked = async () => {
 //get attendees from component  via emits
 const updateAttendees = (attendeesId) => {
   appointmentData.value.attendees = attendeesId
-  console.log('form data attend', appointmentData.value.attendees)
+  //console.log('form data attend', appointmentData.value.attendees)
 }
 //search for spaces
 const searchQuery = ref('')
@@ -327,7 +327,7 @@ watch(searchQuery, (newSearchQuery) => {
 watch(selectedSpaceName, (newSpaceName) => {
   const selectedSpace = spaces.value.find((space) => space.name === newSpaceName)
   appointmentData.value.space_id = selectedSpace ? selectedSpace.id : null
-  console.log('selectedSpace:', selectedSpace)
+  //console.log('selectedSpace:', selectedSpace)
 })
 
 // Watch for changes in the selected username to update selectedUser_id
@@ -337,14 +337,14 @@ const user_searchQuery = ref(null)
 const UsersOptionsCopy = ref([])
 UsersOptionsCopy.value = UsersOptions.value
 watch(user_searchQuery, (newUserSearchQuery) => {
-  console.log('useroptions:', UsersOptions.value)
-  console.log('newUsername:', newUserSearchQuery)
+  //console.log('useroptions:', UsersOptions.value)
+  //console.log('newUsername:', newUserSearchQuery)
   if (!newUserSearchQuery) {
     UsersOptionsCopy.value = []
     return
   }
   UsersOptionsCopy.value = UsersOptions.value.filter((user) => user.username.toLowerCase().includes(newUserSearchQuery.toLowerCase()) || user.email.toLowerCase().includes(newUserSearchQuery.toLowerCase()) || user.fullname.toLowerCase().includes(newUserSearchQuery.toLowerCase()))
-  console.log('UsersOptionsCopy:', UsersOptionsCopy.value)
+  //console.log('UsersOptionsCopy:', UsersOptionsCopy.value)
 })
 
 const selectedUsername = ref(null)
@@ -356,7 +356,7 @@ const handleUserSelection = (id) => {
 }
 
 watch(selectedUserId, (newUserId) => {
-  console.log('newUsername:', newUserId)
+  //console.log('newUsername:', newUserId)
   userId.value = newUserId || authStore.getUserId()
   appointmentData.value.user_id = userId.value
 
@@ -423,7 +423,7 @@ const prevStep = () => {
 }
 
 const selectDate = (date) => {
-  console.log('date:', date)
+  //console.log('date:', date)
   selectedDate.value = date
   selectedTime.value = null // Reset time when date changes
 }

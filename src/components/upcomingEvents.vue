@@ -15,23 +15,23 @@ const props = defineProps({
 // check if props.events is empty
 const message = ref(null)
 if (!props.events.length) {
-  console.log('No events')
+  //console.log('No events')
   message.value = 'No Upcoming events'
 }
 
 const viewAllEvents = () => {
   router.push({ name: 'all-events' })
-  console.log('View all events')
+  //console.log('View all events')
 }
 
 const editevent = ref(null)
 const event_id = ref(null)
 
 const viewThisEvent = (id) => {
-  console.log('View event:', id)
+  //console.log('View event:', id)
   if (editevent.value) {
     event_id.value = id
-    console.log('event_id sending', event_id.value)
+    //console.log('event_id sending', event_id.value)
     editevent.value.show()
   }
 }

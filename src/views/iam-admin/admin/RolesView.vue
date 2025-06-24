@@ -111,7 +111,7 @@ const getRoles = async (page = currentPage.value) => {
   try {
     const response = await axiosInstance.get(`/v1/auth/roles?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
-    console.log(tableData.value)
+    //console.log(tableData.value)
   } catch (error) {
     console.error(error)
   }
@@ -130,7 +130,7 @@ const roleModal = ref(null)
 const roleName = ref('')
 const showRoleModal = (role) => {
   roleName.value = role
-  console.log('1', roleName.value)
+  //console.log('1', roleName.value)
   roleModal.value.$refs.roleModal.show()
   //pass the role name to the modal as value for roleName
 }

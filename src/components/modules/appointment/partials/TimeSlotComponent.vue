@@ -75,7 +75,7 @@ const selectSlot = (index) => {
 
   emit('selectedSlotsTimes', { startTime, endTime })
 
-  // console.log(selectedSlots.value);
+  // //console.log(selectedSlots.value);
 }
 </script>
 <!--

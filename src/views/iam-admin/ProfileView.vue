@@ -24,7 +24,7 @@ const role = ref('')
 onMounted(() => {
   getProfile()
   user_id.value = authStore.getUserId()
-  console.log(user_id.value)
+  //console.log(user_id.value)
   role.value = authStore.getRole()
 })
 
@@ -132,7 +132,7 @@ const updatePassword = async () => {
         icon: 'success'
       })
     }
-    // console.log(response.data);
+    // //console.log(response.data);
   } catch (error) {
     if (error.response && error.response.data && error.response.data.errorPayload) {
       // Extract and handle errors from server response

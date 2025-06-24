@@ -249,11 +249,11 @@ const performSearch = async (role, searchQuery) => {
 }
 
 onMounted(() => {
-  // // console.log('RolePermissions mounted', props.roleName, props.user_id)
+  // // //console.log('RolePermissions mounted', props.roleName, props.user_id)
   // if (!props.user_id) {
   //   // getRoleDetails()
   // } else if (props.user_id) {
-  //   console.log('Getting user roles')
+  //   //console.log('Getting user roles')
   //   // getUserRoles()
   // }
 })

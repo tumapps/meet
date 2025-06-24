@@ -8,7 +8,7 @@ import { Modal } from 'bootstrap';
 onMounted(async () => {
     //fetch appointments and slots and unavailable slots
     getSlot();
-    // console.log(appointments);
+    // //console.log(appointments);
     modalInstance = new Modal(modalRef.value);  // Create a Bootstrap modal instance
 });
 
@@ -20,9 +20,9 @@ let modalInstance = null;    // Will hold the Bootstrap modal instance
 const getSlot = async () => {
     try {
         const response = await axiosInstance.get('v1/scheduler/appointments');
-        console.log(response.data);
+        //console.log(response.data);
         appointments.value = response.data.dataPayload.data;
-        console.log("appointments", appointments);
+        //console.log("appointments", appointments);
     } catch (error) {
         console.error(error);
     }

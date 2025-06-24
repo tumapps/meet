@@ -42,7 +42,7 @@ const toggleSidebar = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', onscroll())
-  console.log('mounted the navv bar hubsjhdjbhj', fontSize)
+  //console.log('mounted the navv bar hubsjhdjbhj', fontSize)
 })
 
 onUnmounted(() => {

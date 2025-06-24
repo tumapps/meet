@@ -86,7 +86,7 @@ const attendeesId = ref([])
 
 watch(attendeesId, (newValue) => {
   emits('newAttendee', newValue)
-  console.log('watcher atterarera', newValue)
+  //console.log('watcher atterarera', newValue)
 })
 
 // emits('attendeesId', attendeesId.value)
@@ -106,8 +106,8 @@ const addAttendeeToTable = (user) => {
     Swal.fire('Error!', 'Attendee already added.', 'error')
   }
 
-  console.log('final attendees', attendees.value)
-  console.log('final attendeesId', attendeesId.value)
+  //console.log('final attendees', attendees.value)
+  //console.log('final attendeesId', attendeesId.value)
 
   searchQuery.value = ''
   searchResults.value = []
@@ -122,7 +122,7 @@ const removeAttendee = (index, fromBackend) => {
   } else {
     attendees.value.splice(index, 1)
     attendeesId.value = attendees.value.map((attendee) => attendee.id)
-    console.log('final attendees removed from table', attendees.value)
+    //console.log('final attendees removed from table', attendees.value)
   }
 }
 
@@ -150,7 +150,7 @@ const confirmRemoval = () => {
   }).then((result) => {
     if (result.isConfirmed) {
       const reason = result.value
-      console.log('Removal Reason:', attendees.value[currentRemovalIndex.value])
+      //console.log('Removal Reason:', attendees.value[currentRemovalIndex.value])
       // Proceed with the removal process
       const removedUser = attendees.value[currentRemovalIndex.value]
       attendees.value.splice(currentRemovalIndex.value, 1)
@@ -161,8 +161,8 @@ const confirmRemoval = () => {
       submitRemovedAttendees()
       //remove id of  user being removed from the attendeesid
       // attendeesId.value.splice
-      console.log('Removed Attendees:', removedAttendees.value)
-      console.log('new attendeesids', attendeesId.value)
+      //console.log('Removed Attendees:', removedAttendees.value)
+      //console.log('new attendeesids', attendeesId.value)
       //backedn call to remove the user
     }
   })
@@ -187,9 +187,9 @@ const submitRemovedAttendees = async () => {
     if (response.data?.dataPayload) {
       Swal.fire('Success!', 'Removed attendees have been submitted successfully.', 'success')
     }
-    console.log('Removed Attendees:', removedAttendees.value)
+    //console.log('Removed Attendees:', removedAttendees.value)
   } catch (error) {
-    console.log('meetingId:', meetingId.value)
+    //console.log('meetingId:', meetingId.value)
 
     console.error('Error submitting removed attendees:', error)
   }
@@ -251,9 +251,10 @@ const submitRemovedAttendees = async () => {
               </span>
             </td>
             <td>
-              <span :class="[user.status === 'PENDING' ? 'bg-info text-white' : user.status === 'CONFIRMED' ? 'bg-success text-white' : user.status === 'DECLINED' ? 'bg-danger text-white' : '', 'fw-bold text-nowrap px-2 py-1 small rounded']" :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
+              <span v-if="['PENDING', 'CONFIRMED', 'DECLINED'].includes(user.status)" :class="[user.status === 'PENDING' ? 'bg-info text-white' : user.status === 'CONFIRMED' ? 'bg-success text-white' : user.status === 'DECLINED' ? 'bg-danger text-white' : '', 'fw-bold text-nowrap px-2 py-1 small rounded']" :style="{ textDecoration: user.removed ? 'line-through' : 'none' }">
                 {{ user.status }}
               </span>
+              <span v-else class="text-muted fw-bold small">not delivered</span>
             </td>
 
             <td>

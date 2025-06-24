@@ -63,7 +63,7 @@ const event_id = ref(null)
 const openModal = (id) => {
   if (editevent.value) {
     event_id.value = id
-    console.log('event_id sending', event_id.value)
+    //console.log('event_id sending', event_id.value)
     editevent.value.show()
   }
 }

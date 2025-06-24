@@ -19,7 +19,7 @@ const event_id = ref(props.event_id) // Set initial value
 watch(
   () => props.event_id,
   (newEventId) => {
-    console.log('New event_id:', newEventId)
+    //console.log('New event_id:', newEventId)
     event_id.value = newEventId // Ensure it updates
   },
   { immediate: true }
@@ -63,7 +63,7 @@ const show = async (newEventId) => {
     event_id.value = newEventId // Update event_id directly
   }
 
-  console.log('Opening modal with event_id:', event_id.value) // Debugging
+  //console.log('Opening modal with event_id:', event_id.value) // Debugging
 
   if (!event_id.value) {
     console.error('Error: event_id is null or undefined')
@@ -75,7 +75,7 @@ const show = async (newEventId) => {
 }
 
 const handleClose = () => {
-  console.log('Modal closed')
+  //console.log('Modal closed')
   eventDetails.value = {
     title: '',
     start_date: '',
@@ -91,7 +91,7 @@ const toastPayload = ref({})
 
 const getEvent = async () => {
   try {
-    console.log('Fetching event:', event_id.value) // Debugging
+    //console.log('Fetching event:', event_id.value) // Debugging
     const response = await axiosInstance.get(`v1/scheduler/events/${event_id.value}`)
     eventDetails.value = response.data.dataPayload.data
     recordStatus.value = eventDetails.value.recordStatus

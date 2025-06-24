@@ -60,7 +60,7 @@ const onModalShow = async () => {
   secretaryid.value = props.user_id
   secretaryname.value = props.name
 
-  console.log('Modal opened:', i.value++, secretaryid.value, secretaryname.value)
+  //console.log('Modal opened:', i.value++, secretaryid.value, secretaryname.value)
 
   getUnderSecretary()
 
@@ -81,7 +81,7 @@ const assignModal = ref(null) // Reference for <b-modal>
 const selectedUser_id = ref(null)
 
 const getUnderSecretary = async () => {
-  console.log('here i go', secretaryid.value, secretaryname.value)
+  //console.log('here i go', secretaryid.value, secretaryname.value)
   const response = await axiosInstance.get(`/v1/scheduler/get-assigned-users?id=${secretaryid.value}`)
   availableRoles.value = response.data.dataPayload.data.available
   assignedRoles.value = response.data.dataPayload.data.assigned

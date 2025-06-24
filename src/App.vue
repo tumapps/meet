@@ -79,7 +79,7 @@ const validToken = async () => {
 
 // ✅ Lifecycle Hooks
 onMounted(() => {
-  console.log('App Mounted')
+  //console.log('App Mounted')
 
   // Run token refresh on mount
   // hello world
@@ -97,7 +97,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  console.log('App Unmounted: Cleaning up...')
+  //console.log('App Unmounted: Cleaning up...')
   registerCleanup(() => localStorage.setItem('loggedIn', false))
 })
 </script>

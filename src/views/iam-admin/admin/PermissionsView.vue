@@ -90,7 +90,7 @@ const getPermissions = async (page = currentPage.value) => {
   try {
     const response = await axiosInstance.get(`/v1/auth/permissions?page=${page}&per-page=${selectedPerPage.value}&_search=${searchQuery.value}`)
     tableData.value = Object.values(response.data.dataPayload.data)
-    console.log(tableData.value)
+    //console.log(tableData.value)
 
     currentPage.value = response.data.dataPayload.currentPage
     totalPages.value = response.data.dataPayload.totalPages
