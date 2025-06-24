@@ -55,3 +55,5 @@ modules/auth/controllers/IssuesController.php
 modules/auth/controllers/VerificationDetailController.php
 modules/auth/controllers/StudentProfileController.php
 modules/auth/migrations/m250614_074921_otp_verification.php
+modules/auth/models/StudentProfile.php
+modules/main/migrations/m250602_191139_test_endpoints.php
