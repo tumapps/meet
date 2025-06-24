@@ -3,9 +3,12 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth.store.js'
 import { useMenuStore } from '@/store/menuStore.js'
 
+const baseURL = import.meta.env.VITE_API_BASE_URL
+
 const AxiosInstance = () => {
   const axiosInstance = axios.create({
     // Set your API base URL
+    baseURL,
     withCredentials: true
   })
   axios.defaults.timeout = 30000 // 30 seconds timeout globally
@@ -21,6 +24,8 @@ const AxiosInstance = () => {
   let userIP
 
   const fetchUserIp = async () => {
+    // console.log('[Axios] Using baseURL:', baseURL)
+
     try {
       const response = await axios.get('https://api.ipify.org?format=json')
       userIP = response.data.ip // Assign the fetched IP to userIP
