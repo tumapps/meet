@@ -34,9 +34,9 @@ pipeline {
         stage('Deploy to Web Directory') {
             steps {
                 sh '''
-          sudo mkdir -p ${DEPLOY_PATH}
-          sudo rm -rf ${DEPLOY_PATH}/*
-          sudo rsync -avz --delete dist/ ${DEPLOY_PATH}/
+          mkdir -p ${DEPLOY_PATH}
+          rm -rf ${DEPLOY_PATH}/*
+          rsync -avz --delete dist/ ${DEPLOY_PATH}/
         '''
             }
         }
