@@ -8,7 +8,7 @@ const Error404 = () => import('@/components/Error404.vue')
 const ErrorPage = () => import('@/views/ErrorPage.vue')
 const Lockscreen = () => import('@/views/iam-admin/authentication/LockScreen.vue')
 const home = () => import('@/views/modules/appointment/DashboardPageView.vue')
-const booking = () => import('@/views/modules/appointment/newBookMeetingView.vue')
+const booking = () => import('@/views/modules/appointment/BookMeetingView.vue')
 const RegistrarDashView = () => import('@/views/modules/venues/RegistrarDashView.vue')
 const settings = () => import('@/views/iam-admin/admin/SettingsView.vue')
 
@@ -246,66 +246,84 @@ const router = createRouter({
 //   // 4. Default case: allow access to other routes
 //   return next()
 // })
+
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('user.token')
-  const user = localStorage.getItem('user.username')
+  const username = localStorage.getItem('user.username')
 
-  // Safely get fallback route
-  let fallbackRoute = '/'
-  try {
-    const menus = localStorage.getItem('menus')
-    if (menus) {
-      const parsedMenus = JSON.parse(menus)
-      if (parsedMenus.length > 0 && parsedMenus[0].route) {
-        fallbackRoute = parsedMenus[0].route
-      }
+  console.log('[Route Guard] Navigating from:', from.fullPath)
+  console.log('[Route Guard] Navigating to:', to.fullPath)
+  console.log('[Route Guard] Token:', token)
+  console.log('[Route Guard] Username:', username)
+  const publicRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed', '/confirm']
+
+  if (publicRoutes.some((route) => to.path === route || to.path.startsWith(route + '/'))) {
+    if (token && username) {
+      console.log('[Route Guard] Authenticated user on public route. Redirecting to fallbackRoute.')
+      if (to.path === fallbackRoute) return next() // prevent same-route redirect
+      return next(fallbackRoute)
     }
-  } catch (e) {
-    console.error('Error parsing menus:', e)
+    return next()
   }
 
-  // Prevent fallback to lockscreen
-  if (fallbackRoute === '/lockscreen') {
+  // Step 1: Handle token/username consistency
+  if (token && !username) {
+    console.warn('[Route Guard] Token exists but username is missing. Clearing localStorage...')
+    localStorage.clear()
+    return next('/auth/login')
+  }
+
+  if (!token && !username) {
+    console.warn('[Route Guard] No token and no username. Redirecting to login...')
+    if (to.path !== '/auth/login') return next('/auth/login')
+    return next()
+  }
+
+  if (!token && username) {
+    console.warn('[Route Guard] Username exists but token missing. Redirecting to lockscreen...')
+    if (to.path !== '/lockscreen') return next('/lockscreen')
+    return next()
+  }
+
+  // Step 2: Compute fallbackRoute
+  let fallbackRoute = '/'
+  try {
+    const menus = JSON.parse(localStorage.getItem('menus'))
+    if (Array.isArray(menus) && menus.length > 0 && menus[0].route) {
+      fallbackRoute = menus[0].route
+    }
+  } catch (e) {
+    console.error('[Route Guard] Failed to parse menus:', e)
+    localStorage.removeItem('menus')
     fallbackRoute = '/'
   }
 
-  // 1. Handle lockscreen route separately
+  // Step 3: Prevent unsafe fallback routes
+  if (fallbackRoute === '/lockscreen' || fallbackRoute === '/auth/login') {
+    console.warn('[Route Guard] Unsafe fallbackRoute. Defaulting to /')
+    fallbackRoute = '/'
+  }
+
+  // Step 4: Handle /lockscreen directly
   if (to.path === '/lockscreen') {
     if (token) {
-      // Avoid redirecting to current route
-      return next(fallbackRoute !== '/lockscreen' ? fallbackRoute : '/')
+      console.log('[Route Guard] Already authenticated. Redirecting from /lockscreen to fallbackRoute.')
+      if (to.path === fallbackRoute) return next() // avoid self redirect
+      return next(fallbackRoute)
     }
-    return next() // Allow access to lockscreen
+    return next()
   }
 
-  // 2. Protected routes
+  // Step 5: Handle protected routes
   if (to.meta.requiresAuth) {
-    if (token) {
-      return next() // Allow access
-    }
-    if (!token && user) {
-      // Only redirect to lockscreen if not already going there
-      return to.path !== '/lockscreen' ? next('/lockscreen') : next()
-    }
-    return next('/auth/login') // Redirect to login
+    console.log('[Route Guard] Protected route. Allowing access.')
+    return next()
   }
 
-  // 3. Public routes
-  const publicRoutes = ['/auth/login', '/request-password-reset', '/reset-password', '/email-confirmed']
+  // Step 6: Handle public routes
 
-  if (publicRoutes.includes(to.path)) {
-    if (token && user) {
-      // Avoid redirect loop to same route
-      return to.path !== fallbackRoute ? next(fallbackRoute) : next()
-    }
-    if (!token && user) {
-      // Only redirect to lockscreen if not already going there
-      return to.path !== '/lockscreen' ? next('/lockscreen') : next()
-    }
-    return next() // Allow public access
-  }
-
-  // 4. All other routes
-  next()
+  // Step 7: Final default allow
+  console.log('[Route Guard] Route matched no special rule. Allowing access.')
+  return next()
 })
 export default router
