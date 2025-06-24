@@ -11,7 +11,7 @@ use scheduler\models\Space;
 use helpers\traits\Keygen;
 use yii\base\Event;
 use helpers\EventHandler;
-use borales\extensions\phoneInput\PhoneInputValidator;
+// use borales\extensions\phoneInput\PhoneInputValidator;
 
 
 class Register extends Model

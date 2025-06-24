@@ -31,14 +31,7 @@ class SpaceController extends \helpers\ApiController
 
 
         $currentUserId = Yii::$app->user->id;
-        // $chairPersonId = $queryParams['user_id'] ?? null;
-
-        // $queryConditions = [
-        //     'OR',
-        //     ['space_type' => Space::SPACE_TYPE_MANAGED],
-        // ];
-
-
+       
         $roleFlags = $this->getRoleFlags($currentUserId);
 
         $searchModel = new SpaceSearch();
@@ -50,15 +43,7 @@ class SpaceController extends \helpers\ApiController
             $dataProvider->query->andWhere(['OR', ['id' => $currentUserId], ['space_type' => Space::SPACE_TYPE_MANAGED]]);
         } elseif ($roleFlags['isSuperAdmin'] || $roleFlags['isRegistrar']) {
             $dataProvider->query->andWhere(['space_type' => Space::SPACE_TYPE_MANAGED]);
-            // if (!empty($chairPersonId)) {
-            //     $queryConditions[] = ['AND', ['space_type' => Space::SPACE_TYPE_UNMANAGED], ['id' => $chairPersonId]];
-            // }
-            // $dataProvider->query->andWhere($queryConditions);
-            // $dataProvider->query->andWhere([
-            //     'OR',
-            //     ['space_type' => Space::SPACE_TYPE_MANAGED],
-            //     ['AND', ['space_type' => Space::SPACE_TYPE_UNMANAGED], ['id' => $chairPersonId]]
-            // ]);
+             
         } elseif ($roleFlags['isSecretary']) {
             // Only show spaces assigned to the current user as a secretary
             $managedUserIds = ManagedUsers::find()
@@ -137,7 +122,6 @@ class SpaceController extends \helpers\ApiController
 
     public function actionUpdate($id)
     {
-        // Yii::$app->user->can('registrar');
         $dataRequest['Space'] = Yii::$app->request->getBodyParams();
         $model = $this->findModel($id);
 

@@ -53,7 +53,6 @@ trait NotificationTrait
         $this->trigger(self::EVENT_APPOINTMENT_REMINDER, $event);
     }
 
-
     public function sendAppointmentCancelledEvent()
     {
         $event = new Event();

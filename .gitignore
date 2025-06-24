@@ -44,7 +44,7 @@ prev.json
 prev.php
 prev-user.php
 RabbitMQ.md
-omnibase.cfg
+# omnibase.cfg
 
 /storage
 /.vscode
