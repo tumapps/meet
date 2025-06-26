@@ -1924,6 +1924,428 @@
                 }
             }
         },
+        "/auth/issues": {
+            "get": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Lists all Issues models ",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_staff_id",
+                        "in": "query",
+                        "description": "Staff Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_student_id",
+                        "in": "query",
+                        "description": "Student Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_issue",
+                        "in": "query",
+                        "description": "Issue",
+                        "schema": {
+                            "type": "text"
+                        }
+                    },
+                    {
+                        "name": "_is_deleted",
+                        "in": "query",
+                        "description": "Is Deleted",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/issues",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Issues"
+                                                    }
+                                                },
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/issues?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/issues?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/issues?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/issues?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/issues?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Creates a new Issues model ",
+                "requestBody": {
+                    "description": "Fill in issues data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Issues"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Issues"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "issues created succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "$ref": "#/components/schemas/Issues"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/issues/{id}": {
+            "get": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Displays a single Issues model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Issues unique ID to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single Issues model.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "$ref": "#/components/schemas/Issues"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Updates an existing Issues model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Issues unique ID to load and update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Finds the Issues model to be updated based on its primary key value",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Issues"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Issues"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "issues updated succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Deletes an existing Issues model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Issues unique ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Restores a deleted Issues model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Issues unique ID to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/permission": {
             "get": {
                 "tags": [
@@ -3116,6 +3538,902 @@
                     }
                 }
             }
+        },
+        "/auth/student-profiles": {
+            "get": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Lists all StudentProfile models ",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_std_id",
+                        "in": "query",
+                        "description": "Std Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_reg_number",
+                        "in": "query",
+                        "description": "Reg Number",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_student_email",
+                        "in": "query",
+                        "description": "Student Email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_fee_paid",
+                        "in": "query",
+                        "description": "Fee Paid",
+                        "schema": {
+                            "type": "decimal"
+                        }
+                    },
+                    {
+                        "name": "_total_fee",
+                        "in": "query",
+                        "description": "Total Fee",
+                        "schema": {
+                            "type": "decimal"
+                        }
+                    },
+                    {
+                        "name": "_photo",
+                        "in": "query",
+                        "description": "Photo",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_status",
+                        "in": "query",
+                        "description": "Status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_class",
+                        "in": "query",
+                        "description": "Class",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_school",
+                        "in": "query",
+                        "description": "School",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_department",
+                        "in": "query",
+                        "description": "Department",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_year_of_study",
+                        "in": "query",
+                        "description": "Year Of Study",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_is_deleted",
+                        "in": "query",
+                        "description": "Is Deleted",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/student-profiles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/StudentProfile"
+                                                    }
+                                                },
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/student-profiles?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/student-profiles?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/student-profiles?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/student-profiles?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/student-profiles?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/student-profile": {
+            "post": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Creates a new StudentProfile model ",
+                "requestBody": {
+                    "description": "Fill in student-profile data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentProfile"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/StudentProfile"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "student-profile created succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "$ref": "#/components/schemas/StudentProfile"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/student-profile/{id}": {
+            "get": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Displays a single StudentProfile model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "StudentProfile unique ID to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single StudentProfile model.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "$ref": "#/components/schemas/StudentProfile"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Updates an existing StudentProfile model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "StudentProfile unique ID to load and update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Finds the StudentProfile model to be updated based on its primary key value",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StudentProfile"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/StudentProfile"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "student-profile updated succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Deletes an existing StudentProfile model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "StudentProfile unique ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "StudentProfile"
+                ],
+                "summary": "Restores a deleted StudentProfile model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "StudentProfile unique ID to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verification-details": {
+            "get": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Lists all VerificationDetail models ",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page No.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Page Size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_search",
+                        "in": "query",
+                        "description": "Search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "_id",
+                        "in": "query",
+                        "description": "Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_student_id",
+                        "in": "query",
+                        "description": "Student Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_staff_id",
+                        "in": "query",
+                        "description": "Staff Id",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_is_deleted",
+                        "in": "query",
+                        "description": "Is Deleted",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_created_at",
+                        "in": "query",
+                        "description": "Created At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "_updated_at",
+                        "in": "query",
+                        "description": "Updated At",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a data payload object for all auth/verification-details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/VerificationDetail"
+                                                    }
+                                                },
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": "50"
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": "25"
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": "2"
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "first": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/verification-details?page=1&per-page=25"
+                                                        },
+                                                        "previous": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/verification-details?page=1&per-page=25"
+                                                        },
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/verification-details?page=1&per-page=25"
+                                                        },
+                                                        "next": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/verification-details?page=1&per-page=25"
+                                                        },
+                                                        "last": {
+                                                            "type": "string",
+                                                            "example": "v1/v1/auth/verification-details?page=1&per-page=25"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verification-detail": {
+            "post": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Creates a new VerificationDetail model ",
+                "requestBody": {
+                    "description": "Fill in verification-detail data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerificationDetail"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/VerificationDetail"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "verification-detail created succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Data Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "$ref": "#/components/schemas/VerificationDetail"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "Some data could not be validated"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "danger"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verification-detail/{id}": {
+            "get": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Displays a single VerificationDetail model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "VerificationDetail unique ID to load",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Displays a single VerificationDetail model.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "$ref": "#/components/schemas/VerificationDetail"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "statusCode": {
+                                                    "type": "integer",
+                                                    "example": 404
+                                                },
+                                                "errorMessage": {
+                                                    "type": "string",
+                                                    "example": "Not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Updates an existing VerificationDetail model",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "VerificationDetail unique ID to load and update",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Finds the VerificationDetail model to be updated based on its primary key value",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerificationDetail"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Data payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/VerificationDetail"
+                                                },
+                                                "toastMessage": {
+                                                    "type": "string",
+                                                    "example": "verification-detail updated succefully"
+                                                },
+                                                "toastTheme": {
+                                                    "type": "string",
+                                                    "example": "success"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Deletes an existing VerificationDetail model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "VerificationDetail unique ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Deletion successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "VerificationDetail"
+                ],
+                "summary": "Restores a deleted VerificationDetail model.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "VerificationDetail unique ID to restore",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Restoration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3131,6 +4449,96 @@
                         "title": "Module Name",
                         "type": "string",
                         "example": "AUTH Module"
+                    }
+                },
+                "type": "object"
+            },
+            "Issues": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "staff_id": {
+                        "title": "Staff id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "student_id": {
+                        "title": "Student id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "issue": {
+                        "title": "Issue",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
+            "Otp": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "user_id": {
+                        "title": "User id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "code": {
+                        "title": "Code",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "expires_at": {
+                        "title": "Expires at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "is_used": {
+                        "title": "Is used",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "integer",
+                        "example": "integer"
                     }
                 },
                 "type": "object"
@@ -3210,6 +4618,81 @@
                 },
                 "type": "object"
             },
+            "StudentProfile": {
+                "properties": {
+                    "std_id": {
+                        "title": "Std id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "reg_number": {
+                        "title": "Reg number",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "student_email": {
+                        "title": "Student email",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "fee_paid": {
+                        "title": "Fee paid",
+                        "type": "float",
+                        "example": "float"
+                    },
+                    "total_fee": {
+                        "title": "Total fee",
+                        "type": "float",
+                        "example": "float"
+                    },
+                    "photo": {
+                        "title": "Photo",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "class": {
+                        "title": "Class",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "school": {
+                        "title": "School",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "department": {
+                        "title": "Department",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "year_of_study": {
+                        "title": "Year of study",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
             "Tokens": {
                 "properties": {
                     "token_id": {
@@ -3244,6 +4727,41 @@
                     }
                 },
                 "type": "object"
+            },
+            "VerificationDetail": {
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "student_id": {
+                        "title": "Student id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "staff_id": {
+                        "title": "Staff id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "is_deleted": {
+                        "title": "Is deleted",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "created_at": {
+                        "title": "Created at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "updated_at": {
+                        "title": "Updated at",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -3263,6 +4781,22 @@
         {
             "name": "AUTH",
             "description": "Endpoints for the AUTH module"
+        },
+        {
+            "name": "Issues",
+            "description": "Available endpoints for Issues model"
+        },
+        {
+            "name": "StudentProfile",
+            "description": "Available endpoints for StudentProfile model"
+        },
+        {
+            "name": "VerificationDetail",
+            "description": "Available endpoints for VerificationDetail model"
+        },
+        {
+            "name": "Issues",
+            "description": "Available endpoints for Issues model"
         }
     ]
 }

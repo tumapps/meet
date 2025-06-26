@@ -111,13 +111,6 @@ class AuthController extends \helpers\ApiController
 			$formattedProfiles[] = [
 				'user_id' => $profile->user_id,
 				'username' => $profile->user->username,
-				// 'email' => $profile->email_address,
-				// 'status' => $profile->user->status,
-				// 'last_activity' => $profile->user->last_login_at,
-				// 'name' => $profile->first_name . ' ' . $profile->last_name,
-				// 'middle_name' => $profile->middle_name,
-				// 'mobile_number' => $profile->mobile_number,
-				// 'roles' => $roles,
 			];
 		}
 
@@ -243,32 +236,6 @@ class AuthController extends \helpers\ApiController
 		}
 		return $this->errorResponse($model->getErrors());
 	}
-
-	// public function filterMenus($roles)
-	// {
-	// 	$menus = Yii::$app->params['menus'];
-
-	// 	$roleNames = array_keys($roles);
-
-	// 	if (in_array('su', $roleNames)) {
-	// return $menus;
-	// 		$allowedRoutes = ['roles', 'permissions', 'admin', 'appointments', 'default.users', 'meetings-approval', 'venues', 'events', 'venue-management'];
-	// 	} elseif (in_array('secretary', $roleNames)) {
-	// 		$allowedRoutes = ['home', 'appointments'];
-	// 	} elseif (in_array('user', $roleNames)) {
-	// 		$allowedRoutes = ['home', 'appointments', 'availability'];
-	// 	} elseif (in_array('registrar', $roleNames)) {
-	// 		$allowedRoutes = ['meetings-approval', 'venues', 'events', 'venue-management'];
-	// 	} else {
-	// 		$allowedRoutes = [];
-	// 	}
-
-	// 	$menus = array_values(array_filter($menus, function ($menu) use ($allowedRoutes) {
-	// 		return in_array($menu['route'], $allowedRoutes);
-	// 	}));
-
-	// 	return $menus;
-	// }
 
 	public function filterMenus($roles)
 	{

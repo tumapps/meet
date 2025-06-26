@@ -174,8 +174,8 @@ class Appointments extends BaseModel
 
 
             // file upload
-            [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
-            [['uploadedFile'], 'validateFileAttachment'],
+            // [['uploadedFile'], 'file', 'extensions' => 'pdf, doc, docx', 'maxSize' => 2 * 1024 * 1024, 'skipOnEmpty' => false],
+            // [['uploadedFile'], 'validateFileAttachment'],
         ];
     }
     public function scenarios()

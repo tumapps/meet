@@ -8,8 +8,8 @@ use auth\models\AuthItem;
 use auth\models\User;
 use yii\rbac\Item;
 use auth\hooks\Configs;
-use auth\models\searches\AssignmentSearch;
-use auth\models\searches\AuthItemSearch;
+// use auth\models\searches\AssignmentSearch;
+// use auth\models\searches\AuthItemSearch;
 
 
 
@@ -17,40 +17,7 @@ class AssignmentController extends \helpers\ApiController
 {
     protected $type = Item::TYPE_ROLE;
 
-    public function actionManageRole2($id)
-    {
-        $authManager = Yii::$app->authManager;
-
-        $role =  $authManager->getRole($id);
-
-        if (!$role) {
-            return $this->errorResponse('Role not found', 404);
-        }
-        $searchModel = new AuthItemSearch();
-        $search = $this->queryParameters(Yii::$app->request->queryParams, 'AuthItemSearch');
-
-        $allRoles = $authManager->getRoles();
-        $allPermissions = $authManager->getPermissions();
-
-        // Fetch assigned roles and permissions for this role
-        $assignedRoles = $authManager->getChildRoles($role->name);
-        $assignedPermissions = $authManager->getPermissionsByRole($role->name);
-
-        // Filter available roles and permissions
-        $availableRoles = array_diff_key($allRoles, $assignedRoles);
-        $availablePermissions = array_diff_key($allPermissions, $assignedPermissions);
-
-        return $this->payloadResponse([
-            'available' => [
-                'roles' => $availableRoles,
-                'permissions' => $availablePermissions,
-            ],
-            'assigned' => [
-                'roles' => $assignedRoles,
-                'permissions' => $assignedPermissions,
-            ],
-        ]);
-    }
+    
 
     public function actionManageRole($id)
     {
