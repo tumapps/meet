@@ -1,1 +1,0 @@
-import{_ as o}from"./spacesMiniTable.07ff7d56.js";import{o as r,g as e}from"./index.848ef5b1.js";import"./pdfjs.7adb8c57.js";const m={__name:"MeetingsApproval",setup(t){return(a,_)=>(r(),e(o))}};export{m as default};

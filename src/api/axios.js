@@ -3,12 +3,10 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth.store.js'
 import { useMenuStore } from '@/store/menuStore.js'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
 
 const AxiosInstance = () => {
   const axiosInstance = axios.create({
     // Set your API base URL
-    baseURL,
     withCredentials: true
   })
   axios.defaults.timeout = 30000 // 30 seconds timeout globally
