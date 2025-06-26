@@ -1,1 +1,0 @@
-import{_ as o,g as r,r as t,o as c}from"./index.e0205fad.js";import"./pdfjs.7adb8c57.js";const n={};function _(a,s){const e=t("router-view");return c(),r(e)}var f=o(n,[["render",_]]);export{f as default};
